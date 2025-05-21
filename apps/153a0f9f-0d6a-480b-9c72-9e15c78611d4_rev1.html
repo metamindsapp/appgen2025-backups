@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Art Portfolio & Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-family: sans-serif;
+        }
+        .navbar {
+            margin-bottom: 20px;
+        }
+        .container-fluid {
+            flex-grow: 1;
+            padding-bottom: 20px;
+        }
+        #drop-zone {
+            border: 2px dashed #555;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 20px;
+            background-color: #1e1e1e;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+            border-radius: 8px;
+        }
+        #drop-zone.dragover {
+            background-color: #333;
+            border-color: #888;
+        }
+        .portfolio-item .card {
+            background-color: #1e1e1e;
+            border-color: #333;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .portfolio-item img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            border-bottom: 1px solid #333;
+            background-color: #000;
+        }
+         .portfolio-item .card-body {
+            flex-grow: 1;
+         }
+        .tag {
+            display: inline-block;
+            background-color: #333;
+            color: #bbb;
+            padding: 3px 8px;
+            margin: 2px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            white-space: nowrap;
+        }
+        #generator-output img {
+             max-width: 100%;
+             height: auto;
+             display: block;
+             margin-top: 20px;
+             border: 1px solid #333;
+             image-rendering: pixelated;
+             image-rendering: -moz-crisp-edges;
+             image-rendering: crisp-edges;
+             background-color: #000;
+        }
+         #generator-output {
+             min-height: 100px;
+             position: relative;
+             display: flex;
+             justify-content: center;
+             align-items: center;
+             flex-direction: column;
+         }
+        .loading-spinner {
+            display: none;
+            margin-top: 20px;
+             color: var(--bs-primary);
+        }
+        .error-message {
+            color: #ff4444;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+         .section {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .section.active {
+            display: block;
+            opacity: 1;
+        }
+         .modal-content {
+             background-color: #1e1e1e;
+             color: #e0e0e0;
+         }
+         .modal-header, .modal-footer {
+             border-color: #333;
+         }
+         .form-control.bg-secondary, .form-select.bg-secondary {
+             background-color: #2d3748 !important;
+             color: #e2e8f0 !important;
+             border-color: #4a5568 !important;
+         }
+         .form-control.bg-secondary::placeholder {
+             color: #a0aec0 !important;
+         }
+         .btn-close-white {
+             filter: invert(1) grayscale(100%) brightness(200%);
+         }
+         #suggested-tags .tag, #style-variations .btn {
+              margin-right: 5px;
+              margin-bottom: 5px;
+         }
+         #variation-from-image {
+             border-top: 1px solid #333;
+             margin-top: 40px;
+             padding-top: 20px;
+         }
+          #variation-suggestions {
+             margin-top: 15px;
+         }
+          #variation-suggestions .btn {
+              margin-right: 5px;
+              margin-bottom: 5px;
+         }
+          .text-muted {
+              color: #a0aec0 !important;
+          }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Pixel Art Hub</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#" data-section="portfolio">Portfolio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-section="generator">Generator</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container-fluid">
+        <section id="portfolio-section" class="section active">
+            <h2>My Portfolio</h2>
+            <div class="row mb-3 align-items-center">
+                <div class="col-md-8">
+                    <input type="text" id="portfolio-search" class="form-control bg-secondary text-white border-secondary" placeholder="Search by title, description, or tags">
+                </div>
+                <div class="col-md-4 text-md-end mt-2 mt-md-0">
+                     <button id="clear-portfolio-btn" class="btn btn-outline-danger w-100 w-md-auto">Clear All</button>
+                </div>
+            </div>
+            <div id="drop-zone" class="bg-secondary text-white-50">
+                Drag & drop pixel art here, or click to select files
+                <input type="file" id="file-upload-input" accept="image/*" multiple hidden>
+            </div>
+            <div id="portfolio-grid" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+                <!-- Portfolio items will be loaded here by JS -->
+            </div>
+        </section>
+
+        <section id="generator-section" class="section">
+            <h2>Generate Pixel Art</h2>
+            <div class="mb-3">
+                <label for="prompt-input" class="form-label">Prompt:</label>
+                <textarea class="form-control bg-secondary text-white border-secondary" id="prompt-input" rows="3" placeholder="e.g., A cute pixel art robot in a cyberpunk city"></textarea>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="palette-select" class="form-label">Color Palette:</label>
+                    <select id="palette-select" class="form-select bg-secondary text-white border-secondary">
+                        <option value="default">Default</option>
+                        <option value="db16">DawnBringer 16</option>
+                        <option value="aap64">AAP-64</option>
+                        <option value="pico8">PICO-8</option>
+                        <option value="gb">Gameboy</option>
+                        <option value="custom">Custom (enter below)</option>
+                    </select>
+                     <input type="text" id="custom-palette-input" class="form-control mt-2 bg-secondary text-white border-secondary" placeholder="e.g., #FF0000,#00FF00,..." style="display: none;">
+                </div>
+                <div class="col-md-6">
+                    <label for="resolution-select" class="form-label">Resolution:</label>
+                    <select id="resolution-select" class="form-select bg-secondary text-white border-secondary">
+                        <option value="small">Small (e.g., 32x32)</option>
+                        <option value="medium">Medium (e.g., 64x64)</option>
+                        <option value="large">Large (e.g., 128x128)</option>
+                        <option value="very large">Very Large (e.g., 256x256)</option>
+                    </select>
+                </div>
+            </div>
+            <button id="generate-btn" class="btn btn-primary">Generate</button>
+
+            <div id="generator-output" class="mt-4">
+                 <div class="spinner-border loading-spinner" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="error-message"></div>
+                <!-- Generated image will be displayed here -->
+            </div>
+
+            <div id="suggested-info" class="mt-4" style="display: none;">
+                 <h5>Suggested Tags:</h5>
+                 <div id="suggested-tags">
+                     <!-- Suggested tags from API will go here -->
+                 </div>
+                 <h5 class="mt-3">Style Variations:</h5>
+                 <div id="style-variations">
+                      <!-- Style variation buttons from API will go here -->
+                 </div>
+                 <button id="add-to-portfolio-btn" class="btn btn-success mt-3 me-2" style="display: none;">Add to Portfolio</button>
+                 <button id="download-btn" class="btn btn-secondary mt-3" style="display: none;">Download Image</button>
+            </div>
+
+             <div id="variation-from-image" class="mt-5">
+                <h4>Generate Variation from Image</h4>
+                <p class="text-muted">Upload an image to get suggestions for new pixel art based on its content.</p>
+                <input type="file" id="variation-image-upload" accept="image/*" class="form-control bg-secondary text-white border-secondary">
+                <button id="analyze-image-btn" class="btn btn-outline-primary mt-2">Analyze Image for Variations</button>
+                <div id="variation-suggestions" class="mt-3">
+                     <!-- Variation suggestions from API will go here -->
+                </div>
+             </div>
+        </section>
+    </main>
+
+    <div class="modal fade" id="editPortfolioModal" tabindex="-1" aria-labelledby="editPortfolioModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editPortfolioModalLabel">Edit Portfolio Item</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="edit-item-id">
+                    <div class="mb-3">
+                        <label for="edit-title" class="form-label">Title:</label>
+                        <input type="text" class="form-control bg-secondary text-white border-secondary" id="edit-title">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-description" class="form-label">Description:</label>
+                        <textarea class="form-control bg-secondary text-white border-secondary" id="edit-description" rows="3"></textarea>
+                    </div>
+                     <div class="mb-3">
+                        <label for="edit-tags" class="form-label">Tags (comma-separated):</label>
+                        <input type="text" class="form-control bg-secondary text-white border-secondary" id="edit-tags">
+                    </div>
+                    <div id="edit-image-preview" class="text-center">
+                         <img src="" alt="Image preview" style="max-width: 100%; height: auto; image-rendering: pixelated;">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="save-portfolio-edit-btn">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function() {
+            let appState = {
+                portfolioItems: [],
+                generator: {
+                    prompt: '',
+                    palette: 'default',
+                    resolution: 'medium',
+                    generatedImageUrl: null,
+                    suggestedTags: [],
+                    suggestedStyles: []
+                },
+                ui: {
+                    currentSection: 'portfolio',
+                    isLoading: false,
+                    errorMessage: null
+                },
+                editingItemId: null
+            };
+
+            const portfolioSection = document.getElementById('portfolio-section');
+            const generatorSection = document.getElementById('generator-section');
+            const navLinks = document.querySelectorAll('.nav-link[data-section]');
+            const dropZone = document.getElementById('drop-zone');
+            const fileUploadInput = document.getElementById('file-upload-input');
+            const portfolioGrid = document.getElementById('portfolio-grid');
+            const portfolioSearchInput = document.getElementById('portfolio-search');
+            const clearPortfolioBtn = document.getElementById('clear-portfolio-btn');
+
+            const promptInput = document.getElementById('prompt-input');
+            const paletteSelect = document.getElementById('palette-select');
+            const customPaletteInput = document.getElementById('custom-palette-input');
+            const resolutionSelect = document.getElementById('resolution-select');
+            const generateBtn = document.getElementById('generate-btn');
+            const generatorOutput = document.getElementById('generator-output');
+            const loadingSpinner = generatorOutput.querySelector('.loading-spinner');
+            const errorMessageElement = generatorOutput.querySelector('.error-message');
+            const suggestedInfoDiv = document.getElementById('suggested-info');
+            const suggestedTagsDiv = document.getElementById('suggested-tags');
+            const styleVariationsDiv = document.getElementById('style-variations');
+            const addToPortfolioBtn = document.getElementById('add-to-portfolio-btn');
+            const downloadBtn = document.getElementById('download-btn');
+
+            const variationImageUpload = document.getElementById('variation-image-upload');
+            const analyzeImageBtn = document.getElementById('analyze-image-btn');
+            const variationSuggestionsDiv = document.getElementById('variation-suggestions');
+
+            const editPortfolioModal = new bootstrap.Modal(document.getElementById('editPortfolioModal'));
+            const editItemIdInput = document.getElementById('edit-item-id');
+            const editTitleInput = document.getElementById('edit-title');
+            const editDescriptionInput = document.getElementById('edit-description');
+            const editTagsInput = document.getElementById('edit-tags');
+            const editImagePreview = document.getElementById('edit-image-preview').querySelector('img');
+            const savePortfolioEditBtn = document.getElementById('save-portfolio-edit-btn');
+
+            function generateId() {
+                return '_' + Math.random().toString(36).substr(2, 9);
+            }
+
+            function loadPortfolio() {
+                const savedPortfolio = localStorage.getItem('pixelArtPortfolio');
+                if (savedPortfolio) {
+                    try {
+                        appState.portfolioItems = JSON.parse(savedPortfolio);
+                    } catch (e) {
+                        console.error("Failed to load portfolio from Local Storage:", e);
+                        appState.portfolioItems = [];
+                        displayError("Error loading portfolio data. It might be corrupted.");
+                    }
+                } else {
+                    appState.portfolioItems = [];
+                }
+                renderPortfolio();
+            }
+
+            function savePortfolio() {
+                try {
+                    localStorage.setItem('pixelArtPortfolio', JSON.stringify(appState.portfolioItems));
+                } catch (e) {
+                     console.error("Failed to save portfolio to Local Storage:", e);
+                     displayError("Error saving portfolio data. Local storage might be full.");
+                }
+            }
+
+            function updateUI() {
+                portfolioSection.classList.remove('active');
+                generatorSection.classList.remove('active');
+                if (appState.ui.currentSection === 'portfolio') {
+                    portfolioSection.classList.add('active');
+                } else {
+                    generatorSection.classList.add('active');
+                }
+
+                navLinks.forEach(link => {
+                    if (link.dataset.section === appState.ui.currentSection) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+
+                if (appState.ui.isLoading) {
+                    loadingSpinner.style.display = 'block';
+                    generateBtn.disabled = true;
+                    analyzeImageBtn.disabled = true;
+                } else {
+                    loadingSpinner.style.display = 'none';
+                    generateBtn.disabled = false;
+                    analyzeImageBtn.disabled = false;
+                }
+
+                if (appState.ui.errorMessage) {
+                    errorMessageElement.textContent = appState.ui.errorMessage;
+                    errorMessageElement.style.display = 'block';
+                } else {
+                    errorMessageElement.textContent = '';
+                    errorMessageElement.style.display = 'none';
+                }
+
+                if (appState.generator.generatedImageUrl) {
+                    suggestedInfoDiv.style.display = 'block';
+                    addToPortfolioBtn.style.display = 'inline-block';
+                    downloadBtn.style.display = 'inline-block';
+                } else {
+                     suggestedInfoDiv.style.display = 'none';
+                     addToPortfolioBtn.style.display = 'none';
+                     downloadBtn.style.display = 'none';
+                }
+
+                if (paletteSelect.value === 'custom') {
+                    customPaletteInput.style.display = 'block';
+                } else {
+                    customPaletteInput.style.display = 'none';
+                }
+            }
+
+            function displayError(message) {
+                appState.ui.errorMessage = message;
+                updateUI();
+            }
+
+            function renderPortfolio(itemsToRender = appState.portfolioItems) {
+                portfolioGrid.innerHTML = '';
+
+                if (itemsToRender.length === 0) {
+                    portfolioGrid.innerHTML = '<div class="col-12 text-center text-muted">No pixel art in portfolio yet. Upload some or generate!</div>';
+                    return;
+                }
+
+                itemsToRender.forEach(item => {
+                    const colDiv = document.createElement('div');
+                    colDiv.classList.add('col', 'portfolio-item');
+                    colDiv.innerHTML = `
+                        <div class="card h-100">
+                            <img src="${item.dataUrl}" class="card-img-top" alt="${item.title || 'Pixel Art'}">
+                            <div class="card-body">
+                                <h5 class="card-title">${item.title || 'Untitled'}</h5>
+                                <p class="card-text">${item.description || ''}</p>
+                                <div class="tags">${item.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}</div>
+                            </div>
+                            <div class="card-footer border-secondary">
+                                <button class="btn btn-sm btn-outline-secondary edit-item-btn" data-id="${item.id}">Edit</button>
+                                <button class="btn btn-sm btn-outline-danger delete-item-btn" data-id="${item.id}">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                    portfolioGrid.appendChild(colDiv);
+                });
+
+                portfolioGrid.querySelectorAll('.edit-item-btn').forEach(button => {
+                    button.addEventListener('click', handleEditButtonClick);
+                });
+                 portfolioGrid.querySelectorAll('.delete-item-btn').forEach(button => {
+                    button.addEventListener('click', handleDeleteButtonClick);
+                });
+            }
+
+            function renderSuggestedTags() {
+                 suggestedTagsDiv.innerHTML = '';
+                 if (appState.generator.suggestedTags && appState.generator.suggestedTags.length > 0) {
+                     appState.generator.suggestedTags.forEach(tag => {
+                         const tagSpan = document.createElement('span');
+                         tagSpan.classList.add('tag');
+                         tagSpan.textContent = tag;
+                         suggestedTagsDiv.appendChild(tagSpan);
+                     });
+                 } else {
+                     suggestedTagsDiv.textContent = 'No tags suggested.';
+                 }
+            }
+
+             function renderStyleVariations() {
+                 styleVariationsDiv.innerHTML = '';
+                 if (appState.generator.suggestedStyles && appState.generator.suggestedStyles.length > 0) {
+                     appState.generator.suggestedStyles.forEach(style => {
+                         const styleBtn = document.createElement('button');
+                         styleBtn.classList.add('btn', 'btn-outline-info', 'btn-sm', 'me-2', 'mb-2');
+                         styleBtn.textContent = style;
+                         styleBtn.dataset.style = style;
+                         styleBtn.addEventListener('click', handleStyleVariationClick);
+                         styleVariationsDiv.appendChild(styleBtn);
+                     });
+                 } else {
+                     styleVariationsDiv.textContent = 'No style variations suggested.';
+                 }
+             }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    appState.ui.currentSection = event.target.dataset.section;
+                    updateUI();
+                });
+            });
+
+            dropZone.addEventListener('dragover', (event) => {
+                event.preventDefault();
+                dropZone.classList.add('dragover');
+            });
+
+            dropZone.addEventListener('dragleave', (event) => {
+                event.preventDefault();
+                dropZone.classList.remove('dragover');
+            });
+
+            dropZone.addEventListener('drop', (event) => {
+                event.preventDefault();
+                dropZone.classList.remove('dragover');
+                const files = event.dataTransfer.files;
+                handleFiles(files);
+            });
+
+            dropZone.addEventListener('click', () => {
+                fileUploadInput.click();
+            });
+
+            fileUploadInput.addEventListener('change', (event) => {
+                const files = event.target.files;
+                handleFiles(files);
+                fileUploadInput.value = '';
+            });
+
+            function handleFiles(files) {
+                displayError(null);
+                for (const file of files) {
+                    if (!file.type.startsWith('image/')) {
+                        displayError(`File "${file.name}" is not an image.`);
+                        continue;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                         if (e.target.result.length > 5 * 1024 * 1024) {
+                             displayError(`Image "${file.name}" is too large for portfolio storage (max 5MB).`);
+                             return;
+                         }
+                        const newItem = {
+                            id: generateId(),
+                            dataUrl: e.target.result,
+                            title: file.name.replace(/\.[^/.]+$/, ""),
+                            description: '',
+                            tags: [],
+                            prompt: ''
+                        };
+                        appState.portfolioItems.push(newItem);
+                        savePortfolio();
+                        renderPortfolio();
+                    };
+                    reader.onerror = () => {
+                         displayError(`Failed to read file: "${file.name}".`);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+
+            portfolioSearchInput.addEventListener('input', (event) => {
+                const query = event.target.value.toLowerCase();
+                const filteredItems = appState.portfolioItems.filter(item =>
+                    (item.title && item.title.toLowerCase().includes(query)) ||
+                    (item.description && item.description.toLowerCase().includes(query)) ||
+                    item.tags.some(tag => tag.toLowerCase().includes(query)) ||
+                    (item.prompt && item.prompt.toLowerCase().includes(query))
+                );
+                renderPortfolio(filteredItems);
+            });
+
+            clearPortfolioBtn.addEventListener('click', () => {
+                if (confirm('Are you sure you want to clear your entire portfolio? This cannot be undone.')) {
+                    appState.portfolioItems = [];
+                    savePortfolio();
+                    renderPortfolio();
+                }
+            });
+
+            function handleEditButtonClick(event) {
+                const itemId = event.target.dataset.id;
+                const item = appState.portfolioItems.find(item => item.id === itemId);
+                if (item) {
+                    appState.editingItemId = itemId;
+                    editItemIdInput.value = itemId;
+                    editTitleInput.value = item.title;
+                    editDescriptionInput.value = item.description;
+                    editTagsInput.value = item.tags.join(', ');
+                    editImagePreview.src = item.dataUrl;
+                    editImagePreview.alt = item.title || 'Pixel Art';
+                    editPortfolioModal.show();
+                }
+            }
+
+            savePortfolioEditBtn.addEventListener('click', () => {
+                const itemId = editItemIdInput.value;
+                const itemIndex = appState.portfolioItems.findIndex(item => item.id === itemId);
+                if (itemIndex !== -1) {
+                    appState.portfolioItems[itemIndex].title = editTitleInput.value;
+                    appState.portfolioItems[itemIndex].description = editDescriptionInput.value;
+                    appState.portfolioItems[itemIndex].tags = editTagsInput.value.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
+                    savePortfolio();
+                    renderPortfolio();
+                    editPortfolioModal.hide();
+                }
+            });
+
+             function handleDeleteButtonClick(event) {
+                const itemId = event.target.dataset.id;
+                if (confirm('Are you sure you want to delete this item?')) {
+                    appState.portfolioItems = appState.portfolioItems.filter(item => item.id !== itemId);
+                    savePortfolio();
+                    renderPortfolio();
+                }
+             }
+
+            paletteSelect.addEventListener('change', updateUI);
+
+            generateBtn.addEventListener('click', handleGenerateClick);
+
+            async function handleGenerateClick() {
+                const prompt = promptInput.value.trim();
+                if (!prompt) {
+                    displayError("Please enter a prompt to generate pixel art.");
+                    return;
+                }
+
+                appState.generator.prompt = prompt;
+                appState.generator.palette = paletteSelect.value;
+                appState.generator.resolution = resolutionSelect.value;
+                appState.generator.generatedImageUrl = null;
+                appState.generator.suggestedTags = [];
+                appState.generator.suggestedStyles = [];
+                generatorOutput.innerHTML = '';
+                suggestedInfoDiv.style.display = 'none';
+                displayError(null);
+
+                appState.ui.isLoading = true;
+                updateUI();
+
+                const fullPrompt = buildImagePrompt(prompt, appState.generator.palette, appState.generator.resolution, customPaletteInput.value.trim());
+
+                try {
+                    const response = await fetch('/api/generate-image-on-demand', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prompt: fullPrompt, aspectRatio: '1:1', style: 'vivid' })
+                    });
+                    const data = await response.json();
+
+                    if (response.ok && data.success) {
+                        appState.generator.generatedImageUrl = data.imageUrl;
+                        const imgElement = document.createElement('img');
+                        imgElement.src = data.imageUrl;
+                        imgElement.alt = prompt;
+                        generatorOutput.appendChild(imgElement);
+
+                        suggestTagsAndStyles(prompt);
+                    } else {
+                        displayError(`Generation failed: ${data.error || 'Unknown error'}`);
+                    }
+                } catch (err) {
+                    console.error('Image generation fetch error:', err);
+                    displayError('Network error during image generation.');
+                } finally {
+                    appState.ui.isLoading = false;
+                    updateUI();
+                }
+            }
+
+            function buildImagePrompt(prompt, palette, resolution, customPalette) {
+                let promptString = `Pixel art of ${prompt}. `;
+                promptString += `Style: ${resolution} resolution pixel art. `;
+
+                if (palette === 'custom' && customPalette) {
+                     promptString += `Use only the following colors in the palette: ${customPalette}. `;
+                } else if (palette !== 'default') {
+                     promptString += `Use the "${palette}"
+ pixel art color palette. `;
+                }
+
+                promptString += `No gradients, no anti-aliasing, crisp pixels, limited color palette.`;
+
+                return promptString;
+            }
+
+            async function suggestTagsAndStyles(prompt) {
+                try {
+                    const response = await fetch('/api/ai', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            aiguide: `Analyze the following pixel art concept prompt. Suggest 5-10 relevant tags (single words or short phrases, comma-separated) and 3-5 distinct stylistic variations (e.g., "cyberpunk style", "fantasy setting", "8-bit look", "isometric view") that could be applied to this pixel art. Provide output as a JSON object with keys "tags" (array of strings) and "styles" (array of strings).`,
+                            msgforai: prompt,
+                            llmSettings: { temperature: 0.7, model: "gemini-1.5-flash-latest" }
+                        })
+                    });
+                    const data = await response.json();
+
+                    if (response.ok && data.success) {
+                         try {
+                             const aiResponse = JSON.parse(data.response);
+                             if (aiResponse.tags && Array.isArray(aiResponse.tags)) {
+                                 appState.generator.suggestedTags = aiResponse.tags;
+                                 renderSuggestedTags();
+                             }
+                              if (aiResponse.styles && Array.isArray(aiResponse.styles)) {
+                                 appState.generator.suggestedStyles = aiResponse.styles;
+                                 renderStyleVariations();
+                             }
+                         } catch (parseError) {
+                              console.error('Failed to parse AI response for tags/styles:', parseError);
+                              suggestedTagsDiv.textContent = 'Could not parse tag/style suggestions.';
+                              styleVariationsDiv.textContent = 'Could not parse style suggestions.';
+                         }
+                    } else {
+                        console.error('API /api/ai failed for suggestions:', data.error);
+                         suggestedTagsDiv.textContent = 'Could not fetch tag/style suggestions.';
+                         styleVariationsDiv.textContent = 'Could not fetch style suggestions.';
+                    }
+                } catch (err) {
+                    console.error('/api/ai fetch error for suggestions:', err);
+                     suggestedTagsDiv.textContent = 'Network error fetching tag/style suggestions.';
+                     styleVariationsDiv.textContent = 'Network error fetching style suggestions.';
+                }
+            }
+
+            function handleStyleVariationClick(event) {
+                const style = event.target.dataset.style;
+                const currentPrompt = promptInput.value.trim();
+                const newPrompt = `${currentPrompt}, ${style}`;
+                promptInput.value = newPrompt;
+                handleGenerateClick();
+            }
+
+            addToPortfolioBtn.addEventListener('click', () => {
+                if (appState.generator.generatedImageUrl) {
+                    const newItem = {
+                        id: generateId(),
+                        dataUrl: appState.generator.generatedImageUrl,
+                        title: appState.generator.prompt.substring(0, 50) + (appState.generator.prompt.length > 50 ? '...' : ''),
+                        description: '',
+                        tags: [...appState.generator.suggestedTags],
+                        prompt: appState.generator.prompt
+                    };
+                    appState.portfolioItems.push(newItem);
+                    savePortfolio();
+                    renderPortfolio();
+                    alert('Image added to portfolio!');
+                }
+            });
+
+            downloadBtn.addEventListener('click', () => {
+                if (appState.generator.generatedImageUrl) {
+                    const link = document.createElement('a');
+                    link.href = appState.generator.generatedImageUrl;
+                    link.download = 'pixel_art_' + Date.now() + '.png';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+            });
+
+            analyzeImageBtn.addEventListener('click', async () => {
+                const file = variationImageUpload.files[0];
+                if (!file) {
+                    displayError("Please select an image to analyze for variations.");
+                    return;
+                }
+                 if (!file.type.startsWith('image/')) {
+                    displayError("The selected file is not an image.");
+                    return;
+                 }
+                 if (file.size > 5 * 1024 * 1024) {
+                     displayError("Image file is too large for analysis (max 5MB).");
+                     return;
+                 }
+
+                displayError(null);
+                variationSuggestionsDiv.innerHTML = '';
+                appState.ui.isLoading = true;
+                updateUI();
+
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    const base64Image = e.target.result;
+
+                     try {
+                         const response = await fetch('/api/ai', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                aiguide: `Analyze the provided image (sent as base64 Data URL in msgforai). Describe its content and style as a concise pixel art prompt (under 100 characters), and suggest 3-5 distinct prompt modifications or variations (each under 50 characters, comma-separated) that could be used for new pixel art generation. Provide output as a JSON object with keys "description_prompt" (string) and "variation_prompts" (array of strings).`,
+                                msgforai: base64Image,
+                                 llmSettings: { temperature: 0.8, model: "gemini-1.5-flash-latest" }
+                            })
+                        });
+                        const data = await response.json();
+
+                         if (response.ok && data.success) {
+                             try {
+                                 const aiResponse = JSON.parse(data.response);
+                                 variationSuggestionsDiv.innerHTML = '';
+                                 if (aiResponse.description_prompt) {
+                                      const descPara = document.createElement('p');
+                                      descPara.textContent = `Suggested base prompt: "${aiResponse.description_prompt}"`;
+                                      variationSuggestionsDiv.appendChild(descPara);
+                                 }
+                                 if (aiResponse.variation_prompts && Array.isArray(aiResponse.variation_prompts)) {
+                                      const variationsTitle = document.createElement('h6');
+                                      variationsTitle.textContent = 'Suggested Variations:';
+                                      variationSuggestionsDiv.appendChild(variationsTitle);
+                                     aiResponse.variation_prompts.forEach(varPrompt => {
+                                         const varBtn = document.createElement('button');
+                                         varBtn.classList.add('btn', 'btn-outline-info', 'btn-sm', 'me-2', 'mb-2');
+                                         varBtn.textContent = varPrompt;
+                                         varBtn.addEventListener('click', () => {
+                                             promptInput.value = varPrompt;
+                                             appState.ui.currentSection = 'generator';
+                                             updateUI();
+                                             generatorOutput.innerHTML = '<p class="text-muted">Prompt loaded. Click Generate to create this variation.</p>';
+                                             suggestedInfoDiv.style.display = 'none';
+                                             variationSuggestionsDiv.innerHTML = '';
+                                         });
+                                         variationSuggestionsDiv.appendChild(varBtn);
+                                     });
+                                 } else if (!aiResponse.description_prompt) {
+                                     variationSuggestionsDiv.textContent = 'Could not get suggestions from the image.';
+                                 }
+
+                             } catch (parseError) {
+                                 console.error('Failed to parse AI response for variations:', parseError);
+                                 variationSuggestionsDiv.textContent = 'Could not parse variation suggestions.';
+                             }
+
+                         } else {
+                             console.error('API /api/ai failed for analysis:', data.error);
+                             displayError(`Image analysis failed: ${data.error || 'Unknown error'}`);
+                             variationSuggestionsDiv.innerHTML = '';
+                         }
+
+                    } catch (err) {
+                        console.error('/api/ai fetch error for analysis:', err);
+                        displayError('Network error during image analysis.');
+                         variationSuggestionsDiv.innerHTML = '';
+                    } finally {
+                        appState.ui.isLoading = false;
+                        updateUI();
+                         variationImageUpload.value = '';
+                    }
+                };
+                 reader.onerror = () => {
+                     displayError(`Failed to read file: "${file.name}".`);
+                      appState.ui.isLoading = false;
+                      updateUI();
+                       variationImageUpload.value = '';
+                 };
+                reader.readAsDataURL(file);
+            });
+
+
+            function init() {
+                loadPortfolio();
+                updateUI();
+            }
+
+            document.addEventListener('DOMContentLoaded', init);
+
+        })();
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>
