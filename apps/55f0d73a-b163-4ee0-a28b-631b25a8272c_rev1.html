@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Absurdist Evolver: Sentient Salad Spinner</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #1A202C;
+        }
+
+        #app-container {
+            background-color: #1A202C;
+        }
+        
+        #main-content {
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            transition: background-image 0.5s ease-in-out;
+        }
+
+        #creature-display-area, #controls-area {
+            background-color: #2D3748;
+            border: 1px solid #4A5568;
+            max-height: calc(100vh - 120px); 
+            overflow-y: auto;
+        }
+        
+        @media (max-width: 991.98px) {
+            #creature-display-area, #controls-area {
+                max-height: none;
+                overflow-y: visible;
+            }
+             body {
+                overflow-y: auto;
+            }
+        }
+
+        #creature-image {
+            max-height: 55vh;
+            object-fit: contain;
+            transition: opacity 0.5s ease-in-out;
+            border: 3px solid #4A5568;
+            opacity: 0; 
+        }
+        
+        #creature-image.loaded {
+            opacity: 1;
+        }
+
+        #creature-image-wrapper {
+            background-color: rgba(0,0,0,0.3);
+            border: 1px dashed #4A5568;
+        }
+
+        #mutation-history-list .list-group-item {
+            background-color: #1A202C;
+            border-color: #4A5568;
+            font-size: 0.85rem;
+            word-break: break-word;
+        }
+
+        #salad-spinner-graphic {
+            transition: transform 0.3s ease-out;
+        }
+
+        #salad-spinner-graphic.spin-once {
+            animation: single-spin 0.75s ease-out forwards;
+        }
+
+        @keyframes single-spin {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(360deg) scale(1.1); }
+            100% { transform: rotate(720deg) scale(1); }
+        }
+
+        #absurdity-progress {
+            transition: width 0.5s ease-in-out;
+            font-weight: bold;
+        }
+        
+        .form-control::placeholder {
+            color: #A0AEC0;
+        }
+        .form-control:focus {
+            border-color: #63B3ED;
+            box-shadow: 0 0 0 0.25rem rgba(99, 179, 237, 0.25);
+        }
+
+        .card {
+            border-color: #4A5568;
+        }
+        .card-header {
+            background-color: #252c3a;
+            border-bottom-color: #4A5568;
+        }
+        
+        .modal-content {
+            background-color: #2D3748;
+            border: 1px solid #4A5568;
+        }
+        .modal-header, .modal-footer {
+            border-color: #4A5568;
+        }
+
+        .toast {
+            background-color: #2D3748 !important; 
+            color: #E2E8F0 !important; 
+        }
+        .toast-header {
+             background-color: #4A5568 !important;
+             color: #E2E8F0 !important;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #2D3748;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4A5568;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #63B3ED;
+        }
+
+    </style>
+</head>
+<body class="bg-dark text-light d-flex flex-column min-vh-100">
+
+    <div id="app-container" class="container-fluid flex-grow-1 d-flex flex-column p-0">
+
+        <header class="text-center py-3 shadow-sm" style="background-color: #212529;">
+            <h1 id="app-title" class="display-5 text-info">Absurdist Evolver: A Sentient Salad Spinner</h1>
+        </header>
+
+        <main id="main-content" class="flex-grow-1 d-flex align-items-stretch p-2 p-md-3 overflow-hidden">
+            <div class="row g-3 w-100 h-100">
+
+                <section id="creature-display-area" class="col-lg-7 d-flex flex-column p-3 rounded shadow">
+                    <h2 id="creature-name" class="text-center text-info mb-3">Proto-Veggie</h2>
+                    <div id="creature-image-wrapper" class="text-center mb-3 flex-grow-1 d-flex align-items-center justify-content-center position-relative p-2" style="min-height: 300px;">
+                        <img id="creature-image" src="" alt="Evolving Creature" class="img-fluid rounded shadow-lg">
+                        <div id="image-loading-spinner" class="spinner-border text-info position-absolute" role="status" style="width: 3rem; height: 3rem; display: none;">
+                            <span class="visually-hidden">Loading image...</span>
+                        </div>
+                    </div>
+                    <div id="creature-description-card" class="card bg-dark text-light mb-3">
+                        <div class="card-header fw-bold">Current State</div>
+                        <div class="card-body">
+                            <p id="creature-current-description" class="card-text fst-italic">Awaiting its first spin into the absurd...</p>
+                        </div>
+                    </div>
+                    <div id="mutation-history-card" class="card bg-dark text-light">
+                        <div class="card-header fw-bold">Mutation History</div>
+                        <ul id="mutation-history-list" class="list-group list-group-flush" style="max-height: 150px; overflow-y: auto;">
+                        </ul>
+                    </div>
+                </section>
+
+                <section id="controls-area" class="col-lg-5 d-flex flex-column p-3 rounded shadow">
+                    <div id="spinner-container" class="text-center mb-4">
+                        <img id="salad-spinner-graphic" src="/generated_images/dalle_6a306718-e97.png" alt="Salad Spinner" class="img-fluid mb-3" style="max-width: 180px; cursor: pointer;">
+                        <button id="spin-button" class="btn btn-lg btn-success w-100 shadow-sm">
+                            <i class="bi bi-arrow-repeat"></i> <span id="spin-button-text">Spin for Absurdity!</span>
+                            <span id="spin-loading-spinner" class="spinner-border spinner-border-sm ms-2" role="status" style="display: none;"></span>
+                        </button>
+                    </div>
+
+                    <div id="absurdity-meter-container" class="mb-4">
+                        <label for="absurdity-progress" class="form-label h5 text-info">Absurdity Meter</label>
+                        <div class="progress" role="progressbar" aria-label="Absurdity Level" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="height: 25px;">
+                            <div id="absurdity-progress" class="progress-bar progress-bar-striped progress-bar-animated bg-info" style="width: 0%;">0%</div>
+                        </div>
+                    </div>
+
+                    <div id="user-influence-container" class="mb-4">
+                        <label for="mutation-suggestion" class="form-label">Suggest a Mutation (Optional):</label>
+                        <textarea id="mutation-suggestion" class="form-control form-control-sm bg-dark text-light border-secondary" rows="2" placeholder="e.g., make it crave existential poetry..."></textarea>
+                    </div>
+                    
+                    <div class="mt-auto d-grid gap-2">
+                        <button id="save-snapshot-button" class="btn btn-primary"><i class="bi bi-camera"></i> Save Current Absurdity</button>
+                        <button id="view-gallery-button" class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#gallery-modal"><i class="bi bi-images"></i> View Gallery</button>
+                         <button id="reset-button" class="btn btn-sm btn-outline-danger mt-2"><i class="bi bi-trash"></i> Start Anew (Reset)</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <footer class="text-center py-2 mt-auto shadow-sm" style="background-color: #212529;">
+            <p class="mb-0 small text-muted">&copy; 2025 Absurdist Creations Inc. (Not really)</p>
+        </footer>
+
+    </div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+      <div id="app-toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="4000">
+        <div class="toast-header">
+          <strong id="toast-title" class="me-auto">Notification</strong>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div id="toast-body-content" class="toast-body">
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="gallery-modal" tabindex="-1" aria-labelledby="galleryModalLabel" aria-hidden="true" data-bs-theme="dark">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="galleryModalLabel">Gallery of Absurdities</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div id="gallery-modal-body" class="modal-body">
+                    <div id="gallery-items-container" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
+                    </div>
+                    <p id="gallery-empty-message" class="text-center d-none">Your gallery is currently a void of normality. Go create some absurdity!</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="philosophical-debate-modal" tabindex="-1" aria-labelledby="philosophicalDebateModalLabel" aria-hidden="true" data-bs-theme="dark">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-info" id="philosophicalDebateModalLabel">A Moment of Profound Nonsense...</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div id="philosophical-debate-modal-body" class="modal-body">
+                    <div id="debate-loading-spinner" class="text-center" style="display: none;">
+                        <div class="spinner-border text-info" role="status" style="width: 2rem; height: 2rem;">
+                            <span class="visually-hidden">Loading debate...</span>
+                        </div>
+                        <p class="mt-2">The creature is pondering deeply...</p>
+                    </div>
+                    <p id="debate-text" class="fst-italic lead"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Fascinating...</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
+
+    <script>
+        const GAME_CONFIG = {
+            INITIAL_CREATURE_NAME: "Proto-Veggie",
+            INITIAL_CREATURE_BASE_CONCEPT: "a sentient radish with anxieties",
+            ABSURDITY_MAX: 100,
+            DEBATE_UNLOCK_THRESHOLD: 60,
+            BACKGROUND_UNLOCK_THRESHOLD: 90,
+            NAME_EVOLVE_MUTATION_COUNT: 4,
+            SOUND_ENABLED: true, 
+        };
+
+        let gameState = {
+            creature: {
+                name: GAME_CONFIG.INITIAL_CREATURE_NAME,
+                baseConcept: GAME_CONFIG.INITIAL_CREATURE_BASE_CONCEPT,
+                currentImagePrompt: "",
+                description: "Awaiting its first spin into the absurd...",
+                imageUrl: "",
+                mutations: [], 
+            },
+            absurdityLevel: 0,
+            mutationCountForNameChange: 0,
+            isLoading: {
+                image: false,
+                mutationText: false,
+                debate: false,
+                background: false,
+                name: false,
+            },
+            savedSnapshots: [],
+            unlocks: {
+                philosophicalDebateTriggered: false,
+                backgroundChangeTriggered: false,
+            },
+            appToast: null,
+            debateModal: null,
+            galleryModal: null,
+            sounds: {}
+        };
+
+        const domElements = {};
+
+        function cacheDOMElements() {
+            domElements.appTitle = document.getElementById('app-title');
+            domElements.creatureNameEl = document.getElementById('creature-name');
+            domElements.creatureImageEl = document.getElementById('creature-image');
+            domElements.imageLoadingSpinner = document.getElementById('image-loading-spinner');
+            domElements.creatureCurrentDescriptionEl = document.getElementById('creature-current-description');
+            domElements.mutationHistoryListEl = document.getElementById('mutation-history-list');
+            domElements.saladSpinnerGraphicEl = document.getElementById('salad-spinner-graphic');
+            domElements.spinButton = document.getElementById('spin-button');
+            domElements.spinButtonText = document.getElementById('spin-button-text');
+            domElements.spinLoadingSpinner = document.getElementById('spin-loading-spinner');
+            domElements.absurdityProgressEl = document.getElementById('absurdity-progress');
+            domElements.mutationSuggestionEl = document.getElementById('mutation-suggestion');
+            domElements.saveSnapshotButton = document.getElementById('save-snapshot-button');
+            domElements.viewGalleryButton = document.getElementById('view-gallery-button');
+            domElements.galleryItemsContainer = document.getElementById('gallery-items-container');
+            domElements.galleryEmptyMessage = document.getElementById('gallery-empty-message');
+            domElements.mainContentEl = document.getElementById('main-content');
+            domElements.debateTextEl = document.getElementById('debate-text');
+            domElements.debateLoadingSpinner = document.getElementById('debate-loading-spinner');
+            domElements.resetButton = document.getElementById('reset-button');
+        }
+        
+        function initSounds() {
+            if (!GAME_CONFIG.SOUND_ENABLED || typeof Howl === 'undefined') return;
+            try {
+                gameState.sounds.spin = new Howl({ src: ['https://cdn.jsdelivr.net/gh/kristopolous/CALM/sounds/button.mp3'], volume: 0.4, html5: true });
+                gameState.sounds.mutation = new Howl({ src: ['https://cdn.jsdelivr.net/gh/kristopolous/CALM/sounds/positive.mp3'], volume: 0.5, html5: true });
+                gameState.sounds.unlock = new Howl({ src: ['https://cdn.jsdelivr.net/gh/kristopolous/CALM/sounds/hero.mp3'], volume: 0.6, html5: true });
+                gameState.sounds.save = new Howl({ src: ['https://cdn.jsdelivr.net/gh/kristopolous/CALM/sounds/dialog.mp3'], volume: 0.4, html5: true });
+                gameState.sounds.error = new Howl({ src: ['https://cdn.jsdelivr.net/gh/kristopolous/CALM/sounds/error.mp3'], volume: 0.5, html5: true });
+            } catch (e) {
+                console.error("Error initializing sounds:", e);
+                GAME_CONFIG.SOUND_ENABLED = false;
+            }
+        }
+
+        function playSound(soundName) {
+            if (GAME_CONFIG.SOUND_ENABLED && gameState.sounds[soundName] && typeof gameState.sounds[soundName].play === 'function') {
+                try {
+                    gameState.sounds[soundName].play();
+                } catch (e) {
+                    console.error(`Error playing sound ${soundName}:`, e);
+                }
+            }
+        }
+
+        function showToast(title, message, type = 'success') {
+            const toastTitleEl = document.getElementById('toast-title');
+            const toastBodyEl = document.getElementById('toast-body-content');
+            const toastEl = document.getElementById('app-toast');
+            
+            toastTitleEl.textContent = title;
+            toastBodyEl.textContent = message;
+
+            toastEl.classList.remove('text-bg-success', 'text-bg-danger', 'text-bg-warning', 'text-bg-info');
+            toastEl.classList.add(`text-bg-${type}`);
+            
+            if (gameState.appToast) {
+                gameState.appToast.show();
+            }
+        }
+
+        async function callAI(aiguide, msgforai, loadingFlag = null) {
+            if (loadingFlag) gameState.isLoading[loadingFlag] = true;
+            updateButtonStates();
+            try {
+                const response = await fetch('/api/ai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ aiguide, msgforai, llmSettings: { temperature: 0.85 } })
+                });
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: `HTTP error! Status: ${response.status}` }));
+                    throw new Error(errorData.error || `HTTP error! Status: ${response.status}`);
+                }
+                const data = await response.json();
+                if (data.success) {
+                    try {
+                        return JSON.parse(data.response); 
+                    } catch (parseError) {
+                         throw new Error("AI returned invalid JSON response.");
+                    }
+                } else {
+                    throw new Error(data.error || "AI request failed due to an unknown reason.");
+                }
+            } catch (error) {
+                console.error(`Error calling AI for ${loadingFlag || 'generic task'}:`, error);
+                showToast("AI Communication Error", `The AI is currently contemplating the void and cannot be reached. (${error.message})`, "danger");
+                playSound('error');
+                return null;
+            } finally {
+                if (loadingFlag) gameState.isLoading[loadingFlag] = false;
+                updateButtonStates();
+            }
+        }
+
+        async function fetchGeneratedImage(prompt, aspectRatio = "1:1", style = "hd", loadingFlag = 'image') {
+            gameState.isLoading[loadingFlag] = true;
+            if (loadingFlag === 'image') {
+                domElements.imageLoadingSpinner.style.display = 'block';
+                domElements.creatureImageEl.classList.remove('loaded');
+            }
+            updateButtonStates();
+            try {
+                const response = await fetch('/api/generate-image-on-demand', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt, aspectRatio, style })
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    return data.imageUrl;
+                } else {
+                    throw new Error(data.error || "Failed to generate image from API.");
+                }
+            } catch (error) {
+                console.error("Image generation error:", error);
+                showToast("Image Generation Error", `The visual cortex of the void seems to be malfunctioning. (${error.message})`, "danger");
+                playSound('error');
+                return null;
+            } finally {
+                gameState.isLoading[loadingFlag] = false;
+                if (loadingFlag === 'image') domElements.imageLoadingSpinner.style.display = 'none';
+                updateButtonStates();
+            }
+        }
+        
+        function updateUIDisplay() {
+            domElements.creatureNameEl.textContent = gameState.creature.name;
+            
+            if (gameState.creature.imageUrl) {
+                domElements.creatureImageEl.src = gameState.creature.imageUrl;
+                domElements.creatureImageEl.alt = gameState.creature.description.substring(0,100);
+                domElements.creatureImageEl.onload = () => {
+                    domElements.creatureImageEl.classList.add('loaded');
+                };
+                if (domElements.creatureImageEl.complete) { 
+                    domElements.creatureImageEl.classList.add('loaded');
+                }
+            } else {
+                domElements.creatureImageEl.src = ""; 
+                domElements.creatureImageEl.alt = "Creature visual is missing";
+                domElements.creatureImageEl.classList.remove('loaded');
+            }
+
+            domElements.creatureCurrentDescriptionEl.textContent = gameState.creature.description;
+
+            domElements.mutationHistoryListEl.innerHTML = '';
+            gameState.creature.mutations.forEach(mutation => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item text-light';
+                li.textContent = `(${mutation.absurdityScore} AP) ${mutation.text}`;
+                domElements.mutationHistoryListEl.prepend(li);
+            });
+
+            const absurdityPercentage = Math.min(100, (gameState.absurdityLevel / GAME_CONFIG.ABSURDITY_MAX) * 100);
+            domElements.absurdityProgressEl.style.width = `${absurdityPercentage}%`;
+            domElements.absurdityProgressEl.textContent = `${Math.round(absurdityPercentage)}%`;
+            domElements.absurdityProgressEl.setAttribute('aria-valuenow', absurdityPercentage);
+        }
+
+        function updateButtonStates() {
+            const anyLoading = Object.values(gameState.isLoading).some(status => status === true);
+            
+            domElements.spinButton.disabled = anyLoading;
+            domElements.saveSnapshotButton.disabled = anyLoading || !gameState.creature.imageUrl;
+            domElements.mutationSuggestionEl.disabled = anyLoading;
+            domElements.resetButton.disabled = anyLoading;
+
+            if (gameState.isLoading.mutationText || gameState.isLoading.image || gameState.isLoading.name) {
+                domElements.spinLoadingSpinner.style.display = 'inline-block';
+                domElements.spinButtonText.textContent = "Evolving...";
+            } else {
+                domElements.spinLoadingSpinner.style.display = 'none';
+                domElements.spinButtonText.textContent = "Spin for Absurdity!";
+            }
+        }
+
+        async function generateInitialCreature() {
+            gameState.creature.currentImagePrompt = `A detailed, dark, whimsical, absurdist illustration of ${gameState.creature.baseConcept}. It looks slightly apprehensive. Studio lighting, quirky high-detail art style. Transparent background if possible, otherwise a very dark, neutral, subtly textured background.`;
+            const imageUrl = await fetchGeneratedImage(gameState.creature.currentImagePrompt, "1:1", "hd", 'image');
+            if (imageUrl) {
+                gameState.creature.imageUrl = imageUrl;
+                gameState.creature.description = `A ${gameState.creature.baseConcept} has materialized, blinking in the dim light. It seems to be pondering its own peculiar existence.`;
+            } else {
+                 gameState.creature.imageUrl = "";
+                 gameState.creature.description = "A creature was supposed to appear, but it seems to have gotten lost in the cosmic static. Try spinning again, or perhaps reality is just too mundane today.";
+            }
+            updateUIDisplay();
+        }
+        
+        async function fetchMutationDetails(currentDesc, userSuggestion) {
+            const aiguide = "You are an Absurdist Mutation Engine. Given a creature description, generate a short, bizarre, humorous physical or behavioral mutation. Describe it dramatically. If user suggests something, incorporate it creatively. Also, provide an 'absurdity_score' (integer 1-10, where 10 is most absurd). Respond ONLY in JSON: {\"mutation_text\": \"...\", \"absurdity_score\": ...}.";
+            const msgforai = `Current Creature: ${currentDesc.substring(0, 500)}. User Suggestion: ${userSuggestion || 'None'}.`;
+            return await callAI(aiguide, msgforai, 'mutationText');
+        }
+
+        async function handleSpinRequest() {
+            if (Object.values(gameState.isLoading).some(status => status === true)) return;
+
+            domElements.saladSpinnerGraphicEl.classList.add('spin-once');
+            playSound('spin');
+            setTimeout(() => domElements.saladSpinnerGraphicEl.classList.remove('spin-once'), 750);
+
+            const userSuggestion = domElements.mutationSuggestionEl.value.trim();
+            const mutationResult = await fetchMutationDetails(gameState.creature.description, userSuggestion);
+
+            if (mutationResult && mutationResult.mutation_text && typeof mutationResult.absurdity_score === 'number') {
+                gameState.creature.mutations.push({ 
+                    text: mutationResult.mutation_text, 
+                    absurdityScore: mutationResult.absurdity_score, 
+                    timestamp: new Date().toISOString() 
+                });
+                gameState.absurdityLevel = Math.min(GAME_CONFIG.ABSURDITY_MAX, gameState.absurdityLevel + mutationResult.absurdity_score);
+                gameState.mutationCountForNameChange++;
+
+                gameState.creature.description += ` It then ${mutationResult.mutation_text}`;
+                
+                let recentMutationsSummary = gameState.creature.mutations.slice(-2).map(m => m.text).join(". Also, it ");
+                gameState.creature.currentImagePrompt = `The evolving creature, originally a "${gameState.creature.baseConcept}". Its current overall appearance is best described as: "${gameState.creature.description.substring(0, 250)}...". A NEW MUTATION has occurred: "${mutationResult.mutation_text}". Recent notable changes also include: "${recentMutationsSummary}". Illustrate this new, updated form of the creature. Emphasize visual continuity with its previous state while clearly incorporating the new mutation. Maintain the established quirky, dark, high-detail, absurdist illustration art style. Studio lighting. Transparent background if possible, otherwise a very dark, neutral, subtly textured background.`;
+                
+                const newImageUrl = await fetchGeneratedImage(gameState.creature.currentImagePrompt, "1:1", "hd", 'image');
+                if (newImageUrl) {
+                    gameState.creature.imageUrl = newImageUrl;
+                }
+                
+                domElements.mutationSuggestionEl.value = '';
+                playSound('mutation');
+                
+                if (gameState.mutationCountForNameChange >= GAME_CONFIG.NAME_EVOLVE_MUTATION_COUNT) {
+                    await evolveCreatureName();
+                    gameState.mutationCountForNameChange = 0;
+                }
+
+                updateUIDisplay();
+                checkUnlocks();
+            } else {
+                showToast("Mutation Misfire", "The spinner sputtered; no clear mutation occurred. Perhaps the ether was too thick with normality.", "warning");
+            }
+        }
+
+        async function evolveCreatureName() {
+            const aiguide = "You are an eccentric Nomenclator of the Bizarre. Given a creature's description, generate a single, highly absurd, dramatic, and slightly pretentious name for it (2-4 words). The name should sound like it belongs to a creature from a forgotten, surreal dimension. Respond ONLY in JSON: {\"creature_name\": \"...\"}.";
+            const msgforai = `Current creature description: ${gameState.creature.description.substring(0,500)}. Its base concept is: ${gameState.creature.baseConcept}. Some notable mutations include: ${gameState.creature.mutations.slice(-3).map(m => m.text).join(', ')}.`;
+            const nameResult = await callAI(aiguide, msgforai, 'name');
+            if (nameResult && nameResult.creature_name) {
+                gameState.creature.name = nameResult.creature_name;
+                showToast("Name Evolved!", `The creature shall henceforth be known as: ${gameState.creature.name}`, "info");
+                updateUIDisplay();
+            }
+        }
+
+        function checkUnlocks() {
+            if (gameState.absurdityLevel >= GAME_CONFIG.DEBATE_UNLOCK_THRESHOLD && !gameState.unlocks.philosophicalDebateTriggered) {
+                triggerPhilosophicalDebate();
+            }
+            if (gameState.absurdityLevel >= GAME_CONFIG.BACKGROUND_UNLOCK_THRESHOLD && !gameState.unlocks.backgroundChangeTriggered) {
+                triggerBackgroundChange();
+            }
+        }
+
+        async function triggerPhilosophicalDebate() {
+            gameState.unlocks.philosophicalDebateTriggered = true;
+            playSound('unlock');
+            showToast("Profound Nonsense!", "The creature has reached a new level of absurdity and wishes to pontificate!", "info");
+            
+            if (gameState.debateModal) gameState.debateModal.show();
+            domElements.debateTextEl.textContent = "";
+            domElements.debateLoadingSpinner.style.display = "block";
+
+            const aiguide = "You are a deeply confused but eloquent philosopher. A bizarre creature is having an existential crisis. Generate a short, absurd philosophical debate or monologue (2-4 sentences) from the creature's perspective, reflecting its current state. Respond ONLY in JSON: {\"debate_text\": \"...\"}.";
+            const msgforai = `Creature's current description: ${gameState.creature.description.substring(0,500)}. Its key characteristics for the debate are: ${gameState.creature.baseConcept} and its recent mutations: ${gameState.creature.mutations.slice(-3).map(m => m.text).join(', ')}.`;
+            const debateResult = await callAI(aiguide, msgforai, 'debate');
+
+            domElements.debateLoadingSpinner.style.display = "none";
+            if (debateResult && debateResult.debate_text) {
+                domElements.debateTextEl.textContent = debateResult.debate_text;
+            } else {
+                domElements.debateTextEl.textContent = "The creature opened its mouth, but only a vague gurgle of existential dread escaped. Perhaps another time, when the cosmic winds are more favorable.";
+            }
+        }
+
+        async function triggerBackgroundChange() {
+            gameState.unlocks.backgroundChangeTriggered = true;
+            playSound('unlock');
+            showToast("Reality Warps!", "The sheer absurdity is altering the very fabric of this dimension!", "info");
+
+            const bgPrompt = "An absurd, surreal, cosmic void background for a bizarre creature. Dark, painterly, digital art. Keywords: swirling nebulae of oddities, distant geometric shapes, eerie glow, strange dimensions, Lovecraftian but whimsical.";
+            const bgImageUrl = await fetchGeneratedImage(bgPrompt, "16:9", "hd", 'background');
+            if (bgImageUrl) {
+                domElements.mainContentEl.style.backgroundImage = `url(${bgImageUrl})`;
+                showToast("Background Changed!", "The view is... decidedly more peculiar now.", "info");
+            }
+        }
+
+        function saveSnapshot() {
+            if (!gameState.creature.imageUrl) {
+                showToast("Cannot Save Snapshot", "The creature is not fully formed or its visual is missing.", "warning");
+                return;
+            }
+            const snapshot = JSON.parse(JSON.stringify(gameState.creature)); 
+            gameState.savedSnapshots.push(snapshot);
+            try {
+                localStorage.setItem('absurdistEvolverSnapshots', JSON.stringify(gameState.savedSnapshots));
+                showToast("Snapshot Saved!", `${snapshot.name} has been immortalized in its current absurdity.`, "success");
+                playSound('save');
+                renderGallery();
+            } catch(e) {
+                console.error("Error saving to localStorage:", e);
+                showToast("Storage Error", "Could not save snapshot. Local storage might be full or disabled.", "danger");
+            }
+        }
+
+        function loadSnapshotsFromLocalStorage() {
+            try {
+                const storedSnapshots = localStorage.getItem('absurdistEvolverSnapshots');
+                if (storedSnapshots) {
+                    gameState.savedSnapshots = JSON.parse(storedSnapshots);
+                }
+            } catch (e) {
+                console.error("Error loading snapshots from localStorage:", e);
+                gameState.savedSnapshots = []; 
+            }
+        }
+
+        function renderGallery() {
+            domElements.galleryItemsContainer.innerHTML = '';
+            if (gameState.savedSnapshots.length === 0) {
+                domElements.galleryEmptyMessage.classList.remove('d-none');
+                return;
+            }
+            domElements.galleryEmptyMessage.classList.add('d-none');
+
+            gameState.savedSnapshots.forEach((snapshot, index) => {
+                const col = document.createElement('div');
+                col.className = 'col';
+                col.innerHTML = `
+                    <div class="card h-100 bg-secondary text-light shadow">
+                        <img src="${snapshot.imageUrl}" class="card-img-top" alt="${snapshot.name || 'Unnamed Creature'}" style="height: 200px; object-fit: cover; border-bottom: 1px solid #4A5568; background-color: #1A202C;">
+                        <div class="card-body d-flex flex-column">
+                            <h6 class="card-title text-info">${snapshot.name || 'An Absurdity'}</h6>
+                            <p class="card-text small fst-italic flex-grow-1">${snapshot.description.substring(0, 80)}...</p>
+                            <div class="mt-auto d-flex justify-content-between">
+                                <button class="btn btn-sm btn-outline-info restore-snapshot-btn" data-index="${index}" title="Restore this creature"><i class="bi bi-arrow-clockwise"></i> Restore</button>
+                                <button class="btn btn-sm btn-outline-danger delete-snapshot-btn" data-index="${index}" title="Delete this snapshot"><i class="bi bi-trash"></i> Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                domElements.galleryItemsContainer.appendChild(col);
+            });
+
+            document.querySelectorAll('.restore-snapshot-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const index = parseInt(event.currentTarget.dataset.index);
+                    restoreSnapshot(index);
+                    if(gameState.galleryModal) gameState.galleryModal.hide();
+                });
+            });
+             document.querySelectorAll('.delete-snapshot-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const index = parseInt(event.currentTarget.dataset.index);
+                    deleteSnapshot(index);
+                });
+            });
+        }
+        
+        function restoreSnapshot(index) {
+            if (index >= 0 && index < gameState.savedSnapshots.length) {
+                const snapshotToRestore = JSON.parse(JSON.stringify(gameState.savedSnapshots[index]));
+                gameState.creature = snapshotToRestore;
+                
+                gameState.absurdityLevel = 0; 
+                gameState.creature.mutations.forEach(m => {
+                    if(typeof m.absurdityScore === 'number') gameState.absurdityLevel += m.absurdityScore;
+                });
+                gameState.absurdityLevel = Math.min(gameState.absurdityLevel, GAME_CONFIG.ABSURDITY_MAX);
+
+                gameState.unlocks.philosophicalDebateTriggered = gameState.absurdityLevel >= GAME_CONFIG.DEBATE_UNLOCK_THRESHOLD;
+                gameState.unlocks.backgroundChangeTriggered = gameState.absurdityLevel >= GAME_CONFIG.BACKGROUND_UNLOCK_THRESHOLD;
+                
+                if (!gameState.unlocks.backgroundChangeTriggered) {
+                    domElements.mainContentEl.style.backgroundImage = ''; 
+                } else {
+                    triggerBackgroundChange(); 
+                }
+                gameState.mutationCountForNameChange = gameState.creature.mutations.length % GAME_CONFIG.NAME_EVOLVE_MUTATION_COUNT;
+
+                updateUIDisplay();
+                showToast("Snapshot Restored", `${gameState.creature.name} has returned from the annals of absurdity!`, "info");
+            }
+        }
+
+        function deleteSnapshot(index) {
+            if (index >= 0 && index < gameState.savedSnapshots.length) {
+                gameState.savedSnapshots.splice(index, 1);
+                 try {
+                    localStorage.setItem('absurdistEvolverSnapshots', JSON.stringify(gameState.savedSnapshots));
+                    renderGallery();
+                    showToast("Snapshot Deleted", "The absurdity has been pruned from the records.", "warning");
+                } catch(e) {
+                    console.error("Error saving to localStorage after delete:", e);
+                    showToast("Storage Error", "Could not update snapshot list. Local storage might be an issue.", "danger");
+                }
+            }
+        }
+
+        function resetGameFull() {
+            gameState.creature = {
+                name: GAME_CONFIG.INITIAL_CREATURE_NAME,
+                baseConcept: GAME_CONFIG.INITIAL_CREATURE_BASE_CONCEPT,
+                currentImagePrompt: "",
+                description: "Awaiting its first spin into the absurd...",
+                imageUrl: "",
+                mutations: [],
+            };
+            gameState.absurdityLevel = 0;
+            gameState.mutationCountForNameChange = 0;
+            gameState.unlocks = {
+                philosophicalDebateTriggered: false,
+                backgroundChangeTriggered: false,
+            };
+            domElements.mainContentEl.style.backgroundImage = '';
+            domElements.mutationSuggestionEl.value = '';
+            domElements.creatureImageEl.classList.remove('loaded'); 
+            domElements.creatureImageEl.src = ''; 
+            generateInitialCreature();
+            showToast("Game Reset", "A new strand of absurdity unfurls!", "info");
+        }
+        
+        function confirmAndResetGame() {
+             if (confirm("Are you sure you want to erase this timeline and start anew? All current unsaved progress will be lost.")) {
+                resetGameFull();
+            }
+        }
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            cacheDOMElements();
+            initSounds();
+            
+            gameState.appToast = new bootstrap.Toast(document.getElementById('app-toast'));
+            gameState.debateModal = new bootstrap.Modal(document.getElementById('philosophical-debate-modal'));
+            gameState.galleryModal = new bootstrap.Modal(document.getElementById('gallery-modal'));
+            
+            domElements.spinButton.addEventListener('click', handleSpinRequest);
+            domElements.saladSpinnerGraphicEl.addEventListener('click', handleSpinRequest);
+            domElements.saveSnapshotButton.addEventListener('click', saveSnapshot);
+            domElements.resetButton.addEventListener('click', confirmAndResetGame);
+            
+            document.getElementById('gallery-modal').addEventListener('show.bs.modal', renderGallery);
+
+            loadSnapshotsFromLocalStorage();
+            resetGameFull(); 
+            updateButtonStates();
+        });
+
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>
