@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AppGen Gallery</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: var(--bs-dark-bg-subtle, #1A202C);
+      color: var(--bs-body-color);
+    }
+
+    .app-card {
+      transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+      background-color: var(--bs-gray-800);
+      border: 1px solid var(--bs-gray-700);
+      border-radius: 0.5rem;
+      position: relative; /* For stretched-link to work correctly */
+    }
+
+    .app-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 0.5rem 1.5rem rgba(var(--bs-primary-rgb), 0.25);
+    }
+
+    .card-img-top {
+      aspect-ratio: 16/9;
+      object-fit: cover;
+      background-color: var(--bs-gray-700);
+      border-top-left-radius: calc(0.5rem - 1px);
+      border-top-right-radius: calc(0.5rem - 1px);
+      border-bottom: 1px solid var(--bs-gray-700);
+    }
+    
+    .app-card.border-danger {
+      border-color: var(--bs-danger-border-subtle) !important;
+      box-shadow: 0 0 0.5rem rgba(var(--bs-danger-rgb), 0.25);
+    }
+    .app-card.border-danger .card-title a {
+      color: var(--bs-danger-text-emphasis) !important;
+    }
+    .app-card.border-danger .card-title a:hover {
+      color: var(--bs-danger) !important;
+    }
+
+    #statusMessageContainer {
+      background-color: var(--bs-primary-bg-subtle);
+      border-color: var(--bs-primary-border-subtle);
+      color: var(--bs-primary-text-emphasis);
+      border-radius: 0.375rem;
+    }
+    #statusMessageContainer.alert-danger {
+        background-color: var(--bs-danger-bg-subtle);
+        border-color: var(--bs-danger-border-subtle);
+        color: var(--bs-danger-text-emphasis);
+    }
+
+    #gallerySubtitle {
+        color: var(--bs-secondary-color) !important;
+    }
+
+    .card-title a.stretched-link {
+        color: var(--bs-light-text-emphasis);
+        font-weight: 500;
+    }
+    .card-title a.stretched-link:hover {
+        color: var(--bs-primary);
+    }
+    
+    .footer-text {
+        font-size: 0.9em;
+    }
+
+    .spinner-border {
+        width: 3rem;
+        height: 3rem;
+    }
+  </style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+  <header class="container-fluid py-4 px-lg-5 text-center shadow-sm">
+    <h1 class="mb-3 display-4 fw-bold">AppGen Live Gallery</h1>
+    <p class="lead" id="gallerySubtitle">Discover applications built with AppGen</p>
+  </header>
+
+  <main class="container-fluid py-4 px-lg-5 flex-grow-1">
+    <div id="statusMessageContainer" class="text-center mb-4 p-3 alert alert-info" style="display: none;">
+      <p id="statusMessage" class="mb-0"></p>
+    </div>
+    <div id="spinner" class="text-center my-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading apps...</span>
+      </div>
+      <p class="mt-2 text-muted">Loading apps, please wait...</p>
+    </div>
+    <div id="gallery" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-3 g-4">
+    </div>
+  </main>
+
+  <footer class="container-fluid text-center py-3 mt-auto border-top border-secondary-subtle">
+    <p class="mb-1 footer-text text-muted">&copy; <span id="currentYear"></span> AppGen Gallery. Powered by AppGen AI.</p>
+    <button id="refreshCacheButton" class="btn btn-sm btn-outline-secondary mt-1" style="display: none;">Refresh Gallery from Source</button>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    (function() {
+      const GITHUB_API_URL = 'https://api.github.com/repos/metamindsapp/appgen2025-backups/contents/apps?ref=main';
+      const GITHUB_RAW_BASE_URL = 'https://raw.githubusercontent.com/metamindsapp/appgen2025-backups/main/apps/';
+      const APP_HOST_BASE_URL = 'https://metamindsapp.github.io/appgen2025-backups/apps/';
+      const API_AI_URL = '/api/ai';
+      const API_IMAGE_GEN_URL = '/api/generate-image-on-demand';
+      const CACHE_KEY = 'appGenGalleryCache_v3';
+      const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+
+      const galleryElement = document.getElementById('gallery');
+      const spinnerElement = document.getElementById('spinner');
+      const statusMessageElement = document.getElementById('statusMessage');
+      const statusMessageContainer = document.getElementById('statusMessageContainer');
+      const refreshCacheButton = document.getElementById('refreshCacheButton');
+      const currentYearElement = document.getElementById('currentYear');
+
+      let appsDataStore = [];
+
+      function updateStatus(message, isError = false) {
+        statusMessageElement.textContent = message;
+        statusMessageContainer.style.display = 'block';
+        statusMessageContainer.classList.toggle('alert-danger', isError);
+        statusMessageContainer.classList.toggle('alert-info', !isError);
+      }
+
+      function showLoadingState(isLoading, message = "Loading apps, please wait...") {
+        if (isLoading) {
+          spinnerElement.style.display = 'block';
+          if (message) updateStatus(message, false);
+        } else {
+          spinnerElement.style.display = 'none';
+        }
+      }
+      
+      function getFallbackTitle(filename) {
+        let title = filename.replace(/\.html$/i, '').replace(/_/g, ' ');
+        title = title.replace(/\b\w/g, l => l.toUpperCase());
+        title = title.replace(/ Rev\d+/i, '');
+        return title.trim() || 'Untitled Application';
+      }
+
+      function getFallbackImageSVG(titleForSVG) {
+        const cleanTitle = titleForSVG.length > 30 ? titleForSVG.substring(0, 27) + '...' : titleForSVG;
+        const placeholderSvg = `
+          <svg width="300" height="169" xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" focusable="false">
+            <rect width="100%" height="100%" fill="#343a40"></rect>
+            <text x="50%" y="50%" fill="#dee2e6" dy=".3em" text-anchor="middle" font-size="14px" font-family="sans-serif" dominant-baseline="middle">${cleanTitle}</text>
+          </svg>`;
+        return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(placeholderSvg)}`;
+      }
+
+      async function fetchAppList() {
+        try {
+          const response = await fetch(GITHUB_API_URL);
+          if (!response.ok) {
+            throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+          }
+          const files = await response.json();
+          if (!Array.isArray(files)) {
+             throw new Error(`GitHub API response is not an array. Message: ${files.message || 'Unknown error'}`);
+          }
+          return files.filter(file => file.type === 'file' && file.name.endsWith('.html'));
+        } catch (error) {
+          console.error('Failed to fetch app list:', error);
+          updateStatus(`Error fetching app list: ${error.message}`, true);
+          return null;
+        }
+      }
+
+      async function fetchSourceCode(sourceUrl) {
+        try {
+          const response = await fetch(sourceUrl);
+          if (!response.ok) {
+            throw new Error(`Failed to fetch source: ${response.status} ${response.statusText}`);
+          }
+          return await response.text();
+        } catch (error) {
+          console.error(`Error fetching source code from ${sourceUrl}:`, error);
+          return null;
+        }
+      }
+
+      async function extractTitle(htmlContent, filename) {
+        const aiguidePrompt = "Analyze the following HTML content and extract the primary project title. Prioritize the content of the <title> tag. If a <title> tag is absent or empty, look for a prominent <h1> heading. If neither is suitable, attempt to derive a concise and descriptive title from other headings or main content. Return ONLY the extracted title as a plain string, with no additional explanations, labels, or surrounding text. If a clear title cannot be reasonably determined or the HTML seems to be a generic placeholder, return 'Untitled Application'.";
+        try {
+          const response = await fetch(API_AI_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              aiguide: aiguidePrompt,
+              msgforai: htmlContent,
+              llmSettings: { temperature: 0.3 }
+            })
+          });
+          if (!response.ok) throw new Error(`AI title extraction API error: ${response.status} ${response.statusText}`);
+          const data = await response.json();
+          if (data.success && data.response && data.response.trim() !== '' && data.response.trim().toLowerCase() !== 'untitled application') {
+            return data.response.trim();
+          }
+          return getFallbackTitle(filename);
+        } catch (error) {
+          console.error(`Error extracting title for ${filename}:`, error);
+          return getFallbackTitle(filename);
+        }
+      }
+
+      async function generateImageFor(title, filename) {
+        const imageGenPrompt = `Generate a visually appealing, abstract, or illustrative thumbnail image that represents a web application titled "${title}". Style: modern, dark theme, tech-focused, visually appealing, symbolic. Avoid embedding any text in the image.`;
+        try {
+          const response = await fetch(API_IMAGE_GEN_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              prompt: imageGenPrompt,
+              aspectRatio: "16:9",
+              style: "hd"
+            })
+          });
+          if (!response.ok) throw new Error(`AI image generation API error: ${response.status} ${response.statusText}`);
+          const data = await response.json();
+          if (data.success && data.imageUrl) {
+            return data.imageUrl;
+          }
+          return getFallbackImageSVG(title);
+        } catch (error) {
+          console.error(`Error generating image for ${title} (${filename}):`, error);
+          return getFallbackImageSVG(title);
+        }
+      }
+      
+      function renderGallery(appsToRender) {
+        galleryElement.innerHTML = '';
+        if (!appsToRender || appsToRender.length === 0) {
+          galleryElement.innerHTML = '<p class="text-center text-muted col-12">No applications found or loaded.</p>';
+          return;
+        }
+
+        appsToRender.forEach(app => {
+          const col = document.createElement('div');
+          col.className = 'col';
+
+          const card = document.createElement('div');
+          card.className = 'card h-100 shadow-sm app-card';
+          if (app.error) {
+            card.classList.add('border-danger');
+          }
+          
+          const imgLinkWrapper = document.createElement('a');
+          imgLinkWrapper.href = app.appUrl;
+          imgLinkWrapper.target = '_blank';
+          imgLinkWrapper.rel = 'noopener noreferrer';
+          imgLinkWrapper.className = 'text-decoration-none';
+
+          const img = document.createElement('img');
+          img.src = app.imageUrl;
+          img.className = 'card-img-top';
+          img.alt = `Preview for ${app.title}`;
+          img.onerror = function() {
+            this.src = getFallbackImageSVG(app.title);
+            card.classList.add('border-danger');
+            if(!app.error){ 
+              const errorFooter = card.querySelector('.card-footer-error-message');
+              if(errorFooter) errorFooter.textContent = 'Image failed to load.';
+              else {
+                const newErrorFooter = document.createElement('div');
+                newErrorFooter.className = 'card-footer bg-transparent border-top-0 text-danger small pb-2 pt-1 card-footer-error-message';
+                newErrorFooter.textContent = 'Image failed to load.';
+                card.querySelector('.card-body').appendChild(newErrorFooter);
+              }
+            }
+          };
+          imgLinkWrapper.appendChild(img);
+
+          const cardBody = document.createElement('div');
+          cardBody.className = 'card-body d-flex flex-column text-center p-3';
+
+          const titleElement = document.createElement('h5');
+          titleElement.className = 'card-title mb-2';
+          
+          const titleLink = document.createElement('a');
+          titleLink.href = app.appUrl;
+          titleLink.target = '_blank';
+          titleLink.rel = 'noopener noreferrer';
+          titleLink.className = 'text-decoration-none link-light stretched-link';
+          titleLink.textContent = app.title;
+          titleElement.appendChild(titleLink);
+
+          const filenameText = document.createElement('p');
+          filenameText.className = 'card-text small text-muted mt-auto pt-1 mb-0';
+          const em = document.createElement('em');
+          em.textContent = app.filename;
+          filenameText.appendChild(em);
+
+          cardBody.appendChild(titleElement);
+          cardBody.appendChild(filenameText);
+          
+          if (app.error) {
+            const errorFooter = document.createElement('div');
+            errorFooter.className = 'card-footer bg-transparent border-top-0 text-danger small pb-2 pt-1 card-footer-error-message';
+            errorFooter.textContent = 'Error loading app details.';
+            cardBody.appendChild(errorFooter);
+          }
+
+          card.appendChild(imgLinkWrapper);
+          card.appendChild(cardBody);
+          col.appendChild(card);
+          galleryElement.appendChild(col);
+        });
+      }
+
+      function loadFromCache() {
+        const cached = localStorage.getItem(CACHE_KEY);
+        if (cached) {
+          try {
+            const { timestamp, apps } = JSON.parse(cached);
+            if (Date.now() - timestamp < CACHE_TTL) {
+              return apps;
+            }
+          } catch(e) {
+            console.error("Error parsing cache:", e);
+            localStorage.removeItem(CACHE_KEY);
+            return null;
+          }
+        }
+        return null;
+      }
+
+      function saveToCache(apps) {
+        try {
+          const dataToCache = {
+            timestamp: Date.now(),
+            apps: apps
+          };
+          localStorage.setItem(CACHE_KEY, JSON.stringify(dataToCache));
+        } catch (e) {
+          console.error("Error saving to cache:", e);
+        }
+      }
+
+      async function fetchAndProcessApps(forceRefresh = false) {
+        if (forceRefresh) {
+          localStorage.removeItem(CACHE_KEY);
+          appsDataStore = [];
+          galleryElement.innerHTML = '';
+        }
+        
+        showLoadingState(true, "Fetching app list from GitHub...");
+        refreshCacheButton.style.display = 'none';
+
+        const githubFiles = await fetchAppList();
+
+        if (!githubFiles) {
+          showLoadingState(false);
+          refreshCacheButton.style.display = 'block';
+          return;
+        }
+        if (githubFiles.length === 0) {
+            showLoadingState(false);
+            updateStatus("No apps found in the repository.", false);
+            refreshCacheButton.style.display = 'block';
+            return;
+        }
+
+        updateStatus(`Found ${githubFiles.length} app files. Processing...`);
+        appsDataStore = [];
+
+        for (let i = 0; i < githubFiles.length; i++) {
+          const file = githubFiles[i];
+          updateStatus(`Processing app ${i + 1} of ${githubFiles.length}: ${file.name}...`);
+          
+          let appEntry = {
+            filename: file.name,
+            sourceUrl: file.download_url,
+            appUrl: APP_HOST_BASE_URL + file.name,
+            title: getFallbackTitle(file.name),
+            imageUrl: '',
+            error: false
+          };
+
+          const htmlContent = await fetchSourceCode(file.download_url);
+          if (!htmlContent) {
+            appEntry.error = true;
+            appEntry.imageUrl = getFallbackImageSVG(appEntry.title); // Use SVG if source fails
+            appsDataStore.push(appEntry);
+            renderGallery(appsDataStore);
+            continue; 
+          }
+
+          appEntry.title = await extractTitle(htmlContent, file.name);
+          appEntry.imageUrl = await generateImageFor(appEntry.title, file.name);
+          
+          appsDataStore.push(appEntry);
+          renderGallery(appsDataStore);
+        }
+
+        saveToCache(appsDataStore);
+        showLoadingState(false);
+        const successfulApps = appsDataStore.filter(app => !app.error).length;
+        if (appsDataStore.length > 0) {
+            if (successfulApps === appsDataStore.length) {
+                updateStatus(`Gallery updated with ${appsDataStore.length} apps.`, false);
+            } else {
+                updateStatus(`Gallery updated. ${successfulApps} of ${appsDataStore.length} apps processed successfully.`, false);
+            }
+        } else {
+            updateStatus("No apps could be processed.", true);
+        }
+        refreshCacheButton.style.display = 'block';
+      }
+
+      function handleRefreshCache() {
+        updateStatus("Refreshing gallery from source...", false);
+        fetchAndProcessApps(true);
+      }
+
+      function initGallery() {
+        currentYearElement.textContent = new Date().getFullYear();
+        refreshCacheButton.addEventListener('click', handleRefreshCache);
+
+        const cachedApps = loadFromCache();
+        if (cachedApps && cachedApps.length > 0) {
+          appsDataStore = cachedApps;
+          renderGallery(appsDataStore);
+          let cacheTimestamp = Date.now();
+          try {
+            const cacheData = JSON.parse(localStorage.getItem(CACHE_KEY));
+            if (cacheData && cacheData.timestamp) {
+                 cacheTimestamp = cacheData.timestamp;
+            }
+          } catch(e) { /* use default now */ }
+          const cacheDate = new Date(cacheTimestamp);
+          updateStatus(`Displaying ${appsDataStore.length} apps from cache (last refreshed: ${cacheDate.toLocaleString()}).`, false);
+          showLoadingState(false);
+          refreshCacheButton.style.display = 'block';
+        } else {
+          fetchAndProcessApps();
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', initGallery);
+
+    })();
+  </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>
