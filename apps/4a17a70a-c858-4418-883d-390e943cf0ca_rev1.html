@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat's off to You - Cat Cafe Paris</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: sans-serif;
+            color: #212529;
+            background-color: #f8f9fa;
+            padding-top: 56px;
+            scroll-padding-top: 56px;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0,0,0,.08);
+        }
+
+        .hero-section {
+            background: url('/generated_images/dalle_02e82fbd-c03.png') no-repeat center center/cover;
+            color: #fff;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+
+        .hero-content {
+            background-color: rgba(0, 0, 0, 0.4);
+            padding: 2rem;
+            border-radius: 8px;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            color: #343a40;
+        }
+
+        .cat-gallery img {
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            object-fit: cover;
+            height: 250px; /* Slightly increased height for better visual */
+            width: 100%; /* Ensure images fill card width */
+        }
+
+        .cat-gallery img:hover {
+            transform: scale(1.03); /* Subtle scale */
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15); /* More prominent shadow */
+        }
+
+        .cat-gallery .card {
+            background-color: #ffffff;
+            border: 1px solid #dee2e6;
+            transition: box-shadow 0.2s ease-in-out;
+        }
+
+         .cat-gallery .card:hover {
+             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+         }
+
+        .cat-gallery .card-title {
+             color: #495057;
+             font-weight: bold;
+        }
+
+        .footer {
+            background-color: #e9ecef;
+            color: #495057;
+        }
+
+        .footer a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .social-icons a {
+            font-size: 1.5rem;
+            margin: 0 0.5rem;
+        }
+
+        .social-icons a:hover {
+            opacity: 0.8;
+        }
+
+        .social-icons i {
+            color: #495057; /* Muted icon color */
+        }
+
+        .form-control:focus {
+            border-color: #86b7fe;
+            outline: 0;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        .btn-primary {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+            transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+        }
+
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+        }
+
+        .btn-secondary {
+             background-color: #6c757d;
+             border-color: #6c757d;
+             transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+        }
+
+        .btn-secondary:hover {
+             background-color: #5c636a;
+             border-color: #565e64;
+        }
+
+        .modal-content {
+            background-color: #ffffff;
+            color: #212529;
+        }
+
+        .modal-header {
+            border-bottom-color: #dee2e6;
+        }
+
+        .modal-footer {
+            border-top-color: #dee2e6;
+        }
+
+         section {
+            padding-top: 4rem;
+            padding-bottom: 4rem;
+         }
+
+         @media (min-width: 992px) {
+             body {
+                 padding-top: 66px; /* Adjust for larger navbar */
+                 scroll-padding-top: 66px;
+             }
+         }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top py-3">
+            <div class="container-fluid container-lg">
+                <a class="navbar-brand fw-bold" href="#home">Cat's off to You</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#about">About</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#cats">Cats</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#menu">Menu</a>
+                        </li>
+                         <li class="nav-item">
+                            <a class="nav-link" href="#rules">Rules</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#visit">Visit Us</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#contact">Contact</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="home" class="hero-section vh-100 d-flex align-items-center justify-content-center text-center">
+            <div class="hero-content">
+                <h1 class="display-4 fw-bold">Cat's off to You</h1>
+                <p class="lead">Experience the purrfect Parisian escape</p>
+            </div>
+        </section>
+
+        <section id="about" class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 text-center">
+                    <h2>About Our Cafe</h2>
+                    <p>Welcome to Cat's off to You, Paris's premier destination for coffee, pastries, and purrs! Nestled in a cozy corner with a view of the city, our cafe offers a unique experience where you can relax, work, or socialize in the company of our lovely resident felines. We are dedicated to providing a comfortable and safe environment for both our human and animal guests.</p>
+                     <p>Our cats are rescues, carefully selected for their friendly temperaments, and they are the heart of our cafe. Each visit helps support their well-being and provides them with a loving home until they potentially find their forever family (some are available for adoption!). Come, sip a latte, enjoy a croissant, and let the stress melt away with a gentle purr.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="cats" class="container cat-gallery">
+            <h2 class="text-center mb-5">Meet Our Cats</h2>
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+                 <div class="col">
+                    <div class="card h-100 text-center" data-cat-id="ginger">
+                        <img src="/generated_images/dalle_a8462876-0e8.png" class="card-img-top img-fluid rounded" alt="Fluffy ginger cat lounging">
+                        <div class="card-body">
+                            <h5 class="card-title">Ginger</h5>
+                        </div>
+                    </div>
+                </div>
+                 <div class="col">
+                    <div class="card h-100 text-center" data-cat-id="shadow">
+                        <img src="/generated_images/dalle_99e1468a-2af.png" class="card-img-top img-fluid rounded" alt="Sleek black cat looking curious">
+                        <div class="card-body">
+                            <h5 class="card-title">Shadow</h5>
+                        </div>
+                    </div>
+                </div>
+                 <div class="col">
+                    <div class="card h-100 text-center" data-cat-id="stripes">
+                        <img src="/generated_images/dalle_83aa120c-c74.png" class="card-img-top img-fluid rounded" alt="Striped tabby cat sitting elegantly">
+                        <div class="card-body">
+                            <h5 class="card-title">Stripes</h5>
+                        </div>
+                    </div>
+                </div>
+                 <div class="col">
+                    <div class="card h-100 text-center" data-cat-id="snow">
+                        <img src="/generated_images/dalle_f01ed70e-987.png" class="card-img-top img-fluid rounded" alt="White cat with blue eyes curled up asleep">
+                        <div class="card-body">
+                            <h5 class="card-title">Snow</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="menu" class="container">
+            <h2 class="text-center mb-5">Our Menu</h2>
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Drinks</h5>
+                            <ul>
+                                <li>Espresso - €2.50</li>
+                                <li>Cappuccino - €3.50</li>
+                                <li>Latte - €3.80</li>
+                                <li>Tea Selection - €3.00</li>
+                                <li>Fresh Juice - €4.00</li>
+                            </ul>
+                             <h5 class="card-title mt-4">Pastries & Snacks</h5>
+                            <ul>
+                                <li>Croissant - €2.00</li>
+                                <li>Pain au Chocolat - €2.20</li>
+                                <li>Macarons (selection) - €1.50 each</li>
+                                <li>Assorted Cookies - €1.80</li>
+                                <li>Sandwiches (placeholder) - €6.00</li>
+                            </ul>
+                             <p class="card-text text-muted small">Menu items and prices are subject to change.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+         <section id="rules" class="container">
+            <h2 class="text-center mb-5">Cat Cafe Etiquette</h2>
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <p class="card-text">To ensure a pleasant experience for both our human and feline friends, please observe the following rules:</p>
+                            <ul>
+                                <li>Always approach cats slowly and let them come to you.</li>
+                                <li>Do not pick up cats unless they initiate contact and seem comfortable.</li>
+                                <li>Avoid waking a sleeping cat. Let them rest!</li>
+                                <li>Do not feed the cats human food. We provide approved treats you can purchase.</li>
+                                <li>Supervise children closely and ensure they interact gently.</li>
+                                <li>Flash photography is discouraged as it can startle the cats.</li>
+                                <li>Sanitize your hands upon entering and leaving the cat area.</li>
+                                <li>If a cat is hiding or seems stressed, give them space.</li>
+                            </ul>
+                            <p class="card-text">Thank you for helping us maintain a calm and happy environment for our resident cats!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <section id="visit" class="container">
+            <h2 class="text-center mb-5">Visit Us</h2>
+            <div class="row justify-content-center">
+                <div class="col-lg-8 text-center">
+                    <p>Find us in the heart of Paris!</p>
+                    <address>
+                        <strong>Cat's off to You</strong><br>
+                        123 Rue des Chats Heureux<br>
+                        75001 Paris<br>
+                        France
+                    </address>
+                    <p><strong>Operating Hours:</strong></p>
+                    <p>Tuesday - Sunday: 10:00 AM - 7:00 PM<br>Monday: Closed</p>
+                    <p><strong>Phone:</strong> +33 1 23 45 67 89</p>
+                    <p><strong>Email:</strong> info@catsofftoyou.paris</p>
+                    <p class="text-muted small">Reservations are recommended, especially on weekends.</p>
+                    <p><a href="https://maps.google.com/?q=Cat+Cafe+Paris" target="_blank">View on Map</a></p>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="container">
+            <h2 class="text-center mb-5">Get in Touch</h2>
+            <div class="row justify-content-center">
+                <div class="col-lg-6">
+                    <form id="contactForm">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email address</label>
+                            <input type="email" class="form-control" id="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Message</label>
+                            <textarea class="form-control" id="message" rows="4" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send Message</button>
+                    </form>
+                     <div id="formSuccessMessage" class="alert alert-success mt-3 d-none" role="alert">
+                        Thank you for your message! We'll get back to you shortly. (Data logged to console)
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer mt-auto py-4 text-center">
+        <div class="container">
+            <p class="mb-2">&copy; 2025 Cat's off to You. All rights reserved.</p>
+            <div class="social-icons">
+                <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <div class="modal fade" id="catModal" tabindex="-1" aria-labelledby="catModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="catModalLabel">Cat Name</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-center">
+            <img id="modalCatImage" src="" class="img-fluid mb-3 rounded" alt="Cat Image">
+            <p id="modalCatDescription">Cat description goes here.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            document.querySelectorAll('nav a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+
+            const cats = [
+                {
+                    id: 'ginger',
+                    name: 'Ginger',
+                    image: '/generated_images/dalle_a8462876-0e8.png',
+                    description: 'Ginger is a fluffy, friendly cat who loves lounging in sunbeams and receiving gentle pets. He enjoys naps and occasional playtime with a feather wand.'
+                },
+                {
+                    id: 'shadow',
+                    name: 'Shadow',
+                    image: '/generated_images/dalle_99e1468a-2af.png',
+                    description: 'Shadow is a sleek and curious black cat. He\'s a bit shy at first but becomes very affectionate once he trusts you. His favorite spot is a cozy corner where he can observe everything.'
+                },
+                 {
+                    id: 'stripes',
+                    name: 'Stripes',
+                    image: '/generated_images/dalle_83aa120c-c74.png',
+                    description: 'Stripes is an elegant tabby cat known for his calm demeanor. He enjoys sitting on tabletops, observing the cafe buzz, and occasionally accepting a chin scratch.'
+                },
+                 {
+                    id: 'snow',
+                    name: 'Snow',
+                    image: '/generated_images/dalle_f01ed70e-987.png',
+                    description: 'Snow is a beautiful white cat with striking blue eyes. She is often found curled up asleep in the most comfortable spots. Approach her quietly when she\'s awake for a gentle interaction.'
+                }
+            ];
+
+            const catModalElement = document.getElementById('catModal');
+            if (catModalElement) {
+                const catModal = new bootstrap.Modal(catModalElement);
+                const modalCatLabel = document.getElementById('catModalLabel');
+                const modalCatImage = document.getElementById('modalCatImage');
+                const modalCatDescription = document.getElementById('modalCatDescription');
+
+                document.querySelectorAll('.cat-gallery .card').forEach(card => {
+                    card.addEventListener('click', function() {
+                        const catId = this.dataset.catId;
+                        const cat = cats.find(c => c.id === catId);
+
+                        if (cat) {
+                            modalCatLabel.textContent = cat.name;
+                            modalCatImage.src = cat.image;
+                            modalCatImage.alt = cat.name + ' image';
+                            modalCatDescription.textContent = cat.description;
+                            catModal.show();
+                        } else {
+                            console.error('Cat data not found for ID:', catId);
+                        }
+                    });
+                });
+            } else {
+                 console.error("Cat modal element not found.");
+            }
+
+
+            const contactForm = document.getElementById('contactForm');
+            const formSuccessMessage = document.getElementById('formSuccessMessage');
+
+            if (contactForm && formSuccessMessage) {
+                contactForm.addEventListener('submit', function(event) {
+                    event.preventDefault();
+
+                    const name = document.getElementById('name').value;
+                    const email = document.getElementById('email').value;
+                    const message = document.getElementById('message').value;
+
+                    console.log('Form submitted:', {
+                        name: name,
+                        email: email,
+                        message: message
+                    });
+
+                    contactForm.reset();
+                    formSuccessMessage.classList.remove('d-none');
+
+                    setTimeout(() => {
+                        formSuccessMessage.classList.add('d-none');
+                    }, 5000);
+                });
+            } else {
+                 console.error("Contact form or success message element not found.");
+            }
+        });
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

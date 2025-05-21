@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AppGen Idea Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            min-height: 100vh;
+            background-color: #1a202c; /* Dark theme background */
+            color: #e2e8f0; /* Light text */
+        }
+
+        .container {
+            max-width: 960px; /* Limit container width for readability */
+        }
+
+        .card {
+            border-color: rgba(255, 255, 255, 0.15);
+            background-color: #2d3748; /* Darker card background */
+            color: #e2e8f0;
+        }
+
+        .card-header {
+            border-bottom-color: rgba(255, 255, 255, 0.15);
+            background-color: #212935; /* Even darker header background */
+        }
+
+        .form-control, .form-select {
+            background-color: #4a5568; /* Darker input background */
+            color: #e2e8f0; /* Light input text */
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .form-control:focus, .form-select:focus {
+             background-color: #4a5568; /* Maintain dark background on focus */
+             color: #e2e8f0;
+             border-color: #63b3ed; /* Bootstrap primary blue equivalent */
+             box-shadow: 0 0 0 0.25rem rgba(99, 179, 237, 0.25); /* Focus ring */
+        }
+
+         /* Explicitly style select options for dark theme consistency */
+         .form-select option {
+             background-color: #4a5568;
+             color: #e2e8f0;
+         }
+
+        .btn-primary {
+            background-color: #4299e1; /* Bootstrap primary blue equivalent */
+            border-color: #4299e1;
+        }
+
+        .btn-primary:hover {
+            background-color: #63b3ed; /* Lighter blue on hover */
+            border-color: #63b3ed;
+        }
+
+         .btn-primary:focus {
+             box-shadow: 0 0 0 0.25rem rgba(66, 153, 225, 0.5); /* Darker focus ring */
+         }
+
+        .btn-secondary {
+            background-color: #718096; /* Bootstrap secondary gray equivalent */
+            border-color: #718096;
+            color: #e2e8f0;
+        }
+
+         .btn-secondary:hover {
+             background-color: #a0aec0; /* Lighter gray on hover */
+             border-color: #a0aec0;
+         }
+
+        #promptOutput {
+            background-color: #1a202c; /* Match body background for code block feel */
+            padding: 1rem;
+            border-radius: 0.25rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace; /* Monospace font for code-like output */
+             color: #a0aec0; /* Muted text color for code block */
+        }
+
+        #generateBtn .spinner-border {
+            vertical-align: text-bottom;
+        }
+
+        /* Bootstrap's built-in dark theme alert-danger is usually sufficient when data-bs-theme="dark" is on html/body */
+        /* Removed custom alert-danger styles to rely on Bootstrap defaults */
+
+    </style>
+</head>
+<body class="text-bg-dark">
+    <div class="container py-4">
+        <header class="text-center mb-4">
+            <h1 class="display-5">AppGen Prompt Idea Generator</h1>
+            <p class="lead">Get creative ideas for your next applet using the AppGen system.</p>
+        </header>
+
+        <main>
+            <div class="card mb-4">
+                <div class="card-header">Generate an Idea</div>
+                <div class="card-body">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="appTypeSelect" class="form-label">App Type Hint (Optional)</label>
+                            <select id="appTypeSelect" class="form-select">
+                                <option value="">Any</option>
+                                <option value="Game">Game</option>
+                                <option value="Utility">Utility</option>
+                                <option value="Data Visualization">Data Visualization</option>
+                                <option value="Educational">Educational</option>
+                                <option value="Creative Tool">Creative Tool</option>
+                                <option value="Simulation">Simulation</option>
+                                <option value="Interactive Story">Interactive Story</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="keywordsInput" class="form-label">Keywords / Constraints (Optional)</label>
+                            <input type="text" id="keywordsInput" class="form-control" placeholder="e.g., 'space theme', 'pixel art', 'todo list'">
+                        </div>
+                    </div>
+
+                    <button id="generateBtn" class="btn btn-primary w-100">
+                        Get Idea
+                        <span id="loadingSpinner" class="spinner-border spinner-border-sm d-none ms-2" role="status" aria-hidden="true"></span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="resultCard" class="card d-none">
+                 <div class="card-header d-flex justify-content-between align-items-center">
+                    Generated Prompt Idea
+                    <button id="copyBtn" class="btn btn-sm btn-secondary">Copy</button>
+                 </div>
+                <div class="card-body">
+                    <pre id="promptOutput" class="text-white-50"></pre>
+                </div>
+            </div>
+
+             <div id="errorAlert" class="alert alert-danger d-none mt-4" role="alert">
+                An error occurred while generating the idea. Please try again.
+             </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const generateBtn = document.getElementById('generateBtn');
+            const appTypeSelect = document.getElementById('appTypeSelect');
+            const keywordsInput = document.getElementById('keywordsInput');
+            const promptOutput = document.getElementById('promptOutput');
+            const resultCard = document.getElementById('resultCard');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const copyBtn = document.getElementById('copyBtn');
+            const errorAlert = document.getElementById('errorAlert');
+
+            let isLoading = false;
+
+            generateBtn.addEventListener('click', generatePromptIdea);
+            copyBtn.addEventListener('click', copyPrompt);
+
+            async function generatePromptIdea() {
+                if (isLoading) return;
+
+                isLoading = true;
+                generateBtn.disabled = true;
+                loadingSpinner.classList.remove('d-none');
+                resultCard.classList.add('d-none');
+                errorAlert.classList.add('d-none');
+
+                const appType = appTypeSelect.value;
+                const keywords = keywordsInput.value.trim();
+
+                let msgForAi = "Generate a detailed, ambitious, and creative appgen prompt idea for a single-file HTML applet. The prompt should include App Type Hint, Image Generation Mode (assuming DALLE3 unless specified), Target Style Preferences (Theme: dark, CSS Framework: bootstrap, JS Structure: vanilla), Project Title, and a detailed description of the app's features, user experience, and potential 'wow' factors. ";
+
+                if (appType) {
+                    msgForAi += `Focus on a "${appType}" app. `;
+                } else {
+                     msgForAi += `Suggest a suitable App Type Hint. `;
+                }
+
+                if (keywords) {
+                    msgForAi += `Consider incorporating the following keywords/themes: "${keywords}". `;
+                }
+
+                msgForAi += "Ensure the idea is suitable for a single-file HTML applet and is presented in the exact format expected by the appgen system, starting with 'Project Title:' and ending after the app description. Provide only the prompt text, no other commentary.";
+
+                const payload = {
+                    aiguide: "You are an expert AI Software Architect and Project Planner. Your task is to design highly detailed and creative prompt ideas suitable for generating ambitious web applets using the appgen system. Think outside the box and propose interesting features. Adhere strictly to the requested format.",
+                    msgforai: msgForAi,
+                     llmSettings: {
+                        temperature: 0.8,
+                        model: "gemini-1.5-flash-latest"
+                    }
+                };
+
+                try {
+                    const response = await fetch('/api/ai', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(payload),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        promptOutput.textContent = data.response.trim();
+                        resultCard.classList.remove('d-none');
+                    } else {
+                        console.error('API Error:', data.error);
+                        errorAlert.textContent = `API Error: ${data.error || 'Unknown error'}`;
+                        errorAlert.classList.remove('d-none');
+                    }
+
+                } catch (error) {
+                    console.error('Fetch Error:', error);
+                    errorAlert.textContent = 'Failed to connect to the API or an unexpected error occurred. Please check your network and try again.';
+                    errorAlert.classList.remove('d-none');
+                } finally {
+                    isLoading = false;
+                    generateBtn.disabled = false;
+                    loadingSpinner.classList.add('d-none');
+                }
+            }
+
+            function copyPrompt() {
+                const textToCopy = promptOutput.textContent;
+                if (!textToCopy) return;
+
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    const originalText = copyBtn.textContent;
+                    copyBtn.textContent = 'Copied!';
+                    setTimeout(() => {
+                        copyBtn.textContent = originalText;
+                    }, 1500);
+                }).catch(err => {
+                    console.error('Failed to copy text: ', err);
+                });
+            }
+        });
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

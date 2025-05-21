@@ -1,0 +1,9 @@
+{
+  "projectId": "f8d0182b-fc5f-456e-9ac8-5e107c73a521",
+  "revisionString": "2",
+  "projectNameDisplay": "APPGEN APP",
+  "userPromptForThisRevision": "the end result should be a fully fledged idea that we bring back here and use as a prompt... but lets roll w this game idea its interesting. \r\n\r\nif you win it gives you the full prompt.   use all the diff possible variables (you can see them in these prompts) as possible upgrades.  start everyone with 1000 currency, and rate each ai response to each element out of 100.   add that total as currency for the user.   at the very bottom of the page make a new admin panel called GAME NOTES and print all log statements there as well as readme like notes. ",
+  "basedOnRevisionString": "1",
+  "savedAt": "2025-05-20T16:40:52.358Z",
+  "imageAssets": []
+}

@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Snake Arena</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            background-color: #f8f9fa;
+        }
+        #game-ui-container {
+            max-width: 800px;
+            width: 100%;
+            z-index: 10;
+            flex-shrink: 0;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        #game-wrapper {
+            position: relative;
+            background-color: #343a40;
+            box-shadow: 0 0 15px rgba(0,0,0,0.25);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
+            overflow: hidden;
+            width: 100%;
+        }
+        #gameCanvas {
+            display: block;
+            background-color: #e9ecef;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -webkit-crisp-edges;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            touch-action: none;
+        }
+        .score-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 1rem;
+        }
+        .score-item-name {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .score-item-swatch {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            border: 1px solid #adb5bd;
+            vertical-align: middle;
+        }
+        .player-score-item .score-item-name-text {
+            font-weight: bold;
+            color: var(--bs-primary);
+        }
+        #food-example-text {
+            font-weight: bold;
+            color: #dc3545;
+            background-size: 16px 16px;
+            background-repeat: no-repeat;
+            background-position: center left;
+            padding-left: 22px;
+            display: inline-block;
+            line-height: 1.5;
+            vertical-align: middle;
+        }
+        #scoreboard-container .card-body {
+            max-height: 180px;
+            overflow-y: auto;
+        }
+        #game-title { color: var(--bs-primary-text-emphasis); }
+        #game-subtitle { color: var(--bs-secondary-text-emphasis); }
+
+        .btn:hover, .btn:focus {
+            transform: translateY(-1px);
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075), 0 0.5rem 1rem rgba(var(--bs-primary-rgb), 0.15) !important;
+        }
+        .btn:active {
+            transform: translateY(0px);
+        }
+    </style>
+</head>
+<body class="pt-3">
+
+    <div id="game-ui-container" class="container text-center px-3">
+        <h1 id="game-title" class="my-2">AI Snake Arena</h1>
+        <p id="game-subtitle" class="text-muted mb-3">Watch the AI battle or jump in yourself!</p>
+
+        <div id="menu-area" class="my-3">
+            <button id="start-player-game-btn" class="btn btn-primary btn-lg m-1 shadow-sm">Play Now!</button>
+            <button id="watch-ai-btn" class="btn btn-secondary m-1 shadow-sm">Watch AI Spectacle</button>
+            <button id="instructions-btn" class="btn btn-info m-1 shadow-sm" data-bs-toggle="modal" data-bs-target="#instructionsModal">How to Play</button>
+        </div>
+
+        <div id="scoreboard-container" class="my-3 d-none">
+            <div class="card shadow-sm">
+                <div class="card-header fw-bold">Live Scores</div>
+                <div class="card-body p-0">
+                    <ul id="score-list" class="list-group list-group-flush">
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="game-wrapper">
+        <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <div class="modal fade" id="instructionsModal" tabindex="-1" aria-labelledby="instructionsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="instructionsModalLabel">How to Play</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Welcome to the AI Snake Arena!</p>
+                    <h6>Controls (when playing):</h6>
+                    <ul>
+                        <li>Use <strong>Arrow Keys</strong> (Up, Down, Left, Right)</li>
+                        <li>Or <strong>W, A, S, D</strong> keys</li>
+                    </ul>
+                    <h6>Objective:</h6>
+                    <p>Grow your snake by eating the <strong id="food-example-text">food items</strong>. Each item makes you longer.</p>
+                    <p>Avoid colliding with:
+                        <ul>
+                            <li>The arena walls.</li>
+                            <li>Your own snake's body.</li>
+                            <li>Other AI snakes.</li>
+                        </ul>
+                    </p>
+                    <p>In <strong>Spectacle Mode</strong> (default), watch the AI snakes compete. Click <strong>"Play Now!"</strong> to start your own game against AI opponents.</p>
+                    <p>The snake with the <img src="/generated_images/dalle_2aa3798c-f9c.png" alt="crown" style="width:18px; height:12px; vertical-align:text-bottom; margin: 0 2px;"> is the longest!</p>
+                    <p>Good luck, and may the longest snake win!</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got it!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="gameOverModal" tabindex="-1" aria-labelledby="gameOverModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="gameOverModalLabel">Game Over!</h5>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <h4>Your Final Length: <strong id="player-final-score" class="text-primary display-6">0</strong></h4>
+                    <p id="high-score-message" class="mt-2 fs-5"></p>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button id="play-again-btn" type="button" class="btn btn-success btn-lg mx-2">Play Again</button>
+                    <button id="back-to-spectacle-btn" type="button" class="btn btn-secondary mx-2">Watch AI Spectacle</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const GAME_CONFIG = {
+            GRID_CELL_SIZE: 20,
+            CANVAS_NATIVE_WIDTH: 800, 
+            CANVAS_NATIVE_HEIGHT: 600, 
+            INITIAL_GAME_SPEED_MS: 110, 
+            NUM_AI_SPECTACLE: 5, 
+            NUM_AI_PLAYER_MODE: 3,
+            SNAKE_COLORS: ['#dc3545', '#fd7e14', '#ffc107', '#20c997', '#0dcaf0', '#6f42c1', '#d63384', '#6610f2', '#28a745', '#17a2b8'],
+            PLAYER_SNAKE_COLOR: '#0d6efd', 
+            AI_NAMES: ["Byte Viper", "Pixel Python", "AlgoGator", "Script Serpent", "Looping Lizard", "Data Drake", "Quantum Boa", "Logic Leviathan", "Syntax Snake", "Vector Viper", "Bit Boa", "Cache Cobra", "Kernel Krait", "Recursive Rattler"],
+            FOOD_IMG_SRC: "/generated_images/dalle_810b379c-9b6.png",
+            CROWN_IMG_SRC: "/generated_images/dalle_2aa3798c-f9c.png",
+            PARTICLE_IMG_SRC: "/generated_images/dalle_e1c751b6-684.png",
+            FOOD_FALLBACK_COLOR: '#dc3545', 
+            PARTICLE_FALLBACK_COLORS: ['#ffc107', '#fd7e14', '#dc3545', '#20c997', '#0dcaf0'],
+            MAX_PARTICLES: 150,
+            INITIAL_SNAKE_LENGTH: 3,
+            HIGH_SCORE_KEY: 'aiSnakeArenaHighScore_v1.1', 
+            MAX_DELTA_TIME_MS: 100, 
+        };
+
+        let canvas, ctx;
+        let gameState = {};
+        let images = { food: null, crown: null, particle: null };
+        let gameOverModalInstance, instructionsModalInstance;
+        let playerInputBuffer = null;
+
+        const GRID_WIDTH = GAME_CONFIG.CANVAS_NATIVE_WIDTH / GAME_CONFIG.GRID_CELL_SIZE;
+        const GRID_HEIGHT = GAME_CONFIG.CANVAS_NATIVE_HEIGHT / GAME_CONFIG.GRID_CELL_SIZE;
+
+        class Snake {
+            constructor(id, type, color, startX, startY, initialDirection, name = "Snake") {
+                this.id = id;
+                this.type = type;
+                this.color = color;
+                this.name = name;
+                this.body = [];
+                this.direction = initialDirection;
+                this.length = GAME_CONFIG.INITIAL_SNAKE_LENGTH;
+                this.isAlive = true;
+                this.score = this.length;
+                this.grewThisTick = false;
+
+                for (let i = 0; i < this.length; i++) {
+                    this.body.push({ x: startX - i * initialDirection.x, y: startY - i * initialDirection.y });
+                }
+            }
+
+            move() {
+                if (!this.isAlive) return;
+                const head = { ...this.body[0] };
+                head.x += this.direction.x;
+                head.y += this.direction.y;
+
+                this.body.unshift(head);
+                if (!this.grewThisTick) {
+                    this.body.pop();
+                } else {
+                    this.grewThisTick = false;
+                    this.length++;
+                    this.score = this.length;
+                }
+            }
+
+            grow() {
+                this.grewThisTick = true;
+            }
+
+            checkCollision(otherSnakes) {
+                if (!this.isAlive) return false;
+                const head = this.body[0];
+
+                if (head.x < 0 || head.x >= GRID_WIDTH || head.y < 0 || head.y >= GRID_HEIGHT) {
+                    this.isAlive = false;
+                    return true; 
+                }
+
+                for (let i = 1; i < this.body.length; i++) {
+                    if (head.x === this.body[i].x && head.y === this.body[i].y) {
+                        this.isAlive = false;
+                        return true; 
+                    }
+                }
+
+                for (const other of otherSnakes) {
+                    if (other.id === this.id || !other.isAlive) continue;
+                    
+                    if (head.x === other.body[0].x && head.y === other.body[0].y) {
+                         this.isAlive = false;
+                         other.isAlive = false; 
+                         createBurstParticles(head.x, head.y, 15, this.color, true);
+                         createBurstParticles(other.body[0].x, other.body[0].y, 15, other.color, true);
+                         return true;
+                    }
+                    for (let i = 0; i < other.body.length; i++) {
+                        if (head.x === other.body[i].x && head.y === other.body[i].y) {
+                            this.isAlive = false;
+                            createBurstParticles(head.x, head.y, 15, this.color, true);
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+            
+            updateAIDirection() {
+                if (!this.isAlive || this.type !== 'AI' || !gameState.food) return;
+            
+                const head = this.body[0];
+                const possibleMoves = [
+                    { dx: 0, dy: -1, name: 'UP' }, { dx: 0, dy: 1, name: 'DOWN' },
+                    { dx: -1, dy: 0, name: 'LEFT' }, { dx: 1, dy: 0, name: 'RIGHT' }
+                ];
+            
+                let bestMove = null;
+                let maxScore = -Infinity;
+            
+                const validMoves = possibleMoves.filter(move => 
+                    !(move.dx === -this.direction.x && move.dy === -this.direction.y) || this.length === 1
+                );
+            
+                for (const move of validMoves.length > 0 ? validMoves : [this.direction]) {
+                    const nextX = head.x + move.dx;
+                    const nextY = head.y + move.dy;
+                    let currentScore = 0;
+            
+                    let collisionRisk = false;
+                    if (nextX < 0 || nextX >= GRID_WIDTH || nextY < 0 || nextY >= GRID_HEIGHT) {
+                        collisionRisk = true; 
+                    }
+                    if (!collisionRisk) {
+                        for (let i = 0; i < this.body.length; i++) { 
+                            if (nextX === this.body[i].x && nextY === this.body[i].y) {
+                                collisionRisk = true; break;
+                            }
+                        }
+                    }
+                    if (!collisionRisk) {
+                        for (const other of gameState.snakes) {
+                            if (!other.isAlive || other.id === this.id) continue;
+                            for (let i = 0; i < other.body.length; i++) {
+                                if (nextX === other.body[i].x && nextY === other.body[i].y) {
+                                    collisionRisk = true; break;
+                                }
+                            }
+                            if (collisionRisk) break;
+                        }
+                    }
+            
+                    if (collisionRisk) {
+                        currentScore = -1000; 
+                    } else {
+                        const distToFoodX = gameState.food.x - nextX;
+                        const distToFoodY = gameState.food.y - nextY;
+                        currentScore = 200 - (Math.sqrt(distToFoodX*distToFoodX + distToFoodY*distToFoodY)); 
+                        
+                        if (move.dx === this.direction.x && move.dy === this.direction.y) {
+                            currentScore += 20; 
+                        }
+                        currentScore += Math.random() * 15; // Increased randomness for AI variety
+                    }
+            
+                    if (currentScore > maxScore) {
+                        maxScore = currentScore;
+                        bestMove = move;
+                    }
+                }
+            
+                if (bestMove) {
+                    this.direction = { x: bestMove.dx, y: bestMove.dy };
+                } else if (validMoves.length > 0) { 
+                    const fallbackMove = validMoves[Math.floor(Math.random() * validMoves.length)];
+                    this.direction = { x: fallbackMove.dx, y: fallbackMove.dy };
+                }
+            }
+
+            draw(ctx) {
+                if (!this.isAlive && this.type !== 'PLAYER') return; 
+                if (!this.isAlive && this.type === 'PLAYER') ctx.globalAlpha = 0.5; 
+                
+                ctx.fillStyle = this.color;
+                this.body.forEach((segment, index) => {
+                    ctx.fillRect(
+                        segment.x * GAME_CONFIG.GRID_CELL_SIZE,
+                        segment.y * GAME_CONFIG.GRID_CELL_SIZE,
+                        GAME_CONFIG.GRID_CELL_SIZE -1, GAME_CONFIG.GRID_CELL_SIZE -1 
+                    );
+                    if (index === 0 && this.isAlive && this.id === gameState.longestSnakeId && images.crown) {
+                        try {
+                             ctx.drawImage(images.crown, 
+                                segment.x * GAME_CONFIG.GRID_CELL_SIZE + (GAME_CONFIG.GRID_CELL_SIZE - 18) / 2, 
+                                segment.y * GAME_CONFIG.GRID_CELL_SIZE - 12 - 3, // 18x12 crown, 3px gap above
+                                18, 12);
+                        } catch (e) { /* Error drawing crown */ }
+                    }
+                });
+                ctx.globalAlpha = 1.0; 
+            }
+        }
+
+        class Particle {
+            constructor(x, y, color, size, image = null) {
+                this.x = x * GAME_CONFIG.GRID_CELL_SIZE + Math.random() * GAME_CONFIG.GRID_CELL_SIZE;
+                this.y = y * GAME_CONFIG.GRID_CELL_SIZE + Math.random() * GAME_CONFIG.GRID_CELL_SIZE;
+                this.size = size || (Math.random() * 6 + 3);
+                this.color = color || GAME_CONFIG.PARTICLE_FALLBACK_COLORS[Math.floor(Math.random() * GAME_CONFIG.PARTICLE_FALLBACK_COLORS.length)];
+                this.image = image;
+                this.life = 1.0; 
+                this.vx = (Math.random() - 0.5) * 5;
+                this.vy = (Math.random() - 0.5) * 5 - 2; 
+                this.gravity = 0.15;
+                this.rotation = Math.random() * Math.PI * 2;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.2;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vy += this.gravity;
+                this.rotation += this.rotationSpeed;
+                this.life -= 0.025; 
+                this.size *= 0.98; 
+                if (this.size < 1) this.life = 0;
+            }
+
+            draw(ctx) {
+                if (this.life <= 0) return;
+                ctx.save();
+                ctx.globalAlpha = this.life > 0 ? Math.max(0, this.life) : 0;
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                
+                if (this.image) {
+                    try {
+                        ctx.drawImage(this.image, -this.size / 2, -this.size / 2, this.size, this.size);
+                    } catch(e) { this.drawFallback(ctx); }
+                } else {
+                   this.drawFallback(ctx);
+                }
+                ctx.restore();
+            }
+            drawFallback(ctx) {
+                ctx.fillStyle = this.color;
+                ctx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
+            }
+        }
+
+        function initApp() {
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+            canvas.width = GAME_CONFIG.CANVAS_NATIVE_WIDTH;
+            canvas.height = GAME_CONFIG.CANVAS_NATIVE_HEIGHT;
+            ctx.imageSmoothingEnabled = false;
+
+            instructionsModalInstance = new bootstrap.Modal(document.getElementById('instructionsModal'));
+            gameOverModalInstance = new bootstrap.Modal(document.getElementById('gameOverModal'));
+            
+            document.getElementById('start-player-game-btn').addEventListener('click', () => startGame('PLAYER_PLAYING'));
+            document.getElementById('watch-ai-btn').addEventListener('click', () => startGame('SPECTACLE'));
+            document.getElementById('play-again-btn').addEventListener('click', () => {
+                gameOverModalInstance.hide();
+                startGame('PLAYER_PLAYING');
+            });
+            document.getElementById('back-to-spectacle-btn').addEventListener('click', () => {
+                gameOverModalInstance.hide();
+                startGame('SPECTACLE');
+            });
+            
+            window.addEventListener('keydown', handleKeyDown);
+            window.addEventListener('resize', resizeGameViewport);
+            
+            loadImages([
+                { name: 'food', src: GAME_CONFIG.FOOD_IMG_SRC },
+                { name: 'crown', src: GAME_CONFIG.CROWN_IMG_SRC },
+                { name: 'particle', src: GAME_CONFIG.PARTICLE_IMG_SRC }
+            ]).then(() => {
+                if (images.food) {
+                    document.getElementById('food-example-text').style.backgroundImage = `url(${GAME_CONFIG.FOOD_IMG_SRC})`;
+                }
+                resizeGameViewport();
+                startGame('SPECTACLE');
+            }).catch(error => {
+                console.error("Image loading error, starting with fallbacks:", error);
+                resizeGameViewport();
+                startGame('SPECTACLE');
+            });
+        }
+
+        function loadImages(imageSources) {
+            let loadedCount = 0;
+            const numImages = imageSources.length;
+            return new Promise((resolve, reject) => {
+                if (numImages === 0) { resolve(); return; }
+                imageSources.forEach(imgSrc => {
+                    const img = new Image();
+                    img.onload = () => {
+                        images[imgSrc.name] = img;
+                        loadedCount++;
+                        if (loadedCount === numImages) resolve();
+                    };
+                    img.onerror = () => {
+                        images[imgSrc.name] = null; 
+                        loadedCount++; 
+                        if (loadedCount === numImages) resolve(); 
+                    };
+                    img.src = imgSrc.src;
+                });
+            });
+        }
+        
+        function startGame(mode) {
+            if (gameState.gameTickId) {
+                cancelAnimationFrame(gameState.gameTickId);
+            }
+            playerInputBuffer = null;
+
+            gameState = {
+                mode: mode,
+                snakes: [],
+                food: null,
+                particles: [],
+                gameSpeedMs: GAME_CONFIG.INITIAL_GAME_SPEED_MS,
+                playerScore: 0,
+                playerHighScore: parseInt(localStorage.getItem(GAME_CONFIG.HIGH_SCORE_KEY)) || 0,
+                gameTickId: null,
+                isPaused: false,
+                lastTickTime: 0,
+                accumulatedTime: 0,
+                longestSnakeId: null,
+                playerSnake: null,
+            };
+
+            const numAIs = mode === 'PLAYER_PLAYING' ? GAME_CONFIG.NUM_AI_PLAYER_MODE : GAME_CONFIG.NUM_AI_SPECTACLE;
+            const availableColors = [...GAME_CONFIG.SNAKE_COLORS].sort(() => 0.5 - Math.random());
+            const availableNames = [...GAME_CONFIG.AI_NAMES].sort(() => 0.5 - Math.random());
+
+            if (mode === 'PLAYER_PLAYING') {
+                const playerColor = GAME_CONFIG.PLAYER_SNAKE_COLOR;
+                const playerStartPos = getRandomEmptyPosition([]);
+                const playerInitialDir = getRandomDirection();
+                if (playerStartPos) {
+                    gameState.playerSnake = new Snake('player', 'PLAYER', playerColor, playerStartPos.x, playerStartPos.y, playerInitialDir, "You");
+                    gameState.snakes.push(gameState.playerSnake);
+                } else {
+                    console.error("No space for player snake!"); // Should not happen on empty board
+                    return; // Cannot start game
+                }
+                
+                const playerColorIndex = availableColors.indexOf(playerColor);
+                if (playerColorIndex > -1) availableColors.splice(playerColorIndex, 1);
+            }
+
+            for (let i = 0; i < numAIs; i++) {
+                const aiColor = availableColors.length > 0 ? availableColors.shift() : getRandomColor(); // Use shift for more variety if many AIs
+                const aiStartPos = getRandomEmptyPosition(gameState.snakes);
+                if (!aiStartPos) continue; 
+                const aiInitialDir = getRandomDirection();
+                const aiName = availableNames.length > 0 ? availableNames.shift() : `AI Snake ${i + 1}`;
+                gameState.snakes.push(new Snake(`ai_${i}`, 'AI', aiColor, aiStartPos.x, aiStartPos.y, aiInitialDir, aiName));
+            }
+            
+            spawnFood();
+            updateLongestSnake();
+
+            document.getElementById('scoreboard-container').classList.remove('d-none');
+            if (mode === 'PLAYER_PLAYING') {
+                 document.getElementById('menu-area').classList.add('d-none');
+            } else {
+                 document.getElementById('menu-area').classList.remove('d-none');
+            }
+
+            gameState.lastTickTime = performance.now();
+            gameLoop(gameState.lastTickTime);
+        }
+
+        function gameLoop(timestamp) {
+            const deltaTime = timestamp - gameState.lastTickTime;
+            gameState.lastTickTime = timestamp;
+            
+            const cappedDeltaTime = Math.min(deltaTime, GAME_CONFIG.MAX_DELTA_TIME_MS);
+            gameState.accumulatedTime += cappedDeltaTime;
+        
+            if (!gameState.isPaused) {
+                if (gameState.mode === 'PLAYER_PLAYING' && playerInputBuffer && gameState.playerSnake && gameState.playerSnake.isAlive) {
+                    const currentDir = gameState.playerSnake.direction;
+                    if (!(playerInputBuffer.x === -currentDir.x && playerInputBuffer.y === -currentDir.y) || gameState.playerSnake.length === 1) {
+                         gameState.playerSnake.direction = playerInputBuffer;
+                    }
+                    playerInputBuffer = null; 
+                }
+        
+                let updatesProcessed = 0;
+                while (gameState.accumulatedTime >= gameState.gameSpeedMs && updatesProcessed < 5) { 
+                    if (gameState.mode === 'GAME_OVER' && gameState.playerSnake && !gameState.playerSnake.isAlive) break;
+                    updateGameLogic();
+                    gameState.accumulatedTime -= gameState.gameSpeedMs;
+                    updatesProcessed++;
+                }
+            }
+        
+            renderGame();
+            gameState.gameTickId = requestAnimationFrame(gameLoop);
+        }
+        
+        function updateGameLogic() {
+            let activeSnakes = gameState.snakes.filter(s => s.isAlive);
+            activeSnakes.forEach(snake => {
+                if (snake.type === 'AI') snake.updateAIDirection();
+                snake.move();
+                if (snake.checkCollision(gameState.snakes)) { 
+                     if (snake.type === 'PLAYER') {
+                        handlePlayerGameOver();
+                     }
+                }
+            });
+
+            activeSnakes = gameState.snakes.filter(s => s.isAlive); 
+            activeSnakes.forEach(snake => {
+                if (gameState.food && snake.body[0].x === gameState.food.x && snake.body[0].y === gameState.food.y) {
+                    snake.grow();
+                    if (snake.type === 'PLAYER') gameState.playerScore = snake.length;
+                    createBurstParticles(gameState.food.x, gameState.food.y, 10, snake.color, true);
+                    spawnFood(); 
+                }
+            });
+            
+            updateLongestSnake();
+
+            gameState.particles = gameState.particles.filter(p => p.life > 0);
+            gameState.particles.forEach(p => p.update());
+
+            if (gameState.mode === 'SPECTACLE') {
+                const aliveAIs = gameState.snakes.filter(s => s.isAlive && s.type === 'AI').length;
+                if (aliveAIs <= 1 && gameState.snakes.length > 1) { 
+                    if (gameState.gameTickId) { // Clear previous timeout if any
+                        cancelAnimationFrame(gameState.gameTickId);
+                        gameState.gameTickId = null; 
+                    }
+                    setTimeout(() => {
+                        if (gameState.mode === 'SPECTACLE') startGame('SPECTACLE'); // Ensure still in spectacle mode
+                    }, 2000); 
+                }
+            }
+        }
+        
+        function renderGame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (gameState.food) {
+                if (images.food) {
+                    try {
+                        ctx.drawImage(images.food, gameState.food.x * GAME_CONFIG.GRID_CELL_SIZE, gameState.food.y * GAME_CONFIG.GRID_CELL_SIZE, GAME_CONFIG.GRID_CELL_SIZE, GAME_CONFIG.GRID_CELL_SIZE);
+                    } catch (e) { drawFallbackFood(); }
+                } else {
+                   drawFallbackFood();
+                }
+            }
+
+            gameState.snakes.forEach(snake => snake.draw(ctx));
+            gameState.particles.forEach(p => p.draw(ctx));
+            updateScoreboardDOM();
+        }
+
+        function drawFallbackFood() {
+            if (!gameState.food) return;
+            ctx.fillStyle = GAME_CONFIG.FOOD_FALLBACK_COLOR;
+            ctx.beginPath();
+            ctx.arc(
+                gameState.food.x * GAME_CONFIG.GRID_CELL_SIZE + GAME_CONFIG.GRID_CELL_SIZE / 2,
+                gameState.food.y * GAME_CONFIG.GRID_CELL_SIZE + GAME_CONFIG.GRID_CELL_SIZE / 2,
+                GAME_CONFIG.GRID_CELL_SIZE / 2 - 2, 0, Math.PI * 2
+            );
+            ctx.fill();
+        }
+
+        function handleKeyDown(event) {
+            if (!gameState.playerSnake || !gameState.playerSnake.isAlive || gameState.mode !== 'PLAYER_PLAYING') return;
+            
+            let newDirection = null;
+            switch (event.key.toLowerCase()) { 
+                case 'arrowup': case 'w': newDirection = { x: 0, y: -1 }; break;
+                case 'arrowdown': case 's': newDirection = { x: 0, y: 1 }; break;
+                case 'arrowleft': case 'a': newDirection = { x: -1, y: 0 }; break;
+                case 'arrowright': case 'd': newDirection = { x: 1, y: 0 }; break;
+                default: return;
+            }
+            event.preventDefault();
+            playerInputBuffer = newDirection; 
+        }
+
+        function spawnFood() {
+            let foodPos = getRandomEmptyPosition(gameState.snakes);
+            if (foodPos) {
+                gameState.food = foodPos;
+            } else {
+                gameState.food = null; 
+                if (gameState.mode === 'PLAYER_PLAYING' && gameState.playerSnake && gameState.playerSnake.isAlive) { 
+                    handlePlayerGameOver(true); 
+                } else if (gameState.mode === 'SPECTACLE') {
+                     if (gameState.gameTickId) {
+                        cancelAnimationFrame(gameState.gameTickId);
+                        gameState.gameTickId = null;
+                     }
+                     setTimeout(() => {
+                        if (gameState.mode === 'SPECTACLE') startGame('SPECTACLE');
+                    }, 1500);
+                }
+            }
+        }
+
+        function getRandomEmptyPosition(snakes) {
+            const occupied = new Set();
+            snakes.forEach(s => { if(s.isAlive || s.type === 'PLAYER') s.body.forEach(seg => occupied.add(`${seg.x},${seg.y}`)); });
+            if (gameState.food) occupied.add(`${gameState.food.x},${gameState.food.y}`);
+
+
+            const emptyCells = [];
+            for (let x = 0; x < GRID_WIDTH; x++) {
+                for (let y = 0; y < GRID_HEIGHT; y++) {
+                    if (!occupied.has(`${x},${y}`)) {
+                        emptyCells.push({ x, y });
+                    }
+                }
+            }
+            if (emptyCells.length === 0) return null;
+            return emptyCells[Math.floor(Math.random() * emptyCells.length)];
+        }
+        
+        function getRandomDirection() {
+            const dirs = [{x:0,y:-1},{x:0,y:1},{x:-1,y:0},{x:1,y:0}];
+            return dirs[Math.floor(Math.random() * dirs.length)];
+        }
+
+        function getRandomColor() {
+            const r = Math.floor(Math.random()*150) + 50; 
+            const g = Math.floor(Math.random()*150) + 50;
+            const b = Math.floor(Math.random()*150) + 50;
+            return `rgb(${r},${g},${b})`;
+        }
+
+        function handlePlayerGameOver(isWinDueToNoSpace = false) {
+            if (gameState.mode === 'GAME_OVER') return; // Already game over
+            gameState.mode = 'GAME_OVER';
+            if (gameState.playerSnake) gameState.playerSnake.isAlive = false; 
+            
+            document.getElementById('player-final-score').textContent = gameState.playerScore;
+            
+            if (isWinDueToNoSpace) {
+                 document.getElementById('gameOverModalLabel').textContent = "Board Cleared!";
+                 document.getElementById('high-score-message').innerHTML = `Amazing! You filled the board! <br>Final Length: <strong class="text-success">${gameState.playerScore}</strong>`;
+            } else {
+                document.getElementById('gameOverModalLabel').textContent = "Game Over!";
+                if (gameState.playerScore > gameState.playerHighScore) {
+                    gameState.playerHighScore = gameState.playerScore;
+                    localStorage.setItem(GAME_CONFIG.HIGH_SCORE_KEY, gameState.playerHighScore);
+                    document.getElementById('high-score-message').innerHTML = `🎉 New High Score: <strong class="text-warning">${gameState.playerHighScore}</strong>!`;
+                } else {
+                    document.getElementById('high-score-message').innerHTML = `High Score: ${gameState.playerHighScore}. Keep trying!`;
+                }
+            }
+            if (gameOverModalInstance) gameOverModalInstance.show();
+        }
+
+        function updateScoreboardDOM() {
+            const scoreList = document.getElementById('score-list');
+            scoreList.innerHTML = '';
+            
+            if (!gameState.snakes || gameState.snakes.length === 0) return;
+            
+            const sortedSnakes = [...gameState.snakes]
+                .filter(snake => snake.type === 'PLAYER' || (snake.type === 'AI' && snake.isAlive)) 
+                .sort((a, b) => b.score - a.score);
+
+            sortedSnakes.forEach(snake => {
+                const item = document.createElement('li');
+                item.className = 'list-group-item score-item';
+                if (snake.type === 'PLAYER') item.classList.add('player-score-item');
+                
+                if (!snake.isAlive && snake.type === 'PLAYER') {
+                    item.style.opacity = '0.7';
+                } else if (!snake.isAlive) { // Don't show dead AIs unless it's player mode and they just died
+                     if (gameState.mode !== 'PLAYER_PLAYING') return;
+                     item.style.opacity = '0.5'; // Show recently dead AIs in player mode slightly faded
+                }
+
+
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'score-item-name';
+                
+                const swatch = document.createElement('span');
+                swatch.className = 'score-item-swatch';
+                swatch.style.backgroundColor = snake.color;
+                nameSpan.appendChild(swatch);
+
+                const nameText = document.createElement('span');
+                nameText.className = 'score-item-name-text';
+                nameText.textContent = `${snake.name}${snake.isAlive && snake.id === gameState.longestSnakeId && images.crown ? ' 👑' : ''}`;
+                nameSpan.appendChild(nameText);
+                
+                const scoreBadge = document.createElement('span');
+                scoreBadge.className = `badge rounded-pill`;
+                scoreBadge.style.backgroundColor = snake.isAlive ? snake.color : '#6c757d';
+                scoreBadge.style.color = '#fff';
+                scoreBadge.textContent = snake.score;
+
+                item.appendChild(nameSpan);
+                item.appendChild(scoreBadge);
+                scoreList.appendChild(item);
+            });
+        }
+        
+        function updateLongestSnake() {
+            let longest = null;
+            let maxLength = 0;
+            gameState.snakes.forEach(snake => {
+                if (snake.isAlive && snake.length > maxLength) {
+                    maxLength = snake.length;
+                    longest = snake.id;
+                }
+            });
+            gameState.longestSnakeId = longest;
+        }
+
+        function createBurstParticles(gridX, gridY, count, baseColor, useParticleImage = false) {
+            if (gameState.particles.length > GAME_CONFIG.MAX_PARTICLES - count) { 
+                gameState.particles.splice(0, Math.max(0, gameState.particles.length - GAME_CONFIG.MAX_PARTICLES + count));
+            }
+            for (let i = 0; i < count; i++) {
+                const particleImg = useParticleImage && images.particle ? images.particle : null;
+                const color = baseColor || GAME_CONFIG.PARTICLE_FALLBACK_COLORS[Math.floor(Math.random() * GAME_CONFIG.PARTICLE_FALLBACK_COLORS.length)];
+                gameState.particles.push(new Particle(gridX, gridY, color, Math.random() * 8 + 4, particleImg));
+            }
+        }
+
+        function resizeGameViewport() {
+            const nativeWidth = GAME_CONFIG.CANVAS_NATIVE_WIDTH;
+            const nativeHeight = GAME_CONFIG.CANVAS_NATIVE_HEIGHT;
+            const nativeAspectRatio = nativeWidth / nativeHeight;
+
+            const gameWrapper = document.getElementById('game-wrapper');
+            
+            const availableWidth = gameWrapper.clientWidth;
+            const availableHeight = gameWrapper.clientHeight;
+
+            let scaledViewportWidth, scaledViewportHeight;
+
+            if (availableWidth / availableHeight > nativeAspectRatio) {
+                scaledViewportHeight = availableHeight;
+                scaledViewportWidth = scaledViewportHeight * nativeAspectRatio;
+            } else {
+                scaledViewportWidth = availableWidth;
+                scaledViewportHeight = scaledViewportWidth / nativeAspectRatio;
+            }
+            
+            canvas.style.width = Math.floor(scaledViewportWidth) + 'px';
+            canvas.style.height = Math.floor(scaledViewportHeight) + 'px';
+        }
+
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

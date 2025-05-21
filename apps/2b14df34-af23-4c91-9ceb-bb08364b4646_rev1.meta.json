@@ -1,0 +1,17 @@
+{
+  "projectId": "2b14df34-af23-4c91-9ceb-bb08364b4646",
+  "revisionString": "1",
+  "projectNameDisplay": "Chronoscape: A Surrealist Time-Traveling Photo Booth",
+  "userPromptForThisRevision": "Project Title:  Chronoscape: A Surrealist Time-Traveling Photo Booth\r\n\r\nApp Type Hint:  Experimental Narrative Generator\r\n\r\nImage Generation Mode: DALL-E 3\r\n\r\nTarget Style Preferences: Theme: dark, CSS Framework: bootstrap, JS Structure: vanilla\r\n\r\nApp Description: Chronoscape is a bizarre photo booth experience where users \"travel\" through subjective timelines represented by dynamically generated surrealist images.  The user begins by inputting a single word (e.g., \"melancholy,\" \"jubilee,\" \"abyss\"). This word is fed to the /api/ai endpoint to generate a short, evocative narrative snippet describing a specific moment in a surreal, anachronistic setting (e.g., \"A lone Victorian gentleman sips tea amidst a field of bioluminescent cacti, the moon a fractured mirror reflecting a forgotten city.\").  This narrative is then used to prompt DALL-E 3 to generate a unique image reflecting this surreal scene.  The user can then \"travel\" forward or backward in time by clicking buttons that subtly alter the narrative prompt (using /api/ai to add or subtract keywords like \"futuristic,\" \"ancient,\" \"dreamlike,\" etc.) resulting in a new DALL-E 3 image. Each image is displayed alongside the generated narrative.  A \"memory bank\" (a simple scrollable div) stores past generated images and narratives, creating a visual and textual timeline of the user's surreal journey.  The \"wow\" factor lies in the unpredictable combinations of narrative and imagery, the user's active participation in shaping the story, and the bizarre, often unsettling, beauty of the resulting surrealist art. The app should utilize bootstrap for layout and styling, ensuring responsiveness and a clean user interface despite the unconventional content. The entire app is contained within a single HTML file, leveraging vanilla Javascript for dynamic image generation and narrative manipulation.  The overall aesthetic should be dark and slightly unsettling, enhancing the surreal nature of the experience.",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-05-21T13:27:02.304Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/dalle_69d9b0b1-d0f.png",
+      "url": "/generated_images/dalle_69d9b0b1-d0f.png",
+      "description": "A mysterious, abstract placeholder image for a surreal photo booth. Dark tones (charcoal, deep indigo, hints of muted crimson), perhaps swirling cosmic dust, fractured geometric patterns like broken glass, or a dimly lit, empty old-fashioned photo booth interior with a faint, otherworldly glow emanating from within. Should evoke curiosity, enigma, and a slightly unsettling, dreamlike feeling. Square aspect ratio. The style should be painterly and textured, avoiding sharp digital lines. Mood is paramount: introspective and foreboding.",
+      "purpose": "Initial placeholder image in the main display area (`initialPlaceholderImage`) before any user generation, and as a fallback if dynamic image generation fails. It sets the initial dark and surreal tone of the application.",
+      "isNewlyGenerated": true
+    }
+  ]
+}

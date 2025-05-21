@@ -1,0 +1,31 @@
+{
+  "projectId": "97c91c89-4228-47d9-b352-4639b23e5841",
+  "revisionString": "3",
+  "projectNameDisplay": "IDEA",
+  "userPromptForThisRevision": "please make all new images for this app",
+  "basedOnRevisionString": "2",
+  "savedAt": "2025-05-21T13:06:13.873Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/dalle_0877d855-4a7.png",
+      "url": "/generated_images/dalle_0877d855-4a7.png",
+      "description": "A sophisticated, abstract background image suitable for a dark-themed tech application. Features subtle, glowing neural network patterns, interconnected nodes, and faint digital code streams in shades of deep blues (e.g., #0A2463), purples (e.g., #3E2F5B), and teals (e.g., #0D7377), with occasional bright cyan highlights (e.g., #14FFEC). The overall mood should be futuristic, innovative, and inspiring, without being overly cluttered or distracting. Optimized for a full-screen display. Avoid any discernible text.",
+      "purpose": "Main application background, providing a high-tech and creative ambiance. To be used in the #background-image CSS.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_4822bd02-38a.png",
+      "url": "/generated_images/dalle_4822bd02-38a.png",
+      "description": "A modern, minimalist logo icon for an 'AppGen Prompt Idea Generator'. The design should creatively combine an abstract representation of a sparking lightbulb (for ideas) with a subtly integrated, stylized letter 'A' or 'AG' (for AppGen). Colors should be primarily a vibrant light cyan (e.g., #14FFEC) or electric blue, designed for a transparent background to sit well on a dark theme. The logo must be clean, sharp, and instantly recognizable at a small size (target display height of 40px). Avoid overly complex details.",
+      "purpose": "Application logo icon to be used in the header for #logo img src.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_e344cba3-46d.png",
+      "url": "/generated_images/dalle_e344cba3-46d.png",
+      "description": "A sleek, modern settings gear icon. The gear should have a clean, slightly futuristic design. Color should be a light neutral gray (e.g., #B0B0B0 or #C0C0C0) to stand out on a dark button background (#718096) but remain harmonious with the overall dark theme. Ensure it has a transparent background. The icon must be crisp and clear when displayed at approximately 32x32 pixels. Avoid overly intricate details that would be lost at small scale.",
+      "purpose": "Icon for the settings button (#settingsButton img src), fitting a modern dark tech theme.",
+      "isNewlyGenerated": true
+    }
+  ]
+}

@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bella Italia - Authentic Italian Restaurant</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 56px;
+            background-color: #1a202c;
+            color: #e2e8f0;
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+        }
+
+        html {
+             scroll-padding-top: 56px;
+        }
+
+        .bg-image {
+            background-image: url('/generated_images/dalle_a57c21ae-e9d.png');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .bg-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.4);
+            z-index: 1;
+        }
+
+        .bg-image > * {
+            position: relative;
+            z-index: 2;
+        }
+
+        .menu-item h5, .deal-item h5 {
+            color: #f8f9fa;
+        }
+
+        .menu-item p, .deal-item p {
+            color: #ced4da;
+        }
+
+        .price {
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        .footer {
+            background-color: #2d3748;
+            color: #cbd5e0;
+        }
+
+        .navbar .navbar-nav .nav-link {
+            transition: color 0.3s ease-in-out;
+        }
+
+        .navbar .navbar-nav .nav-link:hover {
+            color: #0d6efd;
+        }
+
+         .btn-outline-light {
+            --bs-btn-color: #f8f9fa;
+            --bs-btn-border-color: #f8f9fa;
+            --bs-btn-hover-color: #000;
+            --bs-btn-hover-bg: #f8f9fa;
+            --bs-btn-hover-border-color: #f8f9fa;
+            --bs-btn-active-color: #000;
+            --bs-btn-active-bg: #f8f9fa;
+            --bs-btn-active-border-color: #f8f9fa;
+            --bs-btn-disabled-color: #f8f9fa;
+            --bs-btn-disabled-border-color: #f8f9fa;
+         }
+
+         .card {
+            background-color: #2d3748;
+            color: #e2e8f0;
+            border-color: rgba(255, 255, 255, 0.125);
+         }
+
+         .card-header {
+             background-color: #1a202c;
+             border-bottom-color: rgba(255, 255, 255, 0.125);
+             color: #f8f9fa;
+         }
+
+         .list-group-item {
+             background-color: #2d3748;
+             border-color: rgba(255, 255, 255, 0.125);
+             color: #e2e8f0;
+             transition: background-color 0.2s ease-in-out;
+         }
+
+         .list-group-item:hover {
+             background-color: #4a5568;
+         }
+
+         section img {
+             border-radius: 0.5rem;
+             box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+         }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Bella Italia</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about">About Us</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#menu">Menu</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#happy-hour">Happy Hour</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#contact">Contact</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <section id="home" class="vh-100 d-flex align-items-center justify-content-center text-center bg-image">
+            <div class="container">
+                <h1 class="display-2 mb-3">Bella Italia</h1>
+                <p class="lead mb-4">Authentic Italian Flavors in the Heart of Manhattan</p>
+                <a href="#menu" class="btn btn-primary btn-lg me-2">View Menu</a>
+                <a href="#contact" class="btn btn-outline-light btn-lg">Make a Reservation</a>
+            </div>
+        </section>
+
+        <section id="about" class="py-5 bg-dark">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-md-6 mb-4 mb-md-0">
+                        <img src="/generated_images/dalle_d8935118-3d3.png" class="img-fluid" alt="Exterior view of Bella Italia restaurant in Manhattan">
+                    </div>
+                    <div class="col-md-6">
+                        <h2 class="display-4 mb-4 text-center text-md-start">Our Story</h2>
+                        <p class="lead">Welcome to Bella Italia, where we bring the true taste of Italy to Manhattan. Founded by the Romano family, our restaurant is a celebration of traditional Italian cuisine, passed down through generations.</p>
+                        <p>We use only the freshest ingredients, sourced locally and imported from Italy, to create dishes that are both authentic and unforgettable. From classic pasta dishes to wood-fired pizzas, every bite tells a story of passion and heritage.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="menu" class="py-5 bg-secondary">
+            <div class="container">
+                <h2 class="display-4 mb-5 text-center">Our Menu</h2>
+
+                <div class="row mb-5 align-items-center">
+                    <div class="col-md-6 mb-4 mb-md-0">
+                         <img src="/generated_images/dalle_9acb128b-e6e.png" class="img-fluid" alt="Close-up of a delicious pasta dish">
+                    </div>
+                     <div class="col-md-6">
+                        <h3 class="mb-3">Pastas</h3>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item menu-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5>Spaghetti Carbonara</h5>
+                                    <p class="mb-0">Classic Roman pasta with egg, hard cheese, cured pork, and black pepper.</p>
+                                </div>
+                                <span class="price">$22</span>
+                            </li>
+                             <li class="list-group-item menu-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5>Tagliatelle Bolognese</h5>
+                                    <p class="mb-0">Fresh tagliatelle with a rich slow-cooked meat sauce.</p>
+                                </div>
+                                <span class="price">$24</span>
+                            </li>
+                            <li class="list-group-item menu-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5>Linguine alle Vongole</h5>
+                                    <p class="mb-0">Linguine with fresh clams, garlic, white wine, and parsley.</p>
+                                </div>
+                                <span class="price">$26</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="row flex-column-reverse flex-md-row align-items-center">
+                     <div class="col-md-6">
+                        <h3 class="mb-3">Pizzas (Wood-Fired)</h3>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item menu-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5>Margherita</h5>
+                                    <p class="mb-0">Tomato, fresh mozzarella, basil, olive oil.</p>
+                                </div>
+                                <span class="price">$18</span>
+                            </li>
+                             <li class="list-group-item menu-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5>Pepperoni</h5>
+                                    <p class="mb-0">Tomato, mozzarella, spicy pepperoni.</p>
+                                </div>
+                                <span class="price">$20</span>
+                            </li>
+                            <li class="list-group-item menu-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5>Quattro Formaggi</h5>
+                                    <p class="mb-0">Four cheese blend (mozzarella, gorgonzola, fontina, parmesan).</p>
+                                </div>
+                                <span class="price">$21</span>
+                            </li>
+                        </ul>
+
+                         <h3 class="mb-3 mt-4">Antipasti</h3>
+                         <ul class="list-group list-group-flush">
+                             <li class="list-group-item menu-item d-flex justify-content-between align-items-center">
+                                 <div>
+                                     <h5>Bruschetta al Pomodoro</h5>
+                                     <p class="mb-0">Toasted bread with fresh tomatoes, garlic, basil, and olive oil.</p>
+                                 </div>
+                                 <span class="price">$12</span>
+                             </li>
+                             <li class="list-group-item menu-item d-flex justify-content-between align-items-center">
+                                 <div>
+                                     <h5>Arancini</h5>
+                                     <p class="mb-0">Fried risotto balls filled with ragu and mozzarella.</p>
+                                 </div>
+                                 <span class="price">$14</span>
+                             </li>
+                         </ul>
+                    </div>
+                     <div class="col-md-6 mb-4 mb-md-0">
+                         <img src="/generated_images/dalle_2ce2b915-f04.png" class="img-fluid" alt="Vibrant image of a traditional Italian pizza">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="happy-hour" class="py-5 bg-dark">
+            <div class="container">
+                <h2 class="display-4 mb-5 text-center">Happy Hour Deals</h2>
+                <div class="row justify-content-center align-items-center">
+                     <div class="col-md-6 mb-4 mb-md-0">
+                         <img src="/generated_images/dalle_6b8ac314-95e.png" class="img-fluid" alt="Selection of Italian appetizers or desserts">
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header text-center">
+                                Join Us!
+                            </div>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item deal-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5>Select Draft Beers</h5>
+                                        <p class="mb-0">Enjoy discounted prices on a selection of our draft beers.</p>
+                                    </div>
+                                    <span class="price">$6</span>
+                                </li>
+                                <li class="list-group-item deal-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5>House Wine by the Glass</h5>
+                                        <p class="mb-0">Special pricing on our delicious red and white house wines.</p>
+                                    </div>
+                                    <span class="price">$8</span>
+                                </li>
+                                <li class="list-group-item deal-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5>Select Appetizers</h5>
+                                        <p class="mb-0">Discounted favorites like Bruschetta and Arancini.</p>
+                                    </div>
+                                    <span class="price">$10</span>
+                                </li>
+                            </ul>
+                            <div class="card-body text-center">
+                                <p class="card-text lead mb-0">Monday - Friday | 4:00 PM - 6:00 PM</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="py-5 bg-secondary">
+            <div class="container">
+                <h2 class="display-4 mb-5 text-center">Contact Us</h2>
+                <div class="row justify-content-center">
+                    <div class="col-md-8 text-center">
+                        <p class="lead">Visit us in the heart of Manhattan or give us a call to make a reservation.</p>
+                        <address class="mb-4">
+                            <strong>Bella Italia</strong><br>
+                            123 Italian Way<br>
+                            Manhattan, NY 10001<br>
+                            <a href="tel:+12125551234" class="text-white text-decoration-none">(212) 555-1234</a>
+                        </address>
+                        <h5>Hours of Operation</h5>
+                        <p>
+                            Monday - Thursday: 11:00 AM - 10:00 PM<br>
+                            Friday - Saturday: 11:00 AM - 11:00 PM<br>
+                            Sunday: 12:00 PM - 9:00 PM
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer py-4 text-center">
+        <div class="container">
+            <p class="mb-0">&copy; 2025 Bella Italia. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (event) => {
+                    const href = link.getAttribute('href');
+                    if (href && href.startsWith('#')) {
+                        event.preventDefault();
+                        try {
+                            const targetId = href.substring(1);
+                            const targetElement = document.getElementById(targetId);
+                            if (targetElement) {
+                                targetElement.scrollIntoView({ behavior: 'smooth' });
+                            }
+                        } catch (error) {
+                            console.error('Error during smooth scroll:', error);
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

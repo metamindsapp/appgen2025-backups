@@ -1,0 +1,45 @@
+{
+  "projectId": "a80c9eec-69b1-4885-a249-aaa8ba516736",
+  "revisionString": "1",
+  "projectNameDisplay": "website for italian resturant",
+  "userPromptForThisRevision": "Website for my new resturant in Manhatten, Bella Italia, with a menu and some deals for happy hour. 5 images for now. ",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-05-20T16:32:29.459Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/dalle_a57c21ae-e9d.png",
+      "url": "/generated_images/dalle_a57c21ae-e9d.png",
+      "description": "An inviting, warm interior shot of an upscale Italian restaurant. Focus on cozy lighting, maybe a few blurred patrons in the background, and details like wine bottles or rustic decor. The style should be slightly cinematic and high-quality.",
+      "purpose": "Hero section background image.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_9acb128b-e6e.png",
+      "url": "/generated_images/dalle_9acb128b-e6e.png",
+      "description": "A close-up, mouth-watering shot of a classic Italian pasta dish, like spaghetti carbonara or tagliatelle bolognese, beautifully plated. Steam or slight motion blur could add to the realism. Focus on texture and color.",
+      "purpose": "Image for the Menu section.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_2ce2b915-f04.png",
+      "url": "/generated_images/dalle_2ce2b915-f04.png",
+      "description": "A vibrant, delicious image of a traditional Italian pizza, perhaps a Margherita or a pizza with fresh toppings, shown hot out of the oven or ready to serve. Emphasize melted cheese and fresh ingredients.",
+      "purpose": "Another image for the Menu section.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_6b8ac314-95e.png",
+      "url": "/generated_images/dalle_6b8ac314-95e.png",
+      "description": "A stylish composition showing a selection of Italian appetizers (antipasti) or desserts, like bruschetta, arancini, or tiramisu and cannoli, arranged artfully on a dark background or rustic table.",
+      "purpose": "Image for the Happy Hour or About Us section.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_d8935118-3d3.png",
+      "url": "/generated_images/dalle_d8935118-3d3.png",
+      "description": "An exterior view of 'Bella Italia' restaurant, subtly showing a Manhattan street scene or architectural element in the background, suggesting its location. The restaurant facade should look welcoming and authentic Italian.",
+      "purpose": "Image for the Contact or About Us section, or another spot in the layout.",
+      "isNewlyGenerated": true
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "projectId": "4a17a70a-c858-4418-883d-390e943cf0ca",
+  "revisionString": "1",
+  "projectNameDisplay": "cat cafe",
+  "userPromptForThisRevision": "website for my cat cafe in paris, Cat's off to You",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-05-20T18:55:06.181Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/dalle_02e82fbd-c03.png",
+      "url": "/generated_images/dalle_02e82fbd-c03.png",
+      "description": "A charming, slightly whimsical illustration of a cozy cat cafe interior in Paris. Show comfortable armchairs, small tables, maybe some books, and several relaxed, happy cats lounging or interacting gently with people (faces not detailed). A window showing a hint of a Parisian street scene (Eiffel Tower in distance, maybe). Style should be warm, inviting, and slightly artistic, suitable for a website header.",
+      "purpose": "Hero section background/main image",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_a8462876-0e8.png",
+      "url": "/generated_images/dalle_a8462876-0e8.png",
+      "description": "A photorealistic, high-quality image of a fluffy ginger cat lounging comfortably on a cushion. The cat should look relaxed and friendly. Simple background.",
+      "purpose": "Cat gallery image for a specific cat profile",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_99e1468a-2af.png",
+      "url": "/generated_images/dalle_99e1468a-2af.png",
+      "description": "A photorealistic, high-quality image of a sleek black cat looking alert and curious, maybe peering from behind a chair leg. Simple background.",
+      "purpose": "Cat gallery image for a specific cat profile",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_83aa120c-c74.png",
+      "url": "/generated_images/dalle_83aa120c-c74.png",
+      "description": "A photorealistic, high-quality image of a striped tabby cat sitting elegantly on a tabletop, perhaps next to a coffee cup. Simple background.",
+      "purpose": "Cat gallery image for a specific cat profile",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_f01ed70e-987.png",
+      "url": "/generated_images/dalle_f01ed70e-987.png",
+      "description": "A photorealistic, high-quality image of a white cat with blue eyes, perhaps curled up asleep. Simple background.",
+      "purpose": "Cat gallery image for a specific cat profile",
+      "isNewlyGenerated": true
+    }
+  ]
+}

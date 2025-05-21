@@ -1,0 +1,9 @@
+{
+  "projectId": "97c91c89-4228-47d9-b352-4639b23e5841",
+  "revisionString": "1",
+  "projectNameDisplay": "IDEA",
+  "userPromptForThisRevision": "Make a simple app that designs great new prompt ideas for appgen.  click GET IDEAS button and it uses /ai endpoint to generate a new prompt idea designed to work well with the appgen prompts you see right now and are using. ",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-05-20T18:57:14.498Z",
+  "imageAssets": []
+}
