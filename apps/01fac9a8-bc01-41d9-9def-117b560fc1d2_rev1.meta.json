@@ -1,0 +1,9 @@
+{
+  "projectId": "01fac9a8-bc01-41d9-9def-117b560fc1d2",
+  "revisionString": "1",
+  "projectNameDisplay": "AppGen Gallery",
+  "userPromptForThisRevision": "Build a single-file HTML app (Bootstrap 5 + vanilla JavaScript) that:\r\n\r\n1. Lists every `.html` in the `apps/` folder of GitHub repo `metamindsapp/appgen2025-backups` (branch `main`) via the GitHub REST API.\r\n2. For each filename:\r\n   a. Fetch its raw HTML from `https://raw.githubusercontent.com/.../apps/{filename}`  \r\n   b. POST that HTML to your built-in AI text endpoint (`/api/ai`) with:\r\n      ```\r\n      {\r\n        \"prompt\": \"Extract the project title from this HTML. Return ONLY the title.\",\r\n        \"source\": \"<HTML content>\"\r\n      }\r\n      ```\r\n      → receives `{ \"result\": \"<title>\" }`\r\n   c. POST `{ \"prompt\": \"Generate an illustrative image that represents '<title>'.\"] }` to `/api/image-gen` → receives `{ \"url\": \"<imageUrl>\" }`\r\n3. Cache titles and image URLs in `localStorage` for 24 hours to avoid repeat AI calls.\r\n4. Render a responsive 3-column Bootstrap grid of cards. Each card shows the AI image and title, both linking to `https://<your-replit-project>.replit.app/apps/{filename}`.\r\n5. Show a loading spinner while fetching; on any failure, skip or use a fallback (filename as title, placeholder image).\r\n\r\nInclude all JS in a `<script>` block beneath the Bootstrap CSS/JS CDNs. No other external keys or services needed.",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-05-21T19:30:27.326Z",
+  "imageAssets": []
+}
