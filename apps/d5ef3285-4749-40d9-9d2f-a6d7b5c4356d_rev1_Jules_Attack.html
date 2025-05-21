@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IMAGE GEN - Jules's Mischief Mode</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #1a202c;
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-family: sans-serif;
+        }
+        .container-main {
+            flex-grow: 1;
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+        .card {
+            border-color: #2d3748;
+            background-color: #2d3748;
+        }
+        .form-control {
+             background-color: #4a5568;
+             color: #e2e8f0;
+             border-color: #2d3748;
+        }
+        .form-control:focus {
+            border-color: #63b3ed;
+            box-shadow: 0 0 0 0.25rem rgba(99, 179, 237, 0.25);
+            background-color: #4a5568; /* Maintain dark background on focus */
+            color: #e2e8f0; /* Maintain light text on focus */
+        }
+         .form-label {
+            color: #cbd5e0;
+         }
+        #imageDisplayArea {
+            min-height: 300px;
+            background-color: #4a5568;
+            border-radius: 0.375rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+            text-align: center;
+            padding: 10px; /* Add some padding inside the display area */
+        }
+         #imageDisplayArea img {
+            max-width: 100%;
+            max-height: 80vh; /* Limit max height to prevent image from being too tall */
+            height: auto;
+            display: block;
+            margin: auto;
+            border-radius: 0.25rem; /* Slightly rounded corners for the image */
+        }
+        #loadingSpinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+         #errorMessage {
+            color: #f56565; /* A reddish color for errors */
+            font-weight: bold;
+            padding: 10px;
+         }
+         #imagePlaceholder {
+             padding: 20px;
+             color: #a0aec0; /* Lighter muted text */
+         }
+         .footer {
+            padding: 20px;
+            text-align: center;
+            color: #718096; /* Darker muted text for footer */
+            font-size: 0.9rem;
+         }
+    </style>
+</head>
+<body>
+    <div class="container container-main">
+        <h1 class="text-center mb-4 text-primary">IMAGE GEN - Jules's Mischief Mode</h1>
+
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="promptInput" class="form-label">Enter your image prompt:</label>
+                            <textarea class="form-control" id="promptInput" rows="3" placeholder="e.g., A cat sitting on a roof"></textarea>
+                        </div>
+                        <button type="button" class="btn btn-primary w-100" id="generateBtn">Generate Image</button>
+                        <p class="text-muted mt-2 text-center" style="font-size: 0.9rem;">
+                            <small>No matter the prompt, something in the image will always be wearing a tiny hat!</small>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card mt-4">
+                    <div class="card-header">Generated Image</div>
+                    <div class="card-body" id="imageDisplayArea">
+                         <div id="loadingSpinner" class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p id="imagePlaceholder">Your generated image will appear here.</p>
+                        <img id="generatedImage" src="" alt="Generated image" style="display: none;">
+                        <p id="errorMessage" style="display: none;"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 1999 IMAGE GEN App</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function() {
+            const promptInput = document.getElementById('promptInput');
+            const generateBtn = document.getElementById('generateBtn');
+            const imageDisplayArea = document.getElementById('imageDisplayArea');
+            const generatedImage = document.getElementById('generatedImage');
+            const imagePlaceholder = document.getElementById('imagePlaceholder');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const errorMessage = document.getElementById('errorMessage');
+
+            function showLoading() {
+                generateBtn.disabled = true;
+                imagePlaceholder.style.display = 'none';
+                generatedImage.style.display = 'none';
+                errorMessage.style.display = 'none';
+                loadingSpinner.style.display = 'block';
+                imageDisplayArea.style.backgroundColor = '#4a5568'; // Dark background during loading
+            }
+
+            function hideLoading() {
+                generateBtn.disabled = false;
+                loadingSpinner.style.display = 'none';
+            }
+
+            function displayError(message) {
+                errorMessage.textContent = `Error: ${message}`;
+                errorMessage.style.display = 'block';
+                imagePlaceholder.style.display = 'none'; // Hide placeholder on error
+                generatedImage.style.display = 'none';
+                 imageDisplayArea.style.backgroundColor = '#4a5568'; // Maintain dark background
+            }
+
+            function displayImage(imageUrl, altText) {
+                generatedImage.src = imageUrl;
+                generatedImage.alt = altText || 'Generated image';
+                generatedImage.style.display = 'block';
+                imagePlaceholder.style.display = 'none';
+                errorMessage.style.display = 'none';
+                 imageDisplayArea.style.backgroundColor = 'transparent'; // Transparent background when image is shown
+            }
+
+            async function generateImage() {
+                 const userPrompt = promptInput.value.trim();
+
+                if (!userPrompt) {
+                    displayError('Please enter a prompt.');
+                    return;
+                }
+
+                const finalPrompt = userPrompt + ", wearing a tiny hat.";
+
+                showLoading();
+
+                try {
+                    const response = await fetch('/api/generate-image-on-demand', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            prompt: finalPrompt,
+                            aspectRatio: "1:1",
+                            style: "vivid"
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok && data.success && data.imageUrl) {
+                        displayImage(data.imageUrl, finalPrompt);
+                    } else {
+                        displayError(data.error || 'Failed to generate image. Please try again.');
+                        console.error('Image generation API error:', data.error);
+                         // If API call was successful but no image URL or success is false
+                         imagePlaceholder.style.display = 'block'; // Show placeholder again
+                    }
+
+                } catch (error) {
+                    displayError('Network error. Could not connect to the image generation service.');
+                    console.error('Fetch error:', error);
+                     imagePlaceholder.style.display = 'block'; // Show placeholder again on network error
+                } finally {
+                    hideLoading();
+                }
+            }
+
+
+            generateBtn.addEventListener('click', generateImage);
+
+            promptInput.addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault(); // Prevent default form submission
+                    generateImage();
+                }
+            });
+
+            // Initial state setup
+            imagePlaceholder.style.display = 'block';
+            generatedImage.style.display = 'none';
+            loadingSpinner.style.display = 'none';
+            errorMessage.style.display = 'none';
+
+        })();
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>
