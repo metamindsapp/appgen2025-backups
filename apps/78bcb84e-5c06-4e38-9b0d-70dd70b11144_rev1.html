@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crash Game Simulator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #121212;
+        }
+
+        main {
+            padding-top: 60px; 
+        }
+
+        #game-canvas-wrapper {
+            width: 100%;
+            max-width: 800px; /* Controlled by GAME_CONFIG.NATIVE_CANVAS_WIDTH or similar */
+            margin-left: auto;
+            margin-right: auto;
+            background-color: #0a0f14;
+            box-shadow: 0 0 15px rgba(0, 123, 255, 0.1);
+            position: relative;
+        }
+
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background-color: transparent;
+        }
+
+        #multiplierDisplay {
+            font-size: clamp(2.5rem, 8vw, 6rem);
+            color: #00e676;
+            text-shadow: 0 0 8px #00e676, 0 0 15px #00e676, 1px 1px 1px #000;
+            opacity: 0.95;
+            transition: opacity 0.3s ease-in-out, color 0.3s ease-in-out;
+            pointer-events: none;
+        }
+
+        #crashMessage {
+            font-size: clamp(2rem, 7vw, 5rem);
+            color: #ff3d00;
+            text-shadow: 0 0 8px #ff3d00, 0 0 15px #ff3d00, 1px 1px 1px #000;
+            background-image: url("/generated_images/dalle_b7ae5893-176.png");
+            background-repeat: no-repeat;
+            background-position: center 10%;
+            background-size: contain;
+            padding-top: clamp(50px, 15vh, 120px);
+            text-align: center;
+            pointer-events: none;
+        }
+        #crashMessage.d-none {
+            display: none !important;
+        }
+
+        .btn-success { background-color: #00b248; border-color: #00993d; }
+        .btn-success:hover { background-color: #00cc52; border-color: #00b248; }
+        .btn-warning { background-color: #ff8f00; border-color: #e68100; }
+        .btn-warning:hover { background-color: #ffa000; border-color: #ff8f00; }
+        .btn-info { background-color: #0dcaf0; border-color: #0dcaf0; }
+        .btn-info:hover { background-color: #31d2f2; border-color: #25cff2; }
+        .btn-danger { background-color: #dc3545; border-color: #dc3545; }
+        .btn-danger:hover { background-color: #bb2d3b; border-color: #b02a37; }
+
+        #roundHistoryList .list-group-item {
+            background-color: #22272c;
+            border-color: #3a3f44;
+            color: #ced4da;
+            padding: 0.5rem 0.75rem;
+        }
+        #roundHistoryList .win { border-left: 3px solid #28a745; }
+        #roundHistoryList .loss { border-left: 3px solid #dc3545; }
+        #roundHistoryList .neutral { border-left: 3px solid #ffc107; }
+        #roundHistoryList .win strong, #roundHistoryList .win .text-win { color: #28a745 !important; }
+        #roundHistoryList .loss strong, #roundHistoryList .loss .text-loss { color: #dc3545 !important; }
+        #roundHistoryList .neutral strong, #roundHistoryList .neutral .text-neutral { color: #ffc107 !important; }
+
+
+        .form-control-lg { font-size: 1rem; padding: .5rem 1rem;}
+        .btn-lg { font-size: 1rem; padding: .5rem 1rem;}
+
+        .navbar-brand img {
+            filter: drop-shadow(0 0 3px #0dcaf0);
+        }
+        
+        #mainActionButton img {
+            height: 1.2em;
+            margin-right: 0.5em;
+            vertical-align: text-bottom;
+        }
+        .fs-sm { font-size: 0.8rem; }
+    </style>
+</head>
+<body class="d-flex flex-column vh-100 bg-dark text-light">
+
+    <nav class="navbar navbar-expand-sm navbar-dark bg-dark border-bottom border-secondary fixed-top py-1">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <img src="/generated_images/dalle_ce73e1ad-040.png" alt="Crash Game Logo" width="28" height="28" class="d-inline-block align-text-top me-2">
+                Crash Sim
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <button class="btn btn-sm btn-outline-info me-2" data-bs-toggle="modal" data-bs-target="#howToPlayModal">How to Play</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-sm btn-outline-warning me-2" data-bs-toggle="modal" data-bs-target="#provablyFairModal">Provably Fair</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#historyModal">History</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow-1 d-flex flex-column align-items-center justify-content-center p-2 p-md-3">
+        <div class="container-fluid mb-2 mb-md-3" style="max-width: 960px;">
+            <div class="row text-center g-2">
+                <div class="col-md-4 col-12 order-md-1 order-2">
+                    <h6>Balance: <span id="playerBalance" class="text-success fw-bold">1000.00</span> <span class="fs-6 text-muted">credits</span></h6>
+                </div>
+                <div class="col-md-4 col-12 order-md-2 order-1">
+                    <h6 id="gameStatusText" class="text-warning">Place your bet!</h6>
+                </div>
+                <div class="col-md-4 col-12 order-md-3 order-3">
+                    <div id="seedInfo" class="fs-sm">
+                        <small>Round Hash: <code id="serverSeedHashDisplay" class="text-muted">Initializing...</code></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="game-canvas-wrapper" class="mb-2 mb-md-3">
+            <canvas id="gameCanvas"></canvas>
+            <div id="multiplierDisplay" class="position-absolute top-50 start-50 translate-middle fw-bold">1.00x</div>
+            <div id="crashMessage" class="position-absolute top-50 start-50 translate-middle fw-bold d-none">BUSTED!</div>
+        </div>
+
+        <div class="container-fluid" style="max-width: 960px;">
+            <div class="card bg-dark-subtle border-secondary">
+                <div class="card-body p-2 p-md-3">
+                    <div class="row g-2 align-items-end">
+                        <div class="col-md-4 col-sm-6">
+                            <label for="betAmountInput" class="form-label mb-1">Bet Amount</label>
+                            <input type="number" class="form-control form-control-lg bg-dark text-light border-secondary" id="betAmountInput" value="10" min="1" step="1">
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <label for="autoCashoutInput" class="form-label mb-1">Auto Cashout (e.g., 2.0x)</label>
+                            <input type="number" class="form-control form-control-lg bg-dark text-light border-secondary" id="autoCashoutInput" placeholder="Optional" min="1.01" step="0.01">
+                        </div>
+                        <div class="col-md-4 col-sm-12 d-grid">
+                            <button id="mainActionButton" class="btn btn-lg btn-success w-100">
+                                <img src="/generated_images/dalle_ce73e1ad-040.png" alt="Bet">Place Bet
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                         <div class="col-12 text-center">
+                            <small id="currentBetInfo" class="text-muted">Not currently in a round.</small>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal fade" id="howToPlayModal" tabindex="-1" aria-labelledby="howToPlayModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="howToPlayModalLabel">How to Play Crash Game</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Welcome to the Crash Game Simulator!</p>
+                    <h6>Objective:</h6>
+                    <p>Place a bet and watch the multiplier increase. Cash out your bet before the multiplier "crashes" to win!</p>
+                    <h6>Gameplay:</h6>
+                    <ol>
+                        <li><strong>Place Your Bet:</strong>
+                            <ul>
+                                <li>Enter your desired <strong>Bet Amount</strong>.</li>
+                                <li>Optionally, set an <strong>Auto Cashout</strong> multiplier (e.g., 2.00x). If the game reaches this multiplier, your bet will automatically cash out.</li>
+                                <li>Click "Place Bet".</li>
+                            </ul>
+                        </li>
+                        <li><strong>Multiplier Rising:</strong>
+                            <ul>
+                                <li>The multiplier starts at 1.00x and increases.</li>
+                                <li>If you haven't set an Auto Cashout, or want to cash out earlier/later, click the "Cash Out @ X.XXx" button at any time.</li>
+                            </ul>
+                        </li>
+                        <li><strong>Winning:</strong>
+                            <ul>
+                                <li>If you cash out (manually or automatically) before the game crashes, you win!</li>
+                                <li>Your payout is: <code>Bet Amount × Cashout Multiplier</code>.</li>
+                            </ul>
+                        </li>
+                        <li><strong>Losing:</strong>
+                            <ul>
+                                <li>If the game crashes before you cash out, you lose your bet amount.</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    <h6>Provably Fair:</h6>
+                    <p>This game uses a system to ensure outcomes are determined fairly and can be verified. Check the "Provably Fair" modal for details.</p>
+                    <p>Good luck and have fun!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="provablyFairModal" tabindex="-1" aria-labelledby="provablyFairModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="provablyFairModalLabel">Provably Fair System</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>This game uses a provably fair system to determine round outcomes. Here's how it works (simulated client-side):</p>
+                    <ol>
+                        <li><strong>Server Seed:</strong> Before a round begins, the "server" (this simulation) generates a secret random Server Seed.</li>
+                        <li><strong>Server Seed Hash:</strong> The server then computes the SHA-256 hash of this Server Seed and shows it to you. This proves the Server Seed was determined before the round started and wasn't changed.</li>
+                        <li><strong>Client Seed:</strong> A Client Seed is automatically generated for your session and stored locally. You can see a truncated version below.</li>
+                        <li><strong>Nonce:</strong> A number (Nonce) increments for each round played with your Client Seed.</li>
+                        <li><strong>Crash Point Calculation:</strong> After the round, the Server Seed is revealed. The crash point is calculated using HMAC-SHA256:
+                            <br><code>hashedValue = HMAC-SHA256(ServerSeed, ClientSeed + "-" + Nonce)</code>
+                            <br><code>intValue = IntegerValueOfFirst4Bytes(hashedValue)</code>
+                            <br><code>Crash Point = (Math.abs(intValue) % 10000 + 100) / 100</code>
+                            <br>(Ensuring crash point is at least 1.00x)
+                        </li>
+                    </ol>
+                    <p>This means the outcome is predetermined by data available before the round starts (Server Seed Hash) and data you control or know (Client Seed, Nonce), but it's unpredictable until the Server Seed is revealed.</p>
+                    <hr class="border-secondary">
+                    <h5>Verify Round Outcome</h5>
+                    <p><small>You can use the details from the "History" modal for past rounds. The Server Seed for the most recently completed round is pre-filled if available.</small></p>
+                    <div class="mb-3">
+                        <label for="verifyServerSeed" class="form-label">Server Seed</label>
+                        <input type="text" class="form-control bg-dark text-light border-secondary" id="verifyServerSeed" placeholder="Enter revealed server seed">
+                    </div>
+                    <div class="mb-3">
+                        <label for="verifyClientSeed" class="form-label">Client Seed (Current session's: <code id="currentClientSeedDisplay"></code>)</label>
+                        <input type="text" class="form-control bg-dark text-light border-secondary" id="verifyClientSeed" placeholder="Enter client seed used for the round">
+                    </div>
+                    <div class="mb-3">
+                        <label for="verifyNonce" class="form-label">Nonce</label>
+                        <input type="number" class="form-control bg-dark text-light border-secondary" id="verifyNonce" placeholder="Enter nonce used for the round" value="1" min="1">
+                    </div>
+                    <button id="verifyButton" class="btn btn-warning">Verify Crash Point</button>
+                    <p class="mt-3">Calculated Crash Point: <strong id="verifiedCrashPoint" class="text-info">N/A</strong></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
+             <div class="modal-content bg-dark text-light">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="historyModalLabel">Round History</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul id="roundHistoryList" class="list-group list-group-flush">
+                        <li class="list-group-item">No rounds played yet.</li>
+                    </ul>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button id="clearHistoryButton" class="btn btn-sm btn-outline-danger">Clear History</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const GAME_CONFIG = {
+            NATIVE_CANVAS_WIDTH: 800,
+            NATIVE_CANVAS_HEIGHT: 450, 
+            MULTIPLIER_CONSTANT: 0.00006, 
+            BETTING_PHASE_DURATION: 5000, 
+            COUNTDOWN_DURATION: 3000, 
+            RESULTS_PHASE_DURATION: 5000, 
+            GRAPH_LINE_COLOR: '#00e676',
+            GRAPH_AXIS_COLOR: '#555c63',
+            GRAPH_TEXT_COLOR: '#adb5bd',
+            GRAPH_GRID_COLOR: '#343a40',
+            GRAPH_AUTO_CASHOUT_LINE_COLOR: '#ffc107',
+            INITIAL_BALANCE: 1000,
+            MAX_HISTORY_ITEMS: 20,
+            CANVAS_BG_IMAGE_PATH: "/generated_images/dalle_8e2b207c-4dc.png",
+            PLACE_BET_ICON_PATH: "/generated_images/dalle_ce73e1ad-040.png",
+            MAX_GRAPH_TIME_MS: 30000, 
+            MAX_GRAPH_MULTIPLIER: 15, 
+        };
+
+        class Player {
+            constructor(initialBalance, clientSeed) {
+                this.balance = initialBalance;
+                this.clientSeed = clientSeed || crypto.randomUUID();
+                this.nonce = 1; 
+                this.currentBetAmount = 0;
+                this.autoCashoutTarget = null;
+                this.cashedOutThisRound = false;
+                this.lastCashoutMultiplier = null;
+                this.loadState();
+            }
+
+            loadState() {
+                try {
+                    const savedBalance = localStorage.getItem('crashGameBalance');
+                    if (savedBalance !== null) {
+                        this.balance = parseFloat(savedBalance);
+                    }
+                    const savedClientSeed = localStorage.getItem('crashGameClientSeed');
+                    if (savedClientSeed) {
+                        this.clientSeed = savedClientSeed;
+                    }
+                    const savedNonce = localStorage.getItem('crashGameNonce');
+                    if (savedNonce !== null) {
+                        this.nonce = parseInt(savedNonce, 10);
+                    }
+                } catch (error) {
+                    console.error("Error loading player state from localStorage:", error);
+                }
+            }
+
+            saveState() {
+                try {
+                    localStorage.setItem('crashGameBalance', this.balance.toFixed(2));
+                    localStorage.setItem('crashGameClientSeed', this.clientSeed);
+                    localStorage.setItem('crashGameNonce', this.nonce.toString());
+                } catch (error) {
+                    console.error("Error saving player state to localStorage:", error);
+                }
+            }
+
+            updateBalance(amount) {
+                this.balance += amount;
+                this.saveState();
+            }
+
+            placeBet(amount, autoCashout) {
+                if (amount <= 0 || amount > this.balance) return false;
+                this.currentBetAmount = amount;
+                this.autoCashoutTarget = autoCashout ? parseFloat(autoCashout) : null;
+                this.updateBalance(-amount);
+                this.cashedOutThisRound = false;
+                this.lastCashoutMultiplier = null;
+                return true;
+            }
+
+            handleWin(multiplier) {
+                const winnings = this.currentBetAmount * multiplier;
+                this.updateBalance(winnings);
+                return winnings;
+            }
+        }
+
+        class ProvablyFair {
+            async generateServerSeed() {
+                return crypto.randomUUID();
+            }
+
+            async getHash(text) {
+                const encoder = new TextEncoder();
+                const data = encoder.encode(text);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            }
+
+            async calculateCrashPoint(serverSeed, clientSeed, nonce) {
+                try {
+                    const message = `${clientSeed}-${nonce}`;
+                    const keyMaterial = await crypto.subtle.importKey(
+                        'raw',
+                        new TextEncoder().encode(serverSeed),
+                        { name: 'HMAC', hash: 'SHA-256' },
+                        false,
+                        ['sign']
+                    );
+                    const signatureBuffer = await crypto.subtle.sign('HMAC', keyMaterial, new TextEncoder().encode(message));
+                    
+                    const dataView = new DataView(signatureBuffer.slice(0, 4));
+                    let intValue = dataView.getUint32(0, false); 
+
+                    const crashValue = (Math.abs(intValue) % 10000 + 100) / 100; 
+                    return parseFloat(Math.max(1.00, crashValue).toFixed(2));
+                } catch (error) {
+                    console.error("Error calculating crash point:", error);
+                    return 1.01; 
+                }
+            }
+        }
+
+        class GraphRenderer {
+            constructor(canvasId, nativeWidth, nativeHeight) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.nativeWidth = nativeWidth;
+                this.nativeHeight = nativeHeight;
+                this.canvas.width = this.nativeWidth;
+                this.canvas.height = this.nativeHeight;
+                
+                this.bgImage = new Image();
+                this.bgImageLoaded = false;
+                this.bgImage.onload = () => {
+                    this.bgImageLoaded = true;
+                    this.drawFullFrame(0, 1.00); 
+                };
+                this.bgImage.onerror = () => {
+                    console.error("Failed to load canvas background image.");
+                     this.drawFullFrame(0, 1.00);
+                }
+                this.bgImage.src = GAME_CONFIG.CANVAS_BG_IMAGE_PATH;
+
+                this.points = [];
+                this.maxTime = GAME_CONFIG.MAX_GRAPH_TIME_MS; 
+                this.maxMultiplier = GAME_CONFIG.MAX_GRAPH_MULTIPLIER;
+                this.padding = { top: 20, bottom: 30, left: 40, right: 20 };
+            }
+
+            resizeCanvas() {
+                const wrapper = this.canvas.parentElement;
+                const currentWrapperWidth = wrapper.clientWidth;
+                
+                const nativeAspectRatio = this.nativeWidth / this.nativeHeight;
+                const newWrapperHeight = currentWrapperWidth / nativeAspectRatio;
+                
+                wrapper.style.height = Math.floor(newWrapperHeight) + 'px';
+            }
+
+            clearGraphState() {
+                this.points = [];
+                this.maxTime = GAME_CONFIG.MAX_GRAPH_TIME_MS; 
+                this.maxMultiplier = GAME_CONFIG.MAX_GRAPH_MULTIPLIER;
+            }
+            
+            drawBackground() {
+                if (this.bgImageLoaded && this.bgImage.complete && this.bgImage.naturalWidth > 0) {
+                    this.ctx.drawImage(this.bgImage, 0, 0, this.nativeWidth, this.nativeHeight);
+                } else {
+                    this.ctx.fillStyle = '#0a0f14'; 
+                    this.ctx.fillRect(0, 0, this.nativeWidth, this.nativeHeight);
+                }
+            }
+
+            drawAxesAndGrid() {
+                this.ctx.strokeStyle = GAME_CONFIG.GRAPH_GRID_COLOR;
+                this.ctx.fillStyle = GAME_CONFIG.GRAPH_TEXT_COLOR;
+                this.ctx.lineWidth = 1;
+                this.ctx.font = '10px Segoe UI';
+
+                const graphWidth = this.nativeWidth - this.padding.left - this.padding.right;
+                const graphHeight = this.nativeHeight - this.padding.top - this.padding.bottom;
+
+                for (let m = 1; m <= this.maxMultiplier; m += (this.maxMultiplier <= 5 ? 0.5 : (this.maxMultiplier <= 15 ? 1 : (this.maxMultiplier <= 50 ? 5 : 10) ))) {
+                    const y = this.padding.top + graphHeight - (((m -1) / (this.maxMultiplier -1)) * graphHeight);
+                     if (m === 1 || m % (this.maxMultiplier <= 5 ? 1 : (this.maxMultiplier <= 15 ? 2 : (this.maxMultiplier <=50 ? 10: 20))) === 0 || m === this.maxMultiplier || (m < 2 && m % 0.5 === 0)) {
+                        if(y >= this.padding.top && y <= this.nativeHeight - this.padding.bottom) {
+                            this.ctx.beginPath();
+                            this.ctx.moveTo(this.padding.left, y);
+                            this.ctx.lineTo(this.nativeWidth - this.padding.right, y);
+                            this.ctx.stroke();
+                            this.ctx.fillText(`${m.toFixed(m<2?1:0)}x`, 5, y + 3);
+                        }
+                    }
+                }
+
+                for (let t = 0; t <= this.maxTime; t += 5000) { 
+                    const x = this.padding.left + (t / this.maxTime) * graphWidth;
+                    if (t % 5000 === 0 && x >= this.padding.left && x <= this.nativeWidth - this.padding.right) {
+                         this.ctx.beginPath();
+                        this.ctx.moveTo(x, this.padding.top);
+                        this.ctx.lineTo(x, this.nativeHeight - this.padding.bottom);
+                        this.ctx.stroke();
+                        this.ctx.fillText(`${t/1000}s`, x - 5, this.nativeHeight - this.padding.bottom + 12);
+                    }
+                }
+                
+                this.ctx.strokeStyle = GAME_CONFIG.GRAPH_AXIS_COLOR;
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.padding.left, this.padding.top);
+                this.ctx.lineTo(this.padding.left, this.nativeHeight - this.padding.bottom);
+                this.ctx.stroke();
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.padding.left, this.nativeHeight - this.padding.bottom);
+                this.ctx.lineTo(this.nativeWidth - this.padding.right, this.nativeHeight - this.padding.bottom);
+                this.ctx.stroke();
+            }
+
+            drawMultiplierCurve(elapsedTime, currentMultiplier, autoCashoutTarget, crashedAt = null) {
+                if (this.points.length === 0 && elapsedTime > 0) { // Ensure first point at 0, 1x if starting mid-graph
+                    this.points.push({ time: 0, multiplier: 1.00 });
+                }
+                if (elapsedTime > this.maxTime) this.maxTime = elapsedTime * 1.2;
+                if (currentMultiplier > this.maxMultiplier) this.maxMultiplier = currentMultiplier * 1.2;
+
+                this.points.push({ time: elapsedTime, multiplier: currentMultiplier });
+
+                const graphWidth = this.nativeWidth - this.padding.left - this.padding.right;
+                const graphHeight = this.nativeHeight - this.padding.top - this.padding.bottom;
+
+                this.ctx.beginPath();
+                this.ctx.strokeStyle = GAME_CONFIG.GRAPH_LINE_COLOR;
+                this.ctx.lineWidth = 3;
+                this.ctx.lineJoin = 'round';
+                this.ctx.lineCap = 'round';
+
+                let firstPoint = true;
+                for (const point of this.points) {
+                    const x = this.padding.left + (point.time / this.maxTime) * graphWidth;
+                    const y = this.padding.top + graphHeight - ((point.multiplier - 1) / (this.maxMultiplier > 1 ? this.maxMultiplier - 1 : 1)) * graphHeight;
+                    
+                    if (x > this.nativeWidth - this.padding.right + 2) continue; 
+
+                    if (firstPoint) {
+                        this.ctx.moveTo(x, y);
+                        firstPoint = false;
+                    } else {
+                        this.ctx.lineTo(x, y);
+                    }
+                }
+                this.ctx.stroke();
+                this.ctx.lineWidth = 1; 
+
+                if (autoCashoutTarget && autoCashoutTarget <= this.maxMultiplier && autoCashoutTarget > 1) {
+                    const yCashout = this.padding.top + graphHeight - ((autoCashoutTarget - 1) / (this.maxMultiplier > 1 ? this.maxMultiplier -1 : 1)) * graphHeight;
+                    if (yCashout >= this.padding.top && yCashout <= this.nativeHeight - this.padding.bottom) {
+                        this.ctx.beginPath();
+                        this.ctx.strokeStyle = GAME_CONFIG.GRAPH_AUTO_CASHOUT_LINE_COLOR;
+                        this.ctx.setLineDash([5, 5]);
+                        this.ctx.moveTo(this.padding.left, yCashout);
+                        this.ctx.lineTo(this.nativeWidth - this.padding.right, yCashout);
+                        this.ctx.stroke();
+                        this.ctx.setLineDash([]);
+                    }
+                }
+                
+                if (crashedAt) {
+                    const lastPointTime = this.points.length > 0 ? this.points[this.points.length-1].time : 0;
+                    const x = this.padding.left + (lastPointTime / this.maxTime) * graphWidth;
+                    const y = this.padding.top + graphHeight - ((crashedAt - 1) / (this.maxMultiplier > 1 ? this.maxMultiplier - 1 : 1)) * graphHeight;
+
+                    this.ctx.fillStyle = '#ff3d00';
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, y, 6, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+            }
+            
+            drawFullFrame(elapsedTime, currentMultiplier, autoCashoutTarget, crashedAt = null) {
+                this.ctx.clearRect(0, 0, this.nativeWidth, this.nativeHeight);
+                this.drawBackground();
+                this.drawAxesAndGrid();
+                this.drawMultiplierCurve(elapsedTime, currentMultiplier, autoCashoutTarget, crashedAt);
+            }
+        }
+
+        class UIManager {
+            constructor() {
+                this.playerBalanceEl = document.getElementById('playerBalance');
+                this.gameStatusTextEl = document.getElementById('gameStatusText');
+                this.serverSeedHashDisplayEl = document.getElementById('serverSeedHashDisplay');
+                this.multiplierDisplayEl = document.getElementById('multiplierDisplay');
+                this.crashMessageEl = document.getElementById('crashMessage');
+                this.betAmountInputEl = document.getElementById('betAmountInput');
+                this.autoCashoutInputEl = document.getElementById('autoCashoutInput');
+                this.mainActionButtonEl = document.getElementById('mainActionButton');
+                this.currentBetInfoEl = document.getElementById('currentBetInfo');
+                this.historyListEl = document.getElementById('roundHistoryList');
+                
+                this.verifyServerSeedEl = document.getElementById('verifyServerSeed');
+                this.verifyClientSeedEl = document.getElementById('verifyClientSeed');
+                this.verifyNonceEl = document.getElementById('verifyNonce');
+                this.verifiedCrashPointEl = document.getElementById('verifiedCrashPoint');
+                this.currentClientSeedDisplayEl = document.getElementById('currentClientSeedDisplay');
+            }
+
+            updateBalanceDisplay(balance) {
+                this.playerBalanceEl.textContent = balance.toFixed(2);
+            }
+
+            updateGameStatus(text, type = 'warning') { // Default to warning as it's often for timing/betting phases
+                this.gameStatusTextEl.textContent = text;
+                const typeMap = { info: 'info', success: 'success', warning: 'warning', danger: 'danger', neutral: 'muted' };
+                this.gameStatusTextEl.className = `text-${typeMap[type] || 'warning'}`;
+            }
+            
+            updateSeedHashDisplay(hash) {
+                this.serverSeedHashDisplayEl.textContent = hash ? hash.substring(0,16) + "..." : "N/A";
+            }
+
+            updateMultiplierDisplay(multiplier, isBusted = false) {
+                const formattedMultiplier = parseFloat(multiplier).toFixed(2);
+                this.multiplierDisplayEl.textContent = `${formattedMultiplier}x`;
+                if (isBusted) {
+                    this.multiplierDisplayEl.classList.add('d-none');
+                    this.crashMessageEl.classList.remove('d-none');
+                    this.crashMessageEl.innerHTML = `BUSTED!<br><small style="font-size:0.5em;">@ ${formattedMultiplier}x</small>`;
+                } else {
+                    this.multiplierDisplayEl.classList.remove('d-none');
+                    this.crashMessageEl.classList.add('d-none');
+                }
+            }
+            
+            setMainActionButtonState(state, currentMultiplier = 1.00) {
+                this.mainActionButtonEl.disabled = false;
+                this.mainActionButtonEl.classList.remove('btn-success', 'btn-danger', 'btn-warning', 'btn-info', 'btn-secondary');
+                let text = "Place Bet";
+                let iconSrc = GAME_CONFIG.PLACE_BET_ICON_PATH;
+
+                switch(state) {
+                    case 'BETTING':
+                        this.mainActionButtonEl.classList.add('btn-success');
+                        text = "Place Bet";
+                        iconSrc = GAME_CONFIG.PLACE_BET_ICON_PATH;
+                        this.toggleBetControls(true);
+                        break;
+                    case 'WAITING_FOR_START':
+                        this.mainActionButtonEl.classList.add('btn-secondary');
+                        text = "Waiting...";
+                        this.mainActionButtonEl.disabled = true;
+                        this.toggleBetControls(false);
+                        break;
+                    case 'RUNNING':
+                        this.mainActionButtonEl.classList.add('btn-warning');
+                        text = `Cash Out @ ${parseFloat(currentMultiplier).toFixed(2)}x`;
+                        iconSrc = GAME_CONFIG.PLACE_BET_ICON_PATH; 
+                        this.toggleBetControls(false);
+                        break;
+                    case 'CASHED_OUT':
+                        this.mainActionButtonEl.classList.add('btn-info');
+                        text = "Cashed Out!";
+                        this.mainActionButtonEl.disabled = true;
+                        this.toggleBetControls(false);
+                        break;
+                    case 'GAME_OVER': 
+                        this.mainActionButtonEl.classList.add('btn-secondary');
+                        text = "Next Round Soon...";
+                        this.mainActionButtonEl.disabled = true;
+                        this.toggleBetControls(false);
+                        break;
+                }
+                this.mainActionButtonEl.innerHTML = `<img src="${iconSrc}" alt="">${text}`;
+            }
+
+            toggleBetControls(enabled) {
+                this.betAmountInputEl.disabled = !enabled;
+                this.autoCashoutInputEl.disabled = !enabled;
+            }
+            
+            updateCurrentBetInfo(betAmount, autoCashoutTarget) {
+                if (betAmount > 0) {
+                    let info = `Bet: ${betAmount.toFixed(2)} credits`;
+                    if (autoCashoutTarget) {
+                        info += ` | Auto: ${autoCashoutTarget.toFixed(2)}x`;
+                    }
+                    this.currentBetInfoEl.textContent = info;
+                    this.currentBetInfoEl.classList.remove('text-muted');
+                    this.currentBetInfoEl.classList.add('text-info');
+                } else {
+                    this.currentBetInfoEl.textContent = "Not currently in a round.";
+                    this.currentBetInfoEl.classList.add('text-muted');
+                    this.currentBetInfoEl.classList.remove('text-info');
+                }
+            }
+
+            populateHistory(historyArray) {
+                this.historyListEl.innerHTML = '';
+                if (historyArray.length === 0) {
+                    this.historyListEl.innerHTML = '<li class="list-group-item">No rounds played yet.</li>';
+                    return;
+                }
+                historyArray.forEach(item => {
+                    const li = document.createElement('li');
+                    li.classList.add('list-group-item');
+                    
+                    let playerActionText = '';
+                    let outcomeClass = 'neutral';
+
+                    if (item.cashedOutAt) {
+                        playerActionText = `<span class="text-win">You cashed out @ ${item.cashedOutAt.toFixed(2)}x. Won: ${item.winnings.toFixed(2)} credits.</span>`;
+                        outcomeClass = 'win';
+                    } else {
+                         if (item.betAmount > 0) {
+                            playerActionText = `<span class="text-loss">Your bet: ${item.betAmount.toFixed(2)} credits. Lost.</span>`;
+                            outcomeClass = 'loss';
+                        } else {
+                             playerActionText = `No bet placed.`;
+                             outcomeClass = 'neutral';
+                        }
+                    }
+                    li.classList.add(outcomeClass);
+                    li.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span><strong>Crashed @ ${item.crashPoint.toFixed(2)}x</strong></span>
+                            <small class="text-muted">${new Date(item.timestamp).toLocaleTimeString()}</small>
+                        </div>
+                        <div>${playerActionText}</div>
+                        <div class="mt-1 fs-sm text-muted">
+                            Hash: ${item.serverSeedHash.substring(0,12)}... (Nonce: ${item.nonce})
+                            <button class="btn btn-xs btn-outline-secondary py-0 px-1 ms-2" style="font-size:0.7rem;" 
+                                    onclick="gameInstance.populateVerifierModal('${item.serverSeed}', '${item.clientSeed}', ${item.nonce})">
+                                Verify
+                            </button>
+                        </div>
+                    `;
+                    this.historyListEl.appendChild(li);
+                });
+            }
+            
+            updateProvablyFairModal(clientSeed, serverSeed = '', nonce = 1) {
+                this.currentClientSeedDisplayEl.textContent = clientSeed ? clientSeed.substring(0,8) + "..." + clientSeed.substring(clientSeed.length - 4) : "N/A";
+                this.verifyClientSeedEl.value = clientSeed || '';
+                this.verifyServerSeedEl.value = serverSeed;
+                this.verifyNonceEl.value = nonce;
+                this.verifiedCrashPointEl.textContent = "N/A";
+                this.verifiedCrashPointEl.className = 'text-info';
+            }
+            
+            setVerificationResult(text, success = true) {
+                this.verifiedCrashPointEl.textContent = text;
+                this.verifiedCrashPointEl.className = success ? 'text-success fw-bold' : 'text-danger';
+            }
+        }
+        
+        let gameInstance = null; 
+
+        class CrashGame {
+            constructor() {
+                this.player = new Player(GAME_CONFIG.INITIAL_BALANCE);
+                this.provablyFair = new ProvablyFair();
+                this.uiManager = new UIManager();
+                this.graphRenderer = new GraphRenderer('gameCanvas', GAME_CONFIG.NATIVE_CANVAS_WIDTH, GAME_CONFIG.NATIVE_CANVAS_HEIGHT);
+                
+                this.gameState = 'IDLE'; 
+                this.serverSeed = null;
+                this.serverSeedHash = null;
+                this.crashPoint = null;
+                this.currentMultiplier = 1.00;
+                this.roundStartTimeMs = 0;
+                
+                this.gameHistory = [];
+                this.animationFrameId = null;
+                this.phaseTimeoutId = null;
+            }
+
+            async init() {
+                try {
+                    this.gameHistory = JSON.parse(localStorage.getItem('crashGameHistory')) || [];
+                } catch (error) {
+                    console.error("Error parsing game history from localStorage:", error);
+                    this.gameHistory = [];
+                }
+
+                this.uiManager.updateBalanceDisplay(this.player.balance);
+                this.uiManager.populateHistory(this.gameHistory);
+                this.uiManager.updateProvablyFairModal(this.player.clientSeed);
+                
+                this.graphRenderer.resizeCanvas();
+                window.addEventListener('resize', () => this.graphRenderer.resizeCanvas());
+
+                this.uiManager.mainActionButtonEl.addEventListener('click', () => this.handleMainAction());
+                document.getElementById('verifyButton').addEventListener('click', () => this.verifyProvablyFair());
+                document.getElementById('clearHistoryButton').addEventListener('click', () => this.clearHistory());
+                
+                await this.prepareNewRound();
+            }
+
+            async prepareNewRound() {
+                clearTimeout(this.phaseTimeoutId);
+                if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
+
+                this.gameState = 'BETTING';
+                this.currentMultiplier = 1.00;
+                this.player.currentBetAmount = 0;
+                this.player.autoCashoutTarget = null;
+                this.player.cashedOutThisRound = false;
+                this.player.lastCashoutMultiplier = null;
+
+                this.serverSeed = await this.provablyFair.generateServerSeed();
+                this.serverSeedHash = await this.provablyFair.getHash(this.serverSeed);
+                this.crashPoint = await this.provablyFair.calculateCrashPoint(this.serverSeed, this.player.clientSeed, this.player.nonce);
+
+                this.uiManager.updateSeedHashDisplay(this.serverSeedHash);
+                this.uiManager.updateGameStatus(`Betting open... (${(GAME_CONFIG.BETTING_PHASE_DURATION / 1000).toFixed(0)}s remaining)`, 'warning');
+                this.uiManager.setMainActionButtonState('BETTING');
+                this.uiManager.updateMultiplierDisplay(this.currentMultiplier, false);
+                this.uiManager.updateCurrentBetInfo(0, null);
+                
+                this.graphRenderer.clearGraphState();
+                this.graphRenderer.drawFullFrame(0, 1.00, null);
+
+                let bettingTimeRemaining = GAME_CONFIG.BETTING_PHASE_DURATION;
+                const updateBettingTimer = () => {
+                    bettingTimeRemaining -= 1000;
+                    if (bettingTimeRemaining > 0 && this.gameState === 'BETTING') {
+                         this.uiManager.updateGameStatus(`Betting open... (${(bettingTimeRemaining / 1000).toFixed(0)}s remaining)`, 'warning');
+                         this.phaseTimeoutId = setTimeout(updateBettingTimer, 1000);
+                    } else if (this.gameState === 'BETTING') {
+                        this.startCountdown();
+                    }
+                };
+                this.phaseTimeoutId = setTimeout(updateBettingTimer, 1000);
+            }
+
+            handleMainAction() {
+                if (this.gameState === 'BETTING') {
+                    const betAmount = parseFloat(this.uiManager.betAmountInputEl.value);
+                    const autoCashoutRaw = this.uiManager.autoCashoutInputEl.value;
+                    const autoCashout = autoCashoutRaw ? parseFloat(autoCashoutRaw) : null;
+
+                    if (isNaN(betAmount) || betAmount <= 0) {
+                        this.uiManager.updateGameStatus("Invalid bet amount.", "danger");
+                        return;
+                    }
+                    if (betAmount > this.player.balance) {
+                        this.uiManager.updateGameStatus("Insufficient balance.", "danger");
+                        return;
+                    }
+                    if (autoCashout !== null && (isNaN(autoCashout) || autoCashout < 1.01)) {
+                         this.uiManager.updateGameStatus("Invalid auto cashout (min 1.01x).", "danger");
+                        return;
+                    }
+
+                    if (this.player.placeBet(betAmount, autoCashout)) {
+                        this.uiManager.updateBalanceDisplay(this.player.balance);
+                        this.uiManager.updateGameStatus("Bet placed! Waiting for round start...", "success");
+                        this.uiManager.setMainActionButtonState('WAITING_FOR_START');
+                        this.uiManager.updateCurrentBetInfo(betAmount, autoCashout);
+                    }
+                } else if (this.gameState === 'RUNNING' && this.player.currentBetAmount > 0 && !this.player.cashedOutThisRound) {
+                    this.cashOut(true); 
+                }
+            }
+
+            startCountdown() {
+                clearTimeout(this.phaseTimeoutId);
+                this.gameState = 'COUNTDOWN';
+                let countdown = GAME_CONFIG.COUNTDOWN_DURATION / 1000;
+                this.uiManager.updateGameStatus(`Round starting in ${countdown}...`, 'info');
+                this.uiManager.setMainActionButtonState('WAITING_FOR_START');
+
+                const countdownInterval = setInterval(() => {
+                    countdown--;
+                    if (countdown > 0) {
+                        this.uiManager.updateGameStatus(`Round starting in ${countdown}...`, 'info');
+                    } else {
+                        clearInterval(countdownInterval);
+                        this.startRunningPhase();
+                    }
+                }, 1000);
+            }
+
+            startRunningPhase() {
+                this.gameState = 'RUNNING';
+                this.roundStartTimeMs = performance.now();
+                this.uiManager.updateGameStatus("Multiplier running!", "success");
+                if (this.player.currentBetAmount > 0) {
+                     this.uiManager.setMainActionButtonState('RUNNING', this.currentMultiplier);
+                } else {
+                     this.uiManager.setMainActionButtonState('GAME_OVER'); 
+                }
+                this.animationFrameId = requestAnimationFrame((timestamp) => this.gameLoop(timestamp));
+            }
+
+            gameLoop(timestamp) {
+                if (this.gameState !== 'RUNNING') return;
+
+                const elapsedTimeMs = Math.max(0, timestamp - this.roundStartTimeMs);
+                this.currentMultiplier = Math.max(1.00, Math.exp(GAME_CONFIG.MULTIPLIER_CONSTANT * elapsedTimeMs));
+                
+                this.graphRenderer.drawFullFrame(elapsedTimeMs, this.currentMultiplier, this.player.autoCashoutTarget);
+                this.uiManager.updateMultiplierDisplay(this.currentMultiplier.toFixed(2));
+                 if (this.player.currentBetAmount > 0 && !this.player.cashedOutThisRound) {
+                    this.uiManager.setMainActionButtonState('RUNNING', this.currentMultiplier.toFixed(2));
+                }
+
+                if (this.player.currentBetAmount > 0 && !this.player.cashedOutThisRound && this.player.autoCashoutTarget && this.currentMultiplier >= this.player.autoCashoutTarget) {
+                    this.cashOut(false); 
+                }
+
+                if (this.currentMultiplier >= this.crashPoint) {
+                    this.handleCrash();
+                } else {
+                    this.animationFrameId = requestAnimationFrame((newTimestamp) => this.gameLoop(newTimestamp));
+                }
+            }
+            
+            cashOut(isManual) {
+                if (this.player.cashedOutThisRound || this.player.currentBetAmount <= 0) return;
+
+                this.player.cashedOutThisRound = true;
+                this.player.lastCashoutMultiplier = parseFloat( (isManual ? this.currentMultiplier : this.player.autoCashoutTarget).toFixed(2) );
+                
+                const winnings = this.player.handleWin(this.player.lastCashoutMultiplier);
+                
+                this.uiManager.updateBalanceDisplay(this.player.balance);
+                this.uiManager.updateGameStatus(`Cashed out @ ${this.player.lastCashoutMultiplier.toFixed(2)}x! Won ${winnings.toFixed(2)}`, "success");
+                this.uiManager.setMainActionButtonState('CASHED_OUT');
+            }
+
+            handleCrash() {
+                if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
+                this.gameState = 'CRASHED';
+                this.currentMultiplier = this.crashPoint; 
+
+                const elapsedTimeMs = Math.max(0, performance.now() - this.roundStartTimeMs);
+                this.graphRenderer.drawFullFrame(elapsedTimeMs, this.currentMultiplier, this.player.autoCashoutTarget, this.currentMultiplier);
+                this.uiManager.updateMultiplierDisplay(this.currentMultiplier.toFixed(2), true); 
+
+                let roundOutcomeWinnings = 0;
+                if (this.player.cashedOutThisRound) {
+                    this.uiManager.updateGameStatus(`Crashed @ ${this.currentMultiplier.toFixed(2)}x. You already cashed out!`, "neutral");
+                    roundOutcomeWinnings = this.player.currentBetAmount * this.player.lastCashoutMultiplier - this.player.currentBetAmount;
+                } else if (this.player.currentBetAmount > 0) {
+                    this.uiManager.updateGameStatus(`Crashed @ ${this.currentMultiplier.toFixed(2)}x. You lost ${this.player.currentBetAmount.toFixed(2)}.`, "danger");
+                     roundOutcomeWinnings = -this.player.currentBetAmount;
+                } else {
+                     this.uiManager.updateGameStatus(`Crashed @ ${this.currentMultiplier.toFixed(2)}x. No bet placed.`, "neutral");
+                }
+                this.uiManager.setMainActionButtonState('GAME_OVER');
+
+                this.addRoundToHistory({
+                    timestamp: Date.now(),
+                    serverSeedHash: this.serverSeedHash,
+                    serverSeed: this.serverSeed, 
+                    clientSeed: this.player.clientSeed,
+                    nonce: this.player.nonce,
+                    crashPoint: this.currentMultiplier,
+                    betAmount: this.player.currentBetAmount,
+                    cashedOutAt: this.player.lastCashoutMultiplier,
+                    winnings: roundOutcomeWinnings
+                });
+                
+                this.player.nonce++; 
+                this.player.saveState(); 
+
+                this.uiManager.updateProvablyFairModal(this.player.clientSeed, this.serverSeed, this.player.nonce -1); 
+
+                this.phaseTimeoutId = setTimeout(() => this.prepareNewRound(), GAME_CONFIG.RESULTS_PHASE_DURATION);
+            }
+            
+            addRoundToHistory(roundData) {
+                this.gameHistory.unshift(roundData);
+                if (this.gameHistory.length > GAME_CONFIG.MAX_HISTORY_ITEMS) {
+                    this.gameHistory.pop();
+                }
+                try {
+                    localStorage.setItem('crashGameHistory', JSON.stringify(this.gameHistory));
+                } catch (error) {
+                    console.error("Error saving game history to localStorage:", error);
+                }
+                this.uiManager.populateHistory(this.gameHistory);
+            }
+
+            async verifyProvablyFair() {
+                const serverSeed = this.uiManager.verifyServerSeedEl.value;
+                const clientSeed = this.uiManager.verifyClientSeedEl.value;
+                const nonce = parseInt(this.uiManager.verifyNonceEl.value, 10);
+
+                if (!serverSeed || !clientSeed || isNaN(nonce)) {
+                    this.uiManager.setVerificationResult("Please fill all fields.", false);
+                    return;
+                }
+                try {
+                    const calculatedCrash = await this.provablyFair.calculateCrashPoint(serverSeed, clientSeed, nonce);
+                    this.uiManager.setVerificationResult(`${calculatedCrash.toFixed(2)}x`, true);
+                } catch (e) {
+                    this.uiManager.setVerificationResult("Error in calculation.", false);
+                    console.error("Verification error:", e);
+                }
+            }
+            
+            populateVerifierModal(serverSeed, clientSeed, nonce) {
+                this.uiManager.updateProvablyFairModal(clientSeed, serverSeed, nonce);
+                const provablyFairModal = new bootstrap.Modal(document.getElementById('provablyFairModal'));
+                provablyFairModal.show();
+                this.verifyProvablyFair(); // Auto-calculate on populate
+            }
+
+            clearHistory() {
+                this.gameHistory = [];
+                try {
+                    localStorage.removeItem('crashGameHistory');
+                } catch (error) {
+                    console.error("Error clearing game history from localStorage:", error);
+                }
+                this.uiManager.populateHistory(this.gameHistory);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!window.crypto || !window.crypto.subtle) {
+                document.body.innerHTML = `<div class="alert alert-danger m-5" role="alert">
+                    Critical Error: Web Crypto API (crypto.subtle) is not available in your browser. This game cannot run securely. Please use a modern browser.
+                </div>`;
+                return;
+            }
+            gameInstance = new CrashGame();
+            gameInstance.init().catch(err => {
+                console.error("Failed to initialize game:", err);
+                 document.body.innerHTML = `<div class="alert alert-danger m-5" role="alert">
+                    Failed to initialize game. Check console for details.
+                </div>`;
+            });
+        });
+
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>
