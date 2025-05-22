@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AppGen Gallery</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: var(--bs-dark-bg-subtle, #0d1117);
+      color: var(--bs-body-color);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    }
+
+    .app-card-wrapper {
+        display: flex; 
+        flex-direction: column;
+    }
+
+    .app-card {
+      transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out;
+      background-color: var(--bs-tertiary-bg); 
+      border: 1px solid var(--bs-border-color-translucent);
+      border-radius: 0.5rem; 
+      position: relative;
+      overflow: hidden; 
+      display: flex;
+      flex-direction: column;
+    }
+
+    .app-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 0.5rem 1.5rem rgba(var(--bs-primary-rgb), 0.15);
+      border-color: var(--bs-primary-border-subtle);
+    }
+
+    .img-placeholder {
+      position: relative;
+      aspect-ratio: 16/9;
+      background-color: var(--bs-secondary-bg);
+      overflow: hidden;
+    }
+
+    .card-img-top {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .image-status-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      background-color: rgba(var(--bs-dark-rgb), 0.6);
+      transition: opacity 0.3s ease-in-out;
+      pointer-events: none;
+    }
+
+    .image-status-overlay.error-overlay {
+        background-color: rgba(var(--bs-danger-rgb), 0.7);
+    }
+    .image-status-overlay .bi-exclamation-triangle-fill {
+        color: var(--bs-light);
+    }
+    .image-status-overlay .status-text {
+        color: var(--bs-light);
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+    }
+
+    .app-card.border-danger { 
+      border-color: var(--bs-danger-border-subtle) !important;
+      box-shadow: 0 0 0.5rem rgba(var(--bs-danger-rgb), 0.2);
+    }
+    .app-card.border-danger .card-title a.stretched-link {
+      color: var(--bs-danger-text-emphasis) !important;
+    }
+    .app-card.border-danger .card-title a.stretched-link:hover {
+      color: var(--bs-danger) !important;
+    }
+
+    #statusMessageContainer {
+      border-radius: 0.375rem;
+      transition: opacity 0.3s ease-in-out, background-color 0.3s ease-in-out, border-color 0.3s ease-in-out;
+    }
+    
+    #statusMessageContainer.alert-info {
+        background-color: var(--bs-info-bg-subtle);
+        border-color: var(--bs-info-border-subtle);
+        color: var(--bs-info-text-emphasis);
+    }
+    #statusMessageContainer.alert-danger {
+        background-color: var(--bs-danger-bg-subtle);
+        border-color: var(--bs-danger-border-subtle);
+        color: var(--bs-danger-text-emphasis);
+    }
+    #statusMessageContainer.alert-success {
+        background-color: var(--bs-success-bg-subtle);
+        border-color: var(--bs-success-border-subtle);
+        color: var(--bs-success-text-emphasis);
+    }
+
+    #gallerySubtitle {
+        color: var(--bs-secondary-color) !important;
+    }
+
+    .card-title a.stretched-link {
+        color: var(--bs-body-emphasis); 
+        font-weight: 600;
+        text-decoration: none;
+    }
+    .card-title a.stretched-link:hover {
+        color: var(--bs-primary);
+        text-decoration: underline;
+        text-decoration-thickness: 1.5px;
+    }
+    
+    .footer-text {
+        font-size: 0.9em;
+    }
+
+    #spinner .spinner-border { 
+        width: 3rem;
+        height: 3rem;
+    }
+    .image-status-overlay .spinner-border-sm { 
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+
+    .card-body {
+        flex-grow: 1; 
+    }
+    .card-error-message {
+        font-size: 0.85em;
+        margin-top: 0.5rem;
+    }
+    
+    #gallery {
+      display: none; 
+    }
+  </style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+  <header class="container-fluid py-4 px-lg-5 text-center shadow-sm bg-body-tertiary border-bottom border-body-secondary">
+    <h1 class="mb-2 display-5 fw-semibold">AppGen Live Gallery</h1>
+    <p class="lead fs-5" id="gallerySubtitle">Discover the latest applications built with AppGen</p>
+  </header>
+
+  <main class="container-fluid py-4 px-lg-5 flex-grow-1">
+    <div id="statusMessageContainer" class="text-center mb-4 p-3 alert" role="alert" style="display: none;">
+      <p id="statusMessage" class="mb-0"></p>
+    </div>
+    <div id="spinner" class="text-center my-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading apps...</span>
+      </div>
+      <p class="mt-2 text-muted">Loading apps, please wait...</p>
+    </div>
+    <div id="gallery" class="row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
+    </div>
+  </main>
+
+  <footer class="container-fluid text-center py-3 mt-auto border-top border-secondary-subtle bg-body-tertiary">
+    <p class="mb-1 footer-text text-muted">&copy; <span id="currentYear"></span> AppGen Gallery. Powered by AppGen AI.</p>
+    <button id="refreshCacheButton" class="btn btn-sm btn-outline-info mt-1" style="display: none;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise me-1" viewBox="0 0 16 16" style="vertical-align: -0.125em;">
+        <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/>
+        <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/>
+      </svg>
+      Refresh Gallery
+    </button>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    (function() {
+      const GITHUB_API_URL = 'https://api.github.com/repos/metamindsapp/appgen2025-backups/contents/apps?ref=main';
+      const APP_HOST_BASE_URL = 'https://beepboopbeepgen.replit.app/apps/';
+      const API_AI_URL = '/api/ai';
+      const API_IMAGE_GEN_URL = '/api/generate-image-on-demand';
+      const CACHE_KEY = 'appGenGalleryCache_v6_progressive'; 
+      const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+      const TRANSPARENT_SVG_PLACEHOLDER = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 9"%3E%3C/svg%3E';
+
+      const galleryElement = document.getElementById('gallery');
+      const spinnerElement = document.getElementById('spinner');
+      const statusMessageElement = document.getElementById('statusMessage');
+      const statusMessageContainer = document.getElementById('statusMessageContainer');
+      const refreshCacheButton = document.getElementById('refreshCacheButton');
+      const currentYearElement = document.getElementById('currentYear');
+
+      let appsDataStore = [];
+
+      function generateSafeId(filename) {
+        return `app-card-${filename.replace(/[^a-zA-Z0-9-]/g, '_')}`;
+      }
+
+      function updateStatus(message, type = 'info') { 
+        statusMessageElement.textContent = message;
+        statusMessageContainer.style.display = 'block';
+        statusMessageContainer.className = 'text-center mb-4 p-3 alert'; 
+        statusMessageContainer.classList.add(`alert-${type}`);
+      }
+
+      function showLoadingState(isLoading, message = "Loading apps, please wait...") {
+        if (isLoading) {
+          spinnerElement.style.display = 'block';
+          galleryElement.style.display = 'none'; 
+          if (message) updateStatus(message, 'info');
+          refreshCacheButton.disabled = true;
+          refreshCacheButton.classList.add('disabled');
+        } else {
+          spinnerElement.style.display = 'none';
+          galleryElement.style.display = 'flex'; 
+          refreshCacheButton.disabled = false;
+          refreshCacheButton.classList.remove('disabled');
+          refreshCacheButton.style.display = 'block';
+        }
+      }
+      
+      function getFallbackTitle(filename) {
+        let title = filename.replace(/\.html$/i, '').replace(/_/g, ' ');
+        title = title.replace(/\b[a-z0-9]/g, l => l.toUpperCase());
+        title = title.replace(/ Rev\d+/i, ''); 
+        return title.trim() || 'Untitled Application';
+      }
+
+      function getFallbackImageSVG(titleForSVG, errorMessage = "Image Unavailable") {
+        const cleanTitle = titleForSVG.length > 25 ? titleForSVG.substring(0, 22) + '...' : titleForSVG;
+        const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--bs-secondary-bg').trim() || '#343a40';
+        const textColor = getComputedStyle(document.documentElement).getPropertyValue('--bs-body-color').trim() || '#f8f9fa';
+        const errorColor = getComputedStyle(document.documentElement).getPropertyValue('--bs-danger-text-emphasis').trim() || '#f17c7c';
+        
+        const iconPath = "M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z";
+
+        const placeholderSvg = `
+          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" focusable="false" viewBox="0 0 100 56.25">
+            <rect width="100%" height="100%" fill="${bgColor}"></rect>
+            <g transform="translate(50 22) scale(1.2)"> 
+              <path fill="${errorColor}" d="${iconPath}" transform="translate(-8 -8)"/>
+            </g>
+            <text x="50%" y="65%" fill="${textColor}" dy=".3em" text-anchor="middle" font-size="5px" font-family="system-ui, sans-serif" dominant-baseline="middle">${cleanTitle}</text>
+            <text x="50%" y="80%" fill="${errorColor}" dy=".3em" text-anchor="middle" font-size="4px" font-family="system-ui, sans-serif" dominant-baseline="middle">${errorMessage}</text>
+          </svg>`;
+        return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(placeholderSvg)}`;
+      }
+
+      async function fetchAppList() {
+        try {
+          const response = await fetch(GITHUB_API_URL, { cache: 'no-store' });
+          if (!response.ok) throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+          const files = await response.json();
+          if (!Array.isArray(files)) {
+            const errorMessage = files.message ? `GitHub API error: ${files.message}` : 'GitHub API response is not an array.';
+            throw new Error(errorMessage);
+          }
+          return files.filter(file => file.type === 'file' && file.name.endsWith('.html'));
+        } catch (error) {
+          console.error('Failed to fetch app list:', error);
+          updateStatus(`Error fetching app list: ${error.message}`, 'danger');
+          return null;
+        }
+      }
+
+      function processAppFiles(githubFiles) {
+        if (!githubFiles || githubFiles.length === 0) return [];
+        const latestRevisionsMap = {};
+        const filePattern = /^(.*?)(?:_rev(\d+))?\.html$/i;
+        githubFiles.forEach(file => {
+          const match = file.name.match(filePattern);
+          if (match) { 
+            const baseName = match[1];
+            const revision = match[2] ? parseInt(match[2], 10) : 0;
+            if (!latestRevisionsMap[baseName] || revision >= latestRevisionsMap[baseName].revision) {
+              latestRevisionsMap[baseName] = { fileObject: file, revision: revision };
+            }
+          }
+        });
+        return Object.values(latestRevisionsMap).map(item => item.fileObject);
+      }
+
+      async function fetchSourceCode(sourceUrl) {
+        try {
+          const response = await fetch(sourceUrl, { cache: 'no-store' });
+          if (!response.ok) throw new Error(`Failed to fetch source: ${response.status} ${response.statusText}`);
+          return await response.text();
+        } catch (error) {
+          console.error(`Error fetching source code from ${sourceUrl}:`, error);
+          return null;
+        }
+      }
+
+      async function extractTitle(htmlContent, filename) {
+        const aiguidePrompt = "Analyze the following HTML content and extract the primary project title. Prioritize the content of the <title> tag. If a <title> tag is absent or empty, look for a prominent <h1> heading. If neither is suitable, attempt to derive a concise and descriptive title from other headings or main content. Return ONLY the extracted title as a plain string, with no additional explanations, labels, or surrounding text. If a clear title cannot be reasonably determined or the HTML seems to be a generic placeholder, return 'Untitled Application'.";
+        try {
+          const response = await fetch(API_AI_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              aiguide: aiguidePrompt,
+              msgforai: htmlContent,
+              llmSettings: { temperature: 0.2, model: "gemini-1.5-flash-latest" }
+            })
+          });
+          if (!response.ok) throw new Error(`AI title extraction API error: ${response.status} ${response.statusText}`);
+          const data = await response.json();
+          if (data.success && data.response && data.response.trim() !== '' && data.response.trim().toLowerCase() !== 'untitled application') {
+            return data.response.trim();
+          }
+          return getFallbackTitle(filename);
+        } catch (error) {
+          console.error(`Error extracting title for ${filename}:`, error);
+          return getFallbackTitle(filename);
+        }
+      }
+
+      async function generateImageFor(title, filename) {
+        const imageGenPrompt = `Generate a visually appealing, abstract, or illustrative thumbnail image (16:9 aspect ratio) representing a web application titled "${title}". Style: modern, dark theme, tech-focused, visually symbolic, professional, clean. Avoid embedding any text in the image. Focus on a central iconic element or an evocative abstract design.`;
+        try {
+          const response = await fetch(API_IMAGE_GEN_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: imageGenPrompt, aspectRatio: "16:9", style: "hd" })
+          });
+          if (!response.ok) throw new Error(`AI image generation API error: ${response.status} ${response.statusText}`);
+          const data = await response.json();
+          if (data.success && data.imageUrl) return data.imageUrl;
+          return getFallbackImageSVG(title, 'Image Gen Failed');
+        } catch (error) {
+          console.error(`Error generating image for ${title} (${filename}):`, error);
+          return getFallbackImageSVG(title, 'Image Gen Error');
+        }
+      }
+
+      function renderAppCard(appObject) {
+        const col = document.createElement('div');
+        col.className = 'col app-card-wrapper'; 
+        col.id = appObject.id.replace('app-card-', 'col-');
+
+        const card = document.createElement('div');
+        card.className = 'card h-100 shadow-sm app-card';
+        card.id = appObject.id;
+        
+        const imgPlaceholder = document.createElement('div');
+        imgPlaceholder.className = 'img-placeholder position-relative';
+
+        const img = document.createElement('img');
+        img.src = TRANSPARENT_SVG_PLACEHOLDER; 
+        img.className = 'card-img-top';
+        img.alt = `Loading preview for ${appObject.filename}`;
+        img.loading = 'lazy';
+
+        img.onload = function() {
+            if (this.src === TRANSPARENT_SVG_PLACEHOLDER && appObject.imageUrl === TRANSPARENT_SVG_PLACEHOLDER) return; 
+            
+            if (this.src === appObject.finalImageUrl && appObject.status !== 'completed') { 
+                 appObject.status = 'completed';
+            } else if (this.src.startsWith('data:image/svg+xml') && (appObject.status === 'error-image' || appObject.status === 'error-browser')) {
+            }
+            updateCardDOM(appObject);
+        };
+        img.onerror = function() {
+            if (this.src === TRANSPARENT_SVG_PLACEHOLDER && !appObject.finalImageUrl) {
+                console.error("Transparent SVG placeholder failed to load:", this.src, appObject);
+                appObject.status = 'error-browser';
+                appObject.errorMessage = (appObject.errorMessage || '') + ' Image placeholder resource error.';
+                updateCardDOM(appObject);
+                return;
+            }
+
+            const currentSrcWasFallback = this.src.startsWith('data:image/svg+xml');
+            appObject.status = 'error-browser';
+            
+            if (currentSrcWasFallback) {
+                appObject.errorMessage = (appObject.errorMessage || '') + ' Fallback SVG could not be rendered. ';
+            } else {
+                appObject.errorMessage = (appObject.errorMessage || '') + ' Content image could not be loaded. ';
+            }
+
+            const definitiveFallbackTitle = (appObject.title && appObject.title !== 'Loading title...') ? appObject.title : getFallbackTitle(appObject.filename);
+            const definitiveFallbackSvg = getFallbackImageSVG(definitiveFallbackTitle, 'Display Error');
+
+            if (this.src !== definitiveFallbackSvg) {
+                appObject.finalImageUrl = definitiveFallbackSvg;
+                this.src = definitiveFallbackSvg;
+            }
+            updateCardDOM(appObject); 
+        };
+
+        const imageStatusOverlay = document.createElement('div');
+        imageStatusOverlay.className = 'image-status-overlay';
+        imageStatusOverlay.style.display = 'none';
+
+        imgPlaceholder.appendChild(img);
+        imgPlaceholder.appendChild(imageStatusOverlay);
+
+        const cardBody = document.createElement('div');
+        cardBody.className = 'card-body d-flex flex-column text-center p-3';
+
+        const titleElement = document.createElement('h5');
+        titleElement.className = 'card-title mb-2';
+        
+        const titleTextSpan = document.createElement('span');
+        titleTextSpan.className = 'title-text';
+        titleTextSpan.textContent = 'Loading title...';
+        
+        const titleLink = document.createElement('a');
+        titleLink.href = appObject.appUrl;
+        titleLink.target = '_blank';
+        titleLink.rel = 'noopener noreferrer';
+        titleLink.className = 'stretched-link';
+        titleLink.style.display = 'none'; 
+        
+        titleElement.appendChild(titleTextSpan);
+        titleElement.appendChild(titleLink);
+
+        const filenameText = document.createElement('p');
+        filenameText.className = 'card-text small text-muted mt-auto pt-2 mb-0 filename-text';
+        filenameText.innerHTML = `<em>${appObject.filename}</em>`;
+        
+        const cardErrorMessageElement = document.createElement('div');
+        cardErrorMessageElement.className = 'card-error-message text-danger small';
+        cardErrorMessageElement.style.display = 'none';
+
+        cardBody.appendChild(titleElement);
+        cardBody.appendChild(filenameText);
+        cardBody.appendChild(cardErrorMessageElement);
+        
+        card.appendChild(imgPlaceholder);
+        card.appendChild(cardBody);
+        col.appendChild(card);
+        galleryElement.appendChild(col);
+        updateCardDOM(appObject); 
+      }
+
+      function updateCardDOM(appObject) {
+        const card = document.getElementById(appObject.id);
+        if (!card) return;
+
+        const titleTextSpan = card.querySelector('.title-text');
+        const titleLink = card.querySelector('.card-title a.stretched-link');
+        const filenameText = card.querySelector('.filename-text');
+        const imgElement = card.querySelector('.card-img-top');
+        const imageStatusOverlay = card.querySelector('.image-status-overlay');
+        const cardErrorMessageElement = card.querySelector('.card-error-message');
+
+        card.classList.remove('border-danger');
+        imageStatusOverlay.innerHTML = '';
+        imageStatusOverlay.style.display = 'none';
+        imageStatusOverlay.classList.remove('error-overlay');
+        cardErrorMessageElement.style.display = 'none';
+        cardErrorMessageElement.textContent = '';
+
+        if (appObject.title && appObject.title !== 'Loading title...') {
+            titleTextSpan.style.display = 'none';
+            titleLink.textContent = appObject.title;
+            titleLink.href = appObject.appUrl;
+            titleLink.style.display = 'inline';
+            imgElement.alt = `Preview for ${appObject.title}`;
+        } else {
+            titleTextSpan.textContent = appObject.title || 'Loading title...';
+            titleTextSpan.style.display = 'inline';
+            titleLink.style.display = 'none';
+            imgElement.alt = `Loading preview for ${appObject.filename}`;
+        }
+        filenameText.innerHTML = `<em>${appObject.filename}</em>`;
+
+        if (appObject.finalImageUrl && imgElement.src !== appObject.finalImageUrl) {
+            imgElement.src = appObject.finalImageUrl;
+        } else if (!appObject.finalImageUrl && imgElement.src !== TRANSPARENT_SVG_PLACEHOLDER) {
+            imgElement.src = TRANSPARENT_SVG_PLACEHOLDER;
+        }
+        
+        switch (appObject.status) {
+            case 'loading-title':
+                titleTextSpan.textContent = 'Loading title...';
+                break;
+            case 'loading-image':
+                imageStatusOverlay.style.display = 'flex';
+                imageStatusOverlay.innerHTML = `<div class="spinner-border spinner-border-sm text-light" role="status"><span class="visually-hidden">Loading image...</span></div>`;
+                break;
+            case 'error-source':
+                card.classList.add('border-danger');
+                cardErrorMessageElement.textContent = appObject.errorMessage || 'Failed to load app source.';
+                cardErrorMessageElement.style.display = 'block';
+                if (imgElement.src === TRANSPARENT_SVG_PLACEHOLDER && appObject.finalImageUrl) { 
+                    imgElement.src = appObject.finalImageUrl;
+                }
+                break;
+            case 'error-title':
+                 cardErrorMessageElement.textContent = appObject.errorMessage || 'Failed to determine title.';
+                 cardErrorMessageElement.style.display = 'block';
+                 break;
+            case 'error-image':
+            case 'error-browser':
+                card.classList.add('border-danger');
+                imageStatusOverlay.style.display = 'flex';
+                imageStatusOverlay.classList.add('error-overlay');
+                const errorType = appObject.status === 'error-image' ? 'Image Gen Failed' : 'Image Load Failed';
+                imageStatusOverlay.innerHTML = `
+                    <div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-exclamation-triangle-fill" viewBox="0 0 16 16"><path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>
+                        <span class="d-block status-text">${errorType}</span>
+                    </div>`;
+                 if (appObject.errorMessage && !cardErrorMessageElement.textContent.includes(appObject.errorMessage)) {
+                    cardErrorMessageElement.textContent = (cardErrorMessageElement.textContent ? cardErrorMessageElement.textContent + " " : "") + appObject.errorMessage;
+                    cardErrorMessageElement.style.display = 'block';
+                 }
+                break;
+            case 'completed':
+                break;
+        }
+      }
+      
+      async function processSingleApp(appObject) {
+        try {
+            appObject.status = 'loading-title';
+            updateCardDOM(appObject);
+
+            const htmlContent = await fetchSourceCode(appObject.sourceUrl);
+            if (!htmlContent) {
+              appObject.status = 'error-source';
+              appObject.errorMessage = 'Failed to load app source.';
+              appObject.title = getFallbackTitle(appObject.filename);
+              appObject.finalImageUrl = getFallbackImageSVG(appObject.title, 'Source Error');
+              updateCardDOM(appObject);
+              return;
+            }
+            appObject.htmlContent = htmlContent;
+
+            appObject.title = await extractTitle(appObject.htmlContent, appObject.filename);
+            appObject.status = 'loading-image';
+            updateCardDOM(appObject);
+
+            appObject.finalImageUrl = await generateImageFor(appObject.title, appObject.filename);
+            if (appObject.finalImageUrl.startsWith('data:image/svg+xml')) { 
+                appObject.status = 'error-image';
+                appObject.errorMessage = (appObject.errorMessage || '') + ' Image generation resulted in fallback.';
+            }
+            updateCardDOM(appObject);
+        } catch (error) {
+            console.error(`Critical error processing ${appObject.filename}:`, error);
+            appObject.status = 'error-source'; 
+            appObject.errorMessage = `Processing error: ${error.message}`;
+            appObject.title = getFallbackTitle(appObject.filename);
+            appObject.finalImageUrl = getFallbackImageSVG(appObject.title, 'Processing Error');
+            updateCardDOM(appObject);
+        }
+      }
+
+      function loadFromCache() {
+        const cached = localStorage.getItem(CACHE_KEY);
+        if (cached) {
+          try {
+            const { timestamp, apps } = JSON.parse(cached);
+            if (Date.now() - timestamp < CACHE_TTL) return apps;
+          } catch(e) {
+            console.error("Error parsing cache:", e);
+            localStorage.removeItem(CACHE_KEY); 
+          }
+        }
+        return null;
+      }
+
+      function saveToCache(apps) {
+        try {
+          const appsToCache = apps.map(app => ({ ...app, htmlContent: null })); 
+          localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), apps: appsToCache }));
+        } catch (e) {
+          console.error("Error saving to cache:", e);
+          updateStatus("Could not save to local cache. Storage might be full.", 'danger');
+        }
+      }
+      
+      function sortGalleryDOM() {
+        const gallery = document.getElementById('gallery');
+        const appCardCols = appsDataStore
+            .map(app => document.getElementById(app.id.replace('app-card-', 'col-')))
+            .filter(Boolean); 
+        
+        const fragment = document.createDocumentFragment();
+        appCardCols.forEach(colElement => fragment.appendChild(colElement));
+        gallery.appendChild(fragment);
+      }
+
+      async function fetchAndProcessApps(forceRefresh = false) {
+        if (forceRefresh) {
+          localStorage.removeItem(CACHE_KEY);
+          appsDataStore = [];
+        }
+        galleryElement.innerHTML = ''; 
+        showLoadingState(true, "Fetching app list from GitHub...");
+
+        const githubFiles = await fetchAppList();
+        if (!githubFiles) { showLoadingState(false); return; }
+        
+        updateStatus(`Found ${githubFiles.length} file(s). Filtering latest revisions...`, 'info');
+        const latestAppFiles = processAppFiles(githubFiles);
+
+        if (!latestAppFiles || latestAppFiles.length === 0) {
+            updateStatus("No suitable app files found after filtering.", 'info');
+            showLoadingState(false); return;
+        }
+
+        updateStatus(`Initializing gallery for ${latestAppFiles.length} app(s)...`, 'info');
+        appsDataStore = latestAppFiles.map(file => ({
+            id: generateSafeId(file.name),
+            filename: file.name,
+            sourceUrl: file.download_url, 
+            appUrl: APP_HOST_BASE_URL + file.name,
+            title: 'Loading title...',
+            imageUrl: TRANSPARENT_SVG_PLACEHOLDER,
+            finalImageUrl: null, 
+            status: 'pending', 
+            errorMessage: null,
+            htmlContent: null
+        }));
+        
+        appsDataStore.forEach(appObject => renderAppCard(appObject)); 
+        showLoadingState(false); 
+        updateStatus(`Processing ${appsDataStore.length} app(s)... This may take a while. Card details will appear as they load.`, 'info');
+
+        const processingPromises = appsDataStore.map((app, index) => {
+            return processSingleApp(app).catch(err => {
+                 console.error(`Unhandled error in processSingleApp for ${app.filename}:`, err);
+                 app.status = 'error-source';
+                 app.errorMessage = `Unexpected error: ${err.message}`;
+                 app.title = getFallbackTitle(app.filename);
+                 app.finalImageUrl = getFallbackImageSVG(app.title, 'System Error');
+                 updateCardDOM(app);
+            });
+        });
+        
+        await Promise.allSettled(processingPromises);
+        
+        appsDataStore.sort((a,b) => (a.title || "").localeCompare(b.title || ""));
+        sortGalleryDOM();
+        saveToCache(appsDataStore);
+
+        const successfulApps = appsDataStore.filter(app => app.status === 'completed').length;
+        const errorApps = appsDataStore.length - successfulApps;
+
+        if (errorApps === 0 && appsDataStore.length > 0) {
+            updateStatus(`Gallery updated with ${appsDataStore.length} app(s). All loaded successfully!`, 'success');
+        } else if (appsDataStore.length > 0) {
+            updateStatus(`Gallery updated. ${successfulApps} of ${appsDataStore.length} app(s) loaded. ${errorApps} app(s) encountered issues.`, errorApps > 0 ? 'info' : 'success');
+        } else {
+            updateStatus("No apps to display.", 'info');
+        }
+      }
+      
+      function renderFullGalleryFromCache(cachedApps) {
+        galleryElement.innerHTML = '';
+        appsDataStore = cachedApps.map(app => ({...app, htmlContent: null}));
+        appsDataStore.forEach(appObject => {
+            renderAppCard(appObject); 
+            updateCardDOM(appObject); 
+        });
+        sortGalleryDOM(); 
+        showLoadingState(false);
+        let cacheTimestamp = Date.now();
+        try {
+            const cacheMeta = JSON.parse(localStorage.getItem(CACHE_KEY));
+            if(cacheMeta && cacheMeta.timestamp) cacheTimestamp = cacheMeta.timestamp;
+        } catch(e){ console.error("Error reading cache timestamp:", e); }
+        const cacheDate = new Date(cacheTimestamp);
+        updateStatus(`Displaying ${appsDataStore.length} app(s) from cache (last refreshed: ${cacheDate.toLocaleString()}). Click refresh for latest.`, 'success');
+      }
+
+      function handleRefreshCache() {
+        updateStatus("Refreshing gallery from source... This may take a moment.", 'info');
+        fetchAndProcessApps(true);
+      }
+
+      function initGallery() {
+        currentYearElement.textContent = new Date().getFullYear();
+        refreshCacheButton.addEventListener('click', handleRefreshCache);
+
+        const cachedApps = loadFromCache();
+        if (cachedApps && cachedApps.length > 0) {
+          renderFullGalleryFromCache(cachedApps);
+        } else {
+          fetchAndProcessApps();
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', initGallery);
+    })();
+  </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>
