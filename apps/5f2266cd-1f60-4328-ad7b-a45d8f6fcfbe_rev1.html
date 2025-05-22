@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Face Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #1a202c;
+            color: #e2e8f0;
+            font-family: sans-serif;
+        }
+        .vh-100 {
+            height: 100vh;
+        }
+        .img-fluid {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        .card-custom {
+            background-color: #2d3748;
+            border: 1px solid #4a5568;
+        }
+        .form-control-custom {
+             background-color: #4a5568;
+             color: #e2e8f0;
+             border-color: #6a7b90;
+        }
+         .form-control-custom::placeholder {
+            color: #a0aec0;
+         }
+         .form-control-custom:focus {
+            background-color: #4a5568;
+            color: #e2e8f0;
+            border-color: #63b3ed;
+            box-shadow: 0 0 0 0.25rem rgba(99, 179, 237, 0.25);
+         }
+         .btn-primary {
+            background-color: #63b3ed;
+            border-color: #63b3ed;
+         }
+         .btn-primary:hover {
+             background-color: #4299e1;
+             border-color: #4299e1;
+         }
+         .btn-primary:active {
+             background-color: #3182ce !important;
+             border-color: #3182ce !important;
+         }
+         .btn-primary:focus {
+             box-shadow: 0 0 0 0.25rem rgba(99, 179, 237, 0.5);
+         }
+         .alert-custom {
+             background-color: #4a5568;
+             color: #e2e8f0;
+             border-color: #6a7b90;
+         }
+    </style>
+</head>
+<body>
+
+    <div class="container-fluid d-flex flex-column align-items-center justify-content-center vh-100 bg-dark text-white p-3">
+        <div class="row w-100 justify-content-center">
+            <div class="col-12 col-md-8 col-lg-6 text-center">
+                <h1 class="mb-4">Happy Face Generator</h1>
+                <img id="happyFaceImage" src="/generated_images/dalle_0770ee4e-c6a.png" alt="A happy face" class="img-fluid mb-4 border border-secondary rounded shadow">
+
+                <div class="card card-custom mb-3 w-100">
+                    <div class="card-body">
+                        <label for="promptInput" class="form-label text-start w-100">Describe the happy face you want:</label>
+                        <input type="text" class="form-control form-control-custom mb-3" id="promptInput" placeholder="e.g., A cheerful cartoon face with big eyes">
+                        <button id="generateBtn" class="btn btn-primary w-100">Generate Happy Face</button>
+                    </div>
+                </div>
+
+                <div id="feedbackArea" class="text-muted mt-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function() {
+            const happyFaceImage = document.getElementById('happyFaceImage');
+            const promptInput = document.getElementById('promptInput');
+            const generateBtn = document.getElementById('generateBtn');
+            const feedbackArea = document.getElementById('feedbackArea');
+
+            function showFeedback(message, isError = false) {
+                feedbackArea.innerHTML = '';
+                const alertDiv = document.createElement('div');
+                alertDiv.classList.add('alert', 'alert-custom', 'mt-2');
+                if (isError) {
+                     alertDiv.classList.add('alert-danger'); // Use danger for errors
+                } else {
+                    alertDiv.classList.add('alert-info'); // Use info for general messages
+                }
+                alertDiv.textContent = message;
+                feedbackArea.appendChild(alertDiv);
+            }
+
+            function clearFeedback() {
+                feedbackArea.innerHTML = '';
+            }
+
+            async function generateHappyFace(prompt) {
+                if (!prompt) {
+                    showFeedback('Please enter a description.', true);
+                    return;
+                }
+
+                showFeedback('Generating image...');
+                generateBtn.disabled = true;
+                generateBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Generating...';
+
+                try {
+                    const response = await fetch('/api/generate-image-on-demand', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            prompt: prompt,
+                            aspectRatio: '1:1',
+                            style: 'standard'
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok && data.success) {
+                        happyFaceImage.src = data.imageUrl;
+                        happyFaceImage.onerror = () => {
+                            showFeedback('Failed to load the generated image.', true);
+                        };
+                        showFeedback('Image generated successfully!');
+                    } else {
+                        showFeedback(`Error: ${data.error || 'Failed to generate image.'}`, true);
+                        console.error('Image generation error:', data.error);
+                    }
+                } catch (error) {
+                    showFeedback('Network error. Could not generate image.', true);
+                    console.error('Network/fetch error:', error);
+                } finally {
+                    generateBtn.disabled = false;
+                    generateBtn.innerHTML = 'Generate Happy Face';
+                }
+            }
+
+            generateBtn.addEventListener('click', () => {
+                const prompt = promptInput.value.trim();
+                generateHappyFace(prompt);
+            });
+
+            promptInput.addEventListener('keypress', (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    generateBtn.click();
+                }
+            });
+
+            // Optional: Clear feedback when input is focused again
+            promptInput.addEventListener('focus', clearFeedback);
+
+
+        })();
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>
