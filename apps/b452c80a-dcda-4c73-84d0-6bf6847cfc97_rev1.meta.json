@@ -1,0 +1,9 @@
+{
+  "projectId": "b452c80a-dcda-4c73-84d0-6bf6847cfc97",
+  "revisionString": "1",
+  "projectNameDisplay": "Breakout , but with spelling",
+  "userPromptForThisRevision": "Break blocks to make words. \r\nFailing making a possible word combination, ball bounces back\r\nNot failing to be the next letter in a word explodes brick",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-05-22T01:31:45.063Z",
+  "imageAssets": []
+}
