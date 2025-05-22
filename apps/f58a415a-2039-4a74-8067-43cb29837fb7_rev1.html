@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COOL Art Explorer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: var(--bs-body-bg);
+            color: var(--bs-body-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-family: sans-serif;
+            line-height: 1.6;
+        }
+        .main-content {
+             flex-grow: 1;
+        }
+        .artwork-card {
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            height: 100%;
+            border: 1px solid var(--bs-border-color-translucent);
+        }
+        .artwork-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.3);
+        }
+         .artwork-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-top-left-radius: var(--bs-card-border-radius);
+            border-top-right-radius: var(--bs-card-border-radius);
+        }
+        .loading-spinner {
+            display: none;
+            margin-top: 20px;
+        }
+        .modal-body {
+            max-height: 70vh;
+            overflow-y: auto;
+            text-align: center;
+        }
+         .modal-body img {
+             max-width: 100%;
+             height: auto;
+             display: block;
+             margin: 0 auto 1rem auto;
+         }
+        .btn-favorite.favorited {
+            background-color: var(--bs-success);
+            border-color: var(--bs-success);
+            color: var(--bs-white);
+        }
+        .btn-favorite.favorited:hover {
+             background-color: var(--bs-success-hover, #198754); /* Use Bootstrap variable or fallback */
+             border-color: var(--bs-success-hover, #198754);
+        }
+         .btn-favorite.favorited:focus {
+             box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.5); /* Use Bootstrap variable or fallback */
+        }
+
+        .card-body {
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+        }
+        .card-title {
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        .card-text {
+            font-size: 0.9rem;
+            color: var(--bs-secondary-color);
+        }
+        .card-body .mt-auto {
+            margin-top: auto;
+        }
+        .footer {
+            flex-shrink: 0; /* Prevent footer from shrinking */
+        }
+        #favoritesGrid .col-12 p {
+            padding: 20px;
+            text-align: center;
+        }
+         .alert {
+            margin-top: 1rem;
+         }
+         .btn-outline-light:hover {
+             color: var(--bs-dark) !important;
+         }
+         .btn-outline-light:focus {
+             box-shadow: 0 0 0 0.25rem rgba(248, 249, 250, 0.5); /* White with transparency */
+         }
+         .form-control {
+             background-color: var(--bs-body-bg);
+             color: var(--bs-body-color);
+             border-color: var(--bs-border-color);
+         }
+          .form-control:focus {
+              background-color: var(--bs-body-bg);
+              color: var(--bs-body-color);
+              border-color: var(--bs-primary);
+              box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25); /* Bootstrap primary focus */
+          }
+    </style>
+</head>
+<body>
+
+    <header class="bg-dark text-light py-3 shadow-sm">
+        <div class="container">
+            <h1 class="text-center mb-0">COOL Art Explorer</h1>
+        </div>
+    </header>
+
+    <main class="container my-4 main-content">
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-8 col-lg-6">
+                <div class="input-group">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search artworks...">
+                    <button class="btn btn-outline-light" type="button" id="searchButton">Search</button>
+                    <button class="btn btn-outline-light" type="button" id="surpriseButton">Surprise Me!</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center mb-4">
+             <div class="col-auto">
+                 <button class="btn btn-outline-light" type="button" id="viewFavoritesButton">View Favorites (<span id="favoritesCount">0</span>)</button>
+             </div>
+        </div>
+
+        <div id="loadingSpinner" class="text-center loading-spinner">
+            <div class="spinner-border text-light" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+
+        <div id="errorMessage" class="alert alert-danger d-none" role="alert">
+            An error occurred. Please try again.
+        </div>
+
+        <h2 id="gridTitle" class="text-center mb-3">Search Results</h2>
+
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4" id="resultsGrid">
+            <!-- Artwork cards will be injected here -->
+        </div>
+
+         <div id="favoritesGrid" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 d-none">
+            <!-- Favorite artwork cards will be injected here -->
+        </div>
+
+    </main>
+
+    <footer class="footer bg-dark text-light py-3 mt-4">
+        <div class="container text-center">
+            <p class="mb-0">&copy; 2025 COOL Art Explorer | Powered by the <a href="https://api.artic.edu/docs/" class="text-light" target="_blank">Art Institute of Chicago API</a></p>
+        </div>
+    </footer>
+
+    <!-- Artwork Detail Modal -->
+    <div class="modal fade" id="artworkDetailModal" tabindex="-1" aria-labelledby="artworkDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="artworkDetailModalLabel">Artwork Details</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <img id="modalArtworkImage" src="" class="img-fluid mb-3" alt="Artwork Image">
+                    <h4 id="modalArtworkTitle"></h4>
+                    <p id="modalArtworkArtist" class="text-secondary mb-1"></p>
+                    <p id="modalArtworkDate" class="text-secondary mb-1"></p>
+                    <p id="modalArtworkMedium" class="text-secondary mb-1"></p>
+                    <p id="modalArtworkDimensions" class="text-secondary mb-1"></p>
+                </div>
+                <div class="modal-footer justify-content-between">
+                     <button type="button" class="btn btn-outline-light btn-favorite" id="saveFavoriteButton" data-artwork-id="">Save Favorite</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function() {
+            const searchInput = document.getElementById('searchInput');
+            const searchButton = document.getElementById('searchButton');
+            const surpriseButton = document.getElementById('surpriseButton');
+            const resultsGrid = document.getElementById('resultsGrid');
+            const favoritesGrid = document.getElementById('favoritesGrid');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const errorMessage = document.getElementById('errorMessage');
+            const artworkDetailModal = document.getElementById('artworkDetailModal');
+            const modalArtworkImage = document.getElementById('modalArtworkImage');
+            const modalArtworkTitle = document.getElementById('modalArtworkTitle');
+            const modalArtworkArtist = document.getElementById('modalArtworkArtist');
+            const modalArtworkDate = document.getElementById('modalArtworkDate');
+            const modalArtworkMedium = document.getElementById('modalArtworkMedium');
+            const modalArtworkDimensions = document.getElementById('modalArtworkDimensions');
+            const saveFavoriteButton = document.getElementById('saveFavoriteButton');
+            const viewFavoritesButton = document.getElementById('viewFavoritesButton');
+            const favoritesCountSpan = document.getElementById('favoritesCount');
+            const gridTitle = document.getElementById('gridTitle');
+
+            let articConfig = null;
+            let favorites = [];
+            let currentDetailArtwork = null;
+            let showingFavorites = false;
+
+            const ARTIC_API_BASE = 'https://api.artic.edu/api/v1/';
+            const LOCAL_STORAGE_KEY = 'articFavorites';
+            const ARTWORKS_PER_PAGE = 100; // Number of results per search/list request
+
+            async function init() {
+                await fetchArticConfig();
+                loadFavorites();
+                updateFavoritesCount();
+                setupEventListeners();
+                // Optionally perform an initial search or show instructions
+            }
+
+            async function fetchArticConfig() {
+                try {
+                    const response = await fetch(`${ARTIC_API_BASE}config`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const configData = await response.json();
+                    articConfig = configData.config;
+                } catch (error) {
+                    console.error('Error fetching Artic config:', error);
+                    showError('Could not load application configuration. API may be unavailable.');
+                }
+            }
+
+            function setupEventListeners() {
+                searchButton.addEventListener('click', handleSearch);
+                searchInput.addEventListener('keypress', (event) => {
+                    if (event.key === 'Enter') {
+                        handleSearch();
+                    }
+                });
+                surpriseButton.addEventListener('click', fetchRandomArtwork);
+                saveFavoriteButton.addEventListener('click', handleSaveFavoriteClick);
+                viewFavoritesButton.addEventListener('click', handleViewFavoritesClick);
+
+                resultsGrid.addEventListener('click', handleArtworkCardClick);
+                favoritesGrid.addEventListener('click', handleArtworkCardClick);
+
+                 artworkDetailModal.addEventListener('hidden.bs.modal', () => {
+                    currentDetailArtwork = null;
+                    saveFavoriteButton.removeAttribute('data-artwork-id');
+                    saveFavoriteButton.classList.remove('favorited');
+                    saveFavoriteButton.textContent = 'Save Favorite';
+                    // Clear modal content to prevent flicker on next open
+                    modalArtworkImage.src = '';
+                    modalArtworkImage.alt = 'Artwork Image';
+                    modalArtworkTitle.textContent = '';
+                    modalArtworkArtist.textContent = '';
+                    modalArtworkDate.textContent = '';
+                    modalArtworkMedium.textContent = '';
+                    modalArtworkDimensions.textContent = '';
+                });
+            }
+
+            async function handleSearch() {
+                const query = searchInput.value.trim();
+                if (!query) {
+                    showError('Please enter a search term.');
+                    return;
+                }
+                await fetchArtworks(query);
+            }
+
+            async function fetchArtworks(query) {
+                showLoading();
+                clearResults();
+                hideError();
+                showingFavorites = false;
+                gridTitle.textContent = 'Search Results';
+                favoritesGrid.classList.add('d-none');
+                resultsGrid.classList.remove('d-none');
+                viewFavoritesButton.textContent = `View Favorites (${favorites.length})`;
+
+
+                if (!articConfig) {
+                     showError('Configuration not loaded. Cannot perform search.');
+                     hideLoading();
+                     return;
+                }
+
+                try {
+                    const searchUrl = `${ARTIC_API_BASE}artworks/search?q=${encodeURIComponent(query)}&query[term][is_public_domain]=true&fields=id,title,artist_display,date_display,image_id,thumbnail&limit=${ARTWORKS_PER_PAGE}`;
+                    const response = await fetch(searchUrl);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const data = await response.json();
+
+                    if (data.data && data.data.length > 0) {
+                        displayResults(data.data);
+                    } else {
+                        showError(`No artworks found matching "${query}".`);
+                    }
+
+                } catch (error) {
+                    console.error('Error fetching artworks:', error);
+                    showError('Failed to fetch artworks. Please check your internet connection and try again.');
+                } finally {
+                    hideLoading();
+                }
+            }
+
+            async function fetchRandomArtwork() {
+                 showLoading();
+                clearResults();
+                hideError();
+                 showingFavorites = false;
+                gridTitle.textContent = 'Search Results'; // Random goes to detail, but clears grid below
+                favoritesGrid.classList.add('d-none');
+                resultsGrid.classList.remove('d-none');
+                 viewFavoritesButton.textContent = `View Favorites (${favorites.length})`;
+
+
+                 if (!articConfig) {
+                     showError('Configuration not loaded. Cannot fetch random artwork.');
+                     hideLoading();
+                     return;
+                }
+
+                try {
+                    // Fetch a list of public domain artworks to pick a random ID. Fetching first page is usually sufficient.
+                    const listUrl = `${ARTIC_API_BASE}artworks?query[term][is_public_domain]=true&fields=id&limit=${ARTWORKS_PER_PAGE}`;
+                     const listResponse = await fetch(listUrl);
+                     if (!listResponse.ok) {
+                         throw new Error(`HTTP error! status: ${listResponse.status}`);
+                     }
+                     const listData = await listResponse.json();
+
+                     if (!listData.data || listData.data.length === 0) {
+                         showError('Could not find any public domain artworks to select randomly.');
+                         hideLoading();
+                         return;
+                     }
+
+                     const randomIndex = Math.floor(Math.random() * listData.data.length);
+                     const randomArtworkId = listData.data[randomIndex].id;
+
+                     const artworkDetails = await fetchArtworkDetails(randomArtworkId);
+
+                     if (artworkDetails) {
+                         displayDetailModal(artworkDetails);
+                     } else {
+                         showError('Failed to fetch details for the random artwork.');
+                     }
+
+                } catch (error) {
+                     console.error('Error fetching random artwork:', error);
+                     showError('Failed to fetch a random artwork. Please try again.');
+                } finally {
+                     hideLoading();
+                }
+            }
+
+            async function fetchArtworkDetails(artworkId) {
+                 if (!articConfig) {
+                     showError('Configuration not loaded. Cannot fetch artwork details.');
+                     return null;
+                }
+                try {
+                    const detailUrl = `${ARTIC_API_BASE}artworks/${artworkId}?fields=id,title,artist_display,date_display,medium_display,dimensions,image_id,is_public_domain`;
+                    const response = await fetch(detailUrl);
+                     if (!response.ok) {
+                         throw new Error(`HTTP error! status: ${response.status}`);
+                     }
+                    const data = await response.json();
+                    // API returns { data: {...} } for single artwork
+                    return data.data;
+                } catch (error) {
+                    console.error(`Error fetching artwork details for ID ${artworkId}:`, error);
+                    showError('Failed to fetch artwork details.');
+                    return null;
+                }
+            }
+
+            function displayResults(artworks) {
+                clearGrid(resultsGrid);
+                const artworksWithImages = artworks.filter(artwork => artwork.image_id);
+                if (artworksWithImages.length === 0) {
+                     resultsGrid.innerHTML = '<div class="col-12 text-center"><p>No artworks with images found in the search results.</p></div>';
+                     return;
+                }
+                artworksWithImages.forEach(artwork => {
+                    const cardHtml = renderArtworkCard(artwork);
+                    resultsGrid.innerHTML += cardHtml;
+                });
+            }
+
+            function renderArtworkCard(artwork) {
+                 const imageUrl = articConfig && artwork.image_id ?
+                    `${articConfig.iiif_url}/${artwork.image_id}/full/400,/0/default.jpg` :
+                    ''; // Use empty string if no image_id
+
+                const altText = `Image of ${artwork.title || 'Untitled Artwork'}${artwork.artist_display ? ' by ' + artwork.artist_display : ''}`;
+
+                return `
+                    <div class="col">
+                        <div class="card h-100 bg-dark text-light artwork-card" data-artwork-id="${artwork.id}">
+                             <img src="${imageUrl}" class="card-img-top" alt="${altText}">
+                            <div class="card-body">
+                                <h5 class="card-title">${artwork.title || 'Untitled'}</h5>
+                                <p class="card-text">${artwork.artist_display || 'Unknown Artist'}</p>
+                                 <p class="card-text mt-auto">${artwork.date_display || ''}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            async function handleArtworkCardClick(event) {
+                const card = event.target.closest('.artwork-card');
+                if (card) {
+                    const artworkId = card.dataset.artworkId;
+                    if (artworkId) {
+                        showLoading();
+                        const artworkDetails = await fetchArtworkDetails(artworkId);
+                        hideLoading();
+                        if (artworkDetails) {
+                            displayDetailModal(artworkDetails);
+                        } else {
+                            // Error message is shown by fetchArtworkDetails
+                        }
+                    }
+                }
+            }
+
+            function displayDetailModal(artwork) {
+                currentDetailArtwork = artwork;
+                if (articConfig && artwork.image_id) {
+                    modalArtworkImage.src = `${articConfig.iiif_url}/${artwork.image_id}/full/843,/0/default.jpg`;
+                     modalArtworkImage.alt = `Image of ${artwork.title || 'Untitled Artwork'}${artwork.artist_display ? ' by ' + artwork.artist_display : ''}`;
+                } else {
+                     modalArtworkImage.src = '';
+                     modalArtworkImage.alt = 'No image available for this artwork.';
+                }
+
+                modalArtworkTitle.textContent = artwork.title || 'Untitled';
+                modalArtworkArtist.textContent = artwork.artist_display || 'Unknown Artist';
+                modalArtworkDate.textContent = artwork.date_display || '';
+                modalArtworkMedium.textContent = artwork.medium_display || '';
+                modalArtworkDimensions.textContent = artwork.dimensions || '';
+
+                saveFavoriteButton.dataset.artworkId = artwork.id;
+                updateFavoriteButtonState(artwork.id);
+
+                const modal = new bootstrap.Modal(artworkDetailModal);
+                modal.show();
+            }
+
+            function updateFavoriteButtonState(artworkId) {
+                const isFavorited = favorites.some(fav => fav.id === artworkId);
+                if (isFavorited) {
+                    saveFavoriteButton.classList.add('favorited');
+                    saveFavoriteButton.textContent = 'Favorited';
+                    saveFavoriteButton.classList.remove('btn-outline-light');
+                    saveFavoriteButton.classList.add('btn-success');
+                } else {
+                    saveFavoriteButton.classList.remove('favorited');
+                    saveFavoriteButton.textContent = 'Save Favorite';
+                     saveFavoriteButton.classList.add('btn-outline-light');
+                    saveFavoriteButton.classList.remove('btn-success');
+                }
+            }
+
+            function handleSaveFavoriteClick() {
+                const artworkId = parseInt(saveFavoriteButton.dataset.artworkId, 10);
+                 if (isNaN(artworkId) || !currentDetailArtwork || currentDetailArtwork.id !== artworkId) {
+                    console.error('Attempted to favorite/unfavorite without a valid artwork loaded.');
+                    showError('Could not save or remove favorite. Artwork data is missing.');
+                    return;
+                }
+
+                const isFavorited = favorites.some(fav => fav.id === artworkId);
+
+                if (isFavorited) {
+                    // Remove from favorites
+                    favorites = favorites.filter(fav => fav.id !== artworkId);
+                    saveFavorites();
+                    updateFavoriteButtonState(artworkId);
+                     if (showingFavorites) {
+                         displayFavorites(); // Refresh favorites grid if currently viewing it
+                     }
+                     // Optional: Show a small confirmation message
+                } else {
+                    // Add to favorites - save minimal data
+                    const favoriteData = {
+                        id: currentDetailArtwork.id,
+                        title: currentDetailArtwork.title,
+                        artist_display: currentDetailArtwork.artist_display,
+                        date_display: currentDetailArtwork.date_display,
+                        image_id: currentDetailArtwork.image_id
+                    };
+                    favorites.push(favoriteData);
+                    saveFavorites();
+                    updateFavoriteButtonState(artworkId);
+                     // Optional: Show a small confirmation message
+                }
+                updateFavoritesCount();
+            }
+
+            function loadFavorites() {
+                try {
+                    const storedFavorites = localStorage.getItem(LOCAL_STORAGE_KEY);
+                    if (storedFavorites) {
+                        favorites = JSON.parse(storedFavorites);
+                        // Ensure favorites is an array in case of corrupted data
+                        if (!Array.isArray(favorites)) {
+                            console.error("LocalStorage favorites data is corrupted. Resetting.");
+                            favorites = [];
+                            saveFavorites(); // Save empty array to clear corrupted data
+                        }
+                    } else {
+                        favorites = [];
+                    }
+                } catch (error) {
+                    console.error('Error loading favorites from localStorage:', error);
+                    showError('Could not load favorites from your browser. Local storage might be disabled.');
+                    favorites = []; // Fallback to empty array on error
+                }
+            }
+
+            function saveFavorites() {
+                try {
+                    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(favorites));
+                } catch (error) {
+                    console.error('Error saving favorites to localStorage:', error);
+                    showError('Could not save favorites. Local storage might be full or disabled.');
+                }
+            }
+
+            function updateFavoritesCount() {
+                favoritesCountSpan.textContent = favorites.length;
+                 if (!showingFavorites) { // Only update the text if not currently viewing favorites
+                     viewFavoritesButton.textContent = `View Favorites (${favorites.length})`;
+                 }
+            }
+
+            function handleViewFavoritesClick() {
+                if (showingFavorites) {
+                    // Switch back to search view
+                    showingFavorites = false;
+                    gridTitle.textContent = 'Search Results';
+                    favoritesGrid.classList.add('d-none');
+                    resultsGrid.classList.remove('d-none');
+                    viewFavoritesButton.textContent = `View Favorites (${favorites.length})`;
+                    // Clear search results grid when switching back
+                    clearGrid(resultsGrid);
+
+                } else {
+                    // Switch to favorites view
+                    showingFavorites = true;
+                    gridTitle.textContent = 'Your Saved Favorites';
+                    resultsGrid.classList.add('d-none');
+                    favoritesGrid.classList.remove('d-none');
+                    viewFavoritesButton.textContent = `Hide Favorites (${favorites.length})`;
+                    displayFavorites();
+                }
+            }
+
+            function displayFavorites() {
+                clearGrid(favoritesGrid);
+                if (favorites.length === 0) {
+                    favoritesGrid.innerHTML = '<div class="col-12 text-center"><p>You have no saved favorites yet.</p><p>Search for artworks and click "Save Favorite" in the details modal.</p></div>';
+                    return;
+                }
+                favorites.forEach(artwork => {
+                    // Ensure artwork has necessary fields for rendering card
+                    if (artwork && artwork.id) {
+                        const cardHtml = renderArtworkCard(artwork);
+                         favoritesGrid.innerHTML += cardHtml;
+                    } else {
+                        console.warn("Skipping rendering of malformed favorite artwork:", artwork);
+                    }
+                });
+            }
+
+            function showLoading() {
+                loadingSpinner.style.display = 'block';
+            }
+
+            function hideLoading() {
+                loadingSpinner.style.display = 'none';
+            }
+
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorMessage.classList.remove('d-none');
+            }
+
+            function hideError() {
+                errorMessage.classList.add('d-none');
+                errorMessage.textContent = '';
+            }
+
+            function clearGrid(gridElement) {
+                gridElement.innerHTML = '';
+            }
+
+             function clearResults() {
+                 clearGrid(resultsGrid);
+                 clearGrid(favoritesGrid); // Clear both when starting a new search or random fetch
+             }
+
+
+            document.addEventListener('DOMContentLoaded', init);
+
+        })();
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>
