@@ -1,0 +1,9 @@
+{
+  "projectId": "3a79b15d-b83b-40a4-9a05-b31d28354137",
+  "revisionString": "3",
+  "projectNameDisplay": "APPGEN Gallery",
+  "userPromptForThisRevision": "when it runs its loading the pictures really slowly, and im not sure if some arent displayed or if maybe it hasnt made an image for them yet.    could you help me solve this? \r\n\r\nI actually just tried it again and NONE of the images would load even tho at least half have been created. \r\n\r\n\r\nalso the links cant go to the github, they need to go to the replits. \r\n\r\nie. https://beepboopbeepgen.replit.app/apps/55f0d73a-b163-4ee0-a28b-631b25a8272c_rev3.html\r\n\r\nso please have all the apps URLs be constructed like this. \r\n",
+  "basedOnRevisionString": "2",
+  "savedAt": "2025-05-22T11:15:34.393Z",
+  "imageAssets": []
+}
