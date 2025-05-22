@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Cowpoke Clicker Tycoon</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .bg-dark-secondary {
+            background-color: #2D3748;
+        }
+
+        .bg-dark-tertiary {
+            background-color: #1A202C;
+        }
+
+        #cow-pen, #newsTicker, #dynamic-content-area, #rodeo-leaderboard, #researchModal .modal-body, #traderModal .modal-body, #cowDetailModal .modal-body, #ranch-upgrades-list {
+            scrollbar-width: thin;
+            scrollbar-color: #6c757d #343a40;
+        }
+        #cow-pen::-webkit-scrollbar, #newsTicker::-webkit-scrollbar, #dynamic-content-area::-webkit-scrollbar, #rodeo-leaderboard::-webkit-scrollbar, #researchModal .modal-body::-webkit-scrollbar, #traderModal .modal-body::-webkit-scrollbar, #cowDetailModal .modal-body::-webkit-scrollbar, #ranch-upgrades-list::-webkit-scrollbar {
+            width: 8px;
+        }
+        #cow-pen::-webkit-scrollbar-track, #newsTicker::-webkit-scrollbar-track, #dynamic-content-area::-webkit-scrollbar-track, #rodeo-leaderboard::-webkit-scrollbar-track, #researchModal .modal-body::-webkit-scrollbar-track, #traderModal .modal-body::-webkit-scrollbar-track, #cowDetailModal .modal-body::-webkit-scrollbar-track, #ranch-upgrades-list::-webkit-scrollbar-track {
+            background: #343a40;
+        }
+        #cow-pen::-webkit-scrollbar-thumb, #newsTicker::-webkit-scrollbar-thumb, #dynamic-content-area::-webkit-scrollbar-thumb, #rodeo-leaderboard::-webkit-scrollbar-thumb, #researchModal .modal-body::-webkit-scrollbar-thumb, #traderModal .modal-body::-webkit-scrollbar-thumb, #cowDetailModal .modal-body::-webkit-scrollbar-thumb, #ranch-upgrades-list::-webkit-scrollbar-thumb {
+            background-color: #6c757d;
+            border-radius: 4px;
+            border: 2px solid #343a40;
+        }
+
+        .cow-card-img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            background-color: #343a40;
+        }
+        
+        .cow-card .card-body {
+            padding: 0.75rem;
+        }
+        .cow-card .card-title {
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+        .cow-card .card-text {
+            font-size: 0.85rem;
+            margin-bottom: 0.25rem;
+        }
+        .cow-card .btn-sm {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.4rem;
+        }
+        .resource-icon {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            margin-right: 5px;
+            border-radius: 3px;
+            vertical-align: middle;
+        }
+        .cosmic-milk-icon { background-color: #add8e6; }
+        .quasar-cheese-icon { background-color: #f0e68c; }
+        .nebula-beef-icon { background-color: #dda0dd; }
+
+        #main-image-display {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        #main-text-display {
+            white-space: pre-wrap;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            max-height: 100%;
+            overflow-y: auto;
+        }
+        #newsTicker {
+            height: 100px;
+            overflow-y: auto;
+        }
+        #newsTicker p {
+            margin-bottom: 0.5rem;
+            font-size: 0.8rem;
+        }
+        .panel-section {
+            overflow-y: auto;
+        }
+        .clickable:hover {
+            cursor: pointer;
+            opacity: 0.8;
+        }
+        .rodeo-target-bar-container {
+            width: 100%;
+            height: 30px;
+            background-color: #444;
+            border-radius: 5px;
+            position: relative;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        .rodeo-moving-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background-color: #0dcaf0; 
+            width: 5px; 
+        }
+        .rodeo-target-zone {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            background-color: rgba(40, 167, 69, 0.5); 
+        }
+        .toast-container {
+            z-index: 1100; 
+        }
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body data-bs-theme="dark">
+
+    <header class="bg-dark text-light p-2 shadow-sm text-center">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="h4 mb-0">Cosmic Cowpoke Clicker Tycoon</h1>
+            <button id="settingsBtn" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#settingsModal"><i class="bi bi-gear-fill"></i></button>
+        </div>
+    </header>
+
+    <main class="flex-grow-1 row g-2 p-2 m-0 overflow-hidden">
+        <section id="left-panel" class="col-lg-3 col-md-4 d-flex flex-column p-2 bg-dark-secondary rounded h-100">
+            <div id="resource-display" class="mb-3 p-2 border rounded"></div>
+            <button id="breedCowBtn" class="btn btn-primary btn-lg mb-3 w-100 text-nowrap overflow-hidden text-truncate"><i class="bi bi-plus-circle-dotted"></i> Breed New Space Cow!</button>
+            
+            <h5 class="text-info">Cow Pen</h5>
+            <div id="cow-pen" class="flex-grow-1 overflow-auto border rounded p-2 mb-3 panel-section"></div>
+            
+            <div id="ranch-upgrades-section" class="mt-auto">
+                <h5 class="text-info">Ranch Upgrades</h5>
+                <div id="ranch-upgrades-list" class="overflow-auto panel-section" style="max-height: 200px;"></div>
+            </div>
+        </section>
+
+        <section id="center-panel" class="col-lg-6 col-md-8 d-flex flex-column p-2 bg-dark-tertiary rounded h-100">
+            <h3 id="center-panel-title" class="text-center text-info mb-2">Your Asteroid Ranch HQ</h3>
+            <div id="dynamic-content-area" class="flex-grow-1 d-flex justify-content-center align-items-center position-relative border rounded p-2 bg-black bg-opacity-25 overflow-hidden">
+                <img id="main-image-display" class="img-fluid rounded" style="display: none;">
+                <div id="main-text-display" class="text-light p-3" style="display: none;"></div>
+                <div id="loading-spinner-main" class="spinner-border text-primary" role="status" style="display: none; width: 3rem; height: 3rem;"><span class="visually-hidden">Loading...</span></div>
+                <div id="main-placeholder-text" class="text-muted">Click actions on the left or right panels to see content here!</div>
+            </div>
+            <div class="mt-auto pt-2">
+                <button id="conductResearchBtn" class="btn btn-info w-100"><i class="bi bi-lightbulb-fill"></i> Conduct Genetic Research</button>
+            </div>
+        </section>
+
+        <section id="right-panel" class="col-lg-3 col-md-12 d-flex flex-column p-2 bg-dark-secondary rounded h-100">
+            <div id="trader-info-area" class="mb-3">
+                <h5 class="text-info">Alien Visitors</h5>
+                <div id="trader-status" class="alert alert-secondary p-2">No traders currently. Next potential arrival in <span id="trader-timer">--</span>s.</div>
+            </div>
+            
+            <div id="rodeo-section" class="mb-3">
+                <h5 class="text-info">Cosmic Rodeo</h5>
+                <button id="enterRodeoBtn" class="btn btn-warning w-100 mb-2"><i class="bi bi-trophy-fill"></i> Enter Rodeo!</button>
+                <div class="border rounded p-2">
+                    <h6 class="text-light">Leaderboard</h6>
+                    <ul id="rodeo-leaderboard" class="list-group list-group-flush overflow-auto panel-section" style="max-height: 150px;"></ul>
+                </div>
+            </div>
+            
+            <div id="news-ticker-container" class="mt-auto p-2 border rounded bg-dark">
+                <h5 class="text-info">Galactic Dustbowl Gazette</h5>
+                <div id="newsTicker" class="small panel-section"></div>
+            </div>
+        </section>
+    </main>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+      <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+          <strong class="me-auto" id="toastTitle">Notification</strong>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="toastBody">
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="researchModal" tabindex="-1" aria-labelledby="researchModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="researchModalLabel">Groundbreaking Research!</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="research-paper-content" class="mb-3 p-3 border rounded bg-light text-dark" style="font-family: monospace; font-size: 0.9rem;"></div>
+                    <h6 class="text-info">Potential Upgrades Unlocked:</h6>
+                    <div id="research-upgrades-list"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="traderModal" tabindex="-1" aria-labelledby="traderModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="traderModalLabel">Alien Trader Contact</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-3 position-relative" style="min-height: 200px;">
+                        <img id="trader-image" src="" alt="Trader Portrait" class="img-fluid rounded" style="max-height: 200px; display: none;">
+                        <div id="trader-image-spinner-container" class="loading-overlay" style="display: none; border-radius: var(--bs-border-radius);">
+                             <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"><span class="visually-hidden">Loading...</span></div>
+                        </div>
+                    </div>
+                    <h6 id="trader-name" class="text-info"></h6>
+                    <p id="trader-backstory" class="small"></p>
+                    <div id="trader-deal-info"></div>
+                </div>
+                <div class="modal-footer" id="trader-modal-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="rodeoModal" tabindex="-1" aria-labelledby="rodeoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="rodeoModalLabel">Cosmic Rodeo Event!</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6 id="rodeo-event-name" class="text-info text-center"></h6>
+                    <div class="text-center mb-3 position-relative" style="min-height: 200px;">
+                        <img id="rodeo-image" src="" alt="Rodeo Scene" class="img-fluid rounded" style="max-height: 300px; display: none;">
+                         <div id="rodeo-image-spinner-container" class="loading-overlay" style="display: none; border-radius: var(--bs-border-radius);">
+                            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"><span class="visually-hidden">Loading...</span></div>
+                        </div>
+                    </div>
+                    <p id="rodeo-event-description" class="text-center"></p>
+                    <div id="rodeo-cow-selection" class="mb-3">
+                        <label for="rodeoCowSelect" class="form-label">Select Your Champion Cow:</label>
+                        <select id="rodeoCowSelect" class="form-select"></select>
+                    </div>
+                    <div id="rodeo-mini-game-area" style="display:none;">
+                        <p class="text-center">Click the button when the bar is in the green zone!</p>
+                        <div class="rodeo-target-bar-container">
+                            <div class="rodeo-moving-bar"></div>
+                            <div class="rodeo-target-zone"></div>
+                        </div>
+                        <button id="rodeoMiniGameBtn" class="btn btn-success w-100 mt-3">Click Me!</button>
+                    </div>
+                    <div id="rodeo-results-area" style="display:none;" class="text-center">
+                        <h4>Results</h4>
+                        <p id="rodeo-score-display"></p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="startRodeoMiniGameBtn" type="button" class="btn btn-primary" disabled>Start Event!</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="settingsModalLabel">Settings</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Manage your game data.</p>
+                    <button id="resetGameBtn" class="btn btn-danger w-100">Reset Game Data (Irreversible!)</button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="cowDetailModal" tabindex="-1" aria-labelledby="cowDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cowDetailModalLabel">Cow Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-2">
+                        <img id="cowDetailImage" src="" class="img-fluid rounded" style="max-height: 250px; background-color: #343a40;">
+                    </div>
+                    <h4 id="cowDetailName" class="text-info"></h4>
+                    <p><strong>Quirk:</strong> <span id="cowDetailQuirk"></span></p>
+                    <p><strong>Base Production:</strong> <span id="cowDetailProduction"></span></p>
+                    <p><strong>Genetic Level:</strong> <span id="cowDetailLevel"></span></p>
+                    <p><strong>Last Collected:</strong> <span id="cowDetailLastCollected"></span></p>
+                    <hr>
+                    <h5 class="text-info">Genetic Upgrades</h5>
+                    <div id="cowDetailUpgradesList"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    (function() {
+        'use strict';
+
+        const Game = {
+            state: {},
+            config: {
+                initialCowCost: 500,
+                researchCost: 2000,
+                resources: [
+                    { id: 'cosmicMilk', name: 'Cosmic Milk', iconClass: 'cosmic-milk-icon', baseProd: 10 },
+                    { id: 'quasarCheese', name: 'Quasar Cheese', iconClass: 'quasar-cheese-icon', baseProd: 5 },
+                    { id: 'nebulaBeef', name: 'Nebula Beef', iconClass: 'nebula-beef-icon', baseProd: 2 }
+                ],
+                ranchUpgrades: [
+                    { id: 'fasterBreeding', name: 'Faster Breeding Incubator', cost: 1000, description: 'Reduces new cow cost by 10%.', maxLevel: 5, effect: state => state.currentCowCostModifier = (state.currentCowCostModifier || 1) * 0.9, costMultiplier: 1.6 },
+                    { id: 'improvedSilo', name: 'Improved Feed Silo', cost: 1500, description: 'Increases base production of all cows by 5%.', maxLevel: 10, effect: state => state.globalProdModifier = (state.globalProdModifier || 1) * 1.05, costMultiplier: 1.5 },
+                    { id: 'autoMilker', name: 'Auto-Milker Drones', cost: 5000, description: 'Passively collects 10% of cow production per minute.', maxLevel: 5, effect: state => state.autoCollectRate = (state.autoCollectRate || 0) + 0.1, costMultiplier: 2.0 }
+                ],
+                cowQuirkPrompt: "Generate a short, absurd, space-western themed personality quirk for a space cow named [COW_NAME]. Max 1-2 sentences.",
+                cowNamePrompt: "Generate a unique, slightly absurd name for a space western cow breed. Example: Galactic Longhorn, Void Vaca, Nebula Nudger.",
+                cowImageBasePrompt: "A [COW_NAME] which is a [ADJECTIVE_1] space cow with [FEATURE_1] and [FEATURE_2], grazing on a [LOCATION_ELEMENT], space western art style, absurd, detailed, vibrant colors, high definition.",
+                researchPaperPrompt: "Write a short, pseudo-scientific research paper abstract (around 100-150 words), in a space western tone, about genetically improving space cows to produce more [RESOURCE_NAME]. Make it sound important but slightly nonsensical. Include a catchy, absurd title for the paper. Format the title on its own line first, then the abstract.",
+                researchUpgradePrompt: "Based on a research paper about improving [RESOURCE_NAME] production in space cows, suggest 2-3 distinct, named genetic upgrades. Each upgrade should have a name, a brief quirky description of its effect (e.g., increases production slightly, makes cow glow), and a cost in Galactic Credits (between 500-5000). Format as: UpgradeName1 (Cost1 GC): Description1; UpgradeName2 (Cost2 GC): Description2",
+                traderNameBackstoryPrompt: "Generate a name and a short, quirky backstory (50-100 words) for an alien trader in a space western setting. They are looking to buy [RESOURCE_NAME_1] and potentially [RESOURCE_NAME_2]. Mention their species or a distinct visual characteristic. Start with the name on the first line, then the backstory.",
+                traderImagePrompt: "A portrait of [TRADER_NAME], an alien trader described as [TRADER_DESCRIPTION], space western style, character art, slightly humorous, detailed.",
+                rodeoEventPrompt: "Describe a bizarre space rodeo event. First line: Event Title. Second line: A short, exciting description (30-50 words) for it. Examples: Zero-G Barrel Weaving, Asteroid Lasso Golf, Solar Flare Stampede.",
+                rodeoImagePrompt: "Scene of a space cow participating in [RODEO_EVENT_TITLE] - [RODEO_EVENT_DESCRIPTION] on a vibrant asteroid field, dynamic action shot, space western rodeo, slightly humorous, dramatic lighting, high definition.",
+                newsTickerPrompt: "Generate a bizarre, humorous news headline (max 15 words) suitable for a space western setting's 'Galactic Dustbowl Gazette'.",
+                gameTickInterval: 1000,
+                traderArrivalIntervalMin: 120 * 1000, 
+                traderArrivalIntervalMax: 300 * 1000,
+                newsTickerUpdateInterval: 45 * 1000,
+                maxNewsItems: 5,
+                localStorageKey: 'cosmicCowpokeTycoonSave_v1',
+                rodeoMiniGameDuration: 5000, 
+            },
+            dom: {},
+            modals: {},
+            toast: null,
+            apiImageCallInProgress: false,
+
+            init() {
+                this.cacheDom();
+                this.initModals();
+                this.initToast();
+                this.loadGame();
+                this.attachEventListeners();
+                this.startGameLoop();
+                UIManager.renderAll();
+                UIManager.updateCenterPanel(this.dom.centerPanelTitle.textContent, 'placeholder', 'Your ranch awaits, Cowpoke! Breed some cows or explore the station.');
+                this.scheduleNextTraderArrival();
+                this.scheduleNewsUpdate();
+
+                if (!this.state.newsTickerItems || this.state.newsTickerItems.length === 0) {
+                    setTimeout(() => APIManager.generateAndAddNewsItem(), 2000); 
+                }
+            },
+
+            cacheDom() {
+                this.dom.resourceDisplay = document.getElementById('resource-display');
+                this.dom.breedCowBtn = document.getElementById('breedCowBtn');
+                this.dom.cowPen = document.getElementById('cow-pen');
+                this.dom.ranchUpgradesList = document.getElementById('ranch-upgrades-list');
+                this.dom.centerPanelTitle = document.getElementById('center-panel-title');
+                this.dom.dynamicContentArea = document.getElementById('dynamic-content-area');
+                this.dom.mainImageDisplay = document.getElementById('main-image-display');
+                this.dom.mainTextDisplay = document.getElementById('main-text-display');
+                this.dom.loadingSpinnerMain = document.getElementById('loading-spinner-main');
+                this.dom.mainPlaceholderText = document.getElementById('main-placeholder-text');
+                this.dom.conductResearchBtn = document.getElementById('conductResearchBtn');
+                this.dom.traderStatus = document.getElementById('trader-status');
+                this.dom.traderTimer = document.getElementById('trader-timer');
+                this.dom.enterRodeoBtn = document.getElementById('enterRodeoBtn');
+                this.dom.rodeoLeaderboard = document.getElementById('rodeo-leaderboard');
+                this.dom.newsTicker = document.getElementById('newsTicker');
+                this.dom.settingsBtn = document.getElementById('settingsBtn');
+                this.dom.resetGameBtn = document.getElementById('resetGameBtn');
+
+                this.dom.researchModal = document.getElementById('researchModal');
+                this.dom.researchPaperContent = document.getElementById('research-paper-content');
+                this.dom.researchUpgradesList = document.getElementById('research-upgrades-list');
+                
+                this.dom.traderModal = document.getElementById('traderModal');
+                this.dom.traderImage = document.getElementById('trader-image');
+                this.dom.traderImageSpinnerContainer = document.getElementById('trader-image-spinner-container');
+                this.dom.traderName = document.getElementById('trader-name');
+                this.dom.traderBackstory = document.getElementById('trader-backstory');
+                this.dom.traderDealInfo = document.getElementById('trader-deal-info');
+                this.dom.traderModalFooter = document.getElementById('trader-modal-footer');
+
+                this.dom.rodeoModal = document.getElementById('rodeoModal');
+                this.dom.rodeoEventName = document.getElementById('rodeo-event-name');
+                this.dom.rodeoImage = document.getElementById('rodeo-image');
+                this.dom.rodeoImageSpinnerContainer = document.getElementById('rodeo-image-spinner-container');
+                this.dom.rodeoEventDescription = document.getElementById('rodeo-event-description');
+                this.dom.rodeoCowSelection = document.getElementById('rodeo-cow-selection');
+                this.dom.rodeoCowSelect = document.getElementById('rodeoCowSelect');
+                this.dom.rodeoMiniGameArea = document.getElementById('rodeo-mini-game-area');
+                this.dom.rodeoTargetBarContainer = document.querySelector('.rodeo-target-bar-container');
+                this.dom.rodeoMovingBar = document.querySelector('.rodeo-moving-bar');
+                this.dom.rodeoTargetZone = document.querySelector('.rodeo-target-zone');
+                this.dom.rodeoMiniGameBtn = document.getElementById('rodeoMiniGameBtn');
+                this.dom.rodeoResultsArea = document.getElementById('rodeo-results-area');
+                this.dom.rodeoScoreDisplay = document.getElementById('rodeo-score-display');
+                this.dom.startRodeoMiniGameBtn = document.getElementById('startRodeoMiniGameBtn');
+
+                this.dom.cowDetailModal = document.getElementById('cowDetailModal');
+                this.dom.cowDetailImage = document.getElementById('cowDetailImage');
+                this.dom.cowDetailName = document.getElementById('cowDetailName');
+                this.dom.cowDetailQuirk = document.getElementById('cowDetailQuirk');
+                this.dom.cowDetailProduction = document.getElementById('cowDetailProduction');
+                this.dom.cowDetailLevel = document.getElementById('cowDetailLevel');
+                this.dom.cowDetailLastCollected = document.getElementById('cowDetailLastCollected');
+                this.dom.cowDetailUpgradesList = document.getElementById('cowDetailUpgradesList');
+
+                this.dom.toastTitle = document.getElementById('toastTitle');
+                this.dom.toastBody = document.getElementById('toastBody');
+            },
+
+            initModals() {
+                this.modals.research = new bootstrap.Modal(this.dom.researchModal);
+                this.modals.trader = new bootstrap.Modal(this.dom.traderModal);
+                this.modals.rodeo = new bootstrap.Modal(this.dom.rodeoModal);
+                this.modals.settings = new bootstrap.Modal(document.getElementById('settingsModal'));
+                this.modals.cowDetail = new bootstrap.Modal(this.dom.cowDetailModal);
+            },
+
+            initToast() {
+                this.toast = new bootstrap.Toast(document.getElementById('liveToast'));
+            },
+
+            attachEventListeners() {
+                this.dom.breedCowBtn.addEventListener('click', () => CowManager.breedNewCow());
+                this.dom.conductResearchBtn.addEventListener('click', () => ResearchManager.conductResearch());
+                this.dom.enterRodeoBtn.addEventListener('click', () => RodeoManager.initRodeoEvent());
+                this.dom.resetGameBtn.addEventListener('click', () => {
+                    if (confirm('Are you sure you want to reset all game data? This cannot be undone!')) {
+                        this.resetGame();
+                        this.modals.settings.hide();
+                    }
+                });
+
+                this.dom.cowPen.addEventListener('click', event => {
+                    const target = event.target.closest('button');
+                    if (!target) return;
+                    const cowCard = target.closest('.cow-card');
+                    if (!cowCard) return;
+                    
+                    const cowId = cowCard.dataset.cowId;
+                    if (target.classList.contains('collect-btn')) {
+                        CowManager.collectResources(cowId);
+                    } else if (target.classList.contains('details-btn')) {
+                        UIManager.showCowDetailModal(cowId);
+                    }
+                });
+                
+                this.dom.startRodeoMiniGameBtn.addEventListener('click', () => RodeoManager.startMiniGame());
+                this.dom.rodeoMiniGameBtn.addEventListener('click', () => RodeoManager.handleMiniGameClick());
+
+                this.dom.ranchUpgradesList.addEventListener('click', event => {
+                    if (event.target.tagName === 'BUTTON' && event.target.dataset.upgradeId) {
+                        RanchManager.purchaseUpgrade(event.target.dataset.upgradeId);
+                    }
+                });
+
+                this.dom.cowDetailUpgradesList.addEventListener('click', event => {
+                    if (event.target.classList.contains('apply-genetic-upgrade-btn')) {
+                        const cowId = event.target.dataset.cowId;
+                        const upgradeId = event.target.dataset.upgradeId;
+                        CowManager.applyGeneticUpgrade(cowId, upgradeId);
+                    }
+                });
+            },
+
+            saveGame() {
+                try {
+                    localStorage.setItem(this.config.localStorageKey, JSON.stringify(this.state));
+                } catch (e) {
+                    console.error("Error saving game:", e);
+                    UIManager.showToast("Save Error", "Could not save game progress. Local storage might be full or disabled.", "danger");
+                }
+            },
+
+            loadGame() {
+                try {
+                    const savedGame = localStorage.getItem(this.config.localStorageKey);
+                    if (savedGame) {
+                        const parsedState = JSON.parse(savedGame);
+                        const defaultState = this.getDefaultState();
+                        
+                        this.state = {
+                            ...defaultState, 
+                            ...parsedState,
+                            resources: {...defaultState.resources, ...parsedState.resources},
+                            research: {...defaultState.research, ...parsedState.research},
+                            ranchUpgrades: {} 
+                        };
+                        
+                        this.config.ranchUpgrades.forEach(upg => {
+                            this.state.ranchUpgrades[upg.id] = { 
+                                level: (parsedState.ranchUpgrades && parsedState.ranchUpgrades[upg.id]) ? parsedState.ranchUpgrades[upg.id].level : 0
+                            };
+                        });
+
+                        this.state.cows = (parsedState.cows || []).map(cow => ({
+                            ...cow,
+                            lastCollectedTime: cow.lastCollectedTime ? parseInt(cow.lastCollectedTime) : Date.now(),
+                            geneticLevel: cow.geneticLevel || 1,
+                            appliedUpgrades: cow.appliedUpgrades || []
+                        }));
+
+                        if (!this.state.newsTickerItems) this.state.newsTickerItems = [];
+                        if (!this.state.research.unlockedUpgrades) this.state.research.unlockedUpgrades = [];
+                        if (!this.state.research.completedPapers) this.state.research.completedPapers = [];
+
+                    } else {
+                        this.state = this.getDefaultState();
+                    }
+                } catch (e) {
+                    console.error("Error loading game:", e);
+                    UIManager.showToast("Load Error", "Could not load saved game. Starting new game.", "warning");
+                    this.state = this.getDefaultState();
+                }
+                this.state.lastTickTime = this.state.lastTickTime || Date.now();
+                this.processOfflineProgress();
+            },
+            
+            getDefaultState() {
+                const defaultState = {
+                    galacticCredits: 1000,
+                    resources: { cosmicMilk: 0, quasarCheese: 0, nebulaBeef: 0 },
+                    cows: [],
+                    ranchUpgrades: {},
+                    research: { unlockedUpgrades: [], completedPapers: [] },
+                    rodeoScores: [],
+                    lastTickTime: Date.now(),
+                    trader: null,
+                    traderNextArrival: 0,
+                    newsTickerItems: [],
+                    currentCowCostModifier: 1,
+                    globalProdModifier: 1,
+                    autoCollectRate: 0
+                };
+                this.config.ranchUpgrades.forEach(upg => {
+                    defaultState.ranchUpgrades[upg.id] = { level: 0 };
+                });
+                return defaultState;
+            },
+
+            resetGame() {
+                localStorage.removeItem(this.config.localStorageKey);
+                this.state = this.getDefaultState();
+                this.state.lastTickTime = Date.now();
+                UIManager.renderAll();
+                UIManager.updateCenterPanel(this.dom.centerPanelTitle.textContent, 'placeholder', 'Game reset! Your ranch is brand new.');
+                UIManager.showToast("Game Reset", "All game data has been reset.", "info");
+            },
+
+            processOfflineProgress() {
+                const now = Date.now();
+                const offlineTimeMs = now - this.state.lastTickTime;
+                if (offlineTimeMs > 0) {
+                    const offlineSeconds = offlineTimeMs / 1000;
+                    const autoCollectRatePerMinute = (this.state.ranchUpgrades.autoMilker?.level || 0) * 0.1;
+                    const autoCollectRatePerSecond = autoCollectRatePerMinute / 60;
+                    
+                    let totalCollectedOffline = 0;
+
+                    if (autoCollectRatePerSecond > 0 && this.state.cows.length > 0) {
+                        this.state.cows.forEach(cow => {
+                            const resourceInfo = Game.config.resources.find(r => r.id === cow.produces);
+                            if (!resourceInfo) return;
+                            const baseProd = resourceInfo.baseProd;
+                            const effectiveProd = baseProd * cow.geneticLevel * (this.state.globalProdModifier || 1);
+                            const collectedAmount = effectiveProd * autoCollectRatePerSecond * offlineSeconds;
+                            
+                            this.state.resources[cow.produces] += collectedAmount;
+                            totalCollectedOffline += collectedAmount;
+                        });
+                        if (totalCollectedOffline > 0) {
+                           UIManager.showToast("Offline Gains", `Welcome back! Your Auto-Milkers collected resources while you were away.`, "success");
+                        }
+                    }
+                }
+                this.state.lastTickTime = now;
+            },
+
+            startGameLoop() {
+                setInterval(() => this.gameTick(), this.config.gameTickInterval);
+            },
+
+            gameTick() {
+                const now = Date.now();
+                const deltaTime = (now - this.state.lastTickTime) / 1000; 
+                this.state.lastTickTime = now;
+
+                if (this.state.ranchUpgrades.autoMilker?.level > 0 && this.state.cows.length > 0) {
+                    const autoCollectRatePerMinute = this.state.ranchUpgrades.autoMilker.level * 0.1;
+                    const autoCollectRatePerSecond = autoCollectRatePerMinute / 60;
+                    let updatedResources = false;
+                    this.state.cows.forEach(cow => {
+                        const resourceInfo = Game.config.resources.find(r => r.id === cow.produces);
+                        if (!resourceInfo) return;
+                        const baseProd = resourceInfo.baseProd;
+                        const effectiveProd = baseProd * cow.geneticLevel * (this.state.globalProdModifier || 1);
+                        const collectedAmount = effectiveProd * autoCollectRatePerSecond * deltaTime;
+                        if (collectedAmount > 0) {
+                            this.state.resources[cow.produces] += collectedAmount;
+                            updatedResources = true;
+                        }
+                    });
+                    if (updatedResources) UIManager.updateResourceDisplay();
+                }
+
+                TraderManager.updateTraderTimer(deltaTime);
+                this.saveGame();
+            },
+
+            scheduleNextTraderArrival() {
+                const arrivalTime = Date.now() + Math.random() * (this.config.traderArrivalIntervalMax - this.config.traderArrivalIntervalMin) + this.config.traderArrivalIntervalMin;
+                this.state.traderNextArrival = arrivalTime;
+                TraderManager.checkTraderArrival(); 
+            },
+
+            scheduleNewsUpdate() {
+                setInterval(() => {
+                    if (this.state.newsTickerItems.length < this.config.maxNewsItems * 2) { 
+                        APIManager.generateAndAddNewsItem();
+                    }
+                }, this.config.newsTickerUpdateInterval);
+            }
+        };
+
+        const UIManager = {
+            renderAll() {
+                this.updateResourceDisplay();
+                this.renderCowPen();
+                this.renderRanchUpgrades();
+                this.updateRodeoLeaderboard();
+                this.updateNewsTicker();
+            },
+
+            updateResourceDisplay() {
+                let html = `<h6 class="text-warning mb-2">Galactic Credits: ${Math.floor(Game.state.galacticCredits)} GC</h6>`;
+                Game.config.resources.forEach(res => {
+                    html += `<p class="mb-1 small"><span class="resource-icon ${res.iconClass}"></span> ${res.name}: ${Math.floor(Game.state.resources[res.id])}</p>`;
+                });
+                Game.dom.resourceDisplay.innerHTML = html;
+            },
+
+            renderCowPen() {
+                if (!Game.dom.cowPen) return;
+                if (Game.state.cows.length === 0) {
+                    Game.dom.cowPen.innerHTML = `<p class="text-muted text-center mt-3">Your cow pen is empty. Breed some cows!</p>`;
+                    return;
+                }
+                let html = '<div class="row row-cols-1 row-cols-lg-2 g-2">';
+                Game.state.cows.forEach(cow => {
+                    const resourceInfo = Game.config.resources.find(r => r.id === cow.produces);
+                    const productionRate = resourceInfo.baseProd * cow.geneticLevel * (Game.state.globalProdModifier || 1);
+                    const placeholderImg = `https://via.placeholder.com/150/333333/888888?text=${encodeURIComponent(cow.name.substring(0,10))}`;
+                    html += `
+                        <div class="col">
+                            <div class="card h-100 cow-card bg-dark border-secondary" data-cow-id="${cow.id}">
+                                <img src="${cow.imageUrl || placeholderImg}" class="card-img-top cow-card-img" alt="${cow.name}" onerror="this.src='${placeholderImg}'">
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title text-info">${cow.name} <small class="text-muted">(Lvl ${cow.geneticLevel.toFixed(2)})</small></h5>
+                                    <p class="card-text small">Produces: ${resourceInfo.name} (${productionRate.toFixed(1)}/sec)</p>
+                                    <p class="card-text small fst-italic">Quirk: ${cow.quirk || "A mysterious creature."}</p>
+                                    <div class="mt-auto d-flex justify-content-between">
+                                        <button class="btn btn-success btn-sm collect-btn" data-cow-id="${cow.id}"><i class="bi bi-bucket-fill"></i> Collect</button>
+                                        <button class="btn btn-outline-info btn-sm details-btn" data-cow-id="${cow.id}"><i class="bi bi-search"></i> Details</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+                html += '</div>';
+                Game.dom.cowPen.innerHTML = html;
+            },
+
+            renderRanchUpgrades() {
+                if (!Game.dom.ranchUpgradesList) return;
+                let html = '';
+                Game.config.ranchUpgrades.forEach(upg => {
+                    const currentLevel = Game.state.ranchUpgrades[upg.id]?.level || 0;
+                    const cost = upg.cost * Math.pow(upg.costMultiplier || 1.5, currentLevel); 
+                    const canAfford = Game.state.galacticCredits >= cost;
+                    const atMaxLevel = currentLevel >= upg.maxLevel;
+
+                    html += `
+                        <div class="card bg-dark border-secondary mb-2">
+                            <div class="card-body p-2">
+                                <h6 class="card-title text-light mb-1">${upg.name} <span class="badge bg-info">${currentLevel}/${upg.maxLevel}</span></h6>
+                                <p class="card-text small mb-1">${upg.description}</p>
+                                <button class="btn btn-sm btn-outline-warning w-100" data-upgrade-id="${upg.id}" ${atMaxLevel || !canAfford ? 'disabled' : ''}>
+                                    ${atMaxLevel ? 'Max Level' : `Upgrade (${Math.floor(cost)} GC)`}
+                                </button>
+                            </div>
+                        </div>`;
+                });
+                Game.dom.ranchUpgradesList.innerHTML = html;
+            },
+            
+            updateCenterPanel(title, mode = 'placeholder', content = null, altText = '') {
+                Game.dom.centerPanelTitle.textContent = title;
+                Game.dom.mainImageDisplay.style.display = 'none';
+                Game.dom.mainTextDisplay.style.display = 'none';
+                Game.dom.loadingSpinnerMain.style.display = 'none';
+                Game.dom.mainPlaceholderText.style.display = 'none';
+
+                switch(mode) {
+                    case 'image':
+                        Game.dom.mainImageDisplay.src = content;
+                        Game.dom.mainImageDisplay.alt = altText || title;
+                        Game.dom.mainImageDisplay.style.display = 'block';
+                        break;
+                    case 'text':
+                        Game.dom.mainTextDisplay.innerHTML = content; 
+                        Game.dom.mainTextDisplay.style.display = 'block';
+                        break;
+                    case 'loading':
+                        Game.dom.loadingSpinnerMain.style.display = 'block';
+                        break;
+                    case 'placeholder':
+                    default:
+                        Game.dom.mainPlaceholderText.textContent = content || 'Select an action or wait for an event.';
+                        Game.dom.mainPlaceholderText.style.display = 'block';
+                        break;
+                }
+            },
+
+            showToast(title, message, type = 'info') {
+                Game.dom.toastTitle.textContent = title;
+                Game.dom.toastBody.textContent = message;
+                const toastEl = document.getElementById('liveToast');
+                toastEl.classList.remove('text-bg-success', 'text-bg-danger', 'text-bg-warning', 'text-bg-info', 'text-bg-primary');
+                toastEl.classList.add(`text-bg-${type}`);
+                Game.toast.show();
+            },
+
+            updateRodeoLeaderboard() {
+                if (!Game.dom.rodeoLeaderboard) return;
+                Game.state.rodeoScores.sort((a, b) => b.score - a.score);
+                const topScores = Game.state.rodeoScores.slice(0, 5);
+                let html = '';
+                if (topScores.length === 0) {
+                    html = '<li class="list-group-item bg-transparent border-secondary text-muted">No scores yet. Be the first!</li>';
+                } else {
+                    topScores.forEach(entry => {
+                        html += `<li class="list-group-item bg-transparent border-secondary d-flex justify-content-between align-items-center small">
+                                    <span>${entry.cowName.substring(0,15)}${entry.cowName.length > 15 ? '...' : ''} (${entry.eventName.substring(0,10)}${entry.eventName.length > 10 ? '...' : ''})</span>
+                                    <span class="badge bg-warning rounded-pill">${entry.score} pts</span>
+                                 </li>`;
+                    });
+                }
+                Game.dom.rodeoLeaderboard.innerHTML = html;
+            },
+
+            updateNewsTicker() {
+                if (!Game.dom.newsTicker) return;
+                let html = '';
+                const displayItems = Game.state.newsTickerItems.slice(-Game.config.maxNewsItems);
+                displayItems.reverse().forEach(item => {
+                    html += `<p class="border-bottom border-secondary pb-1 mb-1">${item}</p>`;
+                });
+                if (!html) html = `<p class="text-muted">The galaxy is quiet... too quiet.</p>`;
+                Game.dom.newsTicker.innerHTML = html;
+                if (Game.dom.newsTicker.scrollTop + Game.dom.newsTicker.clientHeight >= Game.dom.newsTicker.scrollHeight - 20) {
+                    Game.dom.newsTicker.scrollTop = Game.dom.newsTicker.scrollHeight;
+                }
+            },
+
+            showCowDetailModal(cowId) {
+                const cow = Game.state.cows.find(c => c.id === cowId);
+                if (!cow) return;
+                const placeholderImg = `https://via.placeholder.com/250/333333/888888?text=${encodeURIComponent(cow.name.substring(0,10))}`;
+                Game.dom.cowDetailImage.src = cow.imageUrl || placeholderImg;
+                Game.dom.cowDetailImage.onerror = () => { Game.dom.cowDetailImage.src = placeholderImg; };
+                Game.dom.cowDetailName.textContent = cow.name;
+                Game.dom.cowDetailQuirk.textContent = cow.quirk;
+                const resourceInfo = Game.config.resources.find(r => r.id === cow.produces);
+                const productionRate = resourceInfo.baseProd * cow.geneticLevel * (Game.state.globalProdModifier || 1);
+                Game.dom.cowDetailProduction.textContent = `${productionRate.toFixed(1)} ${resourceInfo.name}/sec`;
+                Game.dom.cowDetailLevel.textContent = cow.geneticLevel.toFixed(2);
+                Game.dom.cowDetailLastCollected.textContent = new Date(cow.lastCollectedTime).toLocaleString();
+                
+                let upgradesHtml = '';
+                const availableUpgrades = Game.state.research.unlockedUpgrades.filter(upg => upg.appliesTo === resourceInfo.id || upg.appliesTo === 'all' || !upg.appliesTo);
+                
+                if (availableUpgrades.length === 0) {
+                    upgradesHtml = '<p class="text-muted">No specific genetic upgrades available for this cow type yet. Conduct more research!</p>';
+                } else {
+                    availableUpgrades.forEach(upg => {
+                        const isApplied = cow.appliedUpgrades && cow.appliedUpgrades.includes(upg.id);
+                        const canAfford = Game.state.galacticCredits >= upg.cost;
+                        upgradesHtml += `
+                            <div class="card bg-dark border-secondary mb-2">
+                                <div class="card-body p-2">
+                                    <h6 class="card-title text-light mb-1">${upg.name}</h6>
+                                    <p class="card-text small mb-1">${upg.description}</p>
+                                    <p class="card-text small">Cost: ${upg.cost} GC</p>
+                                    <button class="btn btn-sm btn-info w-100 apply-genetic-upgrade-btn" 
+                                            data-cow-id="${cow.id}" data-upgrade-id="${upg.id}" 
+                                            ${isApplied || !canAfford ? 'disabled' : ''}>
+                                        ${isApplied ? 'Applied' : 'Apply Upgrade'}
+                                    </button>
+                                </div>
+                            </div>`;
+                    });
+                }
+                Game.dom.cowDetailUpgradesList.innerHTML = upgradesHtml;
+                Game.modals.cowDetail.show();
+            }
+        };
+
+        const APIManager = {
+            async _callApi(endpoint, body) {
+                if (endpoint === '/api/generate-image-on-demand') {
+                    if (Game.apiImageCallInProgress) {
+                        UIManager.showToast("API Busy", "An image generation is already in progress. Please wait.", "warning");
+                        return null; 
+                    }
+                    Game.apiImageCallInProgress = true;
+                }
+
+                try {
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({ error: `HTTP error! status: ${response.status}` }));
+                        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                    }
+                    return await response.json();
+                } catch (error) {
+                    console.error(`Error calling ${endpoint}:`, error);
+                    UIManager.showToast("API Error", `Failed to communicate with the AI. ${error.message}`, "danger");
+                    return null;
+                } finally {
+                     if (endpoint === '/api/generate-image-on-demand') Game.apiImageCallInProgress = false;
+                }
+            },
+
+            async generateText(promptContent, context) {
+                const payload = {
+                    aiguide: `You are an AI assistant for the 'Cosmic Cowpoke Clicker Tycoon' game. The game has a bizarre, humorous space western theme. Context: ${context}. Provide a concise, creative response based on the user prompt.`,
+                    msgforai: promptContent,
+                    llmSettings: { temperature: 0.85, model:"gemini-1.5-flash-latest" }
+                };
+                const data = await this._callApi('/api/ai', payload);
+                return data && data.success ? data.response.trim() : null;
+            },
+
+            async generateImage(promptContent, aspectRatio = "1:1") {
+                const payload = { prompt: promptContent, aspectRatio: aspectRatio, style: "hd" };
+                const data = await this._callApi('/api/generate-image-on-demand', payload);
+                return data && data.success ? data.imageUrl : null;
+            },
+            
+            async generateAndAddNewsItem() {
+                if (document.hidden) return; 
+                const headline = await this.generateText(Game.config.newsTickerPrompt, "news_headline_generation");
+                if (headline) {
+                    Game.state.newsTickerItems.push(headline);
+                    if (Game.state.newsTickerItems.length > Game.config.maxNewsItems * 2) {
+                         Game.state.newsTickerItems.shift(); 
+                    }
+                    UIManager.updateNewsTicker();
+                }
+            }
+        };
+
+        const CowManager = {
+            async breedNewCow() {
+                const currentCost = Game.config.initialCowCost * (Game.state.currentCowCostModifier || 1);
+                if (Game.state.galacticCredits < currentCost) {
+                    UIManager.showToast("Insufficient Funds", "Not enough Galactic Credits to breed a new cow.", "warning");
+                    return;
+                }
+                if (Game.apiImageCallInProgress) {
+                    UIManager.showToast("Operation Busy", "An image generation is already in progress. Please wait.", "warning");
+                    return;
+                }
+
+                Game.dom.breedCowBtn.disabled = true;
+                UIManager.updateCenterPanel("Breeding New Cow...", "loading", "Contacting the cosmic bovine geneticists...");
+
+                const cowName = await APIManager.generateText(Game.config.cowNamePrompt, "cow_name_generation");
+                if (!cowName) {
+                    UIManager.showToast("Breeding Failed", "Could not generate a name for the cow. The void is silent.", "danger");
+                    UIManager.updateCenterPanel("Ranch HQ", "placeholder", "Breeding failed. Try again!");
+                    Game.dom.breedCowBtn.disabled = false;
+                    return;
+                }
+                
+                UIManager.updateCenterPanel(`Breeding: ${cowName}`, "loading", `Determining unique quirks for ${cowName}...`);
+                const quirkPrompt = Game.config.cowQuirkPrompt.replace("[COW_NAME]", cowName);
+                const cowQuirk = await APIManager.generateText(quirkPrompt, "cow_quirk_generation");
+
+                UIManager.updateCenterPanel(`Breeding: ${cowName}`, "loading", `Visualizing the magnificent ${cowName}...`);
+                const adj = ['bio-luminescent', 'crystal-skinned', 'robo-mechanical', 'gaseous-form', 'cactus-horned', 'six-legged', 'tentacled-udder', 'jet-propelled', 'star-dusted', 'void-infused'];
+                const feat1 = ['glowing eyes', 'metallic hooves', 'plasma breath', 'anti-gravity floatation sacs', 'quill-like fur', 'multiple stomachs', 'nebula-patterned hide', 'comet-tail plume'];
+                const feat2 = ['a tiny cowboy hat', 'laser targeting monocle', 'rocket boosters', 'a saddle made of stardust', 'solar panel wings', 'a banjo it occasionally strums', 'an aura of existential dread'];
+                const loc = ['a purple asteroid field', 'a zero-g pasture', 'a swirling nebula cloud', 'the rings of a forgotten gas giant', 'a derelict spaceship hull', 'a moon made of cheese'];
+                
+                const imagePrompt = Game.config.cowImageBasePrompt
+                    .replace("[COW_NAME]", cowName)
+                    .replace("[ADJECTIVE_1]", adj[Math.floor(Math.random() * adj.length)])
+                    .replace("[FEATURE_1]", feat1[Math.floor(Math.random() * feat1.length)])
+                    .replace("[FEATURE_2]", feat2[Math.floor(Math.random() * feat2.length)])
+                    .replace("[LOCATION_ELEMENT]", loc[Math.floor(Math.random() * loc.length)]);
+
+                const cowImageUrl = await APIManager.generateImage(imagePrompt, "1:1");
+                if (!cowImageUrl) {
+                    UIManager.showToast("Breeding Failed", "Could not generate an image for the cow. Cosmic interference!", "danger");
+                    UIManager.updateCenterPanel("Ranch HQ", "placeholder", "Image generation failed. The cow remains unseen. Try again!");
+                    Game.dom.breedCowBtn.disabled = false;
+                    return;
+                }
+
+                Game.state.galacticCredits -= currentCost;
+                const newCow = {
+                    id: 'cow_' + Date.now() + Math.random().toString(36).substr(2, 9),
+                    name: cowName,
+                    imageUrl: cowImageUrl,
+                    quirk: cowQuirk || "An enigmatic bovine from the deep yonder.",
+                    produces: Game.config.resources[Math.floor(Math.random() * Game.config.resources.length)].id,
+                    lastCollectedTime: Date.now(),
+                    geneticLevel: 1,
+                    appliedUpgrades: []
+                };
+                Game.state.cows.push(newCow);
+                UIManager.renderCowPen();
+                UIManager.updateResourceDisplay();
+                UIManager.updateCenterPanel(newCow.name, "image", newCow.imageUrl, `Image of ${newCow.name}`);
+                UIManager.showToast("New Arrival!", `Successfully bred ${newCow.name}! What a specimen!`, "success");
+                Game.dom.breedCowBtn.disabled = false;
+            },
+
+            collectResources(cowId) {
+                const cow = Game.state.cows.find(c => c.id === cowId);
+                if (!cow) return;
+
+                const now = Date.now();
+                const timeSinceLastCollect = (now - cow.lastCollectedTime) / 1000; 
+                const resourceInfo = Game.config.resources.find(r => r.id === cow.produces);
+                if (!resourceInfo) return;
+                const baseProd = resourceInfo.baseProd;
+                const effectiveProd = baseProd * cow.geneticLevel * (Game.state.globalProdModifier || 1);
+                const amountCollected = Math.floor(effectiveProd * timeSinceLastCollect);
+
+                if (amountCollected > 0) {
+                    Game.state.resources[cow.produces] += amountCollected;
+                    cow.lastCollectedTime = now;
+                    UIManager.updateResourceDisplay();
+                    UIManager.showToast("Resources Collected", `Collected ${amountCollected} ${resourceInfo.name} from ${cow.name}.`, "info");
+                } else {
+                    UIManager.showToast("Nothing to Collect", `${cow.name} hasn't produced enough interstellar goodies yet.`, "info");
+                }
+            },
+            applyGeneticUpgrade(cowId, upgradeId) {
+                const cow = Game.state.cows.find(c => c.id === cowId);
+                const upgrade = Game.state.research.unlockedUpgrades.find(u => u.id === upgradeId);
+
+                if (!cow || !upgrade) {
+                    UIManager.showToast("Error", "Cow or upgrade not found. Lost in the cosmos?", "danger");
+                    return;
+                }
+                if (cow.appliedUpgrades && cow.appliedUpgrades.includes(upgradeId)) {
+                    UIManager.showToast("Already Applied", "This genetic marvel is already part of this cow's makeup.", "warning");
+                    return;
+                }
+                if (Game.state.galacticCredits < upgrade.cost) {
+                    UIManager.showToast("Insufficient Funds", "Not enough Galactic Credits for this fancy gene-splicing.", "warning");
+                    return;
+                }
+
+                Game.state.galacticCredits -= upgrade.cost;
+                cow.geneticLevel += (upgrade.levelBoost || 0.25); 
+                if (!cow.appliedUpgrades) cow.appliedUpgrades = [];
+                cow.appliedUpgrades.push(upgradeId);
+
+                UIManager.showToast("Upgrade Applied!", `${upgrade.name} applied to ${cow.name}. Genetic level increased!`, "success");
+                UIManager.updateResourceDisplay();
+                UIManager.renderCowPen(); 
+                UIManager.showCowDetailModal(cowId); 
+            }
+        };
+
+        const RanchManager = {
+            purchaseUpgrade(upgradeId) {
+                const upgradeInfo = Game.config.ranchUpgrades.find(u => u.id === upgradeId);
+                if (!upgradeInfo) return;
+
+                let currentUpgradeState = Game.state.ranchUpgrades[upgradeId];
+                if (!currentUpgradeState) { // Should be initialized, but as a fallback
+                    Game.state.ranchUpgrades[upgradeId] = { level: 0 };
+                    currentUpgradeState = Game.state.ranchUpgrades[upgradeId];
+                }
+                
+                if (currentUpgradeState.level >= upgradeInfo.maxLevel) {
+                    UIManager.showToast("Max Level", "This ranch upgrade is already at its maximum potential.", "info");
+                    return;
+                }
+
+                const cost = upgradeInfo.cost * Math.pow(upgradeInfo.costMultiplier || 1.5, currentUpgradeState.level);
+                if (Game.state.galacticCredits < cost) {
+                    UIManager.showToast("Insufficient Funds", "Not enough Galactic Credits for this ranch improvement.", "warning");
+                    return;
+                }
+
+                Game.state.galacticCredits -= cost;
+                currentUpgradeState.level++;
+                if (upgradeInfo.effect) {
+                    upgradeInfo.effect(Game.state); 
+                }
+                
+                if(upgradeId === 'improvedSilo' || upgradeId === 'autoMilker'){ // Re-calculate derived state if needed
+                   Game.state.globalProdModifier = 1;
+                   Game.state.autoCollectRate = 0;
+                   Game.config.ranchUpgrades.forEach(upgConf => {
+                       const stateUpg = Game.state.ranchUpgrades[upgConf.id];
+                       if(stateUpg && stateUpg.level > 0){
+                           for(let i=0; i < stateUpg.level; i++){
+                               if(upgConf.effect) upgConf.effect(Game.state); // Re-apply effect based on new level
+                           }
+                       }
+                   });
+                }
+
+
+                UIManager.updateResourceDisplay();
+                UIManager.renderRanchUpgrades();
+                UIManager.renderCowPen(); 
+                UIManager.showToast("Upgrade Purchased!", `${upgradeInfo.name} upgraded to level ${currentUpgradeState.level}. Yeehaw!`, "success");
+            }
+        };
+
+        const ResearchManager = {
+            async conductResearch() {
+                if (Game.state.galacticCredits < Game.config.researchCost) {
+                    UIManager.showToast("Insufficient Funds", "Not enough Galactic Credits to fund this vital research.", "warning");
+                    return;
+                }
+                 if (Game.apiImageCallInProgress) {
+                    UIManager.showToast("Operation Busy", "An image generation is in progress. Research must wait.", "warning");
+                    return;
+                }
+
+                Game.dom.conductResearchBtn.disabled = true;
+                UIManager.updateCenterPanel("Conducting Research...", "loading", "Firing up the ol' thinkin' machine...");
+
+                Game.state.galacticCredits -= Game.config.researchCost;
+                UIManager.updateResourceDisplay();
+
+                const targetResource = Game.config.resources[Math.floor(Math.random() * Game.config.resources.length)];
+                const paperPrompt = Game.config.researchPaperPrompt.replace("[RESOURCE_NAME]", targetResource.name);
+                const researchPaperText = await APIManager.generateText(paperPrompt, "research_paper_generation");
+
+                if (!researchPaperText) {
+                    UIManager.showToast("Research Failed", "Could not generate research paper. The muse of science is fickle.", "danger");
+                    Game.state.galacticCredits += Game.config.researchCost; 
+                    UIManager.updateResourceDisplay();
+                    UIManager.updateCenterPanel("Ranch HQ", "placeholder", "Research fizzled out. Try again!");
+                    Game.dom.conductResearchBtn.disabled = false;
+                    return;
+                }
+                
+                const [paperTitle, ...paperAbstractParts] = researchPaperText.split('\n');
+                const paperAbstract = paperAbstractParts.join('\n').trim() || "Fascinating findings, indeed.";
+
+                Game.state.research.completedPapers.push({title: paperTitle, content: paperAbstract});
+                UIManager.updateCenterPanel(paperTitle, "text", `<div class="p-2 border rounded bg-light text-dark small" style="font-family: monospace; white-space: pre-wrap;"><h4>${paperTitle}</h4>${paperAbstract}</div>`, paperTitle);
+
+                const upgradePrompt = Game.config.researchUpgradePrompt.replace("[RESOURCE_NAME]", targetResource.name);
+                const upgradesText = await APIManager.generateText(upgradePrompt, "research_upgrade_parsing");
+                
+                let newUpgradesHtml = '<p class="text-muted">No new specific upgrades from this paper, but knowledge grows!</p>';
+                if (upgradesText) {
+                    const parsedUpgrades = this.parseUpgrades(upgradesText, targetResource.id);
+                    if (parsedUpgrades.length > 0) {
+                        newUpgradesHtml = '';
+                        parsedUpgrades.forEach(upg => {
+                            if (!Game.state.research.unlockedUpgrades.find(existing => existing.name === upg.name)) { // Avoid duplicates
+                                Game.state.research.unlockedUpgrades.push(upg);
+                                newUpgradesHtml += `<div class="alert alert-info"><strong>${upg.name}</strong> (${upg.cost} GC): ${upg.description} (Boosts Lvl by ~${upg.levelBoost.toFixed(2)})</div>`;
+                            }
+                        });
+                         if(newUpgradesHtml === '') newUpgradesHtml = '<p class="text-muted">This research confirmed existing theories. More study needed!</p>';
+                    }
+                }
+
+                Game.dom.researchPaperContent.innerHTML = `<h4>${paperTitle}</h4><hr>${paperAbstract.replace(/\n/g, '<br>')}`;
+                Game.dom.researchUpgradesList.innerHTML = newUpgradesHtml;
+                Game.modals.research.show();
+                Game.dom.conductResearchBtn.disabled = false;
+            },
+
+            parseUpgrades(text, appliesToResource) {
+                const upgrades = [];
+                const upgradeStrings = text.split(';');
+                upgradeStrings.forEach(str => {
+                    const match = str.match(/(.+?)\s\((\d+)\sGC\):\s(.+)/);
+                    if (match) {
+                        upgrades.push({
+                            id: 'resUpg_' + Date.now() + Math.random().toString(36).substr(2, 5),
+                            name: match[1].trim(),
+                            cost: parseInt(match[2]),
+                            description: match[3].trim(),
+                            appliesTo: appliesToResource, 
+                            levelBoost: parseFloat((0.15 + Math.random() * 0.35).toFixed(2))
+                        });
+                    }
+                });
+                return upgrades;
+            }
+        };
+
+        const TraderManager = {
+            updateTraderTimer(deltaTime) {
+                if (Game.state.trader) return; 
+                if (!Game.dom.traderTimer) Game.dom.traderTimer = document.getElementById('trader-timer');
+                if (!Game.dom.traderTimer) return;
+
+                const timeToArrival = (Game.state.traderNextArrival - Date.now()) / 1000;
+                if (timeToArrival <=0) {
+                    Game.dom.traderTimer.textContent = "Soon!";
+                    this.checkTraderArrival();
+                } else {
+                    Game.dom.traderTimer.textContent = `${Math.floor(timeToArrival)}s`;
+                }
+            },
+            
+            async checkTraderArrival() {
+                if (Game.state.trader || Date.now() < Game.state.traderNextArrival || Game.apiImageCallInProgress) {
+                    if (Game.apiImageCallInProgress && Date.now() >= Game.state.traderNextArrival) {
+                         setTimeout(() => this.checkTraderArrival(), 5000); // Retry if busy
+                    }
+                    return;
+                }
+                
+                UIManager.updateCenterPanel("Alien Trader Approaching...", "loading", "Scanning for incoming vessels...");
+                Game.dom.traderStatus.innerHTML = `<div class="alert alert-info p-2">Detecting incoming transmission... <div class="spinner-border spinner-border-sm ms-2" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
+
+                const resource1 = Game.config.resources[Math.floor(Math.random() * Game.config.resources.length)];
+                let resource2 = Game.config.resources[Math.floor(Math.random() * Game.config.resources.length)];
+                while (resource2.id === resource1.id) {
+                     resource2 = Game.config.resources[Math.floor(Math.random() * Game.config.resources.length)];
+                }
+                
+                const nameBackstoryPrompt = Game.config.traderNameBackstoryPrompt
+                    .replace("[RESOURCE_NAME_1]", resource1.name)
+                    .replace("[RESOURCE_NAME_2]", resource2.name);
+                const nameBackstory = await APIManager.generateText(nameBackstoryPrompt, "trader_generation");
+
+                if (!nameBackstory) {
+                    UIManager.showToast("Trader Vanished", "The trader signal was lost in cosmic dust.", "warning");
+                    Game.scheduleNextTraderArrival();
+                    UIManager.updateCenterPanel("Ranch HQ", "placeholder");
+                    Game.dom.traderStatus.innerHTML = `<div class="alert alert-secondary p-2">No traders currently. Next potential arrival in <span id="trader-timer">--</span>s.</div>`;
+                    if(!Game.dom.traderTimer) Game.dom.traderTimer = document.getElementById('trader-timer'); 
+                    return;
+                }
+
+                const [traderName, ...backstoryParts] = nameBackstory.split('\n');
+                const traderBackstory = backstoryParts.join('\n').trim() || "An enigmatic interstellar merchant with wares and wants.";
+                
+                const imagePrompt = Game.config.traderImagePrompt
+                    .replace("[TRADER_NAME]", traderName)
+                    .replace("[TRADER_DESCRIPTION]", traderBackstory.substring(0, 120) + " " + resource1.name);
+
+                Game.dom.traderImage.style.display = 'none';
+                Game.dom.traderImageSpinnerContainer.style.display = 'flex';
+                
+                const traderImageUrl = await APIManager.generateImage(imagePrompt, "1:1");
+                
+                Game.dom.traderImageSpinnerContainer.style.display = 'none';
+                const placeholderImg = `https://via.placeholder.com/200/1A202C/EEEEEE?text=${encodeURIComponent(traderName.substring(0,10))}`;
+                Game.dom.traderImage.src = traderImageUrl || placeholderImg;
+                Game.dom.traderImage.onerror = () => { Game.dom.traderImage.src = placeholderImg; };
+                Game.dom.traderImage.style.display = 'block';
+                
+                const wants = [];
+                const offerRate1 = 1.1 + Math.random() * 0.8; 
+                wants.push({ resourceId: resource1.id, resourceName: resource1.name, pricePerUnit: Math.max(1, Math.floor(resource1.baseProd * offerRate1)) });
+                if (Math.random() > 0.4) { // Higher chance for second item
+                    const offerRate2 = 1.1 + Math.random() * 0.8;
+                    wants.push({ resourceId: resource2.id, resourceName: resource2.name, pricePerUnit: Math.max(1, Math.floor(resource2.baseProd * offerRate2)) });
+                }
+
+                Game.state.trader = {
+                    name: traderName,
+                    backstory: traderBackstory,
+                    imageUrl: traderImageUrl,
+                    wants: wants
+                };
+                
+                UIManager.updateCenterPanel(traderName, "image", traderImageUrl || placeholderImg, `Image of trader ${traderName}`);
+                Game.dom.traderStatus.innerHTML = `<div class="alert alert-success p-2 clickable" data-bs-toggle="modal" data-bs-target="#traderModal">Trader <strong>${traderName}</strong> is hailing! Click to interact.</div>`;
+                Game.modals.trader.show();
+                this.displayTraderInModal();
+            },
+
+            displayTraderInModal() {
+                const trader = Game.state.trader;
+                if (!trader) return;
+
+                Game.dom.traderName.textContent = trader.name;
+                Game.dom.traderBackstory.textContent = trader.backstory;
+                
+                let dealHtml = '<h5>Wants to Buy:</h5><ul class="list-group">';
+                trader.wants.forEach(item => {
+                    const playerHas = Math.floor(Game.state.resources[item.resourceId]);
+                    dealHtml += `<li class="list-group-item bg-dark-tertiary border-secondary">
+                        ${item.resourceName} (You have: ${playerHas})
+                        <br>Price: ${item.pricePerUnit} GC/unit
+                        <div class="input-group input-group-sm mt-1">
+                            <input type="number" class="form-control trade-amount-input bg-dark text-light border-secondary" data-resource-id="${item.resourceId}" min="0" max="${playerHas}" value="0" placeholder="Amount">
+                            <button class="btn btn-outline-success trade-btn" data-resource-id="${item.resourceId}" data-price="${item.pricePerUnit}" ${playerHas === 0 ? 'disabled' : ''}>Sell</button>
+                        </div>
+                    </li>`;
+                });
+                dealHtml += '</ul>';
+                Game.dom.traderDealInfo.innerHTML = dealHtml;
+                
+                Game.dom.traderModalFooter.innerHTML = `<button type="button" class="btn btn-secondary" onclick="TraderManager.dismissTrader()">Dismiss Trader</button>`;
+
+                document.querySelectorAll('.trade-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const resourceId = e.target.dataset.resourceId;
+                        const price = parseInt(e.target.dataset.price);
+                        const input = document.querySelector(`.trade-amount-input[data-resource-id="${resourceId}"]`);
+                        const amount = parseInt(input.value);
+                        this.executeTrade(resourceId, amount, price);
+                    });
+                });
+            },
+
+            executeTrade(resourceId, amount, pricePerUnit) {
+                if (isNaN(amount) || amount <= 0) {
+                    UIManager.showToast("Invalid Amount", "Please enter a valid amount to sell.", "warning");
+                    return;
+                }
+                if (Game.state.resources[resourceId] < amount) {
+                    UIManager.showToast("Not Enough Resources", `You don't have ${amount} ${Game.config.resources.find(r=>r.id === resourceId).name}.`, "warning");
+                    return;
+                }
+
+                Game.state.resources[resourceId] -= amount;
+                Game.state.galacticCredits += amount * pricePerUnit;
+
+                UIManager.updateResourceDisplay();
+                this.displayTraderInModal(); 
+                UIManager.showToast("Trade Successful!", `Sold ${amount} ${Game.config.resources.find(r=>r.id === resourceId).name}. Pleasure doing business!`, "success");
+            },
+
+            dismissTrader() {
+                Game.state.trader = null;
+                Game.modals.trader.hide();
+                Game.scheduleNextTraderArrival();
+                UIManager.updateCenterPanel("Ranch HQ", "placeholder", "Trader has departed. The void awaits the next encounter.");
+                Game.dom.traderStatus.innerHTML = `<div class="alert alert-secondary p-2">No traders currently. Next potential arrival in <span id="trader-timer">--</span>s.</div>`;
+                if(!Game.dom.traderTimer) Game.dom.traderTimer = document.getElementById('trader-timer'); 
+            }
+        };
+
+        const RodeoManager = {
+            currentEvent: null,
+            miniGameInterval: null,
+            barPosition: 0,
+            barDirection: 1,
+
+            async initRodeoEvent() {
+                if (Game.state.cows.length === 0) {
+                    UIManager.showToast("No Cows!", "You need at least one cow to enter the rodeo.", "warning");
+                    return;
+                }
+                 if (Game.apiImageCallInProgress) {
+                    UIManager.showToast("Operation Busy", "An image generation is in progress. Rodeo preparations on hold.", "warning");
+                    return;
+                }
+
+                Game.dom.enterRodeoBtn.disabled = true;
+                UIManager.updateCenterPanel("Preparing Rodeo...", "loading", "Setting up the cosmic arena...");
+                Game.dom.rodeoImage.style.display = 'none';
+                Game.dom.rodeoImageSpinnerContainer.style.display = 'flex';
+                Game.dom.rodeoMiniGameArea.style.display = 'none';
+                Game.dom.rodeoResultsArea.style.display = 'none';
+                Game.dom.startRodeoMiniGameBtn.disabled = true;
+                Game.dom.startRodeoMiniGameBtn.textContent = 'Start Event!';
+
+
+                let cowOptionsHtml = '';
+                Game.state.cows.forEach(cow => {
+                    cowOptionsHtml += `<option value="${cow.id}">${cow.name} (Lvl ${cow.geneticLevel.toFixed(2)})</option>`;
+                });
+                Game.dom.rodeoCowSelect.innerHTML = cowOptionsHtml;
+                Game.dom.rodeoCowSelection.style.display = 'block';
+                
+                const eventText = await APIManager.generateText(Game.config.rodeoEventPrompt, "rodeo_event_generation");
+                if (!eventText) {
+                    UIManager.showToast("Rodeo Canceled", "Could not generate rodeo event details. Cosmic interference!", "danger");
+                    UIManager.updateCenterPanel("Ranch HQ", "placeholder", "Rodeo event generation failed.");
+                    Game.dom.enterRodeoBtn.disabled = false;
+                    return;
+                }
+                
+                const [eventName, ...eventDescParts] = eventText.split('\n');
+                const eventDescription = eventDescParts.join('\n').trim() || "A thrilling space spectacle for the ages!";
+                this.currentEvent = { name: eventName, description: eventDescription };
+
+                Game.dom.rodeoEventName.textContent = this.currentEvent.name;
+                Game.dom.rodeoEventDescription.textContent = this.currentEvent.description;
+
+                const imagePrompt = Game.config.rodeoImagePrompt
+                    .replace("[RODEO_EVENT_TITLE]", this.currentEvent.name)
+                    .replace("[RODEO_EVENT_DESCRIPTION]", this.currentEvent.description.substring(0, 100));
+                
+                const rodeoImageUrl = await APIManager.generateImage(imagePrompt, "16:9");
+                
+                Game.dom.rodeoImageSpinnerContainer.style.display = 'none';
+                const placeholderImg = `https://via.placeholder.com/400x225/1A202C/EEEEEE?text=${encodeURIComponent(this.currentEvent.name.substring(0,15))}`;
+                Game.dom.rodeoImage.src = rodeoImageUrl || placeholderImg;
+                Game.dom.rodeoImage.onerror = () => { Game.dom.rodeoImage.src = placeholderImg; };
+                Game.dom.rodeoImage.style.display = 'block';
+                
+                UIManager.updateCenterPanel(this.currentEvent.name, "image", rodeoImageUrl || placeholderImg, `Image of ${this.currentEvent.name}`);
+                Game.modals.rodeo.show();
+                Game.dom.enterRodeoBtn.disabled = false;
+                Game.dom.startRodeoMiniGameBtn.disabled = false;
+            },
+
+            startMiniGame() {
+                const selectedCowId = Game.dom.rodeoCowSelect.value;
+                const cow = Game.state.cows.find(c => c.id === selectedCowId);
+                if (!cow) {
+                    UIManager.showToast("Error", "Selected cow not found. Did it wander off?", "danger");
+                    return;
+                }
+                this.currentEvent.cow = cow;
+
+                Game.dom.rodeoCowSelection.style.display = 'none';
+                Game.dom.startRodeoMiniGameBtn.style.display = 'none';
+                Game.dom.rodeoMiniGameArea.style.display = 'block';
+                Game.dom.rodeoResultsArea.style.display = 'none';
+                Game.dom.rodeoMiniGameBtn.disabled = false;
+
+                const targetZoneWidth = 15 + Math.min(15, cow.geneticLevel * 1.5); 
+                const targetZonePosition = Math.random() * (100 - targetZoneWidth);
+                Game.dom.rodeoTargetZone.style.left = `${targetZonePosition}%`;
+                Game.dom.rodeoTargetZone.style.width = `${targetZoneWidth}%`;
+
+                this.barPosition = 0;
+                this.barDirection = 1;
+                const barSpeed = 1 + Math.max(0.1, 3 - cow.geneticLevel * 0.15); 
+
+                if (this.miniGameInterval) clearInterval(this.miniGameInterval);
+                this.miniGameInterval = setInterval(() => {
+                    this.barPosition += this.barDirection * barSpeed;
+                    if (this.barPosition >= 100 || this.barPosition <= 0) {
+                        this.barDirection *= -1;
+                        this.barPosition = Math.max(0, Math.min(100, this.barPosition));
+                    }
+                    Game.dom.rodeoMovingBar.style.left = `${this.barPosition}%`;
+                }, 20);
+
+                setTimeout(() => {
+                    if (Game.dom.rodeoMiniGameBtn.disabled === false) { 
+                        this.handleMiniGameClick(true); 
+                    }
+                }, Game.config.rodeoMiniGameDuration);
+            },
+
+            handleMiniGameClick(timeout = false) {
+                if (!this.currentEvent || !this.currentEvent.cow) return; // Event might have been closed
+                clearInterval(this.miniGameInterval);
+                this.miniGameInterval = null;
+                Game.dom.rodeoMiniGameBtn.disabled = true;
+
+                let score = 0;
+                if (timeout) {
+                    score = 0;
+                    UIManager.showToast("Timeout!", "Too slow, space cowboy! The moment passed.", "warning");
+                } else {
+                    const barCenter = this.barPosition + (parseFloat(Game.dom.rodeoMovingBar.style.width) / 2 / parseFloat(Game.dom.rodeoTargetBarContainer.offsetWidth) * 100 || 0);
+                    const targetZoneLeft = parseFloat(Game.dom.rodeoTargetZone.style.left);
+                    const targetZoneRight = targetZoneLeft + parseFloat(Game.dom.rodeoTargetZone.style.width);
+
+                    if (barCenter >= targetZoneLeft && barCenter <= targetZoneRight) {
+                        const distanceFromCenterOfZone = Math.abs(barCenter - (targetZoneLeft + (targetZoneRight - targetZoneLeft) / 2));
+                        score = Math.max(10, 100 - distanceFromCenterOfZone * (100 / (targetZoneRight - targetZoneLeft))); // Scale score based on target zone size
+                        UIManager.showToast("Great Shot!", "Bullseye! The crowd goes wild!", "success");
+                    } else {
+                        score = Math.max(0, 20 - Math.abs(barCenter - (targetZoneLeft + (targetZoneRight - targetZoneLeft) / 2)) * 1.5);
+                        UIManager.showToast("Missed!", "A valiant effort, but off the mark.", "info");
+                    }
+                }
+                
+                score = Math.floor(score * (1 + this.currentEvent.cow.geneticLevel * 0.15)); // Bonus for higher level cow
+
+                Game.dom.rodeoScoreDisplay.textContent = `Your Score: ${score} points!`;
+                Game.dom.rodeoResultsArea.style.display = 'block';
+                Game.dom.startRodeoMiniGameBtn.style.display = 'block'; 
+                Game.dom.startRodeoMiniGameBtn.textContent = 'Try Another Event?';
+
+
+                if (score > 0) {
+                    Game.state.rodeoScores.push({
+                        cowName: this.currentEvent.cow.name,
+                        eventName: this.currentEvent.name,
+                        score: score
+                    });
+                    UIManager.updateRodeoLeaderboard();
+                }
+            }
+        };
+        
+        document.addEventListener('DOMContentLoaded', () => Game.init());
+    })();
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>
