@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Douglas Crossing Band - Pixar DXB</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pixar-blue: #00A4E6; 
+            --pixar-yellow: #FFD100;
+            --pixar-orange: #FF7F00;
+            --pixar-green: #78C850;
+            --pixar-red: #FC4F4F;
+            --text-dark: #2c3e50;
+            --text-light-gray: #575F6B;
+            --bg-light-custom: #FDFDFD; 
+            --bg-section-alt: #EEF6FF; 
+            --navbar-height: 70px;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            color: var(--text-dark);
+            background-color: var(--bg-light-custom);
+            padding-top: var(--navbar-height); 
+            position: relative;
+        }
+
+        h1, h2, h3, h4, h5, h6, .pixar-font {
+            font-family: 'Lilita One', cursive;
+        }
+        
+        .navbar-brand.pixar-font {
+            font-size: 1.8rem;
+            color: var(--pixar-blue) !important;
+        }
+
+        .navbar-brand img {
+            margin-right: 10px;
+            filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.2));
+        }
+
+        .navbar {
+            background-color: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            min-height: var(--navbar-height);
+        }
+
+        .nav-link {
+            color: var(--text-dark) !important;
+            font-weight: 700;
+            transition: color 0.3s ease;
+            margin: 0 0.5rem;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--pixar-orange) !important;
+        }
+        
+        .btn-pixar-primary {
+            background-color: var(--pixar-blue);
+            border-color: var(--pixar-blue);
+            color: white;
+            font-family: 'Lilita One', cursive;
+            padding: 0.75rem 1.5rem;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 164, 230, 0.3);
+        }
+
+        .btn-pixar-primary:hover, .btn-pixar-primary:focus {
+            background-color: #008ECC;
+            border-color: #008ECC;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 164, 230, 0.4);
+        }
+
+        .btn-pixar-secondary {
+            background-color: var(--pixar-yellow);
+            border-color: var(--pixar-yellow);
+            color: var(--text-dark);
+            font-family: 'Lilita One', cursive;
+            padding: 0.75rem 1.5rem;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(255, 209, 0, 0.3);
+        }
+
+        .btn-pixar-secondary:hover, .btn-pixar-secondary:focus {
+            background-color: #E6B800;
+            border-color: #E6B800;
+            color: var(--text-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(255, 209, 0, 0.4);
+        }
+
+        #hero {
+            min-height: calc(100vh - var(--navbar-height));
+            background: url('/generated_images/dalle_dc329306-989.png') no-repeat center center;
+            background-size: cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            position: relative;
+            padding: 3rem 1rem;
+        }
+
+        #hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.45); 
+        }
+
+        #hero .container {
+            position: relative;
+            z-index: 1;
+        }
+
+        #hero h1 {
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
+        }
+        
+        #hero .subtitle {
+            font-size: 1.75rem;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
+        }
+
+        #hero .secondary-subtitle {
+            font-size: 1.25rem;
+            font-family: 'Nunito', sans-serif;
+            margin-bottom: 2rem;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
+        }
+        
+        @media (max-width: 768px) {
+            #hero h1 {
+                font-size: 2.5rem;
+            }
+            #hero .subtitle {
+                font-size: 1.25rem;
+            }
+            #hero .secondary-subtitle {
+                font-size: 1rem;
+            }
+             .navbar-brand.pixar-font {
+                font-size: 1.5rem;
+            }
+            .navbar-brand img {
+                height: 40px !important;
+            }
+        }
+
+        section {
+            padding: 80px 0;
+            overflow-x: hidden;
+        }
+        
+        main > section:nth-child(odd) {
+             background-color: var(--bg-light-custom);
+        }
+        main > section:nth-child(even) {
+             background-color: var(--bg-section-alt);
+        }
+
+        .section-title {
+            font-size: 2.8rem;
+            color: var(--pixar-orange);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .section-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-light-gray);
+            margin-bottom: 3rem;
+            text-align: center;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .band-image {
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            transition: transform 0.3s ease;
+            max-width: 100%;
+            height: auto;
+        }
+        .band-image:hover {
+            transform: scale(1.03);
+        }
+        
+        .decorative-image {
+            border-radius: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            max-width: 100%;
+            height: auto;
+        }
+
+        #songs ul.song-list-column {
+            padding-left: 0;
+            list-style-type: none;
+            margin-bottom: 1rem;
+        }
+        #songs .song-list-column li {
+            padding: 8px 0;
+            border-bottom: 1px dashed #d2d8de;
+            font-size: 1.05rem;
+            color: var(--text-dark);
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+        #songs .song-list-column li:hover {
+            color: var(--pixar-blue);
+            transform: translateX(5px);
+        }
+        #songs .song-list-column li:last-child {
+            border-bottom: none;
+        }
+
+        .event-card {
+            background-color: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+        }
+        .event-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+        }
+        .event-card .event-date {
+            font-family: 'Lilita One', cursive;
+            color: var(--pixar-red);
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+        .event-card .event-title {
+            font-family: 'Lilita One', cursive;
+            color: var(--pixar-blue);
+            font-size: 1.6rem;
+            margin-bottom: 0.75rem;
+        }
+        .event-card .event-details {
+            color: var(--text-light-gray);
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+        .event-card .event-details i {
+            color: var(--pixar-orange);
+            margin-right: 8px;
+            width: 1.2em;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            border: 1px solid #ced4da;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        .form-control:focus {
+            border-color: var(--pixar-blue);
+            box-shadow: 0 0 0 0.25rem rgba(0, 164, 230, 0.25);
+        }
+        .form-control.is-invalid {
+            border-color: var(--bs-form-invalid-border-color);
+        }
+        .form-label {
+            font-weight: 700;
+            color: var(--text-light-gray);
+        }
+
+        footer {
+            background-color: var(--text-dark);
+            color: #f8f9fa;
+            padding: 40px 0;
+        }
+        footer p {
+            margin-bottom: 0.5rem;
+        }
+        footer .social-icons a {
+            color: var(--pixar-yellow);
+            font-size: 1.8rem;
+            margin: 0 10px;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+        footer .social-icons a:hover {
+            color: white;
+            transform: scale(1.1) rotate(5deg);
+        }
+        .footer-logo-icon {
+            max-height: 60px;
+            margin-top: 1rem;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+        .footer-logo-icon:hover {
+            opacity: 1;
+        }
+
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s cubic-bezier(0.165, 0.84, 0.44, 1), transform 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+        .fade-in-section.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        a:focus-visible, button:focus-visible, input[type="text"]:focus-visible, input[type="email"]:focus-visible, textarea:focus-visible {
+            outline: 2px solid var(--pixar-blue) !important;
+            outline-offset: 2px;
+            box-shadow: 0 0 0 0.25rem rgba(0, 164, 230, 0.3) !important;
+        }
+        .navbar-toggler:focus-visible {
+             box-shadow: 0 0 0 0.25rem rgba(0, 164, 230, 0.5) !important;
+        }
+    </style>
+</head>
+<body data-bs-spy="scroll" data-bs-target="#navbarNav" data-bs-offset="75">
+
+    <nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
+        <div class="container">
+            <a class="navbar-brand pixar-font d-flex align-items-center" href="#hero">
+                <img src="/generated_images/dalle_f3d0634c-085.png" alt="Douglas Crossing Band Logo" height="50" class="d-inline-block align-top">
+                Douglas Crossing Band
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#hero">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#about">The Band</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#songs">Our Songs</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#events">Events</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <header id="hero" class="fade-in-section">
+        <div class="container">
+            <h1 class="display-3 pixar-font">Douglas Crossing Band</h1>
+            <p class="subtitle">SOUTH SURREY'S VERY OWN</p>
+            <p class="secondary-subtitle">Come experience the spectacle!</p>
+            <a href="#contact" class="btn btn-pixar-primary btn-lg">CONTACT US</a>
+        </div>
+    </header>
+
+    <main>
+        <section id="about" class="fade-in-section">
+            <div class="container">
+                <h2 class="section-title">THE BAND</h2>
+                <div class="row align-items-center g-5">
+                    <div class="col-lg-6">
+                        <h3 class="pixar-font" style="color: var(--pixar-blue); font-size: 2.2rem;">What We Play</h3>
+                        <p class="lead" style="color: var(--text-light-gray);">
+                            60s through today including Mellencamp, The Doors, Poison, T-Rex, Guns&Roses, Smash Mouth, Trooper, AC/DC and so much more.
+                        </p>
+                        <p style="color: var(--text-light-gray); font-size: 1.1rem;">
+                            We are a group of passionate musicians dedicated to bringing high-energy performances and a diverse range of classic hits to every event. Our goal is to get you dancing and singing along all night long!
+                        </p>
+                        <a href="#songs" class="btn btn-pixar-secondary mt-3">OUR SONG LIST & SAMPLES</a>
+                    </div>
+                    <div class="col-lg-6 text-center">
+                        <img src="/generated_images/dalle_142c9b42-241.png" alt="Douglas Crossing Band performing" class="img-fluid band-image">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="songs" class="fade-in-section">
+            <div class="container">
+                <h2 class="section-title">OUR SONG LIST</h2>
+                <p class="section-subtitle">Here's a taste of what we love to play. Our repertoire is always growing!</p>
+                <div class="row">
+                    <div class="col-lg-4 col-md-6">
+                        <ul class="song-list-column">
+                            <li>Ain't my Fault</li>
+                            <li>Bang a Gong</li>
+                            <li>Blue Suede Shoes</li>
+                            <li>Breakup Song</li>
+                            <li>Cherry Bomb</li>
+                            <li>Cinnamon Girl</li>
+                            <li>Come & Get Your Love</li>
+                            <li>Comfortably Numb</li>
+                            <li>Could Have Been a Lady</li>
+                            <li>Crazy Little Thing Called Love</li>
+                            <li>Day After Day</li>
+                            <li>Dead Flowers</li>
+                            <li>Dear Mr. Fantasy</li>
+                            <li>Every Rose Has Its Thorns</li>
+                            <li>Friday I'm in Love</li>
+                            <li>Have You Ever Seen the Rain</li>
+                            <li>Here for a Good Time</li>
+                            <li>Hungry Heart</li>
+                            <li>Hurts so Good</li>
+                            <li>I won't Back Down</li>
+                            <li>I Would Walk 500 Miles</li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <ul class="song-list-column">
+                            <li>It's Only Rock & Roll</li>
+                            <li>Johnny B Good</li>
+                            <li>Keep Your Hands to Yourself</li>
+                            <li>Knockin' on Heaven's Door</li>
+                            <li>Little Bones</li>
+                            <li>Little Sister</li>
+                            <li>Little Wing</li>
+                            <li>Losing My Religion</li>
+                            <li>Maggie May</li>
+                            <li>Margaritaville</li>
+                            <li>Mary Jane's Last Dance</li>
+                            <li>Midnight Special</li>
+                            <li>Mustang Sally</li>
+                            <li>New Orleans is Sinking</li>
+                            <li>No Matter What</li>
+                            <li>Pink Houses</li>
+                            <li>Pretty Woman</li>
+                            <li>Pride & Joy</li>
+                            <li>Proud Mary</li>
+                            <li>Raise a Little Hell</li>
+                            <li>Roadhouse Blues</li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-4 col-md-12">
+                        <ul class="song-list-column">
+                            <li>R.O.C.K in the USA</li>
+                            <li>Run to You</li>
+                            <li>Running Down a Dream</li>
+                            <li>Satisfaction</li>
+                            <li>Shook me all Night Long</li>
+                            <li>Some Kind of Wonderful</li>
+                            <li>Stray Cat Strut</li>
+                            <li>Stuck in the Middle with You</li>
+                            <li>Tennessee Whisky</li>
+                            <li>The Way</li>
+                            <li>This One Goes Out to the One I Love</li>
+                            <li>Tonight is a Wonderful Night to Fall in Love</li>
+                            <li>Under My Thumb</li>
+                            <li>Under the Boardwalk</li>
+                            <li>Wagon Wheel</li>
+                            <li>What I Like About You</li>
+                            <li>What's Up</li>
+                            <li>White Wedding</li>
+                            <li>Who'll Stop the Rain</li>
+                            <li>You May be Right</li>
+                            <li>You Wreck Me</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="events" class="fade-in-section">
+            <div class="container">
+                <h2 class="section-title">See Us Live</h2>
+                <p class="section-subtitle">We keep the dance floor moving by playing great dance tunes. Find out when we're playing next.</p>
+                <div class="row align-items-stretch g-4 g-lg-5">
+                    <div class="col-lg-7">
+                        <h3 class="pixar-font mb-4" style="color: var(--pixar-blue); font-size: 2.2rem;">UPCOMING EVENTS</h3>
+                        <div class="event-card d-flex flex-column">
+                            <p class="event-date">Saturday Feb 24, 2024</p>
+                            <h4 class="event-title">Live at Crescent Beach Legion, South Surry</h4>
+                            <p class="event-details">Hear us live at The Crescent Beach Legion for an evening of dancing & good times. $10 cover charge.</p>
+                            <div class="mt-auto pt-3">
+                                <p class="event-details"><i class="bi bi-clock-fill"></i> 7:30 pm - 11:00 pm</p>
+                                <p class="event-details mb-0"><i class="bi bi-geo-alt-fill"></i> Crescent Beach Legion South Surrey, BC</p>
+                            </div>
+                        </div>
+                        <div class="text-center mt-4">
+                             <a href="#events" class="btn btn-pixar-secondary">FULL CALENDAR</a>
+                        </div>
+                    </div>
+                    <div class="col-lg-5 text-center d-flex align-items-center justify-content-center">
+                        <img src="/generated_images/dalle_7980eebf-ee2.png" alt="Events Calendar Decorative Image" class="img-fluid decorative-image" style="max-height: 350px;">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="fade-in-section">
+            <div class="container">
+                <div class="text-center mb-5">
+                    <h2 class="section-title">Have Us Play Your Event</h2>
+                    <p class="section-subtitle">Get in touch to find out about featuring Douglas Crossing Band at your event or venue. We'd love to make your occasion unforgettable!</p>
+                </div>
+                
+                <div class="row justify-content-center">
+                    <div class="col-lg-8 col-xl-7">
+                        <h3 class="pixar-font text-center mb-4" style="color: var(--pixar-blue); font-size: 2.2rem;">CONTACT US</h3>
+                        <div id="formAlertContainer" aria-live="polite"></div>
+                        <form id="contactForm" noValidate>
+                            <div class="mb-3">
+                                <label for="formName" class="form-label">Your Name</label>
+                                <input type="text" class="form-control" id="formName" required placeholder="Enter your name">
+                            </div>
+                            <div class="mb-3">
+                                <label for="formEmail" class="form-label">Your Email</label>
+                                <input type="email" class="form-control" id="formEmail" required placeholder="Enter your email address">
+                            </div>
+                            <div class="mb-3">
+                                <label for="formMessage" class="form-label">Message</label>
+                                <textarea class="form-control" id="formMessage" rows="5" required placeholder="Tell us about your event or inquiry"></textarea>
+                            </div>
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-pixar-primary btn-lg px-5">Send Message</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="text-center">
+        <div class="container">
+            <h4 class="pixar-font mt-3" style="color: var(--pixar-yellow);">CONNECT WITH US</h4>
+            <div class="social-icons my-3">
+                <a href="#" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+                <a href="#" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                <a href="#" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+            </div>
+            <img src="/generated_images/dalle_e6919b5f-78a.png" alt="Decorative music icons" class="footer-logo-icon img-fluid">
+            <p class="mt-3 mb-1">&copy; <span id="currentYear"></span> Douglas Crossing Band. All Rights Reserved.</p>
+            <p class="mb-0"><small>Website designed with a touch of Pixar magic!</small></p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function() {
+            'use strict';
+
+            const navbarHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--navbar-height')) || 70;
+
+            document.querySelectorAll('a.nav-link[href^="#"], a.btn[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    const href = this.getAttribute('href');
+                    if (!href || href === '#') return; 
+                    
+                    const targetElement = document.querySelector(href);
+                    if (targetElement) {
+                        e.preventDefault();
+                        const offsetTop = targetElement.offsetTop - navbarHeight; 
+                        
+                        window.scrollTo({
+                            top: offsetTop,
+                            behavior: 'smooth'
+                        });
+                        
+                        const navbarToggler = document.querySelector('.navbar-toggler');
+                        const navbarCollapse = document.querySelector('.navbar-collapse.show');
+                        if (navbarCollapse && getComputedStyle(navbarToggler).display !== 'none') {
+                            new bootstrap.Collapse(navbarCollapse).hide();
+                        }
+                        
+                        document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+                        if (this.classList.contains('nav-link')) {
+                            this.classList.add('active');
+                        } else {
+                           const correspondingNavLink = document.querySelector(`.nav-link[href="${href}"]`);
+                           if(correspondingNavLink) correspondingNavLink.classList.add('active');
+                        }
+                    }
+                });
+            });
+
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+            
+            const heroSection = document.getElementById('hero');
+            if (heroSection && !heroSection.classList.contains('fade-in-section')) {
+                 heroSection.classList.add('fade-in-section');
+            }
+            const allFadeInSections = document.querySelectorAll('.fade-in-section');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries, observerInstance) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observerInstance.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            allFadeInSections.forEach(section => {
+                observer.observe(section);
+            });
+            
+            const contactForm = document.getElementById('contactForm');
+            if (contactForm) {
+                contactForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const nameInput = document.getElementById('formName');
+                    const emailInput = document.getElementById('formEmail');
+                    const messageInput = document.getElementById('formMessage');
+                    
+                    const name = nameInput.value.trim();
+                    const email = emailInput.value.trim();
+                    const message = messageInput.value.trim();
+                    const formAlertContainer = document.getElementById('formAlertContainer');
+                    
+                    formAlertContainer.innerHTML = ''; 
+                    let isValid = true;
+
+                    [nameInput, emailInput, messageInput].forEach(input => {
+                        input.classList.remove('is-invalid');
+                    });
+
+                    if (!name) {
+                        nameInput.classList.add('is-invalid');
+                        isValid = false;
+                    }
+                    if (!email) {
+                        emailInput.classList.add('is-invalid');
+                        isValid = false;
+                    } else if (!validateEmail(email)) {
+                        emailInput.classList.add('is-invalid');
+                        showAlert('Please enter a valid email address.', 'danger', formAlertContainer);
+                        isValid = false; 
+                    }
+                     if (!message) {
+                        messageInput.classList.add('is-invalid');
+                        isValid = false;
+                    }
+
+                    if (!isValid && !document.querySelector('#formAlertContainer .alert-danger')) {
+                         showAlert('Please fill out all required fields correctly.', 'danger', formAlertContainer);
+                    }
+                    if (!isValid) return;
+
+                    showAlert(`Thank you for your message, ${escapeHTML(name)}! We'll get back to you soon.`, 'success', formAlertContainer);
+                    contactForm.reset();
+                });
+            }
+            
+            function validateEmail(email) {
+                const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                return re.test(String(email).toLowerCase());
+            }
+
+            function showAlert(message, type, container) {
+                container.innerHTML = ''; 
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert alert-${type} alert-dismissible fade show mt-3`;
+                alertDiv.setAttribute('role', 'alert');
+                alertDiv.innerHTML = `
+                    ${escapeHTML(message)}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+                container.appendChild(alertDiv);
+            }
+
+            function escapeHTML(str) {
+                const div = document.createElement('div');
+                div.appendChild(document.createTextNode(str));
+                return div.innerHTML;
+            }
+            
+            window.addEventListener('load', () => {
+                const hash = window.location.hash;
+                if (hash) {
+                    const targetElement = document.querySelector(hash);
+                    if (targetElement) {
+                         setTimeout(() => {
+                            const offsetTop = targetElement.offsetTop - navbarHeight;
+                            window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+                        }, 0);
+                    }
+                } else if (window.pageYOffset <= navbarHeight + 50) { 
+                    const heroLink = document.querySelector('.nav-link[href="#hero"]');
+                    if (heroLink) {
+                         document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+                         heroLink.classList.add('active');
+                    }
+                }
+            });
+
+        })();
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>
