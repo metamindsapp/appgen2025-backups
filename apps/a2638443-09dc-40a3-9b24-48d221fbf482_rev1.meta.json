@@ -1,0 +1,66 @@
+{
+  "projectId": "a2638443-09dc-40a3-9b24-48d221fbf482",
+  "revisionString": "1",
+  "projectNameDisplay": "game test",
+  "userPromptForThisRevision": "Make a single-screen 2D pixel-art platformer.\r\nDark-navy background.\r\nPlayer = small blue square that can run and jump.\r\nBrown platforms float at different heights.\r\nYellow coins to collect (show Coins: counter top-right).\r\nHidden spike traps and a full spike floor—touch = respawn.\r\nYellow key pickup unlocks a brown door (door at top-left).\r\nDisplay Level 1 top-left.\r\nGoal: grab key ➜ reach door to win",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-05-23T10:26:30.281Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/dalle_aaa781d2-4bf.png",
+      "url": "/generated_images/dalle_aaa781d2-4bf.png",
+      "description": "Pixel art player character sprite sheet: A small, solid blue square (approx 16x16 or 20x20 pixels). Sprites for: 1. Idle (still), 2. Run frame 1, 3. Run frame 2 (for a 2-frame cycle), 4. Jump/Fall pose (e.g., slightly elongated or static). Arrange horizontally, clearly separated, on a transparent background.",
+      "purpose": "Player character sprite sheet (idle, run, jump/fall).",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_8d82f0ea-c1d.png",
+      "url": "/generated_images/dalle_8d82f0ea-c1d.png",
+      "description": "Pixel art platform tile: A single brown, somewhat earthy textured rectangular block (e.g., 16x16 or 20x20 pixels). Texture should be simple and allow for tiling if needed, but primarily used as individual blocks. Transparent background.",
+      "purpose": "Basic platform block/tile.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_734e159a-6ed.png",
+      "url": "/generated_images/dalle_734e159a-6ed.png",
+      "description": "Pixel art coin sprite sheet: A small, bright yellow, circular coin (approx 12x12 or 14x14 pixels). Provide 3-4 frames for a simple spin or gleam animation. Arrange horizontally, clearly separated, on a transparent background.",
+      "purpose": "Animated collectible coin sprite.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_14913065-11a.png",
+      "url": "/generated_images/dalle_14913065-11a.png",
+      "description": "Pixel art spike trap sprite sheet: Sharp, menacing-looking spikes, dark grey or metallic color (approx 16x10 pixels, designed to sit on a platform). Sprites for: 1. Visible spikes, 2. 'Hidden/Camouflaged' state (e.g., subtly blended with brown platform color, or just tips showing). Arrange horizontally, clearly separated, on a transparent background.",
+      "purpose": "Spike trap hazard sprite (visible and camouflaged/hidden states).",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_c673a255-02e.png",
+      "url": "/generated_images/dalle_c673a255-02e.png",
+      "description": "Pixel art key sprite sheet: A small, bright yellow, classic door key shape (approx 16x10 or 18x12 pixels). Provide 2-3 frames for a gentle pulse or shimmer animation. Arrange horizontally, clearly separated, on a transparent background.",
+      "purpose": "Animated collectible key sprite.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_c4443f57-317.png",
+      "url": "/generated_images/dalle_c4443f57-317.png",
+      "description": "Pixel art door sprite sheet: A brown, wooden-looking door (approx 24x32 or 30x40 pixels, to fit player scale). Sprites for: 1. 'Locked' (closed, prominent keyhole), 2. 'Unlocked/Open' (e.g., slightly ajar, or showing a dark opening). Arrange horizontally, clearly separated, on a transparent background.",
+      "purpose": "Door sprite (locked and unlocked/open states).",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_cfa0c898-e67.png",
+      "url": "/generated_images/dalle_cfa0c898-e67.png",
+      "description": "Pixel art full spike floor tile: A tileable texture (e.g., 16x16 or 20x16 pixels) of upward-pointing spikes, dark grey or metallic. Designed to be tiled horizontally for a continuous hazard. Transparent background if spikes don't fill tile, otherwise opaque.",
+      "purpose": "Repeating tile for the full spike floor hazard.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_f3a7d7fb-ad9.png",
+      "url": "/generated_images/dalle_f3a7d7fb-ad9.png",
+      "description": "Pixel art tileable background texture: A very dark navy blue (e.g., #00001A to #00002A range) base with sparse, tiny, lighter blue or white pixel 'stars' or subtle abstract details. Should be minimalistic and not distracting. A tileable texture (e.g., 128x128 or 256x256 pixels).",
+      "purpose": "Tileable game background texture for a dark, starry/moody sky effect.",
+      "isNewlyGenerated": true
+    }
+  ]
+}
