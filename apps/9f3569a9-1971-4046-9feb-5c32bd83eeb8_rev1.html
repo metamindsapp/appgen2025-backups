@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Platformer Adventure</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #0A0F2A; 
+            color: #E0E0E0;
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        #game-container {
+            background-color: #0A0F2A;
+        }
+
+        #game-title {
+            color: #A0D2EB;
+            text-shadow: 2px 2px 0px #00000090;
+            font-size: 1.75rem;
+        }
+
+        #canvas-wrapper {
+            position: relative;
+            background-color: #000033; 
+            box-shadow: 0 0 25px rgba(128, 178, 255, 0.45);
+            border: 3px solid #2A3F6A; 
+            border-radius: 4px;
+        }
+
+        #gameCanvas {
+            display: block;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            touch-action: none;
+            background-color: transparent;
+        }
+
+        .modal-content {
+            background-color: #1A1A2D !important;
+            border: 2px solid #3A3A5A;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+            border-radius: 8px;
+        }
+
+        .modal-header, .modal-footer {
+            border-color: #3A3A5A !important;
+        }
+
+        .modal-title {
+            color: #A0D2EB;
+            font-size: 1.25rem;
+        }
+        
+        #ui-top {
+            border: 2px solid #2A3F6A;
+            background-color: rgba(10, 10, 30, 0.75) !important;
+            border-radius: 6px;
+            padding: 0.6rem 1rem !important;
+        }
+
+        #ui-top span {
+            font-weight: normal; /* Press Start 2P is already bold */
+            font-size: 0.8rem;
+        }
+        
+        #score-display {
+             background-color: #4A4E69 !important; color: #E0E0E0 !important;
+        }
+        #lives-display {
+            background-color: #C94040 !important; color: #E0E0E0 !important;
+        }
+
+
+        .btn {
+            font-family: 'Press Start 2P', cursive;
+            border-radius: 4px; 
+            box-shadow: 2px 2px 0px #00000040;
+            transition: transform 0.08s ease-out, box-shadow 0.08s ease-out;
+            padding: 0.5rem 0.8rem;
+            font-size: 0.8rem;
+        }
+        .btn-lg {
+            padding: 0.8rem 1.2rem;
+            font-size: 0.9rem;
+        }
+
+        .btn:active {
+            transform: translateY(2px) translateX(1px);
+            box-shadow: 1px 1px 0px #00000040;
+        }
+
+        .btn-success { background-color: #3E8E41; border-color: #2F6F32; }
+        .btn-info { background-color: #3A8FB7; border-color: #2A6A8A; }
+        .btn-primary { background-color: #4A7BD9; border-color: #3A60B0; }
+        .btn-warning { background-color: #D9A53B; border-color: #B0852A; color: #1A1A2D !important; }
+        .btn-outline-secondary { border-color: #6c757d; color: #adb5bd;}
+        .btn-outline-secondary:hover { background-color: #545b62; border-color: #494f54; color: #fff;}
+        .btn-danger { background-color: #C94040; border-color: #A03030; }
+
+
+        .btn-success:hover, .btn-info:hover, .btn-primary:hover, .btn-warning:hover, .btn-danger:hover {
+            filter: brightness(1.15);
+        }
+    </style>
+</head>
+<body class="bg-dark text-light">
+
+    <div id="game-container" class="d-flex flex-column justify-content-center align-items-center min-vh-100 p-2">
+        <header class="text-center mb-3">
+            <h1 id="game-title" class="h3">Pixel Platformer Adventure</h1>
+        </header>
+
+        <div id="ui-top" class="mb-3 text-center d-flex justify-content-around align-items-center p-2 rounded shadow" style="min-width: 300px; max-width: 90vw; width: auto;">
+            <span id="score-display" class="badge fs-6 me-3">Gems: 0 / 3</span>
+            <span id="lives-display" class="badge fs-6">Lives: ❤️❤️❤️</span>
+        </div>
+
+        <div id="canvas-wrapper" class="shadow-lg">
+            <canvas id="gameCanvas"></canvas>
+        </div>
+
+        <div id="ui-bottom" class="mt-3 text-center">
+            <button id="reset-button" class="btn btn-sm btn-warning me-2">Reset</button>
+            <button id="mute-button" class="btn btn-sm btn-outline-secondary">Mute: Off</button>
+        </div>
+    </div>
+
+    <div class="modal fade" id="mainMenuModal" tabindex="-1" aria-labelledby="mainMenuModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="mainMenuModalLabel">Welcome!</h5>
+                </div>
+                <div class="modal-body text-center">
+                    <p style="font-size: 0.85rem;">Collect all gems and reach the portal!</p>
+                    <button id="startGameBtn" class="btn btn-lg btn-success w-75 my-2">Start Game</button>
+                    <button id="instructionsBtnModal" class="btn btn-lg btn-info w-75 my-2">Instructions</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="instructionsModal" tabindex="-1" aria-labelledby="instructionsModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="instructionsModalLabel">How to Play</h5>
+                </div>
+                <div class="modal-body" style="font-size: 0.8rem;">
+                    <p><strong>Controls:</strong></p>
+                    <ul>
+                        <li><strong>Move Left:</strong> Left Arrow / A</li>
+                        <li><strong>Move Right:</strong> Right Arrow / D</li>
+                        <li><strong>Jump:</strong> Spacebar / Up Arrow / W</li>
+                    </ul>
+                    <p><strong>Objective:</strong></p>
+                    <p>Collect all <strong id="total-gems-instruction">3 gems</strong> to activate the portal. Avoid the spikes!</p>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button id="backToMenuBtn" class="btn btn-primary w-50">Main Menu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="gameOverModal" tabindex="-1" aria-labelledby="gameOverModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="gameOverModalLabel">Game Over!</h5>
+                </div>
+                <div class="modal-body text-center">
+                    <p id="gameOverMessage" class="fs-5" style="font-size: 0.9rem !important;">You did it!</p>
+                    <p id="finalScoreMessage" style="font-size: 0.85rem;">Gems collected: 0</p>
+                    <button id="playAgainBtn" class="btn btn-lg btn-success w-75 my-2">Play Again</button>
+                    <button id="gameOverToMenuBtn" class="btn btn-lg btn-secondary w-75 my-2">Main Menu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const GAME_CONFIG = {
+            NATIVE_WIDTH: 640,
+            NATIVE_HEIGHT: 360,
+            TILE_SIZE: 32,
+            GRAVITY: 980, 
+            PLAYER_SPEED: 200, 
+            PLAYER_ACCEL: 1000, 
+            PLAYER_FRICTION: 1200, 
+            JUMP_FORCE: 450, 
+            MAX_FALL_SPEED: 600, 
+            PLAYER_INVINCIBLE_DURATION: 1.5, 
+            PARTICLE_LIFESPAN: 0.5, 
+            GEM_ANIM_SPEED: 150, 
+            PLAYER_MAX_JUMP_TIME: 0.22, 
+        };
+
+        const ASSET_PATHS = {
+            playerSprite: "/generated_images/dalle_68ad5eca-2ca.png",
+            platformTile: "/generated_images/dalle_cc5a9319-a4a.png",
+            gemSprite: "/generated_images/dalle_3fe620d2-06c.png",
+            spikeHazard: "/generated_images/dalle_bfb5d911-015.png",
+            goalClosedSprite: "/generated_images/dalle_257d8d45-4be.png",
+            goalOpenSprite: "/generated_images/dalle_8c22d53b-3dc.png",
+            gameBackground: "/generated_images/dalle_70b5c9e3-af7.png"
+        };
+
+        const LEVEL_1_DATA = {
+            playerStart: { x: 64, y: 280 },
+            totalGemsRequired: 3,
+            background: 'gameBackground',
+            platforms: [
+                { x: 0, y: GAME_CONFIG.NATIVE_HEIGHT - GAME_CONFIG.TILE_SIZE, w: 20, h: 1, spriteKey: 'platformTile' },
+                { x: 160, y: 232, w: 5, h: 1, spriteKey: 'platformTile' },
+                { x: 384, y: 168, w: 4, h: 1, spriteKey: 'platformTile' },
+                { x: 64, y: 136, w: 3, h: 1, spriteKey: 'platformTile' },
+                { x: 480, y: 264, w: 3, h: 1, spriteKey: 'platformTile' }
+            ],
+            collectibles: [
+                { x: 400, y: 136, spriteKey: 'gemSprite', width: 24, height: 24 }, // DALL-E prompt said 16x16 or 24x24, let's use 24x24
+                { x: 100, y: 296, spriteKey: 'gemSprite', width: 24, height: 24 },
+                { x: 200, y: 200, spriteKey: 'gemSprite', width: 24, height: 24 },
+            ],
+            hazards: [
+                { x: 288, y: GAME_CONFIG.NATIVE_HEIGHT - GAME_CONFIG.TILE_SIZE * 1.5, spriteKey: 'spikeHazard', width: 32, height: 16 }, // Adjusted Y for better placement
+                { x: 480, y: 232, spriteKey: 'spikeHazard', width: 32, height: 16 },
+            ],
+            goal: { x: 100, y: 88, spriteClosedKey: 'goalClosedSprite', spriteOpenKey: 'goalOpenSprite', width: 32, height: 48 }
+        };
+        
+        class SoundManager {
+            constructor() {
+                this.audioCtx = null;
+                this.isMuted = false;
+                this.sounds = {
+                    jump: this._createSynthSound(392.00, 0.08, 'square', 0.2, 0.005, 0.04), // G4
+                    land: this._createSynthSound(100, 0.15, 'sine', 0.25, 0.01, 0.1, null, null, true), // Noise burst
+                    collect: this._createSynthSound(659.25, 0.12, 'triangle', 0.3, 0.005, 0.08, 880, 0.04), // E5 pitch bend
+                    hurt: this._createSynthSound(164.81, 0.25, 'sawtooth', 0.35, 0.01, 0.2, 130.81, 0.1), // E3 pitch bend down
+                    win: this._createSynthSoundSequence([[392,0.1],[523.25,0.1],[659.25,0.1],[783.99, 0.25, 'triangle']]), // G4, C5, E5, G5
+                    lose: this._createSynthSoundSequence([[261.63,0.15],[233.08,0.15],[207.65,0.3, 'sawtooth']]), // C4, Bb3, Ab3
+                };
+            }
+
+            _initAudioContextOnUserGesture() {
+                if (!this.audioCtx && (window.AudioContext || window.webkitAudioContext)) {
+                    try {
+                        this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    } catch (e) {
+                        console.error("Web Audio API is not supported in this browser.", e);
+                    }
+                }
+            }
+
+            _createSynthSound(freq, duration, type = 'sine', vol = 0.5, attack = 0.01, decay = 0.1, pitchBendEndFreq = null, pitchBendDuration = null, isNoise = false) {
+                return () => {
+                    if (!this.audioCtx || this.isMuted) return;
+                    let sourceNode;
+                    const gainNode = this.audioCtx.createGain();
+                    gainNode.connect(this.audioCtx.destination);
+
+                    if (isNoise) {
+                        const bufferSize = this.audioCtx.sampleRate * duration;
+                        const buffer = this.audioCtx.createBuffer(1, bufferSize, this.audioCtx.sampleRate);
+                        const output = buffer.getChannelData(0);
+                        for (let i = 0; i < bufferSize; i++) {
+                            output[i] = Math.random() * 2 - 1;
+                        }
+                        sourceNode = this.audioCtx.createBufferSource();
+                        sourceNode.buffer = buffer;
+                    } else {
+                        sourceNode = this.audioCtx.createOscillator();
+                        sourceNode.type = type;
+                        sourceNode.frequency.setValueAtTime(freq, this.audioCtx.currentTime);
+                        if (pitchBendEndFreq && pitchBendDuration) {
+                            sourceNode.frequency.linearRampToValueAtTime(pitchBendEndFreq, this.audioCtx.currentTime + pitchBendDuration);
+                        }
+                    }
+                    sourceNode.connect(gainNode);
+                    
+                    const now = this.audioCtx.currentTime;
+                    gainNode.gain.setValueAtTime(0, now);
+                    gainNode.gain.linearRampToValueAtTime(vol, now + attack);
+                    gainNode.gain.linearRampToValueAtTime(0, now + duration); 
+
+                    sourceNode.start(now);
+                    sourceNode.stop(now + duration + 0.01); // Add small buffer for fade out
+                };
+            }
+            
+            _createSynthSoundSequence(sequence) {
+                return () => {
+                    if (!this.audioCtx || this.isMuted) return;
+                    let cumulativeTime = 0;
+                    const now = this.audioCtx.currentTime;
+                    sequence.forEach(note => {
+                        const [freq, duration, type = 'sine', vol = 0.3, attack = 0.005, decay = 0.05] = note;
+                        const oscillator = this.audioCtx.createOscillator();
+                        const gainNode = this.audioCtx.createGain();
+                        
+                        oscillator.type = type;
+                        oscillator.frequency.setValueAtTime(freq, now + cumulativeTime);
+                        oscillator.connect(gainNode);
+                        gainNode.connect(this.audioCtx.destination);
+
+                        gainNode.gain.setValueAtTime(0, now + cumulativeTime);
+                        gainNode.gain.linearRampToValueAtTime(vol, now + cumulativeTime + attack);
+                        gainNode.gain.linearRampToValueAtTime(0, now + cumulativeTime + duration);
+
+                        oscillator.start(now + cumulativeTime);
+                        oscillator.stop(now + cumulativeTime + duration + 0.01);
+                        cumulativeTime += duration * 0.8; // Slight overlap or quick succession
+                    });
+                };
+            }
+
+            play(soundName) {
+                this._initAudioContextOnUserGesture(); 
+                if (this.sounds[soundName] && this.audioCtx) {
+                    this.sounds[soundName]();
+                }
+            }
+
+            toggleMute() {
+                this.isMuted = !this.isMuted;
+                if (this.isMuted && this.audioCtx && this.audioCtx.state === 'running') {
+                    // Could implement a master gain node to mute all sounds if needed
+                }
+                return this.isMuted;
+            }
+        }
+
+
+        class AssetLoader {
+            constructor() {
+                this.assets = {};
+                this.promises = [];
+            }
+
+            loadImage(key, src) {
+                const promise = new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        this.assets[key] = img;
+                        resolve(img);
+                    };
+                    img.onerror = () => {
+                        console.error(`Failed to load image: ${key} at ${src}`);
+                        reject(`Failed to load ${key}`);
+                    };
+                    img.src = src;
+                });
+                this.promises.push(promise);
+            }
+
+            loadAll(paths) {
+                for (const key in paths) {
+                    this.loadImage(key, paths[key]);
+                }
+                return Promise.all(this.promises);
+            }
+
+            getAsset(key) {
+                return this.assets[key];
+            }
+        }
+
+        class Player {
+            constructor(x, y, assetManager, particleSystem, soundManager) {
+                this.initialX = x;
+                this.initialY = y;
+                this.assetManager = assetManager;
+                this.particleSystem = particleSystem;
+                this.soundManager = soundManager;
+                
+                this.collisionWidth = 24; 
+                this.collisionHeight = 30; 
+
+                this.animations = {
+                    idle: { frames: 4, yOffset: 0, frameWidth: 32, frameHeight: 32, speed: 200, startFrameIndex: 0 },
+                    run:  { frames: 6, yOffset: 0, frameWidth: 32, frameHeight: 32, speed: 100, startFrameIndex: 4 },
+                    jump: { frames: 1, yOffset: 0, frameWidth: 32, frameHeight: 32, speed: 1000, startFrameIndex: 10 },
+                    fall: { frames: 1, yOffset: 0, frameWidth: 32, frameHeight: 32, speed: 1000, startFrameIndex: 11 }
+                };
+                this.spriteSheet = this.assetManager.getAsset('playerSprite');
+                
+                this.hitbox = { 
+                    xOffset: (this.animations.idle.frameWidth - this.collisionWidth) / 2, 
+                    yOffset: (this.animations.idle.frameHeight - this.collisionHeight), 
+                    width: this.collisionWidth, 
+                    height: this.collisionHeight
+                };
+                
+                this.reset();
+            }
+
+            reset() {
+                this.x = this.initialX;
+                this.y = this.initialY;
+                this.vx = 0;
+                this.vy = 0;
+                this.isOnGround = false;
+                this.isJumping = false; 
+                this.jumpHoldTime = 0;
+
+                this.currentAnimation = 'idle';
+                this.currentFrame = 0;
+                this.frameTimer = 0;
+                this.flipX = false;
+
+                this.isInvincible = false;
+                this.invincibleTimer = 0;
+                this.lives = 3;
+            }
+            
+            update(dt, input, worldObjects) {
+                const prevX = this.x;
+                const prevY = this.y;
+
+                if (this.isInvincible) {
+                    this.invincibleTimer -= dt;
+                    if (this.invincibleTimer <= 0) {
+                        this.isInvincible = false;
+                    }
+                }
+
+                let targetVx = 0;
+                if (input.left) {
+                    targetVx = -GAME_CONFIG.PLAYER_SPEED;
+                    this.flipX = true;
+                } else if (input.right) {
+                    targetVx = GAME_CONFIG.PLAYER_SPEED;
+                    this.flipX = false;
+                }
+
+                if (targetVx !== 0) {
+                     this.vx += (targetVx > this.vx ? 1 : -1) * GAME_CONFIG.PLAYER_ACCEL * dt;
+                     if (Math.abs(this.vx) > Math.abs(targetVx)) this.vx = targetVx;
+                } else {
+                    if (this.vx > 0) {
+                        this.vx -= GAME_CONFIG.PLAYER_FRICTION * dt;
+                        if (this.vx < 0) this.vx = 0;
+                    } else if (this.vx < 0) {
+                        this.vx += GAME_CONFIG.PLAYER_FRICTION * dt;
+                        if (this.vx > 0) this.vx = 0;
+                    }
+                }
+                
+                this.x += this.vx * dt;
+                this.handleCollisions(worldObjects.platforms, 'horizontal', prevX, prevY);
+
+                this.vy += GAME_CONFIG.GRAVITY * dt;
+                if (this.vy > GAME_CONFIG.MAX_FALL_SPEED) {
+                    this.vy = GAME_CONFIG.MAX_FALL_SPEED;
+                }
+
+                if (input.jump && this.isOnGround) {
+                    this.isJumping = true;
+                    this.isOnGround = false;
+                    this.vy = -GAME_CONFIG.JUMP_FORCE;
+                    this.jumpHoldTime = 0;
+                    this.particleSystem.emit(this.x + this.animations.idle.frameWidth / 2, this.y + this.animations.idle.frameHeight, 5, '#CCCCCC', 'dust_jump');
+                    this.soundManager.play('jump');
+                } else if (input.jump && this.isJumping && this.jumpHoldTime < GAME_CONFIG.PLAYER_MAX_JUMP_TIME) {
+                     this.vy = -GAME_CONFIG.JUMP_FORCE * (1 - (this.jumpHoldTime / (GAME_CONFIG.PLAYER_MAX_JUMP_TIME * 1.5)) ); 
+                     this.jumpHoldTime += dt;
+                } else if (!input.jump && this.isJumping) {
+                    this.isJumping = false; 
+                }
+                
+                if (this.vy > 0 && this.isJumping) { 
+                    this.isJumping = false;
+                }
+                
+                this.y += this.vy * dt;
+                const landedThisFrame = !this.isOnGround;
+                this.isOnGround = false; 
+                this.handleCollisions(worldObjects.platforms, 'vertical', prevX, prevY);
+
+                if (this.isOnGround && landedThisFrame && this.vy === 0) { // Check vy to ensure it's a proper landing
+                     this.particleSystem.emit(this.x + this.animations.idle.frameWidth / 2, this.y + this.animations.idle.frameHeight, 3, '#AAAAAA', 'dust_land');
+                     this.soundManager.play('land');
+                }
+
+
+                this.updateAnimation(dt);
+            }
+
+            handleCollisions(platforms, axis, prevX, prevY) {
+                const playerRect = this.getHitbox();
+                platforms.forEach(platform => {
+                    const platformRect = platform.getHitbox();
+                    if (this.checkCollision(playerRect, platformRect)) {
+                        if (axis === 'horizontal') {
+                            if (this.vx > 0) { 
+                                this.x = platformRect.x - this.hitbox.xOffset - this.hitbox.width;
+                            } else if (this.vx < 0) { 
+                                this.x = platformRect.x + platformRect.width - this.hitbox.xOffset;
+                            }
+                            this.vx = 0;
+                        } else { 
+                            if (this.vy > 0) { 
+                                const prevPlayerBottom = prevY + this.hitbox.yOffset + this.hitbox.height;
+                                if (prevPlayerBottom <= platformRect.y + 1) { // +1 for a little tolerance
+                                    this.y = platformRect.y - this.hitbox.yOffset - this.hitbox.height;
+                                    this.vy = 0;
+                                    this.isOnGround = true;
+                                    this.isJumping = false;
+                                }
+                            } else if (this.vy < 0) { 
+                                const prevPlayerTop = prevY + this.hitbox.yOffset;
+                                if (prevPlayerTop >= platformRect.y + platformRect.height -1) { // -1 for tolerance
+                                    this.y = platformRect.y + platformRect.height - this.hitbox.yOffset;
+                                    this.vy = 0;
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            getHitbox() {
+                return {
+                    x: this.x + this.hitbox.xOffset,
+                    y: this.y + this.hitbox.yOffset,
+                    width: this.hitbox.width,
+                    height: this.hitbox.height
+                };
+            }
+
+            checkCollision(rect1, rect2) {
+                return rect1.x < rect2.x + rect2.width &&
+                       rect1.x + rect1.width > rect2.x &&
+                       rect1.y < rect2.y + rect2.height &&
+                       rect1.y + rect1.height > rect2.y;
+            }
+            
+            updateAnimation(dt) {
+                if (this.isOnGround) {
+                    if (Math.abs(this.vx) > 10) {
+                        this.currentAnimation = 'run';
+                    } else {
+                        this.currentAnimation = 'idle';
+                    }
+                } else {
+                    if (this.vy < 0) {
+                        this.currentAnimation = 'jump';
+                    } else {
+                        this.currentAnimation = 'fall';
+                    }
+                }
+
+                const anim = this.animations[this.currentAnimation];
+                this.frameTimer += dt * 1000;
+                if (this.frameTimer >= anim.speed) {
+                    this.currentFrame = (this.currentFrame + 1) % anim.frames;
+                    this.frameTimer = 0;
+                }
+            }
+
+            draw(ctx) {
+                if (this.isInvincible && Math.floor(this.invincibleTimer * 10) % 2 === 0) {
+                    return; 
+                }
+                const anim = this.animations[this.currentAnimation];
+                const sx = (anim.startFrameIndex + this.currentFrame) * anim.frameWidth;
+                const sy = anim.yOffset;
+
+                ctx.save();
+                if (this.flipX) {
+                    ctx.translate(this.x + anim.frameWidth, this.y);
+                    ctx.scale(-1, 1);
+                    ctx.drawImage(this.spriteSheet, sx, sy, anim.frameWidth, anim.frameHeight, 0, 0, anim.frameWidth, anim.frameHeight);
+                } else {
+                    ctx.translate(this.x, this.y);
+                    ctx.drawImage(this.spriteSheet, sx, sy, anim.frameWidth, anim.frameHeight, 0, 0, anim.frameWidth, anim.frameHeight);
+                }
+                ctx.restore();
+            }
+
+            takeDamage() {
+                if (!this.isInvincible) {
+                    this.lives--;
+                    this.isInvincible = true;
+                    this.invincibleTimer = GAME_CONFIG.PLAYER_INVINCIBLE_DURATION;
+                    this.particleSystem.emit(this.x + this.animations.idle.frameWidth / 2, this.y + this.animations.idle.frameHeight / 2, 10, '#FF3333', 'hazard_hit');
+                    this.soundManager.play('hurt');
+                    return true; 
+                }
+                return false; 
+            }
+            
+            respawn() {
+                 this.x = this.initialX;
+                 this.y = this.initialY;
+                 this.vx = 0;
+                 this.vy = 0;
+                 this.isInvincible = true;
+                 this.invincibleTimer = GAME_CONFIG.PLAYER_INVINCIBLE_DURATION * 0.66; 
+                 this.currentAnimation = 'idle';
+                 this.currentFrame = 0;
+            }
+        }
+
+        class Entity {
+            constructor(x, y, width, height, spriteKey, assetManager) {
+                this.x = x;
+                this.y = y;
+                this.width = width;
+                this.height = height;
+                this.spriteKey = spriteKey;
+                this.assetManager = assetManager;
+                this.sprite = this.assetManager.getAsset(this.spriteKey);
+            }
+
+            getHitbox() {
+                return { x: this.x, y: this.y, width: this.width, height: this.height };
+            }
+
+            draw(ctx) {
+                if (this.sprite) {
+                    ctx.drawImage(this.sprite, this.x, this.y, this.width, this.height);
+                } else {
+                    ctx.fillStyle = 'grey';
+                    ctx.fillRect(this.x, this.y, this.width, this.height);
+                }
+            }
+        }
+        
+        class Platform extends Entity {
+            constructor(x, y, tileWidth, tileHeight, spriteKey, assetManager) {
+                super(x, y, tileWidth * GAME_CONFIG.TILE_SIZE, tileHeight * GAME_CONFIG.TILE_SIZE, spriteKey, assetManager);
+                this.tileWidth = tileWidth;
+                this.tileHeight = tileHeight;
+            }
+
+            draw(ctx) {
+                if (this.sprite) {
+                    for (let i = 0; i < this.tileWidth; i++) {
+                        for (let j = 0; j < this.tileHeight; j++) {
+                            ctx.drawImage(this.sprite, this.x + i * GAME_CONFIG.TILE_SIZE, this.y + j * GAME_CONFIG.TILE_SIZE, GAME_CONFIG.TILE_SIZE, GAME_CONFIG.TILE_SIZE);
+                        }
+                    }
+                } else {
+                    ctx.fillStyle = 'grey';
+                    ctx.fillRect(this.x, this.y, this.width, this.height);
+                }
+            }
+        }
+
+        class Collectible extends Entity {
+            constructor(x, y, width, height, spriteKey, assetManager, particleSystem, soundManager) {
+                super(x, y, width, height, spriteKey, assetManager);
+                this.particleSystem = particleSystem;
+                this.soundManager = soundManager;
+                this.isCollected = false;
+                // Gem sprite has 4 frames, 16x16 or 24x24. Image is 16x16 per frame in DALL-E.
+                // Asset is /generated_images/dalle_3fe620d2-06c.png
+                // Sprite sheet is likely 4 frames in a row. So if 16x16, sheet is 64x16.
+                // Let's assume 16x16 frames for gem.
+                const gemFrameWidth = this.sprite ? this.sprite.height : 16; // Assuming square frames, sheet is horizontal
+                const gemFrames = this.sprite ? this.sprite.width / gemFrameWidth : 4;
+
+                this.animation = { frames: gemFrames, frameWidth: gemFrameWidth, frameHeight: gemFrameWidth, speed: GAME_CONFIG.GEM_ANIM_SPEED };
+                this.currentFrame = 0;
+                this.frameTimer = 0;
+            }
+
+            update(dt) {
+                if (this.isCollected) return;
+                this.frameTimer += dt * 1000;
+                if (this.frameTimer >= this.animation.speed) {
+                    this.currentFrame = (this.currentFrame + 1) % this.animation.frames;
+                    this.frameTimer = 0;
+                }
+            }
+            
+            draw(ctx) {
+                if (this.isCollected || !this.sprite) return;
+                const sx = this.currentFrame * this.animation.frameWidth;
+                ctx.drawImage(this.sprite, sx, 0, this.animation.frameWidth, this.animation.frameHeight, this.x, this.y, this.width, this.height);
+            }
+
+            collect() {
+                if (!this.isCollected) {
+                    this.isCollected = true;
+                    this.particleSystem.emit(this.x + this.width / 2, this.y + this.height / 2, 15, '#87CEFA', 'gem_sparkle'); // Light blue sparkles
+                    this.soundManager.play('collect');
+                    return true;
+                }
+                return false;
+            }
+        }
+        
+        class Goal extends Entity {
+            constructor(x, y, width, height, spriteClosedKey, spriteOpenKey, assetManager) {
+                super(x, y, width, height, spriteClosedKey, assetManager);
+                this.spriteOpenKey = spriteOpenKey;
+                this.spriteClosedKey = spriteClosedKey; 
+                this.isOpen = false;
+            }
+
+            updateState(collectedCount, requiredCount) {
+                this.isOpen = collectedCount >= requiredCount;
+                this.sprite = this.assetManager.getAsset(this.isOpen ? this.spriteOpenKey : this.spriteClosedKey);
+            }
+        }
+
+        class Particle {
+            constructor(x, y, vx, vy, size, color, lifespan, type) {
+                this.x = x;
+                this.y = y;
+                this.vx = vx;
+                this.vy = vy;
+                this.initialSize = size;
+                this.size = size;
+                this.color = color;
+                this.lifespan = lifespan;
+                this.life = lifespan;
+                this.type = type; 
+            }
+
+            update(dt) {
+                this.x += this.vx * dt;
+                this.y += this.vy * dt;
+                if (this.type === 'dust_jump' || this.type === 'dust_land') {
+                    this.vy += GAME_CONFIG.GRAVITY * 0.1 * dt; 
+                    this.vx *= 0.98; 
+                } else if (this.type === 'gem_sparkle') {
+                    this.vy += GAME_CONFIG.GRAVITY * 0.05 * dt;
+                }
+                this.life -= dt;
+                this.size = Math.max(0, this.initialSize * (this.life / this.lifespan)); 
+            }
+
+            draw(ctx) {
+                ctx.fillStyle = this.color;
+                const alpha = Math.max(0, this.life / this.lifespan);
+                ctx.globalAlpha = alpha * alpha; // Faster fade for some particles
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1.0;
+            }
+        }
+
+        class ParticleSystem {
+            constructor() {
+                this.particles = [];
+            }
+
+            emit(x, y, count, color, type) {
+                for (let i = 0; i < count; i++) {
+                    let vx, vy, size, lifespan;
+                    lifespan = GAME_CONFIG.PARTICLE_LIFESPAN + Math.random() * 0.3 - 0.15;
+                    switch(type) {
+                        case 'dust_jump':
+                        case 'dust_land':
+                            vx = (Math.random() - 0.5) * 60;
+                            vy = -Math.random() * 60 - 30;
+                            size = Math.random() * 2.5 + 1.5;
+                            lifespan *= 0.8;
+                            break;
+                        case 'gem_sparkle':
+                            vx = (Math.random() - 0.5) * 120;
+                            vy = (Math.random() - 0.5) * 120;
+                            size = Math.random() * 2.5 + 1;
+                            lifespan *= 0.6;
+                            break;
+                        case 'hazard_hit':
+                            vx = (Math.random() - 0.5) * 150;
+                            vy = (Math.random() - 0.5) * 150 - 70;
+                            size = Math.random() * 3 + 2;
+                            lifespan *= 0.9;
+                            break;
+                        default:
+                            vx = (Math.random() - 0.5) * 30;
+                            vy = (Math.random() - 0.5) * 30;
+                            size = Math.random() * 2 + 1;
+                    }
+                    this.particles.push(new Particle(x, y, vx, vy, size, color, lifespan, type));
+                }
+            }
+
+            update(dt) {
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    this.particles[i].update(dt);
+                    if (this.particles[i].life <= 0) {
+                        this.particles.splice(i, 1);
+                    }
+                }
+            }
+
+            draw(ctx) {
+                this.particles.forEach(p => p.draw(ctx));
+            }
+        }
+        
+        class LevelManager {
+            constructor(assetManager, particleSystem, soundManager) {
+                this.assetManager = assetManager;
+                this.particleSystem = particleSystem;
+                this.soundManager = soundManager;
+                this.levelObjects = { platforms: [], collectibles: [], hazards: [], goal: null, background: null };
+                this.playerStart = { x: 0, y: 0 };
+                this.totalGemsRequired = 0;
+            }
+
+            loadLevel(levelData) {
+                this.levelObjects.platforms = [];
+                this.levelObjects.collectibles = [];
+                this.levelObjects.hazards = [];
+                
+                this.playerStart = { ...levelData.playerStart };
+                this.totalGemsRequired = levelData.totalGemsRequired;
+                document.getElementById('total-gems-instruction').textContent = this.totalGemsRequired + " gems";
+
+
+                if (levelData.background && this.assetManager.getAsset(levelData.background)) {
+                    this.levelObjects.background = this.assetManager.getAsset(levelData.background);
+                }
+
+                levelData.platforms.forEach(p => {
+                    this.levelObjects.platforms.push(new Platform(p.x, p.y, p.w, p.h, p.spriteKey, this.assetManager));
+                });
+                levelData.collectibles.forEach(c => {
+                    this.levelObjects.collectibles.push(new Collectible(c.x, c.y, c.width, c.height, c.spriteKey, this.assetManager, this.particleSystem, this.soundManager));
+                });
+                levelData.hazards.forEach(h => {
+                    this.levelObjects.hazards.push(new Entity(h.x, h.y, h.width, h.height, h.spriteKey, this.assetManager));
+                });
+                const g = levelData.goal;
+                this.levelObjects.goal = new Goal(g.x, g.y, g.width, g.height, g.spriteClosedKey, g.spriteOpenKey, this.assetManager);
+            }
+            
+            resetCollectibles() {
+                this.levelObjects.collectibles.forEach(c => c.isCollected = false);
+            }
+        }
+
+        class UIManager {
+            constructor(gameInstance) {
+                this.game = gameInstance; // Renamed to avoid conflict with Game class name
+                this.mainMenuModal = new bootstrap.Modal(document.getElementById('mainMenuModal'));
+                this.instructionsModal = new bootstrap.Modal(document.getElementById('instructionsModal'));
+                this.gameOverModal = new bootstrap.Modal(document.getElementById('gameOverModal'));
+
+                this.scoreDisplay = document.getElementById('score-display');
+                this.livesDisplay = document.getElementById('lives-display');
+                this.muteButton = document.getElementById('mute-button');
+                this.resetButton = document.getElementById('reset-button');
+
+                this.setupEventListeners();
+            }
+
+            setupEventListeners() {
+                document.getElementById('startGameBtn').addEventListener('click', () => this.game.startGame());
+                document.getElementById('instructionsBtnModal').addEventListener('click', () => {
+                    this.mainMenuModal.hide();
+                    this.instructionsModal.show();
+                    this.game.gameState.currentPhase = 'InstructionsScreen';
+                });
+                document.getElementById('backToMenuBtn').addEventListener('click', () => {
+                    this.instructionsModal.hide();
+                    this.mainMenuModal.show();
+                    this.game.gameState.currentPhase = 'MainMenu';
+                });
+                document.getElementById('playAgainBtn').addEventListener('click', () => this.game.startGame());
+                document.getElementById('gameOverToMenuBtn').addEventListener('click', () => {
+                    this.gameOverModal.hide();
+                    this.mainMenuModal.show();
+                    this.game.gameState.currentPhase = 'MainMenu';
+                });
+                this.resetButton.addEventListener('click', () => this.game.resetCurrentLevel());
+                this.muteButton.addEventListener('click', () => this.game.toggleMute());
+            }
+
+            showModal(modalId) {
+                if (modalId === 'mainMenuModal') this.mainMenuModal.show();
+                else if (modalId === 'instructionsModal') this.instructionsModal.show();
+                else if (modalId === 'gameOverModal') this.gameOverModal.show();
+            }
+            
+            hideAllModals() {
+                // Check if modals are shown before trying to hide, to prevent errors if not initialized
+                if (this.mainMenuModal._isShown) this.mainMenuModal.hide();
+                if (this.instructionsModal._isShown) this.instructionsModal.hide();
+                if (this.gameOverModal._isShown) this.gameOverModal.hide();
+            }
+
+            updateScore(current, total) {
+                this.scoreDisplay.textContent = `Gems: ${current} / ${total}`;
+            }
+
+            updateLives(count) {
+                this.livesDisplay.innerHTML = `Lives: ${'❤️'.repeat(Math.max(0,count))}`;
+            }
+            
+            updateMuteButton(isMuted) {
+                this.muteButton.textContent = `Mute: ${isMuted ? 'On' : 'Off'}`;
+                this.muteButton.classList.toggle('btn-danger', isMuted);
+                this.muteButton.classList.toggle('btn-outline-secondary', !isMuted);
+            }
+
+            setGameOverMessage(isWin, score, totalGems) {
+                document.getElementById('gameOverModalLabel').textContent = isWin ? "You Win!" : "Game Over!";
+                document.getElementById('gameOverMessage').textContent = isWin ? "Portal Reached! Well done!" : "Oh no, try again!";
+                document.getElementById('finalScoreMessage').textContent = `Gems: ${score} / ${totalGems}`;
+            }
+        }
+
+        class Game {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.ctx.imageSmoothingEnabled = false;
+                this.canvas.width = GAME_CONFIG.NATIVE_WIDTH;
+                this.canvas.height = GAME_CONFIG.NATIVE_HEIGHT;
+
+                this.assetLoader = new AssetLoader();
+                this.soundManager = new SoundManager();
+                this.particleSystem = new ParticleSystem();
+                this.levelManager = new LevelManager(this.assetLoader, this.particleSystem, this.soundManager);
+                this.player = new Player(0, 0, this.assetLoader, this.particleSystem, this.soundManager); 
+                this.uiManager = new UIManager(this);
+
+                this.gameState = {
+                    currentPhase: 'Loading', 
+                    score: 0,
+                };
+                this.inputState = { left: false, right: false, jump: false };
+                this.lastTime = 0;
+
+                this.resizeGameCanvasMaintainAspectRatio();
+                window.addEventListener('resize', this.resizeGameCanvasMaintainAspectRatio.bind(this));
+                this.setupInputListeners();
+            }
+
+            init() {
+                this.ctx.fillStyle = '#000033';
+                this.ctx.fillRect(0,0, this.canvas.width, this.canvas.height);
+                this.ctx.fillStyle = 'white';
+                this.ctx.font = '16px "Press Start 2P"';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText('Loading Assets...', this.canvas.width / 2, this.canvas.height / 2);
+
+                this.assetLoader.loadAll(ASSET_PATHS)
+                    .then(() => {
+                        this.levelManager.loadLevel(LEVEL_1_DATA); 
+                        this.player.initialX = this.levelManager.playerStart.x;
+                        this.player.initialY = this.levelManager.playerStart.y;
+                        this.player.reset();
+                        
+                        this.uiManager.updateScore(this.gameState.score, this.levelManager.totalGemsRequired);
+                        this.uiManager.updateLives(this.player.lives);
+                        this.uiManager.updateMuteButton(this.soundManager.isMuted);
+                        
+                        this.gameState.currentPhase = 'MainMenu';
+                        this.uiManager.showModal('mainMenuModal');
+                        requestAnimationFrame(this.gameLoop.bind(this));
+                    })
+                    .catch(error => {
+                        console.error("Error loading assets:", error);
+                        this.ctx.fillStyle = 'red';
+                        this.ctx.fillText('Error loading assets.', this.canvas.width / 2, this.canvas.height / 2 + 30);
+                    });
+            }
+            
+            startGame() {
+                this.soundManager._initAudioContextOnUserGesture(); // Critical for audio to work
+                this.uiManager.hideAllModals();
+                this.levelManager.resetCollectibles();
+                this.player.reset();
+                this.gameState.score = 0;
+                this.uiManager.updateScore(this.gameState.score, this.levelManager.totalGemsRequired);
+                this.uiManager.updateLives(this.player.lives);
+                this.particleSystem.particles = [];
+                this.gameState.currentPhase = 'Playing';
+                this.lastTime = performance.now(); // Reset lastTime for dt calculation
+            }
+
+            resetCurrentLevel() {
+                if (this.gameState.currentPhase === 'Playing' || this.gameState.currentPhase.startsWith('GameOver')) {
+                    this.startGame();
+                }
+            }
+            
+            toggleMute() {
+                const isMuted = this.soundManager.toggleMute();
+                this.uiManager.updateMuteButton(isMuted);
+            }
+
+            gameLoop(timestamp) {
+                const deltaTime = Math.min(0.1, (timestamp - this.lastTime) / 1000);
+                this.lastTime = timestamp;
+
+                if (this.gameState.currentPhase === 'Playing') {
+                    this.update(deltaTime);
+                }
+                this.render();
+                requestAnimationFrame(this.gameLoop.bind(this));
+            }
+
+            update(dt) {
+                if (dt <= 0) return; // Skip update if dt is invalid
+
+                this.player.update(dt, this.inputState, this.levelManager.levelObjects);
+                this.levelManager.levelObjects.collectibles.forEach(c => c.update(dt));
+                this.particleSystem.update(dt);
+
+                this.levelManager.levelObjects.collectibles.forEach(collectible => {
+                    if (!collectible.isCollected && this.player.checkCollision(this.player.getHitbox(), collectible.getHitbox())) {
+                        if (collectible.collect()) {
+                            this.gameState.score++;
+                            this.uiManager.updateScore(this.gameState.score, this.levelManager.totalGemsRequired);
+                        }
+                    }
+                });
+                
+                this.levelManager.levelObjects.goal.updateState(this.gameState.score, this.levelManager.totalGemsRequired);
+
+                this.levelManager.levelObjects.hazards.forEach(hazard => {
+                    if (this.player.checkCollision(this.player.getHitbox(), hazard.getHitbox())) {
+                        if(this.player.takeDamage()) {
+                           this.uiManager.updateLives(this.player.lives);
+                           if (this.player.lives <= 0) {
+                               this.gameState.currentPhase = 'GameOverLose';
+                               this.uiManager.setGameOverMessage(false, this.gameState.score, this.levelManager.totalGemsRequired);
+                               this.uiManager.showModal('gameOverModal');
+                               this.soundManager.play('lose');
+                           } else {
+                               this.player.respawn();
+                           }
+                        }
+                    }
+                });
+
+                if (this.levelManager.levelObjects.goal.isOpen && this.player.checkCollision(this.player.getHitbox(), this.levelManager.levelObjects.goal.getHitbox())) {
+                    this.gameState.currentPhase = 'GameOverWin';
+                    this.uiManager.setGameOverMessage(true, this.gameState.score, this.levelManager.totalGemsRequired);
+                    this.uiManager.showModal('gameOverModal');
+                    this.soundManager.play('win');
+                }
+                
+                if (this.player.y > GAME_CONFIG.NATIVE_HEIGHT + this.player.animations.idle.frameHeight) { 
+                    if (this.player.takeDamage()) { // Use takeDamage to handle invincibility and sound
+                        this.uiManager.updateLives(this.player.lives);
+                        if (this.player.lives <= 0) {
+                            this.gameState.currentPhase = 'GameOverLose';
+                            this.uiManager.setGameOverMessage(false, this.gameState.score, this.levelManager.totalGemsRequired);
+                            this.uiManager.showModal('gameOverModal');
+                            this.soundManager.play('lose');
+                        } else {
+                            this.player.respawn();
+                        }
+                    } else if (!this.player.isInvincible && this.player.lives > 0) { // if somehow fell off while not invincible but didn't register damage
+                         this.player.lives--; // ensure life loss if fell off without hazard hit
+                         this.uiManager.updateLives(this.player.lives);
+                         if (this.player.lives <= 0) {
+                            this.gameState.currentPhase = 'GameOverLose';
+                            this.uiManager.setGameOverMessage(false, this.gameState.score, this.levelManager.totalGemsRequired);
+                            this.uiManager.showModal('gameOverModal');
+                            this.soundManager.play('lose');
+                         } else {
+                            this.player.respawn();
+                         }
+                    }
+                }
+            }
+
+            render() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                if (this.levelManager.levelObjects.background) {
+                    this.ctx.drawImage(this.levelManager.levelObjects.background, 0, 0, this.canvas.width, this.canvas.height);
+                } else {
+                    this.ctx.fillStyle = '#000033';
+                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                }
+                
+                if (this.gameState.currentPhase !== 'Loading' && this.gameState.currentPhase !== 'MainMenu' && this.gameState.currentPhase !== 'InstructionsScreen') {
+                    this.levelManager.levelObjects.platforms.forEach(p => p.draw(this.ctx));
+                    this.levelManager.levelObjects.hazards.forEach(h => h.draw(this.ctx));
+                    this.levelManager.levelObjects.collectibles.forEach(c => c.draw(this.ctx));
+                    this.levelManager.levelObjects.goal.draw(this.ctx);
+                    this.player.draw(this.ctx);
+                    this.particleSystem.draw(this.ctx);
+                } else if (this.gameState.currentPhase === 'Loading') {
+                     this.ctx.fillStyle = 'white';
+                     this.ctx.font = '16px "Press Start 2P"';
+                     this.ctx.textAlign = 'center';
+                     this.ctx.fillText('Loading Assets...', this.canvas.width / 2, this.canvas.height / 2);
+                }
+            }
+
+            setupInputListeners() {
+                window.addEventListener('keydown', (e) => {
+                    if (this.gameState.currentPhase !== 'Playing') {
+                        if (e.key === 'Enter' || e.key === ' ') { // Allow starting game with Enter/Space from modals
+                            if (this.mainMenuModal._isShown) document.getElementById('startGameBtn').click();
+                            else if (this.gameOverModal._isShown) document.getElementById('playAgainBtn').click();
+                        }
+                        return;
+                    }
+                    switch (e.key.toLowerCase()) {
+                        case 'a': case 'arrowleft': this.inputState.left = true; e.preventDefault(); break;
+                        case 'd': case 'arrowright': this.inputState.right = true; e.preventDefault(); break;
+                        case 'w': case 'arrowup': case ' ': this.inputState.jump = true; e.preventDefault(); break;
+                    }
+                });
+                window.addEventListener('keyup', (e) => {
+                    if (this.gameState.currentPhase !== 'Playing') return;
+                     switch (e.key.toLowerCase()) {
+                        case 'a': case 'arrowleft': this.inputState.left = false; break;
+                        case 'd': case 'arrowright': this.inputState.right = false; break;
+                        case 'w': case 'arrowup': case ' ': this.inputState.jump = false; break;
+                    }
+                });
+            }
+
+            resizeGameCanvasMaintainAspectRatio() {
+                const nativeAspectRatio = GAME_CONFIG.NATIVE_WIDTH / GAME_CONFIG.NATIVE_HEIGHT;
+                let windowWidth = window.innerWidth;
+                let windowHeight = window.innerHeight;
+                
+                const gameContainer = document.getElementById('game-container');
+                const header = gameContainer.querySelector('header');
+                const uiTop = gameContainer.querySelector('#ui-top');
+                const uiBottom = gameContainer.querySelector('#ui-bottom');
+
+                let headerHeight = header ? header.offsetHeight : 0;
+                let uiTopHeight = uiTop ? uiTop.offsetHeight : 0;
+                let uiBottomHeight = uiBottom ? uiBottom.offsetHeight : 0;
+                
+                const verticalMargin = parseInt(getComputedStyle(header).marginBottom) || 0 + 
+                                     parseInt(getComputedStyle(uiTop).marginBottom) || 0 +
+                                     parseInt(getComputedStyle(uiBottom).marginTop) || 0;
+
+                const totalUIVerticalSpace = headerHeight + uiTopHeight + uiBottomHeight + verticalMargin + 20; // 20 for overall padding
+
+                const availableHeight = windowHeight - totalUIVerticalSpace;
+                const availableWidth = windowWidth * 0.95; // Use 95% of window width to avoid edge issues
+
+                let scaledWidth, scaledHeight;
+
+                if (availableWidth / availableHeight > nativeAspectRatio) {
+                    scaledHeight = availableHeight;
+                    scaledWidth = scaledHeight * nativeAspectRatio;
+                } else {
+                    scaledWidth = availableWidth;
+                    scaledHeight = scaledWidth / nativeAspectRatio;
+                }
+                
+                // Ensure it doesn't exceed either available dimension if calculation was off
+                scaledWidth = Math.min(scaledWidth, availableWidth);
+                scaledHeight = Math.min(scaledHeight, availableHeight);
+
+
+                this.canvas.style.width = Math.floor(scaledWidth) + 'px';
+                this.canvas.style.height = Math.floor(scaledHeight) + 'px';
+                
+                const canvasWrapper = document.getElementById('canvas-wrapper');
+                if(canvasWrapper) {
+                    canvasWrapper.style.width = this.canvas.style.width;
+                    canvasWrapper.style.height = this.canvas.style.height;
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const game = new Game('gameCanvas');
+            game.init();
+        });
+
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>
