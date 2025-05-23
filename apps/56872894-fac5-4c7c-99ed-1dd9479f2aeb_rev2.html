@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Muse: Paradoxical Prompt Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+    <style>
+        body {
+            background-color: #121212; /* Even darker base for dark theme */
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .card {
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+            border: 1px solid #333;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+        }
+        .form-control, .form-select {
+            background-color: #2c2c2c;
+            color: #e0e0e0;
+            border-color: #444;
+        }
+        .form-control::placeholder {
+            color: #888;
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: #333;
+            color: #e0e0e0;
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+        }
+        .btn-primary {
+            background-color: #667eea;
+            border-color: #667eea;
+            transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+        }
+        .btn-primary:hover, .btn-primary:focus {
+            background-color: #5a67d8;
+            border-color: #5a67d8;
+        }
+        .btn-primary:disabled {
+            background-color: #4a5568;
+            border-color: #4a5568;
+            opacity: 0.65;
+        }
+        .btn-secondary {
+             background-color: #718096;
+             border-color: #718096;
+             transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+        }
+        .btn-secondary:hover, .btn-secondary:focus {
+            background-color: #5a6470;
+            border-color: #5a6470;
+         }
+        .btn-outline-danger {
+            color: #f56565;
+            border-color: #f56565;
+            transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+        }
+        .btn-outline-danger:hover, .btn-outline-danger:focus {
+             color: #121212;
+             background-color: #f56565;
+             border-color: #f56565;
+        }
+        .btn-info {
+            background-color: #4fd1c5;
+            border-color: #4fd1c5;
+            color: #1A202C;
+        }
+        .btn-info:hover, .btn-info:focus {
+            background-color: #38b2ac;
+            border-color: #38b2ac;
+            color: #1A202C;
+        }
+        .btn-success {
+            background-color: #48bb78;
+            border-color: #48bb78;
+            color: #1A202C;
+        }
+        .btn-success:hover, .btn-success:focus {
+            background-color: #38a169;
+            border-color: #38a169;
+            color: #1A202C;
+        }
+        .loading-spinner {
+            display: none;
+            width: 1.25rem;
+            height: 1.25rem;
+            margin-right: 0.5rem;
+        }
+        .prompt-image-container {
+            min-height: 200px; /* Ensure space for loader/image */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #2c2c2c;
+            border-radius: 0.25rem;
+            position: relative; /* For absolute positioning of spinner */
+        }
+        .prompt-image {
+            max-width: 100%;
+            max-height: 300px; /* Control max image height in gallery */
+            height: auto;
+            border-radius: 0.25rem;
+            object-fit: contain;
+        }
+        .journal-entry {
+            border-bottom: 1px solid #333;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+        .journal-entry:last-child {
+            border-bottom: none;
+        }
+        .journal-entry .prompt-image {
+             max-width: 150px; /* Smaller images in journal */
+             height: auto;
+             margin-top: 0.5rem;
+        }
+        .modal-content {
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+            border: 1px solid #333;
+        }
+        .modal-header, .modal-footer {
+             border-color: #333;
+        }
+        .btn-close {
+            filter: invert(1) grayscale(100%) brightness(200%);
+        }
+        .error-message, .text-danger {
+            color: #f56565 !important; /* Bootstrap override if needed */
+        }
+        .card-footer {
+             background-color: transparent; /* Match card body or slightly different */
+             border-top: 1px solid #333;
+        }
+        .card-title {
+             color: #90cdf4; /* A light blue for titles */
+             font-weight: bold;
+        }
+        .text-muted {
+             color: #a0aec0 !important;
+        }
+        .cursor-pointer {
+            cursor: pointer;
+        }
+        #globalError {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 2000; /* High z-index */
+        }
+    </style>
+</head>
+<body data-bs-theme="dark">
+    <div id="globalError" class="alert alert-danger d-none m-0 rounded-0" role="alert"></div>
+    <main class="container my-4 flex-grow-1">
+        <header class="text-center mb-5">
+            <h1 class="display-4 fw-bold">AI Muse</h1>
+            <p class="lead text-muted">Crafting Paradoxes, Igniting Imagination</p>
+        </header>
+
+        <section class="card shadow-sm mb-4 p-4">
+            <div class="card-body">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-6 col-lg-7">
+                        <label for="coreConceptInput" class="form-label">Core Concept / Keyword:</label>
+                        <input type="text" class="form-control form-control-lg" id="coreConceptInput" placeholder="e.g., silence, memory, growth">
+                    </div>
+                    <div class="col-md-3 col-lg-2">
+                         <label for="imageAspectRatio" class="form-label">Aspect Ratio:</label>
+                         <select class="form-select form-select-lg" id="imageAspectRatio">
+                             <option value="1:1">1:1 Square</option>
+                             <option value="16:9" selected>16:9 Wide</option>
+                             <option value="9:16">9:16 Tall</option>
+                         </select>
+                    </div>
+                    <div class="col-md-3 col-lg-3">
+                        <button class="btn btn-primary btn-lg w-100" id="generatePromptsBtn">
+                             <span class="spinner-border spinner-border-sm loading-spinner" role="status" aria-hidden="true" id="generateSpinner"></span>
+                             Muse!
+                        </button>
+                    </div>
+                </div>
+                 <div id="inputError" class="text-danger mt-2" style="display: none;">Please enter a concept to begin.</div>
+            </div>
+        </section>
+
+        <section id="promptsGallery" class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4 mb-4"></section>
+
+        <div class="modal fade" id="evolvePromptModal" tabindex="-1" aria-labelledby="evolvePromptModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="evolvePromptModalLabel">Evolve This Paradox</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="originalPromptInfo" class="mb-3 p-3 border rounded" style="background-color: #2c2c2c;">
+                            <h6>Original Muse:</h6>
+                            <p id="evolveOriginalPromptText" class="lead"></p>
+                            <img id="evolveOriginalImage" src="" alt="Original generated image" class="prompt-image img-fluid rounded mb-2" style="max-height: 250px; display: block; margin: auto;">
+                            <p id="evolveOriginalCaptionText" class="small text-muted fst-italic"></p>
+                        </div>
+                        <div class="mb-3">
+                            <label for="evolutionDirectives" class="form-label">New Directives / Keywords to Evolve:</label>
+                            <textarea class="form-control" id="evolutionDirectives" rows="3" placeholder="e.g., Infuse with neon glow, explore the texture of time, add a whisper of melancholy"></textarea>
+                        </div>
+                         <div id="evolutionError" class="text-danger mt-2" style="display: none;"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="triggerEvolutionBtn">
+                             <span class="spinner-border spinner-border-sm loading-spinner" role="status" aria-hidden="true" id="evolutionSpinner"></span>
+                             Evolve & Create
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section class="card shadow-sm mb-4 p-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="card-title text-light mb-0">Muse Journal</h2>
+                    <button class="btn btn-sm btn-outline-danger" id="clearJournalBtn" title="Clear all entries from journal">Clear Journal</button>
+                </div>
+                <div id="journalEntries" class="mt-3">
+                    <p id="noJournalEntries" class="text-muted">Your journal is a blank canvas. Start creating!</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer mt-auto py-3" style="background-color: #000000;">
+        <div class="container text-center">
+            <span class="text-muted small">AI Muse &copy; 2025. Where Paradox Sparks Brilliance.</span>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const appState = {
+            journalEntries: [],
+            currentEvolutionData: null, 
+            activeCardOperations: new Set()
+        };
+
+        const DOM = {};
+        let evolveModalInstance = null;
+
+        function getDOMElements() {
+            DOM.coreConceptInput = document.getElementById('coreConceptInput');
+            DOM.imageAspectRatio = document.getElementById('imageAspectRatio');
+            DOM.generatePromptsBtn = document.getElementById('generatePromptsBtn');
+            DOM.generateSpinner = document.getElementById('generateSpinner');
+            DOM.inputError = document.getElementById('inputError');
+            DOM.promptsGallery = document.getElementById('promptsGallery');
+            
+            DOM.evolvePromptModal = document.getElementById('evolvePromptModal');
+            DOM.evolveOriginalPromptText = document.getElementById('evolveOriginalPromptText');
+            DOM.evolveOriginalImage = document.getElementById('evolveOriginalImage');
+            DOM.evolveOriginalCaptionText = document.getElementById('evolveOriginalCaptionText');
+            DOM.evolutionDirectives = document.getElementById('evolutionDirectives');
+            DOM.triggerEvolutionBtn = document.getElementById('triggerEvolutionBtn');
+            DOM.evolutionSpinner = document.getElementById('evolutionSpinner');
+            DOM.evolutionError = document.getElementById('evolutionError');
+            
+            DOM.journalEntriesDiv = document.getElementById('journalEntries');
+            DOM.clearJournalBtn = document.getElementById('clearJournalBtn');
+            DOM.noJournalEntriesMessage = document.getElementById('noJournalEntries');
+            DOM.globalError = document.getElementById('globalError');
+        }
+
+        function escapeHTML(str) {
+            if (str === null || str === undefined) return '';
+            return String(str).replace(/[&<>"']/g, function (match) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[match];
+            });
+        }
+        
+        function showGlobalError(message) {
+            DOM.globalError.textContent = message;
+            DOM.globalError.classList.remove('d-none');
+        }
+
+        function hideGlobalError() {
+            DOM.globalError.classList.add('d-none');
+        }
+
+        function showLoading(buttonElement, spinnerElement) {
+            if (buttonElement) buttonElement.disabled = true;
+            if (spinnerElement) spinnerElement.style.display = 'inline-block';
+        }
+
+        function hideLoading(buttonElement, spinnerElement) {
+            if (buttonElement) buttonElement.disabled = false;
+            if (spinnerElement) spinnerElement.style.display = 'none';
+        }
+
+        async function callApi(endpoint, payload) {
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    const errorMsg = data.error || `API error from ${endpoint} (Status: ${response.status})`;
+                    console.error(`API Error from ${endpoint}:`, errorMsg, data);
+                    throw new Error(errorMsg);
+                }
+                return data;
+            } catch (error) {
+                console.error(`Fetch Error for ${endpoint}:`, error);
+                throw error; 
+            }
+        }
+
+        async function generateParadoxicalPrompts(concept) {
+            if (typeof jsyaml === 'undefined') {
+                const errMsg = "Core library (js-yaml) missing. Prompt generation unavailable. Check connection or refresh.";
+                showGlobalError(errMsg);
+                console.error(errMsg);
+                throw new Error(errMsg);
+            }
+
+            const aiguide = "You are a creative AI assistant. Your SOLE task is to generate 5 paradoxical prompts based on the user's concept. You MUST respond ONLY with a valid YAML list of 5 strings, as per the format requested. Absolutely no introductory text, no apologies, no explanations, no text before or after the YAML block. Ensure the YAML is well-formed.";
+            const msgforai = `Generate 5 distinct paradoxical prompts based on the concept "${escapeHTML(concept)}". Each prompt should be a creative and evocative description suitable for generating an image.
+Format the response STRICTLY as a YAML list of strings.
+DO NOT include any text before or after the YAML list.
+Example:
+- "A silent explosion of color."
+- "The heavy lightness of a forgotten memory."
+- "A desert oasis drowning in its own mirage."
+- "The chaotic symmetry of a flock of birds."
+- "A freshly bloomed ancient ruin."`;
+            
+            const payload = { aiguide, msgforai, llmSettings: { temperature: 0.85 } };
+            const data = await callApi('/api/ai', payload);
+            
+            try {
+                let responseText = data.response.trim();
+                const yamlRegex = /^
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
