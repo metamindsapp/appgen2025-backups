@@ -1,0 +1,9 @@
+{
+  "projectId": "62ac0d0c-eef9-48a2-b0ca-23a5c6017ab7",
+  "revisionString": "3",
+  "projectNameDisplay": "Cellular Automata Playground",
+  "userPromptForThisRevision": "walk through the user flow and make a plan to connect all the pieces.   seems lke picking rules doesnt change anything,  and therefore there is no pattern to choose.  also there is no tutorial, once you have everything properly connected write a tutorial for how someone should start",
+  "basedOnRevisionString": "2",
+  "savedAt": "2025-05-24T19:12:24.657Z",
+  "imageAssets": []
+}
