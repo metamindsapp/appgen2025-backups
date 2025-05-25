@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zen Garden Architect</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body[data-bs-theme="dark"] {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        #app-container {
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .bg-dark-accent {
+            background-color: #1e1e1e !important;
+        }
+
+        .bg-dark-canvas {
+            background-color: #272727;
+        }
+
+        #main-toolbar .navbar-brand {
+            color: #B08D57; 
+            font-weight: 500;
+        }
+        
+        #element-palette {
+            width: 70px;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .btn-tool {
+            border-radius: 0.375rem;
+            border: 1px solid transparent;
+            background-color: #2f2f2f;
+            transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+        }
+
+        .btn-tool:hover {
+            background-color: #3a3a3a;
+        }
+
+        .btn-tool.active {
+            background-color: #B08D57; 
+            border-color: #c0a067;
+            box-shadow: 0 0 0 0.2rem rgba(176, 141, 87, 0.3);
+        }
+        .btn-tool.active:hover {
+            background-color: #c0a067;
+        }
+
+        .tool-icon {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+            filter: invert(0.8) brightness(1.1); 
+        }
+        .btn-tool.active .tool-icon {
+            filter: none;
+        }
+
+        #canvas-wrapper {
+            background-color: #181818; 
+        }
+
+        #zenCanvas {
+            display: block;
+            background-color: #333333;
+            touch-action: none;
+        }
+
+        #loading-indicator {
+            z-index: 1056; 
+            background-color: rgba(30, 30, 30, 0.9);
+            border: 1px solid #B08D57;
+            border-radius: 0.375rem;
+        }
+
+        #properties-panel-wrapper {
+            width: 280px;
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out, width 0.3s ease-in-out, padding 0.3s ease-in-out;
+            border-left: 1px solid #333;
+        }
+        
+        #properties-panel-wrapper.hidden {
+            transform: translateX(100%);
+            opacity: 0;
+            pointer-events: none;
+            width: 0px !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+        }
+        
+        .form-control-sm, .btn-sm, .form-select-sm {
+            font-size: 0.875rem;
+        }
+
+        .alignment-guide {
+            position: absolute;
+            background-color: rgba(176, 141, 87, 0.7); 
+            z-index: 1050;
+            pointer-events: none;
+        }
+        #alignment-guide-x { width: 100%; height: 1px; }
+        #alignment-guide-y { height: 100%; width: 1px; }
+
+        #status-bar {
+            font-size: 0.8em;
+            background-color: #1e1e1e;
+            color: #adb5bd;
+            border-top: 1px solid #333;
+        }
+        
+        .zen-mode #main-toolbar,
+        .zen-mode #element-palette,
+        .zen-mode #properties-panel-wrapper,
+        .zen-mode #status-bar {
+            display: none !important;
+        }
+         .zen-mode #properties-panel-wrapper.hidden {
+            display: none !important;
+        }
+
+
+        .dropdown-menu-dark .dropdown-item:hover,
+        .dropdown-menu-dark .dropdown-item:focus {
+            background-color: #B08D57;
+            color: #1e1e1e;
+        }
+        .form-range::-webkit-slider-thumb {
+            background: #B08D57;
+        }
+        .form-range::-moz-range-thumb {
+            background: #B08D57;
+        }
+        .form-range::-ms-thumb {
+            background: #B08D57;
+        }
+        .btn-primary {
+            background-color: #B08D57;
+            border-color: #B08D57;
+        }
+        .btn-primary:hover, .btn-primary:focus {
+            background-color: #c0a067;
+            border-color: #c0a067;
+        }
+    </style>
+</head>
+<body data-bs-theme="dark">
+    <div id="app-container" class="d-flex flex-column vh-100">
+
+        <nav id="main-toolbar" class="navbar navbar-expand-sm navbar-dark bg-dark-accent p-2 shadow-sm">
+            <div class="container-fluid">
+                <a class="navbar-brand fs-5" href="#">Zen Garden Architect</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#toolbarControls" aria-controls="toolbarControls" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="toolbarControls">
+                    <div class="ms-auto d-flex flex-wrap align-items-center gap-2 mt-2 mt-sm-0">
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="bgThemeDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Background Themes">
+                                <i class="bi bi-palette"></i> Themes
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="bgThemeDropdown" id="bgThemeList">
+                            </ul>
+                        </div>
+                        <input type="text" id="bgPromptInput" class="form-control form-control-sm" style="max-width: 250px;" placeholder="Custom background prompt...">
+                        <button id="generateBgBtn" class="btn btn-primary btn-sm" title="Generate Background"><i class="bi bi-image-alt"></i> Generate</button>
+                        
+                        <div class="btn-group btn-group-sm" role="group" aria-label="File Operations">
+                            <button id="saveJsonBtn" class="btn btn-outline-success" title="Save Design (JSON)"><i class="bi bi-save"></i></button>
+                            <label for="loadJsonInput" class="btn btn-outline-info mb-0" title="Load Design (JSON)"><i class="bi bi-folder2-open"></i></label>
+                            <input type="file" id="loadJsonInput" class="d-none" accept=".json">
+                            <button id="exportPngBtn" class="btn btn-outline-light" title="Export as PNG"><i class="bi bi-camera"></i></button>
+                        </div>
+                         <div class="btn-group btn-group-sm" role="group" aria-label="History Operations">
+                            <button id="undoBtn" class="btn btn-outline-secondary" title="Undo"><i class="bi bi-arrow-counterclockwise"></i></button>
+                            <button id="redoBtn" class="btn btn-outline-secondary" title="Redo"><i class="bi bi-arrow-clockwise"></i></button>
+                        </div>
+                        <button id="zenModeBtn" class="btn btn-outline-warning btn-sm" title="Zen Mode"><i class="bi bi-moon-stars"></i> Zen</button>
+                        <button id="toggleSoundBtn" class="btn btn-outline-info btn-sm" title="Toggle Sound"><i class="bi bi-volume-up-fill"></i></button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div id="main-content" class="flex-grow-1 d-flex position-relative overflow-hidden">
+            <div id="element-palette" class="bg-dark-accent p-2 shadow d-flex flex-column align-items-center">
+                <div class="btn-group-vertical w-100 gap-1" role="group" aria-label="Element Tools">
+                    <button class="btn btn-tool p-2 active" data-tool="select" title="Select/Move Tool"><img id="icon-select" src="/generated_images/dalle_7c3c3079-8d6.png" alt="Select" class="tool-icon"></button>
+                    <button class="btn btn-tool p-2" data-tool="rock" title="Add Rock"><img id="icon-rock" src="/generated_images/dalle_c848cd4f-b1d.png" alt="Rock" class="tool-icon"></button>
+                    <button class="btn btn-tool p-2" data-tool="plant" title="Add Plant"><img id="icon-plant" src="/generated_images/dalle_d1f49bbd-8b4.png" alt="Plant" class="tool-icon"></button>
+                    <button class="btn btn-tool p-2" data-tool="water" title="Add Water Feature"><img id="icon-water" src="/generated_images/dalle_665bea2d-046.png" alt="Water" class="tool-icon"></button>
+                    <button class="btn btn-tool p-2" data-tool="sand" title="Rake Sand"><img id="icon-sand" src="/generated_images/dalle_43b86ac8-a9b.png" alt="Sand" class="tool-icon"></button>
+                </div>
+            </div>
+
+            <div id="canvas-wrapper" class="flex-grow-1 position-relative d-flex justify-content-center align-items-center bg-dark-canvas">
+                <canvas id="zenCanvas"></canvas>
+                <div id="loading-indicator" class="position-absolute top-50 start-50 translate-middle p-3 text-white d-none fade">
+                    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                    <span id="loading-message">Generating background...</span>
+                </div>
+                 <div id="alignment-guide-x" class="alignment-guide d-none"></div>
+                 <div id="alignment-guide-y" class="alignment-guide d-none"></div>
+            </div>
+
+            <div id="properties-panel-wrapper" class="bg-dark-accent shadow overflow-auto hidden">
+                 <div class="p-3 h-100 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="mb-0">Properties</h5>
+                        <button id="closePropertiesPanelBtn" class="btn-close btn-close-white" aria-label="Close"></button>
+                    </div>
+                    <div id="properties-content" class="flex-grow-1 overflow-auto">
+                        <p class="text-muted">Select an element to see its properties.</p>
+                    </div>
+                 </div>
+            </div>
+        </div>
+        
+        <footer id="status-bar" class="bg-dark-accent p-1 text-center">
+            <span id="status-message">Ready. Create your tranquil space.</span>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
+    <script>
+        const GAME_CONFIG = {
+            CANVAS_NATIVE_WIDTH: 1920,
+            CANVAS_NATIVE_HEIGHT: 1080,
+            GRID_SIZE: 20,
+            SNAP_THRESHOLD: 10,
+            DEFAULT_BG_IMAGE_URL: "/generated_images/dalle_5f68fd08-9c7.png",
+            DEFAULT_BG_PROMPT: "serene abstract zen garden, muted colors, soft lighting, minimalist",
+            PRESET_THEMES: {
+                "Misty Bamboo Forest": "zen garden, misty bamboo forest, ethereal lighting, calm, detailed, photorealistic, high quality",
+                "Serene Moonlit Garden": "zen garden, serene moonlit night, raked sand, stone lanterns, tranquil, high detail, photorealistic, high quality",
+                "Abstract Minimalist": "zen garden, abstract minimalist landscape, flowing water patterns, simple forms, conceptual art, muted colors, high quality",
+                "Desert Oasis": "zen garden, desert oasis style, warm sand, sparse resilient plants, clear water pool, sunset glow, photorealistic, high quality"
+            },
+            SOUND_FILES: {
+                CLICK: 'data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU'+Array(300).join(String.fromCharCode(Math.floor(Math.random()*256))),
+                PLACE: 'data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU'+Array(400).join(String.fromCharCode(Math.floor(Math.random()*256))),
+                AMBIENT_WIND: null, 
+                AMBIENT_WATER: null,
+            },
+            TEXTURE_PATHS: {
+                'riverStones': "/generated_images/dalle_40e24b60-a01.png",
+                'rakedSandFine': "/generated_images/dalle_ba3e9415-017.png",
+            },
+            SPRITE_PATHS: {
+                'bonsaiDetailed': "/generated_images/dalle_1b62ae56-96e.png",
+                'bambooCluster': "/generated_images/dalle_212b6216-c6f.png",
+            },
+            MAX_PARTICLES: 200,
+            HANDLE_SIZE: 10,
+            ROTATION_HANDLE_OFFSET: 20,
+        };
+
+        let appState = {
+            elements: [],
+            selectedElementId: null,
+            currentTool: 'select',
+            canvasCtx: null,
+            canvasElement: null,
+            backgroundImage: { 
+                prompt: GAME_CONFIG.DEFAULT_BG_PROMPT, 
+                url: GAME_CONFIG.DEFAULT_BG_IMAGE_URL, 
+                loadedImage: null, 
+                filters: { brightness: 1, saturation: 1, contrast: 1, sepia: 0, blur: 0 } 
+            },
+            isDragging: false,
+            dragStartPos: { x: 0, y: 0 },
+            dragElementStartSnapshot: null,
+            activeResizeHandle: null,
+            history: { undoStack: [], redoStack: [], maxStackSize: 50 },
+            soundEnabled: false, 
+            zenModeActive: false,
+            sounds: {},
+            loadedAssets: { textures: {}, sprites: {} },
+            lastRenderTime: 0,
+            animationFrameId: null,
+            particleSystem: null,
+        };
+
+        class GardenElement {
+            constructor(type, x, y, width, height, specificProps = {}) {
+                this.id = Date.now().toString(36) + Math.random().toString(36).substring(2);
+                this.type = type;
+                this.x = x;
+                this.y = y;
+                this.width = width;
+                this.height = height;
+                this.rotation = 0; 
+                this.opacity = 1;
+                this.colorTint = null; 
+                this.textureKey = specificProps.textureKey || null;
+                this.spriteKey = specificProps.spriteKey || null;
+                this.specificProps = { ...specificProps }; 
+                this.zIndex = appState.elements.length; 
+            }
+
+            getCenter() {
+                return { x: this.x + this.width / 2, y: this.y + this.height / 2 };
+            }
+            
+            isPointInside(pointX, pointY) {
+                const center = this.getCenter();
+                const dx = pointX - center.x;
+                const dy = pointY - center.y;
+                const rad = -this.rotation * Math.PI / 180;
+                const cosRad = Math.cos(rad);
+                const sinRad = Math.sin(rad);
+
+                const localX = dx * cosRad - dy * sinRad;
+                const localY = dx * sinRad + dy * cosRad;
+
+                return Math.abs(localX) <= this.width / 2 && Math.abs(localY) <= this.height / 2;
+            }
+
+            getHandles(scaleFactor = 1) {
+                const actualHandleSize = GAME_CONFIG.HANDLE_SIZE / scaleFactor;
+                const actualRotationOffset = GAME_CONFIG.ROTATION_HANDLE_OFFSET / scaleFactor;
+                const hw = this.width / 2;
+                const hh = this.height / 2;
+
+                const handlePoints = {
+                    nw: { x: -hw, y: -hh, cursor: 'nwse-resize' },
+                    ne: { x: hw, y: -hh, cursor: 'nesw-resize' },
+                    sw: { x: -hw, y: hh, cursor: 'nesw-resize' },
+                    se: { x: hw, y: hh, cursor: 'nwse-resize' },
+                    n:  { x: 0,  y: -hh, cursor: 'ns-resize' },
+                    s:  { x: 0,  y: hh, cursor: 'ns-resize' },
+                    w:  { x: -hw,y: 0, cursor: 'ew-resize' },
+                    e:  { x: hw, y: 0, cursor: 'ew-resize' },
+                    rotate: { x: 0, y: -hh - actualRotationOffset, cursor: 'grab' }
+                };
+
+                const center = this.getCenter();
+                const rad = this.rotation * Math.PI / 180;
+                const cosRad = Math.cos(rad);
+                const sinRad = Math.sin(rad);
+                
+                const worldHandles = {};
+                for (const key in handlePoints) {
+                    const p = handlePoints[key];
+                    worldHandles[key] = {
+                        x: center.x + (p.x * cosRad - p.y * sinRad),
+                        y: center.y + (p.x * sinRad + p.y * cosRad),
+                        cursor: p.cursor,
+                        size: actualHandleSize
+                    };
+                }
+                return worldHandles;
+            }
+        }
+        
+        class Particle {
+             constructor(x, y, vx, vy, lifetime, size, colorStart, colorEnd = null) {
+                this.x = x; this.y = y;
+                this.vx = vx; this.vy = vy;
+                this.lifetime = lifetime; this.initialLifetime = lifetime;
+                this.size = size;
+                this.colorStart = tinycolor(colorStart);
+                this.colorEnd = colorEnd ? tinycolor(colorEnd) : this.colorStart;
+            }
+
+            update(dt) {
+                this.x += this.vx * dt;
+                this.y += this.vy * dt;
+                this.lifetime -= dt;
+            }
+
+            draw(ctx) {
+                if (this.lifetime <= 0) return;
+                const lifeRatio = Math.max(0, this.lifetime / this.initialLifetime);
+                
+                const r = this.colorStart._r + (this.colorEnd._r - this.colorStart._r) * (1 - lifeRatio);
+                const g = this.colorStart._g + (this.colorEnd._g - this.colorStart._g) * (1 - lifeRatio);
+                const b = this.colorStart._b + (this.colorEnd._b - this.colorStart._b) * (1 - lifeRatio);
+                const a = this.colorStart._a * lifeRatio;
+
+                ctx.save();
+                ctx.fillStyle = `rgba(${Math.round(r)},${Math.round(g)},${Math.round(b)},${a.toFixed(2)})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size * lifeRatio, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        class ParticleSystem {
+            constructor() { this.particles = []; }
+            addParticle(x, y, vx, vy, lifetime, size, colorStart, colorEnd) {
+                if (this.particles.length < GAME_CONFIG.MAX_PARTICLES) {
+                    this.particles.push(new Particle(x, y, vx, vy, lifetime, size, colorStart, colorEnd));
+                }
+            }
+            update(dt) {
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    this.particles[i].update(dt);
+                    if (this.particles[i].lifetime <= 0) this.particles.splice(i, 1);
+                }
+            }
+            draw(ctx) { this.particles.forEach(p => p.draw(ctx)); }
+        }
+
+        document.addEventListener('DOMContentLoaded', initApp);
+
+        function initApp() {
+            appState.canvasElement = document.getElementById('zenCanvas');
+            appState.canvasCtx = appState.canvasElement.getContext('2d');
+            appState.particleSystem = new ParticleSystem();
+
+            setupCanvas();
+            loadInitialAssets();
+            initUI();
+            initEventListeners();
+            
+            loadDefaultBackground();
+            addCurrentStateToHistory(true); 
+            
+            appState.lastRenderTime = performance.now();
+            appState.animationFrameId = requestAnimationFrame(gameLoop);
+            updateStatus("Welcome to Zen Garden Architect!");
+        }
+        
+        function gameLoop(timestamp) {
+            let deltaTime = (timestamp - appState.lastRenderTime) / 1000;
+            appState.lastRenderTime = timestamp;
+            deltaTime = Math.max(0.001, Math.min(deltaTime, 0.1)); 
+
+            updateLogic(deltaTime);
+            renderScene(deltaTime);
+            
+            appState.animationFrameId = requestAnimationFrame(gameLoop);
+        }
+        
+        function updateLogic(deltaTime) {
+            appState.particleSystem.update(deltaTime);
+            
+            appState.elements.forEach(element => {
+                if (element.type === 'water' && element.specificProps.animationTime !== undefined) {
+                    element.specificProps.animationTime += deltaTime * (element.specificProps.animationSpeed || 1);
+                }
+                if (element.type === 'sand' && element.specificProps.rippleTime !== undefined) {
+                     element.specificProps.rippleTime += deltaTime * (element.specificProps.rippleSpeed || 0.1);
+                }
+            });
+        }
+
+        function loadInitialAssets() {
+            const promises = [];
+            Object.entries(GAME_CONFIG.TEXTURE_PATHS).forEach(([key, path]) => promises.push(loadAsset(path, 'texture', key)));
+            Object.entries(GAME_CONFIG.SPRITE_PATHS).forEach(([key, path]) => promises.push(loadAsset(path, 'sprite', key)));
+            
+            Promise.all(promises)
+                .then(() => updateStatus("Assets loaded."))
+                .catch(err => {
+                    console.error("Error loading initial assets:", err);
+                    updateStatus("Error loading some assets. Functionality may be limited.");
+                });
+        }
+
+        function loadAsset(path, type, key) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => {
+                    if (type === 'texture') appState.loadedAssets.textures[key] = img;
+                    if (type === 'sprite') appState.loadedAssets.sprites[key] = img;
+                    resolve(img);
+                };
+                img.onerror = (err) => {
+                    console.error(`Failed to load ${type} ${key} from ${path}`, err);
+                    reject(err);
+                };
+                img.src = path;
+            });
+        }
+
+        function setupCanvas() {
+            appState.canvasElement.width = GAME_CONFIG.CANVAS_NATIVE_WIDTH;
+            appState.canvasElement.height = GAME_CONFIG.CANVAS_NATIVE_HEIGHT;
+            appState.canvasCtx.imageSmoothingEnabled = true; 
+        }
+
+        function initUI() {
+            const bgThemeList = document.getElementById('bgThemeList');
+            Object.entries(GAME_CONFIG.PRESET_THEMES).forEach(([name, prompt]) => {
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.classList.add('dropdown-item');
+                a.href = '#';
+                a.textContent = name;
+                a.dataset.prompt = prompt;
+                a.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.getElementById('bgPromptInput').value = prompt;
+                    generateBackgroundFromPrompt(prompt);
+                    playSound('CLICK');
+                });
+                li.appendChild(a);
+                bgThemeList.appendChild(li);
+            });
+
+            document.getElementById('toggleSoundBtn').classList.toggle('active', appState.soundEnabled);
+            updateSoundButtonIcon();
+
+            document.getElementById('closePropertiesPanelBtn').addEventListener('click', () => {
+                document.getElementById('properties-panel-wrapper').classList.add('hidden');
+                if (appState.selectedElementId) {
+                    selectElement(null); 
+                }
+                playSound('CLICK');
+            });
+            
+            updateUndoRedoButtons();
+            
+            const tooltipTriggerList = document.querySelectorAll('[title]');
+            [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl, {delay: { "show": 500, "hide": 100 }}));
+        }
+        
+        function updateSoundButtonIcon() {
+            const icon = document.getElementById('toggleSoundBtn').querySelector('i');
+            icon.classList.toggle('bi-volume-up-fill', appState.soundEnabled);
+            icon.classList.toggle('bi-volume-mute-fill', !appState.soundEnabled);
+        }
+
+        function initEventListeners() {
+            window.addEventListener('resize', resizeCanvasAndRender);
+            document.getElementById('generateBgBtn').addEventListener('click', () => {
+                const prompt = document.getElementById('bgPromptInput').value || GAME_CONFIG.DEFAULT_BG_PROMPT;
+                generateBackgroundFromPrompt(prompt);
+                playSound('CLICK');
+            });
+
+            document.querySelectorAll('#element-palette .btn-tool').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelector('#element-palette .btn-tool.active')?.classList.remove('active');
+                    btn.classList.add('active');
+                    appState.currentTool = btn.dataset.tool;
+                    playSound('CLICK');
+                });
+            });
+
+            appState.canvasElement.addEventListener('mousedown', handleCanvasMouseDown);
+            appState.canvasElement.addEventListener('mousemove', handleCanvasMouseMove);
+            appState.canvasElement.addEventListener('mouseup', handleCanvasMouseUp);
+            appState.canvasElement.addEventListener('mouseleave', handleCanvasMouseLeave); 
+
+            document.getElementById('saveJsonBtn').addEventListener('click', () => { saveDesign(); playSound('CLICK'); });
+            document.getElementById('loadJsonInput').addEventListener('change', (e) => { loadDesign(e.target.files[0]); playSound('CLICK'); e.target.value = null; });
+            document.getElementById('exportPngBtn').addEventListener('click', () => { exportPNG(); playSound('CLICK'); });
+
+            document.getElementById('undoBtn').addEventListener('click', () => { undo(); playSound('CLICK'); });
+            document.getElementById('redoBtn').addEventListener('click', () => { redo(); playSound('CLICK'); });
+            document.getElementById('zenModeBtn').addEventListener('click', () => { toggleZenMode(); playSound('CLICK'); });
+            document.getElementById('toggleSoundBtn').addEventListener('click', toggleSound);
+            
+            initSounds();
+        }
+        
+        function initSounds() {
+            if (typeof Howl === 'undefined') {
+                console.warn("Howler.js not loaded. Sounds disabled.");
+                appState.soundEnabled = false;
+                return;
+            }
+            try {
+                appState.sounds.CLICK = new Howl({ src: [GAME_CONFIG.SOUND_FILES.CLICK], volume: 0.3 });
+                appState.sounds.PLACE = new Howl({ src: [GAME_CONFIG.SOUND_FILES.PLACE], volume: 0.5 });
+                if (GAME_CONFIG.SOUND_FILES.AMBIENT_WIND) appState.sounds.AMBIENT_WIND = new Howl({ src: [GAME_CONFIG.SOUND_FILES.AMBIENT_WIND], loop: true, volume: 0.2 });
+                if (GAME_CONFIG.SOUND_FILES.AMBIENT_WATER) appState.sounds.AMBIENT_WATER = new Howl({ src: [GAME_CONFIG.SOUND_FILES.AMBIENT_WATER], loop: true, volume: 0.3 });
+            } catch (e) {
+                console.error("Error initializing sounds:", e);
+                appState.soundEnabled = false;
+            }
+        }
+
+        function playSound(soundName) {
+            if (appState.soundEnabled && appState.sounds[soundName]) {
+                try { appState.sounds[soundName].play(); } 
+                catch(e) { console.warn(`Could not play sound ${soundName}:`, e); }
+            }
+        }
+        
+        function toggleSound() {
+            appState.soundEnabled = !appState.soundEnabled;
+            document.getElementById('toggleSoundBtn').classList.toggle('active', appState.soundEnabled);
+            updateSoundButtonIcon();
+            
+            if (appState.soundEnabled) {
+                playSound('CLICK'); 
+                if (appState.sounds.AMBIENT_WIND && !appState.sounds.AMBIENT_WIND.playing()) appState.sounds.AMBIENT_WIND.play();
+                if (appState.sounds.AMBIENT_WATER && !appState.sounds.AMBIENT_WATER.playing()) appState.sounds.AMBIENT_WATER.play();
+            } else {
+                if (appState.sounds.AMBIENT_WIND?.playing()) appState.sounds.AMBIENT_WIND.stop();
+                if (appState.sounds.AMBIENT_WATER?.playing()) appState.sounds.AMBIENT_WATER.stop();
+            }
+        }
+
+        function resizeCanvasAndRender() {
+            const canvas = appState.canvasElement;
+            const wrapper = document.getElementById('canvas-wrapper');
+            
+            const nativeAspectRatio = GAME_CONFIG.CANVAS_NATIVE_WIDTH / GAME_CONFIG.CANVAS_NATIVE_HEIGHT;
+            let wrapperWidth = wrapper.clientWidth;
+            let wrapperHeight = wrapper.clientHeight;
+            const windowAspectRatio = wrapperWidth / wrapperHeight;
+
+            let scaledWidth, scaledHeight;
+
+            if (windowAspectRatio > nativeAspectRatio) {
+                scaledHeight = wrapperHeight;
+                scaledWidth = scaledHeight * nativeAspectRatio;
+            } else {
+                scaledWidth = wrapperWidth;
+                scaledHeight = scaledWidth / nativeAspectRatio;
+            }
+
+            canvas.style.width = Math.floor(scaledWidth) + 'px';
+            canvas.style.height = Math.floor(scaledHeight) + 'px';
+        }
+        
+        function renderScene(deltaTime) {
+            if (!appState.canvasCtx) return;
+            const ctx = appState.canvasCtx;
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+            drawBackgroundImage(ctx);
+            appState.elements.sort((a, b) => a.zIndex - b.zIndex); 
+
+            appState.elements.forEach(element => {
+                ctx.save();
+                applyDepthOfField(element, ctx); 
+                
+                const center = element.getCenter();
+                ctx.translate(center.x, center.y);
+                ctx.rotate(element.rotation * Math.PI / 180);
+                ctx.translate(-center.x, -center.y);
+                
+                ctx.globalAlpha = element.opacity;
+                drawElement(element, ctx, deltaTime);
+                ctx.restore();
+            });
+            
+            appState.particleSystem.draw(ctx);
+
+            if (appState.selectedElementId) {
+                const selected = appState.elements.find(el => el.id === appState.selectedElementId);
+                if (selected) drawSelectionHandles(selected, ctx);
+            }
+            hideAlignmentGuides(); 
+        }
+
+
+        function drawElement(element, ctx, deltaTime) {
+            ctx.save();
+            if (element.colorTint) ctx.fillStyle = element.colorTint; 
+
+            switch (element.type) {
+                case 'rock': drawRock(element, ctx); break;
+                case 'plant': drawPlant(element, ctx); break;
+                case 'water': drawWater(element, ctx); break;
+                case 'sand': drawSand(element, ctx); break;
+            }
+            ctx.restore();
+        }
+
+        function drawRock(rock, ctx) {
+            const texture = appState.loadedAssets.textures[rock.textureKey];
+            if (texture) {
+                const pattern = ctx.createPattern(texture, 'repeat');
+                ctx.fillStyle = pattern;
+                ctx.fillRect(rock.x, rock.y, rock.width, rock.height);
+                if (rock.colorTint) { 
+                    ctx.globalAlpha = rock.opacity * 0.4; 
+                    ctx.fillStyle = rock.colorTint;
+                    ctx.fillRect(rock.x, rock.y, rock.width, rock.height);
+                    ctx.globalAlpha = rock.opacity; 
+                }
+            } else {
+                ctx.fillStyle = rock.colorTint || '#888888';
+                ctx.fillRect(rock.x, rock.y, rock.width, rock.height);
+            }
+        }
+
+        function drawPlant(plant, ctx) {
+            const sprite = appState.loadedAssets.sprites[plant.spriteKey];
+            if (sprite) {
+                ctx.drawImage(sprite, plant.x, plant.y, plant.width, plant.height);
+                 if (plant.colorTint) { 
+                    ctx.globalCompositeOperation = 'multiply';
+                    ctx.fillStyle = plant.colorTint;
+                    ctx.fillRect(plant.x, plant.y, plant.width, plant.height);
+                    ctx.globalCompositeOperation = 'source-over';
+                }
+            } else {
+                ctx.fillStyle = plant.colorTint || '#4A7856'; 
+                ctx.fillRect(plant.x, plant.y, plant.width, plant.height); 
+            }
+        }
+
+        function drawWater(water, ctx) {
+            const time = water.specificProps.animationTime || 0;
+            const gradient = ctx.createLinearGradient(water.x, water.y, water.x + water.width, water.y + water.height);
+            const color1 = water.colorTint || '#6495ED'; 
+            const color2 = tinycolor(color1).lighten(15).toString();
+            
+            gradient.addColorStop(0, color1);
+            gradient.addColorStop(Math.max(0, Math.min(1, 0.5 + Math.sin(time) * 0.3)), color2);
+            gradient.addColorStop(1, color1);
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(water.x, water.y, water.width, water.height);
+
+            if (Math.random() < 0.2 ) { 
+                 appState.particleSystem.addParticle(
+                    water.x + Math.random() * water.width, water.y + Math.random() * water.height,
+                    (Math.random() - 0.5) * 15, (Math.random() - 0.5) * 15, 
+                    0.5 + Math.random() * 1, 1 + Math.random() * 2,      
+                    'rgba(220, 220, 255, 0.9)', 'rgba(220, 220, 255, 0)'
+                );
+            }
+        }
+
+        function drawSand(sand, ctx) {
+            const texture = appState.loadedAssets.textures[sand.textureKey];
+            if (texture) {
+                const pattern = ctx.createPattern(texture, 'repeat');
+                ctx.fillStyle = pattern;
+                ctx.fillRect(sand.x, sand.y, sand.width, sand.height);
+                 if (sand.colorTint) { 
+                    ctx.globalAlpha = sand.opacity * 0.3; 
+                    ctx.fillStyle = sand.colorTint;
+                    ctx.fillRect(sand.x, sand.y, sand.width, sand.height);
+                    ctx.globalAlpha = sand.opacity; 
+                }
+            } else {
+                ctx.fillStyle = sand.colorTint || '#E0CDA9'; 
+                ctx.fillRect(sand.x, sand.y, sand.width, sand.height);
+            }
+
+            const time = sand.specificProps.rippleTime || 0;
+            const rippleOffset = Math.sin(time) * 5;
+            ctx.strokeStyle = 'rgba(0,0,0,0.04)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < sand.width + 10; i += 10) {
+                ctx.beginPath();
+                ctx.moveTo(sand.x + i + rippleOffset, sand.y - 5);
+                ctx.bezierCurveTo(
+                    sand.x + i + rippleOffset - 5, sand.y + sand.height / 2,
+                    sand.x + i + rippleOffset + 5, sand.y + sand.height / 2,
+                    sand.x + i + rippleOffset, sand.y + sand.height + 5
+                );
+                ctx.stroke();
+            }
+        }
+        
+        function applyDepthOfField(element, ctx) {
+            const canvasHeight = GAME_CONFIG.CANVAS_NATIVE_HEIGHT;
+            const middleDistance = canvasHeight * 0.6; 
+            const elementCenterY = element.y + element.height / 2;
+            
+            const distanceFromFocus = elementCenterY - middleDistance;
+            const maxBlurDistance = canvasHeight * 0.4; 
+            
+            let blurAmount = 0;
+            if (distanceFromFocus > 0) { // Further away
+                blurAmount = (distanceFromFocus / maxBlurDistance) * 1.5; 
+            } else { // Closer - less blur or no blur
+                blurAmount = (Math.abs(distanceFromFocus) / (canvasHeight * 0.2)) * 0.5;
+            }
+            blurAmount = Math.min(blurAmount, 1.5); 
+
+            if (blurAmount > 0.15) { 
+                ctx.filter = `blur(${blurAmount.toFixed(1)}px)`;
+            }
+        }
+
+        function drawSelectionHandles(element, ctx) {
+            const scaleFactor = appState.canvasElement.width / GAME_CONFIG.CANVAS_NATIVE_WIDTH;
+            const handles = element.getHandles(scaleFactor);
+            const actualHandleSize = GAME_CONFIG.HANDLE_SIZE / scaleFactor;
+            const halfHandle = actualHandleSize / 2;
+            
+            ctx.save();
+            ctx.strokeStyle = '#B08D57'; 
+            ctx.lineWidth = 2 / scaleFactor;
+            
+            const center = element.getCenter();
+            const rad = element.rotation * Math.PI / 180;
+            const cosRad = Math.cos(rad);
+            const sinRad = Math.sin(rad);
+
+            const points = [
+                { x: element.x, y: element.y },
+                { x: element.x + element.width, y: element.y },
+                { x: element.x + element.width, y: element.y + element.height },
+                { x: element.x, y: element.y + element.height }
+            ];
+
+            const rotatedPoints = points.map(p => {
+                const dx = p.x - center.x;
+                const dy = p.y - center.y;
+                return {
+                    x: center.x + dx * cosRad - dy * sinRad,
+                    y: center.y + dx * sinRad + dy * cosRad
+                };
+            });
+            
+            ctx.beginPath();
+            ctx.moveTo(rotatedPoints[0].x, rotatedPoints[0].y);
+            for(let i = 1; i < rotatedPoints.length; i++) ctx.lineTo(rotatedPoints[i].x, rotatedPoints[i].y);
+            ctx.closePath();
+            ctx.stroke();
+
+            ctx.fillStyle = '#B08D57';
+            for (const key in handles) {
+                const p = handles[key];
+                ctx.fillRect(p.x - halfHandle, p.y - halfHandle, actualHandleSize, actualHandleSize);
+            }
+            ctx.restore();
+        }
+        
+        function getCanvasMousePos(event) {
+            const rect = appState.canvasElement.getBoundingClientRect();
+            const scaleX = appState.canvasElement.width / rect.width;
+            const scaleY = appState.canvasElement.height / rect.height;
+            return {
+                x: (event.clientX - rect.left) * scaleX,
+                y: (event.clientY - rect.top) * scaleY
+            };
+        }
+
+        function handleCanvasMouseDown(e) {
+            const pos = getCanvasMousePos(e);
+            appState.isDragging = true;
+            appState.dragStartPos = { ...pos };
+
+            let clickedOnSelectedHandleDetails = null;
+            if (appState.selectedElementId) {
+                const selected = appState.elements.find(el => el.id === appState.selectedElementId);
+                if (selected) {
+                    const scaleFactor = appState.canvasElement.width / GAME_CONFIG.CANVAS_NATIVE_WIDTH;
+                    const handles = selected.getHandles(scaleFactor);
+                    const actualHandleSize = GAME_CONFIG.HANDLE_SIZE / scaleFactor;
+
+                    for (const key in handles) {
+                        const p = handles[key];
+                        if (pos.x >= p.x - actualHandleSize && pos.x <= p.x + actualHandleSize &&
+                            pos.y >= p.y - actualHandleSize && pos.y <= p.y + actualHandleSize) {
+                            clickedOnSelectedHandleDetails = { handleName: key, element: selected };
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (clickedOnSelectedHandleDetails) {
+                appState.activeResizeHandle = clickedOnSelectedHandleDetails.handleName;
+                appState.dragElementStartSnapshot = cloneElementState(clickedOnSelectedHandleDetails.element);
+                appState.canvasElement.style.cursor = clickedOnSelectedHandleDetails.element.getHandles()[appState.activeResizeHandle].cursor;
+            } else {
+                appState.activeResizeHandle = null;
+                if (appState.currentTool === 'select') {
+                    let topMostElement = null;
+                    for (let i = appState.elements.length - 1; i >= 0; i--) {
+                        const element = appState.elements[i];
+                        if (element.isPointInside(pos.x, pos.y)) {
+                           if (!topMostElement || element.zIndex > topMostElement.zIndex) {
+                                topMostElement = element;
+                           }
+                        }
+                    }
+                    if (topMostElement) {
+                        selectElement(topMostElement.id);
+                        appState.dragElementStartSnapshot = cloneElementState(topMostElement);
+                        appState.canvasElement.style.cursor = 'move';
+                    } else {
+                        selectElement(null); 
+                        appState.canvasElement.style.cursor = 'default';
+                    }
+                } else {
+                    addNewElement(appState.currentTool, pos.x, pos.y);
+                    playSound('PLACE');
+                    appState.canvasElement.style.cursor = 'default';
+                }
+            }
+        }
+        
+        function cloneElementState(element) {
+            return JSON.parse(JSON.stringify(element));
+        }
+
+
+        function handleCanvasMouseMove(e) {
+            if (!appState.isDragging) {
+                const pos = getCanvasMousePos(e);
+                let newCursor = 'default';
+                if (appState.selectedElementId) {
+                    const selected = appState.elements.find(el => el.id === appState.selectedElementId);
+                    if (selected) {
+                        const scaleFactor = appState.canvasElement.width / GAME_CONFIG.CANVAS_NATIVE_WIDTH;
+                        const handles = selected.getHandles(scaleFactor);
+                        const actualHandleSize = GAME_CONFIG.HANDLE_SIZE / scaleFactor;
+                        let onHandle = false;
+                        for (const key in handles) {
+                            const p = handles[key];
+                            if (pos.x >= p.x - actualHandleSize && pos.x <= p.x + actualHandleSize &&
+                                pos.y >= p.y - actualHandleSize && pos.y <= p.y + actualHandleSize) {
+                                newCursor = p.cursor;
+                                onHandle = true;
+                                break;
+                            }
+                        }
+                        if (!onHandle && selected.isPointInside(pos.x, pos.y)) newCursor = 'move';
+                    }
+                }
+                appState.canvasElement.style.cursor = newCursor;
+                return;
+            }
+
+            const pos = getCanvasMousePos(e);
+            const screenDx = pos.x - appState.dragStartPos.x;
+            const screenDy = pos.y - appState.dragStartPos.y;
+
+            const selected = appState.elements.find(el => el.id === appState.selectedElementId);
+            if (selected && appState.dragElementStartSnapshot) {
+                const startSnapshot = appState.dragElementStartSnapshot;
+                
+                if (appState.activeResizeHandle) {
+                    const rad = startSnapshot.rotation * Math.PI / 180;
+                    const cosR = Math.cos(rad);
+                    const sinR = Math.sin(rad);
+                    
+                    const localDx = screenDx * cosR + screenDy * sinR;
+                    const localDy = -screenDx * sinR + screenDy * cosR;
+
+                    if (appState.activeResizeHandle === 'rotate') {
+                        const center = {x: startSnapshot.x + startSnapshot.width / 2, y: startSnapshot.y + startSnapshot.height / 2};
+                        const angleStart = Math.atan2(appState.dragStartPos.y - center.y, appState.dragStartPos.x - center.x);
+                        const angleCurrent = Math.atan2(pos.y - center.y, pos.x - center.x);
+                        selected.rotation = startSnapshot.rotation + (angleCurrent - angleStart) * 180 / Math.PI;
+                    } else {
+                        let newX = startSnapshot.x, newY = startSnapshot.y;
+                        let newWidth = startSnapshot.width, newHeight = startSnapshot.height;
+
+                        if (appState.activeResizeHandle.includes('e')) newWidth = Math.max(20, startSnapshot.width + localDx);
+                        if (appState.activeResizeHandle.includes('w')) {
+                            newWidth = Math.max(20, startSnapshot.width - localDx);
+                            newX = startSnapshot.x + (startSnapshot.width - newWidth) * cosR;
+                            newY = startSnapshot.y + (startSnapshot.width - newWidth) * sinR;
+                        }
+                        if (appState.activeResizeHandle.includes('s')) newHeight = Math.max(20, startSnapshot.height + localDy);
+                        if (appState.activeResizeHandle.includes('n')) {
+                            newHeight = Math.max(20, startSnapshot.height - localDy);
+                            newX = startSnapshot.x - (startSnapshot.height - newHeight) * sinR; // Sign might need adjustment based on axis
+                            newY = startSnapshot.y + (startSnapshot.height - newHeight) * cosR;
+                        }
+                        
+                        selected.width = newWidth;
+                        selected.height = newHeight;
+                        
+                        const newCenterX = startSnapshot.x + startSnapshot.width/2 + screenDx/2; // Simplified center shift
+                        const newCenterY = startSnapshot.y + startSnapshot.height/2 + screenDy/2;
+                        
+                        if (appState.activeResizeHandle === 'e') { selected.x = startSnapshot.x; selected.y = startSnapshot.y; }
+                        else if (appState.activeResizeHandle === 'w') { selected.x = startSnapshot.x + screenDx; selected.y = startSnapshot.y + screenDy; }
+                        else if (appState.activeResizeHandle === 's') { selected.x = startSnapshot.x; selected.y = startSnapshot.y; }
+                        else if (appState.activeResizeHandle === 'n') { selected.x = startSnapshot.x + screenDx; selected.y = startSnapshot.y + screenDy; }
+                        else { // Corner handles: Adjust position to keep opposite corner fixed (approximately)
+                            const dxSign = appState.activeResizeHandle.includes('w') ? 1 : (appState.activeResizeHandle.includes('e') ? -1 : 0);
+                            const dySign = appState.activeResizeHandle.includes('n') ? 1 : (appState.activeResizeHandle.includes('s') ? -1 : 0);
+                            
+                            const dw = newWidth - startSnapshot.width;
+                            const dh = newHeight - startSnapshot.height;
+
+                            selected.x = startSnapshot.x + (dxSign === 1 ? dw*cosR - dh*sinR : 0); // This part is complex to get perfectly right
+                            selected.y = startSnapshot.y + (dySign === 1 ? dw*sinR + dh*cosR : 0);
+                        }
+
+                    }
+                    displayProperties(selected); // Update properties panel live
+                } else { 
+                    selected.x = startSnapshot.x + screenDx;
+                    selected.y = startSnapshot.y + screenDy;
+                    
+                    let snapX = false, snapY = false;
+                    const snapThreshold = GAME_CONFIG.SNAP_THRESHOLD;
+
+                    let targetX = selected.x, targetY = selected.y;
+                    targetX = Math.round(targetX / GAME_CONFIG.GRID_SIZE) * GAME_CONFIG.GRID_SIZE;
+                    targetY = Math.round(targetY / GAME_CONFIG.GRID_SIZE) * GAME_CONFIG.GRID_SIZE;
+                    
+                    appState.elements.forEach(other => {
+                        if (other.id === selected.id) return;
+                        const otherPoints = [ other.x, other.x + other.width/2, other.x + other.width ];
+                        const selectedPointsX = [ targetX, targetX + selected.width/2, targetX + selected.width ];
+                        otherPoints.forEach(opX => selectedPointsX.forEach(spX => {
+                            if (Math.abs(spX - opX) < snapThreshold) { targetX -= (spX - opX); snapX = true; showAlignmentGuideY(opX); }
+                        }));
+
+                        const otherPointsY = [ other.y, other.y + other.height/2, other.y + other.height ];
+                        const selectedPointsY = [ targetY, targetY + selected.height/2, targetY + selected.height ];
+                        otherPointsY.forEach(opY => selectedPointsY.forEach(spY => {
+                            if (Math.abs(spY - opY) < snapThreshold) { targetY -= (spY - opY); snapY = true; showAlignmentGuideX(opY); }
+                        }));
+                    });
+                    selected.x = targetX;
+                    selected.y = targetY;
+                }
+            }
+        }
+
+        function handleCanvasMouseUp(e) {
+            if (appState.isDragging) addCurrentStateToHistory();
+            appState.isDragging = false;
+            appState.activeResizeHandle = null;
+            appState.dragElementStartSnapshot = null;
+            hideAlignmentGuides();
+            appState.canvasElement.style.cursor = 'default';
+            const selected = appState.elements.find(el => el.id === appState.selectedElementId);
+            if (selected) displayProperties(selected); // Final update to properties panel
+        }
+        
+        function handleCanvasMouseLeave(e) {
+            if (appState.isDragging) addCurrentStateToHistory();
+            appState.isDragging = false;
+            appState.activeResizeHandle = null;
+            appState.dragElementStartSnapshot = null;
+            hideAlignmentGuides();
+            appState.canvasElement.style.cursor = 'default';
+        }
+
+        function showAlignmentGuideX(yPosCanvas) {
+            const guide = document.getElementById('alignment-guide-x');
+            const canvasRect = appState.canvasElement.getBoundingClientRect();
+            const scaleY = canvasRect.height / GAME_CONFIG.CANVAS_NATIVE_HEIGHT;
+            guide.style.top = (yPosCanvas * scaleY + canvasRect.top - document.getElementById('app-container').offsetTop) + 'px';
+            guide.style.left = canvasRect.left + 'px';
+            guide.style.width = canvasRect.width + 'px';
+            guide.classList.remove('d-none');
+        }
+
+        function showAlignmentGuideY(xPosCanvas) {
+            const guide = document.getElementById('alignment-guide-y');
+            const canvasRect = appState.canvasElement.getBoundingClientRect();
+            const scaleX = canvasRect.width / GAME_CONFIG.CANVAS_NATIVE_WIDTH;
+            guide.style.left = (xPosCanvas * scaleX + canvasRect.left - document.getElementById('app-container').offsetLeft) + 'px';
+            guide.style.top = canvasRect.top + 'px';
+            guide.style.height = canvasRect.height + 'px';
+            guide.classList.remove('d-none');
+        }
+
+        function hideAlignmentGuides() {
+            document.getElementById('alignment-guide-x').classList.add('d-none');
+            document.getElementById('alignment-guide-y').classList.add('d-none');
+        }
+
+        function addNewElement(type, x, y) {
+            let newElement;
+            const defaultSize = { width: 100, height: 100 };
+            let specificProps = {};
+
+            switch (type) {
+                case 'rock':
+                    defaultSize.width = 120; defaultSize.height = 80;
+                    specificProps = { textureKey: 'riverStones' };
+                    break;
+                case 'plant':
+                    defaultSize.width = 100; defaultSize.height = 150;
+                    specificProps = { spriteKey: 'bonsaiDetailed' };
+                    break;
+                case 'water':
+                    defaultSize.width = 150; defaultSize.height = 100;
+                    specificProps = { animationTime: 0, animationSpeed: 0.5 + Math.random() * 0.5 };
+                    break;
+                case 'sand':
+                    defaultSize.width = 200; defaultSize.height = 150;
+                    specificProps = { textureKey: 'rakedSandFine', rippleTime: 0, rippleSpeed: 0.15 + Math.random() * 0.1 };
+                    break;
+                default: return;
+            }
+            const centeredX = x - defaultSize.width / 2;
+            const centeredY = y - defaultSize.height / 2;
+            newElement = new GardenElement(type, centeredX, centeredY, defaultSize.width, defaultSize.height, specificProps);
+            
+            appState.elements.push(newElement);
+            selectElement(newElement.id); 
+            addCurrentStateToHistory();
+        }
+
+        function selectElement(elementId) {
+            appState.selectedElementId = elementId;
+            if (elementId) {
+                const element = appState.elements.find(el => el.id === elementId);
+                if (element) {
+                    displayProperties(element);
+                    document.getElementById('properties-panel-wrapper').classList.remove('hidden');
+                    element.zIndex = Math.max(...appState.elements.map(el => el.zIndex), 0) + 1;
+                } else {
+                    appState.selectedElementId = null; // Element not found
+                    document.getElementById('properties-panel-wrapper').classList.add('hidden');
+                }
+            } else {
+                document.getElementById('properties-panel-wrapper').classList.add('hidden');
+                document.getElementById('properties-content').innerHTML = '<p class="text-muted">Select an element to see its properties.</p>';
+            }
+        }
+
+        function displayProperties(element) {
+            const propsContent = document.getElementById('properties-content');
+            propsContent.innerHTML = ''; 
+
+            if (!element) {
+                propsContent.innerHTML = '<p class="text-muted">Select an element to see its properties.</p>';
+                return;
+            }
+            const createRangeInput = (label, id, min, max, step, value, unit = '', propKey, specific = false) => {
+                const formGroup = document.createElement('div'); formGroup.classList.add('mb-2');
+                const labelEl = document.createElement('label'); labelEl.setAttribute('for', id); labelEl.classList.add('form-label', 'small'); labelEl.textContent = `${label}: `;
+                const valueSpan = document.createElement('span'); valueSpan.textContent = parseFloat(value).toFixed(step < 1 ? 2 : 0) + unit; labelEl.appendChild(valueSpan);
+                const inputEl = document.createElement('input'); inputEl.type = 'range'; inputEl.classList.add('form-range'); inputEl.id = id;
+                inputEl.min = min; inputEl.max = max; inputEl.step = step; inputEl.value = value;
+                
+                inputEl.addEventListener('input', (e) => {
+                    const val = propKey === 'rotation' ? parseInt(e.target.value) : parseFloat(e.target.value);
+                    if (specific) element.specificProps[propKey] = val; else element[propKey] = val;
+                    valueSpan.textContent = val.toFixed(step < 1 ? 2 : 0) + unit;
+                });
+                inputEl.addEventListener('change', () => addCurrentStateToHistory()); 
+
+                formGroup.appendChild(labelEl); formGroup.appendChild(inputEl); return formGroup;
+            };
+            const createColorInput = (label, id, value, propKey) => { /* ... */ return createInputBase('color', 'form-control-color', label, id, value, propKey, (e, el, pK) => { el[pK] = e.target.value; }); };
+            const createSelectInput = (label, id, options, value, propKey) => { /* ... */ return createInputBase('select', 'form-select-sm', label, id, value, propKey, (e, el, pK) => { el[pK] = e.target.value; }, options); };
+
+            function createInputBase(type, className, label, id, value, propKey, eventHandler, selectOptions = []) {
+                const formGroup = document.createElement('div'); formGroup.classList.add('mb-2');
+                const labelEl = document.createElement('label'); labelEl.setAttribute('for', id); labelEl.classList.add('form-label', 'small'); labelEl.textContent = label;
+                const inputEl = document.createElement(type === 'select' ? 'select' : 'input');
+                if (type !== 'select') inputEl.type = type;
+                inputEl.classList.add('form-control', className); inputEl.id = id;
+                
+                if (type === 'select') {
+                    selectOptions.forEach(opt => {
+                        const optionEl = document.createElement('option'); optionEl.value = opt.value; optionEl.textContent = opt.label;
+                        if (opt.value === value) optionEl.selected = true;
+                        inputEl.appendChild(optionEl);
+                    });
+                } else { inputEl.value = value || (type === 'color' ? '#ffffff' : ''); }
+                
+                inputEl.addEventListener('input', (e) => eventHandler(e, element, propKey));
+                inputEl.addEventListener('change', () => addCurrentStateToHistory());
+                formGroup.appendChild(labelEl); formGroup.appendChild(inputEl); return formGroup;
+            }
+
+            propsContent.appendChild(createRangeInput('Opacity', 'opacity', 0, 1, 0.01, element.opacity, '', 'opacity'));
+            propsContent.appendChild(createRangeInput('Rotation', 'rotation', 0, 359, 1, element.rotation, '°', 'rotation'));
+            propsContent.appendChild(createRangeInput('Width', 'width', 20, 1000, 1, element.width, 'px', 'width'));
+            propsContent.appendChild(createRangeInput('Height', 'height', 20, 1000, 1, element.height, 'px', 'height'));
+            propsContent.appendChild(createRangeInput('Layer (Z-Index)', 'zIndex', 0, appState.elements.length + 5, 1, element.zIndex, '', 'zIndex'));
+            propsContent.appendChild(createColorInput('Color Tint', 'colorTint', element.colorTint, 'colorTint'));
+
+            if (element.type === 'rock' || element.type === 'sand') {
+                const textureOptions = Object.keys(appState.loadedAssets.textures).map(k => ({label: k, value: k}));
+                textureOptions.unshift({label: "None", value: ""});
+                propsContent.appendChild(createSelectInput('Texture', 'textureKey', textureOptions, element.textureKey, 'textureKey'));
+            }
+            if (element.type === 'plant') {
+                 const spriteOptions = Object.keys(appState.loadedAssets.sprites).map(k => ({label: k, value: k}));
+                 spriteOptions.unshift({label: "None", value: ""});
+                 propsContent.appendChild(createSelectInput('Sprite', 'spriteKey', spriteOptions, element.spriteKey, 'spriteKey'));
+            }
+            if (element.type === 'sand') {
+                propsContent.appendChild(createRangeInput('Ripple Speed', 'rippleSpeed', 0, 1, 0.01, element.specificProps.rippleSpeed || 0.1, '', 'rippleSpeed', true));
+            }
+             if (element.type === 'water') {
+                propsContent.appendChild(createRangeInput('Anim Speed', 'animationSpeed', 0, 2, 0.01, element.specificProps.animationSpeed || 0.5, '', 'animationSpeed', true));
+            }
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.classList.add('btn', 'btn-danger', 'btn-sm', 'mt-3', 'w-100');
+            deleteBtn.innerHTML = '<i class="bi bi-trash"></i> Delete Element';
+            deleteBtn.addEventListener('click', () => {
+                appState.elements = appState.elements.filter(el => el.id !== element.id);
+                selectElement(null); addCurrentStateToHistory(); playSound('CLICK');
+            });
+            propsContent.appendChild(deleteBtn);
+        }
+
+        function loadDefaultBackground() {
+            const defaultBgUrl = GAME_CONFIG.DEFAULT_BG_IMAGE_URL;
+            if (defaultBgUrl) {
+                const img = new Image();
+                img.onload = () => {
+                    appState.backgroundImage.loadedImage = img;
+                    appState.backgroundImage.url = defaultBgUrl;
+                    appState.backgroundImage.prompt = GAME_CONFIG.DEFAULT_BG_PROMPT;
+                    harmonizeBackgroundAndRender(); updateStatus("Default background loaded.");
+                };
+                img.onerror = () => { console.error("Failed to load default background image."); updateStatus("Failed to load default background."); };
+                img.src = defaultBgUrl;
+            }
+        }
+
+        async function generateBackgroundFromPrompt(prompt) {
+            const loadingIndicator = document.getElementById('loading-indicator');
+            const loadingMessage = document.getElementById('loading-message');
+            const generateBtn = document.getElementById('generateBgBtn');
+
+            loadingMessage.textContent = 'Generating background...';
+            loadingIndicator.classList.remove('d-none'); loadingIndicator.classList.add('show');
+            generateBtn.disabled = true; updateStatus("Generating background image...");
+
+            try {
+                const response = await fetch('/api/generate-image-on-demand', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: prompt, aspectRatio: '16:9', style: 'hd' })
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    appState.backgroundImage.url = data.imageUrl; appState.backgroundImage.prompt = prompt;
+                    const img = new Image();
+                    img.onload = () => {
+                        appState.backgroundImage.loadedImage = img;
+                        harmonizeBackgroundAndRender(); updateStatus("New background generated."); addCurrentStateToHistory();
+                    };
+                    img.onerror = () => { console.error('Failed to load dynamic image:', data.imageUrl); updateStatus("Error: Failed to load generated image."); loadDefaultBackground(); };
+                    img.src = data.imageUrl;
+                } else {
+                    console.error('Image generation error:', data.error); updateStatus(`Error generating background: ${data.error || 'Unknown error'}`); loadDefaultBackground();
+                }
+            } catch (err) {
+                console.error('Network/fetch error:', err); updateStatus('Network error. Could not generate background.'); loadDefaultBackground();
+            } finally {
+                loadingIndicator.classList.remove('show'); loadingIndicator.classList.add('d-none'); generateBtn.disabled = false;
+            }
+        }
+        
+        function harmonizeBackgroundAndRender() {
+            let totalBrightness = 0, elementCount = 0;
+            appState.elements.forEach(el => {
+                if(el.opacity > 0.1) { // Only consider somewhat visible elements
+                    elementCount++;
+                    if(el.colorTint) totalBrightness += tinycolor(el.colorTint).getBrightness() / 255;
+                    else if(el.type === 'rock') totalBrightness += 0.4; // Assume rocks are darker
+                    else if(el.type === 'plant') totalBrightness += 0.5; // Plants mid-range
+                    else totalBrightness += 0.6; // Default other elements
+                }
+            });
+            const avgElementBrightness = elementCount > 0 ? totalBrightness / elementCount : 0.5;
+
+            if (avgElementBrightness < 0.35 && elementCount > 2) { appState.backgroundImage.filters.brightness = 1.15; appState.backgroundImage.filters.contrast = 1.1; }
+            else if (avgElementBrightness > 0.65 && elementCount > 2) { appState.backgroundImage.filters.brightness = 0.85; appState.backgroundImage.filters.contrast = 0.9; }
+            else { appState.backgroundImage.filters.brightness = 1; appState.backgroundImage.filters.contrast = 1; }
+            appState.backgroundImage.filters.blur = Math.min(elementCount / 15, 1.0); 
+        }
+
+        function drawBackgroundImage(ctx) {
+            if (appState.backgroundImage.loadedImage) {
+                ctx.save();
+                const f = appState.backgroundImage.filters;
+                ctx.filter = `brightness(${f.brightness}) saturate(${f.saturation}) contrast(${f.contrast}) sepia(${f.sepia}%) blur(${f.blur}px)`;
+                ctx.drawImage(appState.backgroundImage.loadedImage, 0, 0, ctx.canvas.width, ctx.canvas.height);
+                ctx.filter = 'none'; 
+                ctx.restore();
+            } else {
+                ctx.fillStyle = '#333333';
+                ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            }
+        }
+
+        function saveDesign() {
+            const design = {
+                elements: appState.elements.map(el => ({...el})), 
+                backgroundImage: { prompt: appState.backgroundImage.prompt, url: appState.backgroundImage.url, filters: {...appState.backgroundImage.filters} },
+                version: "1.0.1"
+            };
+            const jsonString = JSON.stringify(design, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = 'zen_garden_design.json';
+            document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+            updateStatus("Design saved.");
+        }
+
+        function loadDesign(file) {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const design = JSON.parse(e.target.result);
+                    appState.elements = design.elements.map(elData => {
+                        let el = new GardenElement(elData.type, elData.x, elData.y, elData.width, elData.height, elData.specificProps);
+                        Object.assign(el, elData); return el;
+                    });
+                    if (design.backgroundImage) {
+                        appState.backgroundImage.prompt = design.backgroundImage.prompt || GAME_CONFIG.DEFAULT_BG_PROMPT;
+                        appState.backgroundImage.url = design.backgroundImage.url || GAME_CONFIG.DEFAULT_BG_IMAGE_URL;
+                        appState.backgroundImage.filters = design.backgroundImage.filters || { brightness: 1, saturation: 1, contrast: 1, sepia: 0, blur: 0 };
+                        if (appState.backgroundImage.url) {
+                            const img = new Image();
+                            img.onload = () => { appState.backgroundImage.loadedImage = img; harmonizeBackgroundAndRender(); };
+                            img.onerror = () => { loadDefaultBackground(); }; img.src = appState.backgroundImage.url;
+                        } else loadDefaultBackground();
+                    } else loadDefaultBackground();
+                    selectElement(null); 
+                    appState.history = { undoStack: [], redoStack: [], maxStackSize: 50 }; 
+                    addCurrentStateToHistory(true); 
+                    updateStatus("Design loaded.");
+                } catch (err) { console.error("Error loading design:", err); updateStatus("Error: Could not load design."); }
+            };
+            reader.readAsText(file);
+        }
+
+        function exportPNG() {
+            const currentSelectedId = appState.selectedElementId; appState.selectedElementId = null; 
+            renderScene(0); // Force a single render without selection, deltaTime 0 is fine for static scene
+            const dataURL = appState.canvasElement.toDataURL('image/png');
+            const a = document.createElement('a'); a.href = dataURL; a.download = 'zen_garden.png';
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            appState.selectedElementId = currentSelectedId; 
+            updateStatus("Garden exported as PNG.");
+        }
+        
+        function cloneState() { return { elements: JSON.parse(JSON.stringify(appState.elements)), backgroundImage: JSON.parse(JSON.stringify(appState.backgroundImage)) }; }
+        function restoreState(stateToRestore) {
+            appState.elements = JSON.parse(JSON.stringify(stateToRestore.elements));
+            const oldBgUrl = appState.backgroundImage.url;
+            appState.backgroundImage = JSON.parse(JSON.stringify(stateToRestore.backgroundImage));
+            if (appState.backgroundImage.url && appState.backgroundImage.url !== oldBgUrl) {
+                const img = new Image();
+                img.onload = () => { appState.backgroundImage.loadedImage = img; harmonizeBackgroundAndRender(); };
+                img.onerror = () => { console.error("Error loading background image during state restore:", appState.backgroundImage.url); loadDefaultBackground(); };
+                img.src = appState.backgroundImage.url;
+            } else if (appState.backgroundImage.loadedImage) harmonizeBackgroundAndRender();
+            else loadDefaultBackground();
+            selectElement(null); 
+        }
+        function addCurrentStateToHistory(isInitial = false) {
+            if (!isInitial) appState.history.redoStack = [];
+            appState.history.undoStack.push(cloneState());
+            if (appState.history.undoStack.length > appState.history.maxStackSize) appState.history.undoStack.shift(); 
+            updateUndoRedoButtons();
+        }
+        function undo() {
+            if (appState.history.undoStack.length > 1) {
+                const currentState = appState.history.undoStack.pop(); appState.history.redoStack.push(currentState);
+                const prevState = appState.history.undoStack[appState.history.undoStack.length - 1];
+                restoreState(prevState); updateStatus("Undo performed.");
+            } else updateStatus("Nothing to undo.");
+            updateUndoRedoButtons();
+        }
+        function redo() {
+            if (appState.history.redoStack.length > 0) {
+                const nextState = appState.history.redoStack.pop(); appState.history.undoStack.push(nextState);
+                restoreState(nextState); updateStatus("Redo performed.");
+            } else updateStatus("Nothing to redo.");
+            updateUndoRedoButtons();
+        }
+        function updateUndoRedoButtons() {
+            document.getElementById('undoBtn').disabled = appState.history.undoStack.length <= 1;
+            document.getElementById('redoBtn').disabled = appState.history.redoStack.length === 0;
+        }
+        function toggleZenMode() {
+            appState.zenModeActive = !appState.zenModeActive;
+            document.body.classList.toggle('zen-mode', appState.zenModeActive);
+            setTimeout(resizeCanvasAndRender, 50); 
+            updateStatus(appState.zenModeActive ? "Zen Mode enabled." : "Zen Mode disabled.");
+        }
+        function updateStatus(message) { document.getElementById('status-message').textContent = message; }
+        
+        const tinycolor = (function() {
+            function inputToRGB(color) {
+                let rgb = { r: 0, g: 0, b: 0 }, a = 1, ok = false, format = false;
+                if (typeof color == "string") color = stringInputToObject(color);
+                if (typeof color == "object" && color !== null) {
+                    if (isValidCSSUnit(color.r) && isValidCSSUnit(color.g) && isValidCSSUnit(color.b)) {
+                        rgb = {r: bound01(color.r, 255) * 255, g: bound01(color.g, 255) * 255, b: bound01(color.b, 255) * 255};
+                        ok = true; format = String(color.r).substr(-1) === "%" ? "prgb" : "rgb";
+                    } else if (isValidCSSUnit(color.h) && isValidCSSUnit(color.s) && isValidCSSUnit(color.v)) {
+                        let s = convertToPercentage(color.s), v = convertToPercentage(color.v);
+                        rgb = hsvToRgb(color.h, s, v); ok = true; format = "hsv";
+                    }
+                    if (color.hasOwnProperty("a")) a = color.a;
+                }
+                a = boundAlpha(a);
+                return { ok: ok, format: color?.format || format, r: Math.min(255, Math.max(rgb.r, 0)), g: Math.min(255, Math.max(rgb.g, 0)), b: Math.min(255, Math.max(rgb.b, 0)), a: a };
+            }
+            function hsvToRgb(h, s, v) {
+                h = bound01(h, 360) * 6; s = bound01(s, 100); v = bound01(v, 100);
+                var i = Math.floor(h), f = h - i, p = v * (1 - s), q = v * (1 - f * s), t = v * (1 - (1 - f) * s), mod = i % 6;
+                return { r: [v, q, p, p, t, v][mod] * 255, g: [t, v, v, q, p, p][mod] * 255, b: [p, p, t, v, v, q][mod] * 255 };
+            }
+            function stringInputToObject(color) {
+                color = String(color).replace(/^\s+/, "").replace(/\s+$/, "").toLowerCase();
+                if (color == "transparent") return { r: 0, g: 0, b: 0, a: 0, format: "name" };
+                var match;
+                if ((match = matchers.rgb.exec(color))) return { r: match[1], g: match[2], b: match[3] };
+                if ((match = matchers.rgba.exec(color))) return { r: match[1], g: match[2], b: match[3], a: match[4] };
+                if ((match = matchers.hex8.exec(color))) return { r: parseIntFromHex(match[1]), g: parseIntFromHex(match[2]), b: parseIntFromHex(match[3]), a: convertHexToDecimal(match[4]), format: "hex8" };
+                if ((match = matchers.hex6.exec(color))) return { r: parseIntFromHex(match[1]), g: parseIntFromHex(match[2]), b: parseIntFromHex(match[3]), format: "hex" };
+                if ((match = matchers.hex4.exec(color))) return { r: parseIntFromHex(match[1] + match[1]), g: parseIntFromHex(match[2] + match[2]), b: parseIntFromHex(match[3] + match[3]), a: convertHexToDecimal(match[4] + match[4]), format: "hex8" };
+                if ((match = matchers.hex3.exec(color))) return { r: parseIntFromHex(match[1] + match[1]), g: parseIntFromHex(match[2] + match[2]), b: parseIntFromHex(match[3] + match[3]), format: "hex" };
+                return false;
+            }
+            function isValidCSSUnit(color) { return !!matchers.CSS_UNIT.exec(String(color)); }
+            function bound01(n, max) { if (isOnePointZero(n)) n = "100%"; var processPercent = isPercentage(n); n = Math.min(max, Math.max(0, parseFloat(n))); if (processPercent) n = parseInt(n * max, 10) / 100; if ((Math.abs(n - max) < 0.000001)) return 1; return (n % max) / parseFloat(max); }
+            function isOnePointZero(n) { return typeof n == "string" && n.indexOf(".") != -1 && parseFloat(n) === 1; }
+            function isPercentage(n) { return typeof n === "string" && n.indexOf("%") != -1; }
+            function boundAlpha(a) { a = parseFloat(a); if (isNaN(a) || a < 0 || a > 1) a = 1; return a; }
+            function parseIntFromHex(val) { return parseInt(val, 16); }
+            function convertToPercentage(n) { if (n <= 1) n = (n * 100) + "%"; return n; }
+            function convertHexToDecimal(h) { return (parseIntFromHex(h) / 255); }
+            var matchers = (function() { var CSS_INTEGER = "[-\\+]?\\d+%?", CSS_NUMBER = "[-\\+]?\\d*\\.\\d+%?", CSS_UNIT = "(?:" + CSS_NUMBER + ")|(?:" + CSS_INTEGER + ")", PERMISSIVE_MATCH3 = "[\\s|\\(]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")\\s*\\)?", PERMISSIVE_MATCH4 = "[\\s|\\(]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")\\s*\\)?"; return { CSS_UNIT: new RegExp(CSS_UNIT), rgb: new RegExp("rgb" + PERMISSIVE_MATCH3), rgba: new RegExp("rgba" + PERMISSIVE_MATCH4), hex3: /^#?([0-9a-fA-F]{1})([0-9a-fA-F]{1})([0-9a-fA-F]{1})$/, hex6: /^#?([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/, hex4: /^#?([0-9a-fA-F]{1})([0-9a-fA-F]{1})([0-9a-fA-F]{1})([0-9a-fA-F]{1})$/, hex8: /^#?([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/ }; })();
+            function TinyColor (color, opts) { color = (color) ? color : ""; opts = opts || { }; if (color instanceof TinyColor) return color; if (!(this instanceof TinyColor)) return new TinyColor(color, opts); var rgb = inputToRGB(color); this._originalInput = color; this._r = rgb.r; this._g = rgb.g; this._b = rgb.b; this._a = rgb.a; this._roundA = Math.round(100*this._a) / 100; this._format = opts.format || rgb.format; }
+            TinyColor.prototype = { constructor: TinyColor,
+                toString: function(format) { format = format || this._format; var r = Math.round(this._r), g = Math.round(this._g), b = Math.round(this._b); var needsAlpha = this._a < 1 && this._a >= 0; if (format === "hex" || format === "hex6") return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase(); if (format === "rgb") return needsAlpha ? "rgba("+r+","+g+","+b+","+this._roundA+")" : "rgb("+r+","+g+","+b+")"; return "rgba("+r+","+g+","+b+","+this._roundA+")"; },
+                getBrightness: function() { return (this._r * 299 + this._g * 587 + this._b * 114) / 1000; },
+                lighten: function(amount) { amount = (amount === 0) ? 0 : (amount || 10); var hsl = this.toHsl(); hsl.l += amount / 100; hsl.l = Math.min(1, Math.max(0, hsl.l)); return new TinyColor(hsl); },
+                toHsl: function() { var r = this._r / 255, g = this._g / 255, b = this._b / 255; var max = Math.max(r, g, b), min = Math.min(r, g, b); var h, s, l = (max + min) / 2; if(max == min) h = s = 0; else { var d = max - min; s = l > 0.5 ? d / (2 - max - min) : d / (max + min); switch(max) { case r: h = (g - b) / d + (g < b ? 6 : 0); break; case g: h = (b - r) / d + 2; break; case b: h = (r - g) / d + 4; break; } h /= 6; } return { h: h * 360, s: s, l: l, a: this._a }; }
+            }; return TinyColor;
+        })();
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>
