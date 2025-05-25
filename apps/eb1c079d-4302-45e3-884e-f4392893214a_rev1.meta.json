@@ -1,0 +1,31 @@
+{
+  "projectId": "eb1c079d-4302-45e3-884e-f4392893214a",
+  "revisionString": "1",
+  "projectNameDisplay": "Fart",
+  "userPromptForThisRevision": "Make me a website of a memecoin for a fart cause my girlfriend is always farting, so let's monetize it, and make a tokenomics",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-05-25T13:09:21.990Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/dalle_aad0fe81-396.png",
+      "url": "/generated_images/dalle_aad0fe81-396.png",
+      "description": "A funny, cartoon-style logo for 'Flatulence Token ($FLAT)'. It should feature a stylized, friendly cartoon 'poof' cloud, possibly light greenish-brown or yellowish, with simple, cheerful eyes. The cloud should look like a soft emission, not angular or aggressive. Avoid any resemblance to actual feces. The text '$FLAT' could be incorporated subtly within or below the cloud in a playful, rounded font. Style: Clean lines, vibrant but not jarring colors suitable for a dark theme accent.",
+      "purpose": "Main logo for the memecoin, to be used in navbar, hero section, and potentially as a favicon.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_6de6d3f5-c35.png",
+      "url": "/generated_images/dalle_6de6d3f5-c35.png",
+      "description": "A humorous, SFW cartoon illustration for the 'About Us' section. Depict a scene where a surprised-looking cartoon character (gender-neutral, simple design) is holding a flower, and instead of pollen, a colorful, whimsical 'poof' cloud (similar to the logo style) is gently emerging from the flower. The character has a comical 'aha!' expression. Background should be simple, not distracting. Colors should be cheerful and fit the overall cartoon aesthetic.",
+      "purpose": "Illustrative image for the 'About Us' section to enhance the humorous narrative.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_48c8e1e6-014.png",
+      "url": "/generated_images/dalle_48c8e1e6-014.png",
+      "description": "An abstract, energetic background image for the hero section. Theme: 'gaseous energy' or 'wind currents'. Feature swirling patterns in dark blues, deep purples, and teals, with dynamic streaks of a contrasting color like a vibrant green or electric yellow. The overall mood should be exciting and slightly mysterious, fitting a dark theme. It should be abstract, avoiding literal depictions. Subtle particle effects or light trails are welcome. No text.",
+      "purpose": "Background for the hero section to make it visually engaging and fit the theme.",
+      "isNewlyGenerated": true
+    }
+  ]
+}
