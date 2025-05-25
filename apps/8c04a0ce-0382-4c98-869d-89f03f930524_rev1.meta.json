@@ -1,0 +1,72 @@
+{
+  "projectId": "8c04a0ce-0382-4c98-869d-89f03f930524",
+  "revisionString": "1",
+  "projectNameDisplay": "copter game",
+  "userPromptForThisRevision": "create classic helicopter game like the image attached ",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-05-25T13:05:15.419Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/user_uploaded_images/fba925f0-e05b-4e04-b9b1-4818d10bbce0.png",
+      "url": "/user_uploaded_images/fba925f0-e05b-4e04-b9b1-4818d10bbce0.png",
+      "description": "User uploaded image: copter.png",
+      "purpose": "User uploaded asset"
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_085399fc-d36.png",
+      "url": "/generated_images/dalle_085399fc-d36.png",
+      "description": "Pixel art style cavern wall segment, dark jagged rock texture (colors: dark greys, deep blues, hints of dark purple), designed to be tiled vertically. This will form the top obstacles (ceiling). Width should be fixed (e.g., 80px), height can vary (e.g., 100-300px for source material, to be clipped/tiled in game). Ensure the top edge looks like a ceiling. Dark theme.",
+      "purpose": "Top obstacle sprite (cavern ceiling segment)",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_0a4d9760-b22.png",
+      "url": "/generated_images/dalle_0a4d9760-b22.png",
+      "description": "Pixel art style cavern wall segment, dark jagged rock texture (colors: dark greys, deep blues, hints of dark purple), designed to be tiled vertically. This will form the bottom obstacles (floor). Width should be fixed (e.g., 80px), height can vary (e.g., 100-300px for source material, to be clipped/tiled in game). Ensure the bottom edge looks like a floor. Dark theme.",
+      "purpose": "Bottom obstacle sprite (cavern floor segment)",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_a32efb28-ed3.png",
+      "url": "/generated_images/dalle_a32efb28-ed3.png",
+      "description": "Parallax background layer 1 (Farthest): Very dark silhouette of distant, jagged mountain peaks against a deep indigo/purple night sky with a sparse scattering of tiny, faint pixel stars. Minimal detail. Pixel art style. Wide format for scrolling.",
+      "purpose": "Farthest parallax background layer (distant mountains/sky)",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_118e23f9-f95.png",
+      "url": "/generated_images/dalle_118e23f9-f95.png",
+      "description": "Parallax background layer 2 (Mid-ground): Darker silhouette of closer, craggy rock formations or stylized dead trees, more defined than layer 1 but still quite dark. Colors: very dark greys, deep blues. Pixel art style. Wide format for scrolling.",
+      "purpose": "Middle parallax background layer (closer rock formations)",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_c621d7db-375.png",
+      "url": "/generated_images/dalle_c621d7db-375.png",
+      "description": "Explosion sprite sheet: A pixel art animation of a fiery orange-red-yellow explosion, suitable for a small helicopter crashing. Sequence of 5-8 frames horizontally. Each frame roughly 48x48 to 64x64 pixels. Transparent background for each frame.",
+      "purpose": "Player helicopter crash explosion animation",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_3ee4e682-fbd.png",
+      "url": "/generated_images/dalle_3ee4e682-fbd.png",
+      "description": "Pixel art icon: A clean, stylized 'Play' symbol (triangle pointing right). Color: light grey or off-white. Transparent background. Suitable for a button on a dark theme. Size around 24x24 pixels.",
+      "purpose": "Icon for 'Start Game' button",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_26c1c384-9ff.png",
+      "url": "/generated_images/dalle_26c1c384-9ff.png",
+      "description": "Pixel art icon: A clean, stylized 'Information' symbol (lowercase 'i' in a circle, or a question mark). Color: light grey or off-white. Transparent background. Suitable for a button on a dark theme. Size around 24x24 pixels.",
+      "purpose": "Icon for 'Instructions' button",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_24a8caf7-86f.png",
+      "url": "/generated_images/dalle_24a8caf7-86f.png",
+      "description": "Pixel art icon: A clean, stylized 'Restart' or 'Replay' symbol (e.g., a circular arrow). Color: light grey or off-white. Transparent background. Suitable for a button on a dark theme. Size around 24x24 pixels.",
+      "purpose": "Icon for 'Restart Game' button",
+      "isNewlyGenerated": true
+    }
+  ]
+}
