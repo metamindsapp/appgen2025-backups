@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Serpent</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐍</text></svg>">
+    <style>
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        #game-container {
+            background: linear-gradient(to bottom, #1a1a2e, #16213e);
+        }
+
+        #game-title {
+            color: #7fdbff;
+            text-shadow: 0 0 10px #7fdbff, 0 0 20px #7fdbff;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        #main-menu-screen .card {
+            background-color: rgba(40, 40, 60, 0.85);
+            border: 1px solid #4f5b62;
+            border-radius: 15px;
+        }
+
+        #game-ui-bar {
+            color: #f0f0f0;
+            font-size: 1.1rem;
+            background-color: rgba(0,0,0,0.3);
+            padding: 8px 15px;
+            border-radius: 8px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        #canvas-wrapper {
+            position: relative; 
+            background-color: #000;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            border-radius: 5px;
+        }
+
+        #gameCanvas {
+            display: block;
+            background-color: #050505;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -webkit-crisp-edges;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            border-radius: 4px;
+        }
+
+        .modal-content {
+            background-color: #212529;
+            border: 1px solid #4f5b62;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        .modal-header, .modal-footer {
+            border-color: #495057;
+        }
+
+        .btn-primary { background-color: #0d6efd; border-color: #0d6efd; }
+        .btn-primary:hover { background-color: #0b5ed7; border-color: #0a58ca; }
+        .btn-info { background-color: #0dcaf0; border-color: #0dcaf0; }
+        .btn-info:hover { background-color: #0aadd0; border-color: #09a1c2; }
+        .btn-warning { background-color: #ffc107; border-color: #ffc107; color: #000; }
+        .btn-warning:hover { background-color: #ffca2c; border-color: #ffc720; color: #000;}
+        .btn-success { background-color: #198754; border-color: #198754; }
+        .btn-success:hover { background-color: #157347; border-color: #146c43; }
+        .btn-secondary { background-color: #6c757d; border-color: #6c757d; }
+        .btn-secondary:hover { background-color: #5c636a; border-color: #565e64; }
+        .btn-outline-light { color: #f8f9fa; border-color: #f8f9fa; }
+        .btn-outline-light:hover { color: #000; background-color: #f8f9fa; border-color: #f8f9fa; }
+
+        .btn:focus-visible {
+            box-shadow: 0 0 0 0.25rem rgba(130, 138, 145, 0.5);
+        }
+        .btn-primary:focus-visible { box-shadow: 0 0 0 .25rem rgba(49,132,253,.5); }
+        .btn-info:focus-visible { box-shadow: 0 0 0 .25rem rgba(58,176,195,.5); }
+        .btn-warning:focus-visible { box-shadow: 0 0 0 .25rem rgba(217,164,6,.5); }
+        .btn-success:focus-visible { box-shadow: 0 0 0 .25rem rgba(72,180,97,.5); }
+        .btn-secondary:focus-visible { box-shadow: 0 0 0 .25rem rgba(130,138,145,.5); }
+
+    </style>
+</head>
+<body class="bg-dark text-light">
+
+    <div id="game-container" class="container-fluid d-flex flex-column justify-content-center align-items-center min-vh-100 p-0">
+        <header id="game-header" class="text-center my-3 my-md-4">
+            <h1 id="game-title" class="display-3 fw-bold">Pixel Serpent</h1>
+        </header>
+
+        <main id="game-main-content" class="flex-grow-1 d-flex flex-column justify-content-center align-items-center w-100">
+            <div id="main-menu-screen" class="text-center">
+                <div class="card bg-secondary text-white p-4 shadow-lg" style="min-width: 300px;">
+                    <div class="card-body">
+                        <h2 class="card-title mb-4">Welcome!</h2>
+                        <p class="lead">High Score: <span id="high-score-menu" class="fw-bold">0</span></p>
+                        <button id="start-game-btn" class="btn btn-primary btn-lg w-100 mb-2">Start Game</button>
+                        <button id="instructions-btn" class="btn btn-info btn-lg w-100 mb-2" data-bs-toggle="modal" data-bs-target="#instructionsModal">Instructions</button>
+                        <button id="difficulty-btn" class="btn btn-warning btn-lg w-100">Difficulty: Normal</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="game-area" class="d-none flex-column align-items-center">
+                <div id="game-ui-bar" class="d-flex justify-content-between align-items-center w-100 mb-2 px-1">
+                    <span>Score: <span id="current-score" class="fw-bold">0</span></span>
+                    <button id="pause-resume-btn" class="btn btn-sm btn-outline-light">Pause</button>
+                    <span>High Score: <span id="high-score-game" class="fw-bold">0</span></span>
+                </div>
+                <div id="canvas-wrapper">
+                    <canvas id="gameCanvas"></canvas>
+                </div>
+            </div>
+        </main>
+
+        <footer class="text-center text-muted py-3">
+            <small>Pixel Serpent &copy; 2025</small>
+        </footer>
+    </div>
+
+    <div class="modal fade" id="instructionsModal" tabindex="-1" aria-labelledby="instructionsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="instructionsModalLabel">How to Play</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Control the serpent using the <strong>Arrow Keys</strong> (↑, ↓, ←, →).</p>
+                    <p>Eat the <span class="text-danger fw-bold">Red Apples</span> to grow longer and score points.</p>
+                    <p>Watch out for the rare <span class="text-warning fw-bold">Golden Apples</span> for bonus points!</p>
+                    <p>Avoid hitting the walls or the serpent's own body.</p>
+                    <p>Press <strong>'P'</strong> to Pause/Resume the game.</p>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got it!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="gameOverModal" tabindex="-1" aria-labelledby="gameOverModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="gameOverModalLabel">Game Over!</h5>
+                </div>
+                <div class="modal-body text-center">
+                    <p class="fs-4">Final Score: <span id="final-score" class="fw-bold">0</span></p>
+                    <p id="new-high-score-message" class="text-success fw-bold d-none">New High Score!</p>
+                    <p>Current High Score: <span id="final-high-score" class="fw-bold">0</span></p>
+                </div>
+                <div class="modal-footer border-secondary justify-content-center">
+                    <button id="play-again-btn" type="button" class="btn btn-success btn-lg mx-2">Play Again</button>
+                    <button id="main-menu-btn-gameover" type="button" class="btn btn-secondary btn-lg mx-2">Main Menu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="pauseModal" tabindex="-1" aria-labelledby="pauseModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="pauseModalLabel">Paused</h5>
+                </div>
+                <div class="modal-body text-center">
+                    <p class="fs-4">Game is Paused</p>
+                </div>
+                <div class="modal-footer border-secondary justify-content-center">
+                    <button id="resume-game-btn" type="button" class="btn btn-primary btn-lg mx-2">Resume</button>
+                    <button id="main-menu-btn-pause" type="button" class="btn btn-secondary btn-lg mx-2">Main Menu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    (function() {
+        let canvas, ctx;
+        let mainMenuScreen, gameAreaScreen;
+        let startGameBtn, instructionsBtn, difficultyBtn, pauseResumeBtn, playAgainBtn, mainMenuBtnGameOver, mainMenuBtnPause, resumeGameBtn;
+        let highScoreMenuEl, currentScoreEl, highScoreGameEl, finalScoreEl, finalHighScoreEl, newHighScoreMessageEl;
+        let instructionsModalInstance, gameOverModalInstance, pauseModalInstance;
+
+        const ASSET_PATHS = {
+            background: "/generated_images/dalle_0f4cd088-96e.png",
+            snakeHead: "/generated_images/dalle_2e163a83-fe3.png",
+            food: "/generated_images/dalle_4e896855-bf1.png",
+            specialFood: "/generated_images/dalle_5b1e3941-778.png"
+        };
+        const images = {};
+        let assetsLoaded = 0;
+        const totalAssets = Object.keys(ASSET_PATHS).length;
+        
+        const sounds = {};
+
+        const GAME_CONFIG = {
+            NATIVE_WIDTH: 800,
+            NATIVE_HEIGHT: 600,
+            GRID_SIZE: 20,
+            INITIAL_SNAKE_LENGTH: 3,
+            SPECIAL_FOOD_CHANCE: 0.15,
+            SPECIAL_FOOD_SCORE: 5,
+            SPECIAL_FOOD_LIFETIME_TICKS: 200,
+            SCORE_INCREMENT_SPEED_THRESHOLD: 5,
+        };
+        const DIFFICULTIES = [
+            { name: "Easy", speed: 150 },
+            { name: "Normal", speed: 100 },
+            { name: "Hard", speed: 70 }
+        ];
+        let currentDifficultyIndex = 1;
+
+        let snake, food, specialFoodActive, direction, newDirection;
+        let score, highScore, gameLoopId, isPaused, isGameOver, currentSpeed;
+        let lastTickTime = 0;
+        let gameInitialized = false;
+
+        function loadImage(key, src) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    images[key] = img;
+                    assetsLoaded++;
+                    resolve(true);
+                };
+                img.onerror = () => {
+                    console.error(`Failed to load image ${key} from ${src}`);
+                    images[key] = null;
+                    assetsLoaded++;
+                    resolve(false);
+                };
+                img.src = src;
+            });
+        }
+
+        async function preloadAssets() {
+            const promises = Object.entries(ASSET_PATHS).map(([key, src]) => loadImage(key, src));
+            await Promise.all(promises);
+            if (assetsLoaded === totalAssets && Object.values(images).every(img => img !== null)) {
+                 console.log("All game assets loaded successfully.");
+            } else if (assetsLoaded === totalAssets) {
+                 console.warn("One or more game assets failed to load. Using fallbacks where possible.");
+            }
+        }
+        
+        function initSounds() {
+            try {
+                if (typeof Howl === 'undefined') {
+                    console.warn("Howler.js not loaded. Sounds will be disabled.");
+                    throw new Error("Howler not defined");
+                }
+                sounds.eat = new Howl({ src: ['/sounds/eat_placeholder.wav'], volume: 0.6 });
+                sounds.specialEat = new Howl({ src: ['/sounds/special_eat_placeholder.wav'], volume: 0.7 });
+                sounds.gameOver = new Howl({ src: ['/sounds/game_over_placeholder.wav'], volume: 0.5 });
+                sounds.click = new Howl({ src: ['/sounds/click_placeholder.wav'], volume: 0.8 });
+            } catch (e) {
+                console.error("Howler.js sound initialization failed. Sounds will be disabled.", e.message);
+                const dummySound = { play: () => {}, load: () => {}, state: () => 'unloaded' };
+                sounds.eat = dummySound;
+                sounds.specialEat = dummySound;
+                sounds.gameOver = dummySound;
+                sounds.click = dummySound;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+            mainMenuScreen = document.getElementById('main-menu-screen');
+            gameAreaScreen = document.getElementById('game-area');
+            
+            startGameBtn = document.getElementById('start-game-btn');
+            instructionsBtn = document.getElementById('instructions-btn');
+            difficultyBtn = document.getElementById('difficulty-btn');
+            pauseResumeBtn = document.getElementById('pause-resume-btn');
+            playAgainBtn = document.getElementById('play-again-btn');
+            mainMenuBtnGameOver = document.getElementById('main-menu-btn-gameover');
+            mainMenuBtnPause = document.getElementById('main-menu-btn-pause');
+            resumeGameBtn = document.getElementById('resume-game-btn');
+
+            highScoreMenuEl = document.getElementById('high-score-menu');
+            currentScoreEl = document.getElementById('current-score');
+            highScoreGameEl = document.getElementById('high-score-game');
+            finalScoreEl = document.getElementById('final-score');
+            finalHighScoreEl = document.getElementById('final-high-score');
+            newHighScoreMessageEl = document.getElementById('new-high-score-message');
+            
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                instructionsModalInstance = new bootstrap.Modal(document.getElementById('instructionsModal'));
+                gameOverModalInstance = new bootstrap.Modal(document.getElementById('gameOverModal'));
+                pauseModalInstance = new bootstrap.Modal(document.getElementById('pauseModal'));
+            } else {
+                console.error("Bootstrap JavaScript or Modal component not loaded. Modals will not work.");
+            }
+
+            await preloadAssets();
+            initSounds();
+
+            loadHighScore();
+            loadDifficulty();
+            updateDifficultyButton();
+
+            setupEventListeners();
+
+            canvas.width = GAME_CONFIG.NATIVE_WIDTH;
+            canvas.height = GAME_CONFIG.NATIVE_HEIGHT;
+            ctx.imageSmoothingEnabled = false;
+            window.addEventListener('resize', resizeGameCanvasMaintainAspectRatio);
+            resizeGameCanvasMaintainAspectRatio();
+
+            showScreen(mainMenuScreen);
+            gameInitialized = true;
+        });
+
+        function setupEventListeners() {
+            startGameBtn.addEventListener('click', () => { sounds.click?.play(); transitionToGame(); });
+            playAgainBtn.addEventListener('click', () => { sounds.click?.play(); gameOverModalInstance?.hide(); transitionToGame(); });
+            
+            mainMenuBtnGameOver.addEventListener('click', () => { sounds.click?.play(); gameOverModalInstance?.hide(); showMainMenu(); });
+            mainMenuBtnPause.addEventListener('click', () => { sounds.click?.play(); pauseModalInstance?.hide(); cancelAnimationFrame(gameLoopId); gameLoopId = null; showMainMenu(); });
+            resumeGameBtn.addEventListener('click', () => { sounds.click?.play(); togglePause(); });
+
+            pauseResumeBtn.addEventListener('click', () => { sounds.click?.play(); togglePause(); });
+            difficultyBtn.addEventListener('click', () => { sounds.click?.play(); cycleDifficulty(); });
+            
+            document.addEventListener('keydown', handleKeyPress);
+        }
+
+        function loadHighScore() {
+            try {
+                const storedHighScore = localStorage.getItem('pixelSerpentHighScore');
+                highScore = storedHighScore ? parseInt(storedHighScore, 10) : 0;
+                if (isNaN(highScore)) highScore = 0;
+            } catch (e) {
+                console.error("Failed to load high score from localStorage:", e);
+                highScore = 0;
+            }
+            updateHighScoreDisplay();
+        }
+
+        function saveHighScore() {
+            try {
+                localStorage.setItem('pixelSerpentHighScore', highScore.toString());
+            } catch (e) {
+                console.error("Failed to save high score to localStorage:", e);
+            }
+        }
+        
+        function updateHighScoreDisplay() {
+            if(highScoreMenuEl) highScoreMenuEl.textContent = highScore;
+            if(highScoreGameEl) highScoreGameEl.textContent = highScore;
+            if(finalHighScoreEl) finalHighScoreEl.textContent = highScore;
+        }
+
+        function loadDifficulty() {
+            try {
+                const storedDifficulty = localStorage.getItem('pixelSerpentDifficulty');
+                if (storedDifficulty !== null) {
+                    const parsedDifficulty = parseInt(storedDifficulty, 10);
+                    if (!isNaN(parsedDifficulty) && parsedDifficulty >= 0 && parsedDifficulty < DIFFICULTIES.length) {
+                        currentDifficultyIndex = parsedDifficulty;
+                    } else {
+                         currentDifficultyIndex = 1;
+                    }
+                } else {
+                    currentDifficultyIndex = 1;
+                }
+            } catch(e) {
+                console.error("Failed to load difficulty from localStorage:", e);
+                currentDifficultyIndex = 1;
+            }
+            currentSpeed = DIFFICULTIES[currentDifficultyIndex].speed;
+        }
+
+        function saveDifficulty() {
+             try {
+                localStorage.setItem('pixelSerpentDifficulty', currentDifficultyIndex.toString());
+            } catch(e) {
+                console.error("Failed to save difficulty to localStorage:", e);
+            }
+        }
+
+        function updateDifficultyButton() {
+            if(difficultyBtn) difficultyBtn.textContent = `Difficulty: ${DIFFICULTIES[currentDifficultyIndex].name}`;
+        }
+
+        function cycleDifficulty() {
+            currentDifficultyIndex = (currentDifficultyIndex + 1) % DIFFICULTIES.length;
+            currentSpeed = DIFFICULTIES[currentDifficultyIndex].speed;
+            updateDifficultyButton();
+            saveDifficulty();
+        }
+
+        function showScreen(screenToShowElement) {
+            mainMenuScreen.classList.add('d-none');
+            gameAreaScreen.classList.add('d-none');
+            
+            screenToShowElement.classList.remove('d-none');
+        }
+
+        function showMainMenu() {
+            isGameOver = true; 
+            if (gameLoopId) {
+                cancelAnimationFrame(gameLoopId);
+                gameLoopId = null;
+            }
+            showScreen(mainMenuScreen);
+            updateHighScoreDisplay();
+        }
+        
+        function transitionToGame() {
+            showScreen(gameAreaScreen);
+            resetGame();
+            isPaused = false;
+            isGameOver = false;
+            if(pauseResumeBtn) pauseResumeBtn.textContent = "Pause";
+            lastTickTime = performance.now();
+            if (gameLoopId) {
+                cancelAnimationFrame(gameLoopId);
+            }
+            gameLoopId = requestAnimationFrame(gameLoop);
+        }
+
+        function resetGame() {
+            score = 0;
+            if(currentScoreEl) currentScoreEl.textContent = score;
+            currentSpeed = DIFFICULTIES[currentDifficultyIndex].speed;
+
+            const numCols = GAME_CONFIG.NATIVE_WIDTH / GAME_CONFIG.GRID_SIZE;
+            const numRows = GAME_CONFIG.NATIVE_HEIGHT / GAME_CONFIG.GRID_SIZE;
+            const startX = Math.floor(numCols / 2);
+            const startY = Math.floor(numRows / 2);
+            
+            snake = [];
+            for (let i = 0; i < GAME_CONFIG.INITIAL_SNAKE_LENGTH; i++) {
+                snake.unshift({ x: startX - i, y: startY });
+            }
+            direction = { x: 1, y: 0 };
+            newDirection = { x: 1, y: 0 };
+
+            food = null; 
+            specialFoodActive = null;
+            spawnFood(); 
+        }
+
+        function spawnFood() {
+            let foodX, foodY;
+            let attempts = 0;
+            const numCols = GAME_CONFIG.NATIVE_WIDTH / GAME_CONFIG.GRID_SIZE;
+            const numRows = GAME_CONFIG.NATIVE_HEIGHT / GAME_CONFIG.GRID_SIZE;
+            const maxAttempts = numCols * numRows;
+
+            if (snake.length >= maxAttempts) {
+                 triggerGameOver(); 
+                 return;
+            }
+
+            do {
+                foodX = Math.floor(Math.random() * numCols);
+                foodY = Math.floor(Math.random() * numRows);
+                attempts++;
+            } while (isOccupied(foodX, foodY) && attempts < maxAttempts);
+
+            if (attempts < maxAttempts) {
+                if (Math.random() < GAME_CONFIG.SPECIAL_FOOD_CHANCE && !specialFoodActive) {
+                    specialFoodActive = { x: foodX, y: foodY, life: GAME_CONFIG.SPECIAL_FOOD_LIFETIME_TICKS };
+                    food = null; 
+                } else {
+                    food = { x: foodX, y: foodY };
+                    specialFoodActive = null; 
+                }
+            } else {
+                 console.warn("Could not find empty spot for food. The game board may be full.");
+            }
+        }
+
+        function isOccupied(x, y) {
+            if (snake.some(segment => segment.x === x && segment.y === y)) return true;
+            if (food && food.x === x && food.y === y) return true;
+            if (specialFoodActive && specialFoodActive.x === x && specialFoodActive.y === y) return true;
+            return false;
+        }
+
+        function handleKeyPress(event) {
+            if (!gameInitialized || isGameOver) return;
+            if (isPaused && event.key.toLowerCase() !== 'p') return;
+
+            switch (event.key) {
+                case 'ArrowUp':    if (direction.y === 0) newDirection = { x: 0, y: -1 }; break;
+                case 'ArrowDown':  if (direction.y === 0) newDirection = { x: 0, y:  1 }; break;
+                case 'ArrowLeft':  if (direction.x === 0) newDirection = { x: -1, y: 0 }; break;
+                case 'ArrowRight': if (direction.x === 0) newDirection = { x:  1, y: 0 }; break;
+                case 'p': case 'P': togglePause(); break;
+            }
+        }
+        
+        function togglePause() {
+            if (isGameOver) return;
+            isPaused = !isPaused;
+            if (isPaused) {
+                if(pauseResumeBtn) pauseResumeBtn.textContent = "Resume";
+                pauseModalInstance?.show();
+            } else {
+                if(pauseResumeBtn) pauseResumeBtn.textContent = "Pause";
+                pauseModalInstance?.hide();
+                lastTickTime = performance.now(); 
+            }
+        }
+
+        function updateGame() {
+            if (isPaused || isGameOver) return;
+
+            direction = newDirection;
+
+            const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+            const numCols = GAME_CONFIG.NATIVE_WIDTH / GAME_CONFIG.GRID_SIZE;
+            const numRows = GAME_CONFIG.NATIVE_HEIGHT / GAME_CONFIG.GRID_SIZE;
+
+            if (head.x < 0 || head.x >= numCols || head.y < 0 || head.y >= numRows) {
+                triggerGameOver();
+                return;
+            }
+
+            for (let i = 1; i < snake.length; i++) {
+                if (head.x === snake[i].x && head.y === snake[i].y) {
+                    triggerGameOver();
+                    return;
+                }
+            }
+
+            snake.unshift(head);
+
+            let ateFoodThisTick = false;
+            if (food && head.x === food.x && head.y === food.y) {
+                sounds.eat?.play();
+                score++;
+                ateFoodThisTick = true;
+                food = null;
+                spawnFood();
+            } 
+            else if (specialFoodActive && head.x === specialFoodActive.x && head.y === specialFoodActive.y) {
+                sounds.specialEat?.play();
+                score += GAME_CONFIG.SPECIAL_FOOD_SCORE;
+                ateFoodThisTick = true;
+                specialFoodActive = null;
+                spawnFood();
+            }
+
+            if (!ateFoodThisTick) {
+                snake.pop();
+            }
+            
+            if(currentScoreEl) currentScoreEl.textContent = score;
+
+            if (specialFoodActive) {
+                specialFoodActive.life--;
+                if (specialFoodActive.life <= 0) {
+                    specialFoodActive = null;
+                    if (!food) spawnFood();
+                }
+            } else if (!food && snake.length < numCols * numRows) {
+                 spawnFood();
+            }
+            
+            if (score > 0 && score % GAME_CONFIG.SCORE_INCREMENT_SPEED_THRESHOLD === 0 && ateFoodThisTick) {
+                const baseSpeedForCurrentDifficulty = DIFFICULTIES[currentDifficultyIndex].speed;
+                currentSpeed = Math.max(30, currentSpeed - (baseSpeedForCurrentDifficulty * 0.05)); 
+            }
+        }
+
+        function triggerGameOver() {
+            sounds.gameOver?.play();
+            isGameOver = true;
+            if (gameLoopId) {
+                cancelAnimationFrame(gameLoopId);
+                gameLoopId = null;
+            }
+
+            if(newHighScoreMessageEl) newHighScoreMessageEl.classList.add('d-none');
+            if (score > highScore) {
+                highScore = score;
+                saveHighScore();
+                updateHighScoreDisplay();
+                if(newHighScoreMessageEl) newHighScoreMessageEl.classList.remove('d-none');
+            }
+            if(finalScoreEl) finalScoreEl.textContent = score;
+            gameOverModalInstance?.show();
+        }
+
+        function renderGame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (images.background) {
+                ctx.drawImage(images.background, 0, 0, canvas.width, canvas.height);
+            } else {
+                ctx.fillStyle = '#050505';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+            
+            if (food) {
+                if (images.food) {
+                    ctx.drawImage(images.food, food.x * GAME_CONFIG.GRID_SIZE, food.y * GAME_CONFIG.GRID_SIZE, GAME_CONFIG.GRID_SIZE, GAME_CONFIG.GRID_SIZE);
+                } else {
+                    ctx.fillStyle = 'red';
+                    ctx.fillRect(food.x * GAME_CONFIG.GRID_SIZE, food.y * GAME_CONFIG.GRID_SIZE, GAME_CONFIG.GRID_SIZE, GAME_CONFIG.GRID_SIZE);
+                    ctx.strokeStyle = 'darkred';
+                    ctx.strokeRect(food.x * GAME_CONFIG.GRID_SIZE, food.y * GAME_CONFIG.GRID_SIZE, GAME_CONFIG.GRID_SIZE, GAME_CONFIG.GRID_SIZE);
+                }
+            }
+            
+            if (specialFoodActive) {
+                 if (images.specialFood) {
+                    const pulse = Math.abs(Math.sin(performance.now() / 150)) * 0.25 + 0.75; 
+                    const size = GAME_CONFIG.GRID_SIZE * pulse;
+                    const offset = (GAME_CONFIG.GRID_SIZE - size) / 2;
+                    ctx.globalAlpha = 0.8 + Math.abs(Math.sin(performance.now() / 150)) * 0.2;
+                    ctx.drawImage(images.specialFood, 
+                        specialFoodActive.x * GAME_CONFIG.GRID_SIZE + offset, 
+                        specialFoodActive.y * GAME_CONFIG.GRID_SIZE + offset, 
+                        size, size);
+                    ctx.globalAlpha = 1.0;
+                } else {
+                    ctx.fillStyle = 'gold';
+                    ctx.fillRect(specialFoodActive.x * GAME_CONFIG.GRID_SIZE, specialFoodActive.y * GAME_CONFIG.GRID_SIZE, GAME_CONFIG.GRID_SIZE, GAME_CONFIG.GRID_SIZE);
+                    ctx.strokeStyle = 'goldenrod';
+                    ctx.strokeRect(specialFoodActive.x * GAME_CONFIG.GRID_SIZE, specialFoodActive.y * GAME_CONFIG.GRID_SIZE, GAME_CONFIG.GRID_SIZE, GAME_CONFIG.GRID_SIZE);
+                }
+            }
+
+            snake.forEach((segment, index) => {
+                if (index === 0 && images.snakeHead) {
+                    ctx.save();
+                    ctx.translate(segment.x * GAME_CONFIG.GRID_SIZE + GAME_CONFIG.GRID_SIZE / 2, segment.y * GAME_CONFIG.GRID_SIZE + GAME_CONFIG.GRID_SIZE / 2);
+                    if (direction.x === -1) ctx.rotate(Math.PI);      
+                    else if (direction.y === -1) ctx.rotate(-Math.PI / 2); 
+                    else if (direction.y === 1) ctx.rotate(Math.PI / 2);  
+                    
+                    ctx.drawImage(images.snakeHead, -GAME_CONFIG.GRID_SIZE / 2, -GAME_CONFIG.GRID_SIZE / 2, GAME_CONFIG.GRID_SIZE, GAME_CONFIG.GRID_SIZE);
+                    ctx.restore();
+                } else {
+                    ctx.fillStyle = (index === 0) ? '#4CAF50' : (index % 2 === 0 ? '#388E3C' : '#2E7D32');
+                    ctx.fillRect(segment.x * GAME_CONFIG.GRID_SIZE, segment.y * GAME_CONFIG.GRID_SIZE, GAME_CONFIG.GRID_SIZE -1, GAME_CONFIG.GRID_SIZE -1);
+                }
+            });
+        }
+        
+        function gameLoop(timestamp) {
+            if (!gameInitialized || isGameOver) {
+                 if (gameLoopId) cancelAnimationFrame(gameLoopId);
+                 gameLoopId = null;
+                 return;
+            }
+            
+            gameLoopId = requestAnimationFrame(gameLoop);
+
+            if (isPaused) {
+                return;
+            }
+            
+            if (timestamp - lastTickTime >= currentSpeed) {
+                lastTickTime = timestamp - ((timestamp - lastTickTime) % currentSpeed);
+                updateGame();
+            }
+            
+            renderGame();
+        }
+
+        function resizeGameCanvasMaintainAspectRatio() {
+            if (!canvas || !document.getElementById('game-main-content') || !document.getElementById('game-ui-bar') || !document.getElementById('game-header') || !document.querySelector('footer')) return;
+            
+            const nativeAspectRatio = GAME_CONFIG.NATIVE_WIDTH / GAME_CONFIG.NATIVE_HEIGHT;
+            const mainContent = document.getElementById('game-main-content');
+            const uiBarEl = document.getElementById('game-ui-bar');
+            const headerEl = document.getElementById('game-header');
+            const footerEl = document.querySelector('footer');
+            
+            let availableWidth = mainContent.clientWidth > 0 ? mainContent.clientWidth - 20 : window.innerWidth - 20; 
+            let availableHeight = mainContent.clientHeight > 0 ? mainContent.clientHeight - (uiBarEl.classList.contains('d-none') ? 0 : uiBarEl.offsetHeight) - 20 : window.innerHeight - headerEl.offsetHeight - footerEl.offsetHeight - (uiBarEl.classList.contains('d-none') ? 0 : uiBarEl.offsetHeight) - 20;
+            
+            availableWidth = Math.max(50, availableWidth);
+            availableHeight = Math.max(50, availableHeight);
+
+            const windowAspectRatio = availableWidth / availableHeight;
+            let scaledWidth, scaledHeight;
+
+            if (windowAspectRatio > nativeAspectRatio) {
+                scaledHeight = availableHeight;
+                scaledWidth = scaledHeight * nativeAspectRatio;
+            } else {
+                scaledWidth = availableWidth;
+                scaledHeight = scaledWidth / nativeAspectRatio;
+            }
+
+            canvas.style.width = Math.floor(scaledWidth) + 'px';
+            canvas.style.height = Math.floor(scaledHeight) + 'px';
+
+            const canvasWrapper = document.getElementById('canvas-wrapper');
+            if (canvasWrapper) {
+              canvasWrapper.style.width = canvas.style.width;
+              canvasWrapper.style.height = canvas.style.height;
+            }
+            
+            if(uiBarEl) {
+                uiBarEl.style.maxWidth = Math.floor(scaledWidth) + 'px';
+            }
+        }
+
+    })();
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>
