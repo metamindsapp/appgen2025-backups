@@ -1,0 +1,115 @@
+{
+  "projectId": "9b62eeaa-c0ff-49fd-b0b1-ad513a80c38b",
+  "revisionString": "4",
+  "projectNameDisplay": "Beekeeping simulator",
+  "userPromptForThisRevision": "\r\n\r\nNeed to finish frame drawing, splitting, add buying packages or nucs (hive body doesn't come with a colony). need apiary level inspections and treatment and feeding options. not all data should be available realtime we need a reason to do inspections. \r\n\r\nthanks",
+  "basedOnRevisionString": "3",
+  "savedAt": "2025-05-27T03:56:05.984Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/dalle_9e83b2a9-3d9.png",
+      "url": "/generated_images/dalle_9e83b2a9-3d9.png",
+      "description": "A welcoming, slightly stylized, and optimistic illustration of a small, neat apiary with a few beehives in a sunny meadow or garden setting. Focus on a clean, inviting look. Light and airy. Subtle details like a few bees flying, flowers. No people.",
+      "purpose": "Thematic image for the guide's cover page or a general ambiance image.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_1b6fffb3-faa.png",
+      "url": "/generated_images/dalle_1b6fffb3-faa.png",
+      "description": "Simple, clean, flat design icon representing an apiary or a single beehive. Light theme friendly (e.g., dark lines on transparent or light background, or a primary color fill). Recognizable at small size (e.g., 20x20px).",
+      "purpose": "Icon for 'Apiary Overview' navigation link.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_4fbd6488-32b.png",
+      "url": "/generated_images/dalle_4fbd6488-32b.png",
+      "description": "Simple, clean, flat design icon representing a marketplace or a shop stall (e.g., a small bag of coins, a produce stand outline, or a shopping cart). Light theme friendly. Recognizable at small size.",
+      "purpose": "Icon for 'Market' navigation link.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_24279f93-1c0.png",
+      "url": "/generated_images/dalle_24279f93-1c0.png",
+      "description": "Simple, clean, flat design icon representing research or knowledge (e.g., an open book, a lightbulb, a magnifying glass). Light theme friendly. Recognizable at small size.",
+      "purpose": "Icon for 'Knowledge & Upgrades' navigation link.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_034e8bdf-261.png",
+      "url": "/generated_images/dalle_034e8bdf-261.png",
+      "description": "Simple, clean, flat design icon representing a guide or help document (e.g., a question mark in a circle, a book with a bookmark, an info 'i' symbol). Light theme friendly. Recognizable at small size.",
+      "purpose": "Icon for 'Beekeeper's Almanac' navigation link.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_3fcb1131-10c.png",
+      "url": "/generated_images/dalle_3fcb1131-10c.png",
+      "description": "Simple, clean, flat design icon representing settings (e.g., a gear or cog). Light theme friendly. Recognizable at small size.",
+      "purpose": "Icon for 'Settings' button.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_4d02bfd9-1a0.png",
+      "url": "/generated_images/dalle_4d02bfd9-1a0.png",
+      "description": "Clear, illustrative depiction of a Queen Bee, side view, highlighting its elongated abdomen. Style should be realistic but clean, suitable for an educational guide. White or light background.",
+      "purpose": "Image for the Beekeeper's Almanac, section on Bee Types/Queen Bee.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_0ae3380b-d92.png",
+      "url": "/generated_images/dalle_0ae3380b-d92.png",
+      "description": "Clear, illustrative depiction of a Worker Bee, side view. Style should be realistic but clean, suitable for an educational guide. White or light background.",
+      "purpose": "Image for the Beekeeper's Almanac, section on Bee Types/Worker Bee.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_1d178691-0dc.png",
+      "url": "/generated_images/dalle_1d178691-0dc.png",
+      "description": "Clear, illustrative depiction of a Drone Bee, side view, highlighting its larger eyes and blunt abdomen. Style should be realistic but clean, suitable for an educational guide. White or light background.",
+      "purpose": "Image for the Beekeeper's Almanac, section on Bee Types/Drone Bee.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_83639747-1d2.png",
+      "url": "/generated_images/dalle_83639747-1d2.png",
+      "description": "Close-up, clear illustration of a Varroa Mite on a bee pupa or adult bee. Style should be realistic enough for identification but clean, suitable for an educational guide on pests. White or light background.",
+      "purpose": "Image for the Beekeeper's Almanac, section on Pests/Varroa Mite.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_2a85bba6-439.png",
+      "url": "/generated_images/dalle_2a85bba6-439.png",
+      "description": "Illustration of a healthy brood comb section, showing capped brood, larvae in cells, and possibly some eggs. Colors should indicate health (e.g., pearly white larvae, uniformly capped cells). Clean, educational style. White or light background.",
+      "purpose": "Image for the Beekeeper's Almanac, section on Hive Inspection/Brood Assessment.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_04593238-fd5.png",
+      "url": "/generated_images/dalle_04593238-fd5.png",
+      "description": "Illustration of a comb section affected by American Foulbrood (AFB), showing sunken, perforated cappings, possibly ropey larvae if details allow. Colors should indicate disease (dark, discolored). Clean, educational style. White or light background.",
+      "purpose": "Image for the Beekeeper's Almanac, section on Diseases/American Foulbrood.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_eea9b54c-2a0.png",
+      "url": "/generated_images/dalle_eea9b54c-2a0.png",
+      "description": "Illustration of Chalkbrood mummies (white and black/grey) in cells of a comb. Clean, educational style, focusing on recognizability. White or light background.",
+      "purpose": "Image for the Beekeeper's Almanac, section on Diseases/Chalkbrood.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_82085711-4ff.png",
+      "url": "/generated_images/dalle_82085711-4ff.png",
+      "description": "Illustration of a Small Hive Beetle (SHB) adult, clear and recognizable. Clean, educational style. White or light background.",
+      "purpose": "Image for the Beekeeper's Almanac, section on Pests/Small Hive Beetle.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_6fdb66d6-83d.png",
+      "url": "/generated_images/dalle_6fdb66d6-83d.png",
+      "description": "Illustration of Wax Moth larvae and their webbing damage on a comb. Clean, educational style. White or light background.",
+      "purpose": "Image for the Beekeeper's Almanac, section on Pests/Wax Moth.",
+      "isNewlyGenerated": true
+    }
+  ]
+}

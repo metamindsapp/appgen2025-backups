@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MetaMind Insights: Your AI-Powered Research Assistant</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            transition: background-color 0.3s ease;
+        }
+
+        header.sticky-top {
+            z-index: 1030;
+        }
+        
+        #queryInput::placeholder {
+            color: var(--bs-secondary-color);
+            opacity: 0.7;
+        }
+
+        #summaryText {
+            white-space: pre-wrap;
+            font-size: 1.05rem;
+            line-height: 1.7;
+        }
+
+        .accordion-button:not(.collapsed) {
+            color: var(--bs-accordion-active-color);
+            background-color: var(--bs-accordion-active-bg);
+        }
+        .accordion-button:focus {
+            box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+        }
+        .accordion-item {
+            background-color: var(--bs-tertiary-bg);
+            border: 1px solid var(--bs-border-color-translucent);
+        }
+        .accordion-body .source-snippet {
+            font-size: 0.9rem;
+            color: var(--bs-secondary-color);
+            margin-bottom: 0.5rem;
+            border-left: 3px solid var(--bs-primary);
+            padding-left: 10px;
+            background-color: rgba(var(--bs-primary-rgb), 0.05);
+            border-radius: 0 4px 4px 0;
+        }
+        .source-title {
+            font-weight: 500;
+        }
+
+        .fade-in {
+            animation: fadeInAnimation 0.5s ease-in-out forwards;
+            opacity: 0;
+        }
+        @keyframes fadeInAnimation {
+            0% { opacity: 0; transform: translateY(15px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        #copyFeedback {
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+        
+        #emptyStateSection i.bi-lightbulb-fill {
+            font-size: 3.5rem !important;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bs-dark); 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--bs-secondary);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--bs-primary); 
+        }
+    </style>
+</head>
+<body data-bs-theme="dark">
+
+    <div class="container-fluid d-flex flex-column min-vh-100 px-0">
+
+        <header class="bg-dark shadow-sm sticky-top">
+            <div class="container py-3 text-center">
+                <h1 class="display-5 mb-1">MetaMind Insights</h1>
+                <p class="lead text-muted">Your AI-Powered Research Assistant</p>
+            </div>
+        </header>
+
+        <main class="container flex-grow-1 my-4">
+            <section id="searchSection" class="mb-4 p-4 bg-body-tertiary rounded shadow-lg">
+                <form id="searchForm">
+                    <div class="mb-3">
+                        <label for="queryInput" class="form-label fs-5">Enter your research query:</label>
+                        <input type="text" class="form-control form-control-lg" id="queryInput" placeholder="e.g., Latest breakthroughs in quantum computing" aria-describedby="queryHelp" autocomplete="off">
+                        <div id="queryHelp" class="form-text">MetaMind will search and summarize findings for you.</div>
+                    </div>
+                    <button type="submit" id="submitButton" class="btn btn-primary btn-lg w-100">
+                        <span id="searchButtonText">Search</span>
+                        <span id="loadingSpinner" class="spinner-border spinner-border-sm d-none ms-2" role="status" aria-hidden="true"></span>
+                    </button>
+                </form>
+            </section>
+
+            <div id="resultsDisplayArea">
+                <section id="queryEchoCard" class="card bg-body-tertiary mb-3 shadow-sm d-none fade-in">
+                    <div class="card-body">
+                        <h5 class="card-title">Results for:</h5>
+                        <p class="card-text fst-italic" id="searchedQueryText"></p>
+                        <small id="queryProcessingTimeText" class="text-muted d-block mt-1 d-none"></small>
+                    </div>
+                </section>
+
+                <section id="summaryCard" class="card bg-body-tertiary mb-4 shadow-sm d-none fade-in">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">AI-Generated Summary</h4>
+                        <button id="copySummaryBtn" class="btn btn-sm btn-outline-secondary" title="Copy Summary">
+                            <i class="bi bi-clipboard"></i> Copy
+                            <span id="copyFeedback" class="ms-2 text-success d-none">Copied!</span>
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <p id="summaryText" class="card-text"></p>
+                    </div>
+                </section>
+
+                <section id="sourcesContainer" class="mb-4 d-none fade-in">
+                    <h4 class="mb-3">Sources:</h4>
+                    <div class="accordion" id="sourcesAccordion">
+                    </div>
+                </section>
+            </div>
+
+            <section id="errorSection" class="mt-4 d-none fade-in">
+                <div id="errorMessage" class="alert alert-danger" role="alert">
+                </div>
+            </section>
+            
+            <section id="emptyStateSection" class="text-center mt-5 p-5 bg-body-tertiary rounded shadow-lg fade-in">
+                <i class="bi bi-lightbulb-fill text-warning"></i>
+                <h3 class="mt-3">Welcome to MetaMind Insights!</h3>
+                <p class="lead text-muted">Enter a query above to get AI-powered summaries and verified sources.</p>
+            </section>
+
+            <section id="searchAgainContainer" class="text-center my-4 d-none fade-in">
+                <button id="searchAgainBtn" class="btn btn-info btn-lg">Perform New Search</button>
+            </section>
+        </main>
+
+        <footer class="bg-dark text-center text-muted py-3 mt-auto border-top border-secondary-subtle">
+            <div class="container">
+                <p class="mb-0 small">&copy; <span id="currentYear"></span> MetaMind Insights. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function() {
+            'use strict';
+
+            const API_URL = 'https://MetaMindsSearch-dev.eba-q5t7qk5a.us-east-2.elasticbeanstalk.com/api/bing-search';
+
+            let searchForm, queryInput, submitButton, searchButtonText, loadingSpinner;
+            let resultsDisplayArea, queryEchoCard, searchedQueryText, queryProcessingTimeText, summaryCard, summaryText, copySummaryBtn, copyFeedback;
+            let sourcesContainer, sourcesAccordion;
+            let errorSection, errorMessage;
+            let emptyStateSection, searchAgainContainer, searchAgainBtn;
+            let currentYearSpan;
+            let queryStartTime;
+
+            function init() {
+                cacheDOMElements();
+                bindEventListeners();
+                updateFooterYear();
+                showInitialState();
+            }
+
+            function cacheDOMElements() {
+                searchForm = document.getElementById('searchForm');
+                queryInput = document.getElementById('queryInput');
+                submitButton = document.getElementById('submitButton');
+                searchButtonText = document.getElementById('searchButtonText');
+                loadingSpinner = document.getElementById('loadingSpinner');
+
+                resultsDisplayArea = document.getElementById('resultsDisplayArea');
+                queryEchoCard = document.getElementById('queryEchoCard');
+                searchedQueryText = document.getElementById('searchedQueryText');
+                queryProcessingTimeText = document.getElementById('queryProcessingTimeText');
+                summaryCard = document.getElementById('summaryCard');
+                summaryText = document.getElementById('summaryText');
+                copySummaryBtn = document.getElementById('copySummaryBtn');
+                copyFeedback = document.getElementById('copyFeedback');
+                
+                sourcesContainer = document.getElementById('sourcesContainer');
+                sourcesAccordion = document.getElementById('sourcesAccordion');
+                
+                errorSection = document.getElementById('errorSection');
+                errorMessage = document.getElementById('errorMessage');
+                
+                emptyStateSection = document.getElementById('emptyStateSection');
+                searchAgainContainer = document.getElementById('searchAgainContainer');
+                searchAgainBtn = document.getElementById('searchAgainBtn');
+                
+                currentYearSpan = document.getElementById('currentYear');
+            }
+
+            function bindEventListeners() {
+                searchForm.addEventListener('submit', handleSearchSubmit);
+                copySummaryBtn.addEventListener('click', handleCopySummary);
+                searchAgainBtn.addEventListener('click', handleSearchAgain);
+            }
+
+            function updateFooterYear() {
+                if (currentYearSpan) {
+                    currentYearSpan.textContent = new Date().getFullYear();
+                }
+            }
+
+            function showInitialState() {
+                emptyStateSection.classList.remove('d-none');
+                resultsDisplayArea.classList.add('d-none');
+                queryEchoCard.classList.add('d-none');
+                summaryCard.classList.add('d-none');
+                sourcesContainer.classList.add('d-none');
+                errorSection.classList.add('d-none');
+                searchAgainContainer.classList.add('d-none');
+                queryProcessingTimeText.classList.add('d-none');
+                queryProcessingTimeText.textContent = '';
+                queryInput.value = '';
+                queryInput.focus();
+            }
+
+            async function handleSearchSubmit(event) {
+                event.preventDefault();
+                const query = queryInput.value.trim();
+
+                if (!query) {
+                    displayError("Please enter a search query.", true);
+                    queryInput.focus();
+                    return;
+                }
+
+                setLoadingState(true);
+                hidePreviousResultsAndErrors();
+                queryStartTime = performance.now();
+
+                try {
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query: query })
+                    });
+
+                    if (!response.ok) {
+                        let errorMsgText = `API Error: ${response.status} ${response.statusText}`;
+                        try {
+                            const errorData = await response.json();
+                            if (errorData && (errorData.message || errorData.error)) {
+                                errorMsgText = `API Error: ${errorData.message || errorData.error}`;
+                            }
+                        } catch (e) { 
+                            
+                        }
+                        throw new Error(errorMsgText);
+                    }
+
+                    const data = await response.json();
+                    displayResults(data);
+
+                } catch (error) {
+                    console.error('Fetch error details:', error);
+                    let userMessage = 'An unexpected error occurred. Please try again.';
+
+                    if (error instanceof TypeError && error.message.toLowerCase().includes('failed to fetch')) {
+                        userMessage = "Failed to fetch results. This could be due to a network connectivity issue, the API server being temporarily unavailable, or a browser security restriction. Common reasons include: trying to access an HTTP API from an HTTPS page (mixed content), or issues with an HTTPS API itself (like an invalid SSL certificate or CORS misconfiguration). Please verify your network connection, check if the API service is operational, and ensure your browser environment allows requests to the API's address.";
+                    } else if (error.message && error.message.startsWith('API Error:')) {
+                        userMessage = error.message;
+                    } else if (error.message) {
+                        userMessage = error.message;
+                    }
+                    
+                    displayError(userMessage);
+                } finally {
+                    setLoadingState(false);
+                }
+            }
+
+            function setLoadingState(isLoading) {
+                if (isLoading) {
+                    searchButtonText.textContent = 'Fetching & Summarizing...';
+                    loadingSpinner.classList.remove('d-none');
+                    submitButton.disabled = true;
+                    queryInput.disabled = true;
+                } else {
+                    searchButtonText.textContent = 'Search';
+                    loadingSpinner.classList.add('d-none');
+                    submitButton.disabled = false;
+                    queryInput.disabled = false;
+                }
+            }
+
+            function hidePreviousResultsAndErrors() {
+                resultsDisplayArea.classList.add('d-none');
+                queryEchoCard.classList.add('d-none');
+                summaryCard.classList.add('d-none');
+                sourcesContainer.classList.add('d-none');
+                sourcesAccordion.innerHTML = '';
+                errorSection.classList.add('d-none');
+                emptyStateSection.classList.add('d-none');
+                searchAgainContainer.classList.add('d-none');
+                queryProcessingTimeText.classList.add('d-none');
+                queryProcessingTimeText.textContent = '';
+            }
+
+            function displayResults(data) {
+                hidePreviousResultsAndErrors();
+                resultsDisplayArea.classList.remove('d-none');
+
+                if (data.searchQuery) {
+                    searchedQueryText.textContent = escapeHTML(data.searchQuery);
+                    if (queryStartTime) {
+                        const endTime = performance.now();
+                        const duration = ((endTime - queryStartTime) / 1000).toFixed(1);
+                        queryProcessingTimeText.textContent = `Query processed in ${duration} seconds.`;
+                        queryProcessingTimeText.classList.remove('d-none');
+                    }
+                    queryEchoCard.classList.remove('d-none');
+                } else {
+                    queryEchoCard.classList.add('d-none');
+                    queryProcessingTimeText.classList.add('d-none');
+                }
+
+                if (data.summary) {
+                    summaryText.textContent = data.summary; 
+                    summaryCard.classList.remove('d-none');
+                } else {
+                    summaryCard.classList.add('d-none');
+                }
+
+                if (data.sources && data.sources.length > 0) {
+                    data.sources.forEach((source, index) => {
+                        const sourceId = `source-${index}`; 
+                        const collapseId = `collapse-${sourceId}`;
+                        const headingId = `heading-${sourceId}`;
+
+                        const itemHTML = `
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="${headingId}">
+                                    <button class="accordion-button collapsed source-title" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="false" aria-controls="${collapseId}">
+                                        ${escapeHTML(source.title) || 'Untitled Source'}
+                                    </button>
+                                </h2>
+                                <div id="${collapseId}" class="accordion-collapse collapse" aria-labelledby="${headingId}" data-bs-parent="#sourcesAccordion">
+                                    <div class="accordion-body">
+                                        ${source.snippet ? `<p class="source-snippet mb-2"><strong>Snippet:</strong> ${escapeHTML(source.snippet)}</p>` : ''}
+                                        <a href="${escapeHTML(source.url)}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary btn-sm">
+                                            Visit Source <i class="bi bi-box-arrow-up-right ms-1"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>`;
+                        sourcesAccordion.insertAdjacentHTML('beforeend', itemHTML);
+                    });
+                    sourcesContainer.classList.remove('d-none');
+                } else {
+                    sourcesContainer.classList.add('d-none');
+                }
+                
+                if (!data.summary && (!data.sources || data.sources.length === 0)) {
+                     displayError("No results found for your query. Try a different search term.", false);
+                } else {
+                    searchAgainContainer.classList.remove('d-none');
+                }
+            }
+
+            function displayError(message, isTemporary = false) {
+                hidePreviousResultsAndErrors();
+                errorMessage.textContent = message;
+                errorSection.classList.remove('d-none');
+                
+                if (!isTemporary) {
+                    searchAgainContainer.classList.remove('d-none');
+                }
+            }
+
+            function handleCopySummary() {
+                if (!summaryText.textContent) return;
+
+                navigator.clipboard.writeText(summaryText.textContent)
+                    .then(() => {
+                        copyFeedback.textContent = 'Copied!';
+                        copyFeedback.classList.remove('text-danger');
+                        copyFeedback.classList.add('text-success');
+                        copyFeedback.classList.remove('d-none');
+                        setTimeout(() => {
+                            copyFeedback.classList.add('d-none');
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy summary: ', err);
+                        copyFeedback.textContent = 'Failed!';
+                        copyFeedback.classList.remove('text-success');
+                        copyFeedback.classList.add('text-danger');
+                        copyFeedback.classList.remove('d-none');
+                         setTimeout(() => {
+                            copyFeedback.classList.add('d-none');
+                        }, 2000);
+                    });
+            }
+            
+            function handleSearchAgain() {
+                showInitialState();
+            }
+
+            function escapeHTML(str) {
+                if (str === null || str === undefined) return '';
+                return String(str).replace(/[&<>"']/g, function (match) {
+                    return {
+                        '&': '&amp;',
+                        '<': '&lt;',
+                        '>': '&gt;',
+                        '"': '&quot;',
+                        "'": '&#39;'
+                    }[match];
+                });
+            }
+
+            document.addEventListener('DOMContentLoaded', init);
+        })();
+    </script>
+
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

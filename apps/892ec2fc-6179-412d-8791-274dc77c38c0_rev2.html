@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MetaMind Quest: The Info-Sphere Challenge</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #121212; /* Dark background for letter/pillarboxing */
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #game-wrapper {
+            position: relative; /* For absolute positioning of UI overlays */
+            background-color: #000000; /* Canvas background color if not drawn over */
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        #gameCanvas {
+            display: block;
+            background-color: transparent; /* Canvas itself is transparent, wrapper provides bg */
+            /* image-rendering: pixelated; /* For pixel art games */
+            /* image-rendering: -moz-crisp-edges; */
+            /* image-rendering: crisp-edges; */
+            touch-action: none;
+        }
+        
+        .hud-element {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #00BCD4; /* Cyan accent */
+            text-shadow: 0 0 5px #00BCD4;
+        }
+
+        .game-ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #e0e0e0;
+            text-align: center;
+            z-index: 10;
+        }
+
+        .game-screen {
+            background-color: rgba(26, 32, 44, 0.9); /* Dark, slightly transparent */
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+            border: 1px solid rgba(var(--bs-primary-rgb), 0.3);
+        }
+        
+        .btn-game {
+            font-size: 1.2rem;
+            padding: 0.75rem 1.5rem;
+            margin-top: 1rem;
+            min-width: 200px;
+            transition: all 0.2s ease-in-out;
+            border-width: 2px;
+        }
+        .btn-game:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(var(--bs-primary-rgb), 0.5);
+        }
+
+        .answer-btn {
+            margin: 0.5rem;
+            width: 100%;
+            max-width: 400px;
+        }
+        .answer-btn.correct {
+            background-color: var(--bs-success) !important;
+            border-color: var(--bs-success) !important;
+            color: white !important;
+        }
+        .answer-btn.incorrect {
+            background-color: var(--bs-danger) !important;
+            border-color: var(--bs-danger) !important;
+            color: white !important;
+        }
+
+
+        .fade-in {
+            animation: fadeInAnimation 0.7s ease-in-out forwards;
+        }
+        @keyframes fadeInAnimation {
+            0% { opacity: 0; transform: translateY(20px) scale(0.95); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        
+        .modal-content {
+            background-color: #2D3748; /* Darker modal background */
+            border: 1px solid rgba(var(--bs-primary-rgb), 0.3);
+        }
+
+        #loading-indicator {
+            font-size: 1.5rem;
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1A202C; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4A5568;
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00BCD4; 
+        }
+    </style>
+</head>
+<body data-bs-theme="dark">
+
+    <div id="game-wrapper">
+        <canvas id="gameCanvas"></canvas>
+
+        <div id="loading-screen" class="game-ui-overlay fade-in d-flex justify-content-center align-items-center">
+            <div id="loading-indicator" class="text-primary">
+                <div class="spinner-border me-2" role="status"></div>
+                Initializing MetaMind Quest...
+            </div>
+        </div>
+        
+        <div id="menu-screen" class="game-ui-overlay d-none">
+            <div class="game-screen fade-in">
+                <h1 class="display-4 mb-3 text-primary">MetaMind Quest</h1>
+                <p class="lead mb-4 text-body-secondary">Test your knowledge in the Info-Sphere!</p>
+                <button id="startGameBtn" class="btn btn-primary btn-game">Start Challenge</button>
+                <button id="instructionsBtn" class="btn btn-outline-info btn-game mt-2" data-bs-toggle="modal" data-bs-target="#instructionsModal">How to Play</button>
+            </div>
+        </div>
+
+        <div id="gameplay-ui" class="game-ui-overlay d-none" style="pointer-events: none;">
+            <div class="container-fluid h-100">
+                <div class="row p-3 text-center fixed-top" style="pointer-events: auto;">
+                     <div class="col">
+                        <span class="hud-element">Score: <span id="scoreDisplay">0</span></span>
+                    </div>
+                    <div class="col">
+                        <span class="hud-element">Lives: <span id="livesDisplay">3</span></span>
+                    </div>
+                    <div class="col">
+                        <span class="hud-element">Time: <span id="timerDisplay">0</span></span>
+                    </div>
+                </div>
+                <div id="question-area" class="row align-items-center justify-content-center" style="height: 50%; pointer-events: auto;">
+                    <div class="col-md-10 text-center">
+                        <h3 id="questionText" class="my-3 p-3 bg-dark bg-opacity-50 rounded"></h3>
+                    </div>
+                </div>
+                 <div id="answers-area" class="row align-items-center justify-content-center" style="height: 40%; pointer-events: auto;">
+                    <div class="col-md-8 text-center" id="answerButtonsContainer">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal fade" id="instructionsModal" tabindex="-1" aria-labelledby="instructionsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header border-bottom border-primary-subtle">
+                    <h5 class="modal-title text-primary" id="instructionsModalLabel">How to Play MetaMind Quest</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Welcome, Challenger, to the Info-Sphere!</p>
+                    <ul>
+                        <li>Answer each question before the timer runs out.</li>
+                        <li>You have a limited number of lives. Losing all lives ends the game.</li>
+                        <li>Correct answers increase your score.</li>
+                        <li>Aim for the highest score and prove your MetaMind prowess!</li>
+                    </ul>
+                    <p>Controls: Click on the answer you believe is correct.</p>
+                </div>
+                <div class="modal-footer border-top border-secondary-subtle">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got it!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="gameOverModal" tabindex="-1" aria-labelledby="gameOverModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content game-screen">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title display-5 text-danger" id="gameOverModalLabel">Challenge Over!</h5>
+                </div>
+                <div class="modal-body text-center">
+                    <p class="lead">Your Final Score: <strong id="finalScoreDisplay" class="text-primary fs-2">0</strong></p>
+                    <p id="highScoreMessage" class="text-info"></p>
+                    <div id="highScoresList" class="list-group my-3 text-start"></div>
+                </div>
+                <div class="modal-footer border-0 d-flex justify-content-center">
+                    <button id="playAgainBtn" type="button" class="btn btn-primary btn-game">Play Again</button>
+                    <button id="backToMenuBtn" type="button" class="btn btn-outline-secondary btn-game mt-2">Main Menu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
+    <script>
+        const Game = (function() {
+            'use strict';
+
+            const GAME_CONFIG = {
+                NATIVE_WIDTH: 1000,
+                NATIVE_HEIGHT: 750,
+                QUESTION_TIME_LIMIT: 15, // seconds
+                START_LIVES: 3,
+                POINTS_PER_CORRECT_ANSWER: 100,
+                ART_INSTITUTE_SEARCH_TERM: "abstract digital data stream",
+                MAX_HIGH_SCORES: 5,
+                FONT_FAMILY: "'Inter', sans-serif",
+                COLORS: {
+                    BACKGROUND: '#080A0F',
+                    PRIMARY_TEXT: '#E0E0E0',
+                    ACCENT: '#00BCD4', // Cyan
+                    CORRECT: '#28a745',
+                    INCORRECT: '#dc3545',
+                    TIMER_BAR: '#FFC107'
+                }
+            };
+
+            const QUESTIONS_DATA = [
+                { question: "What does HTML stand for?", answers: ["Hyper Trainer Marking Language", "Hyper Text Markup Language", "Hyperlinks and Text Markup Language", "Home Tool Markup Language"], correctAnswerIndex: 1, category: "Tech" },
+                { question: "Which planet is known as the Red Planet?", answers: ["Earth", "Mars", "Jupiter", "Venus"], correctAnswerIndex: 1, category: "Science" },
+                { question: "What is the capital of France?", answers: ["Berlin", "Madrid", "Paris", "Rome"], correctAnswerIndex: 2, category: "Geography" },
+                { question: "Who painted the Mona Lisa?", answers: ["Vincent van Gogh", "Pablo Picasso", "Leonardo da Vinci", "Claude Monet"], correctAnswerIndex: 2, category: "Art" },
+                { question: "What is the largest ocean on Earth?", answers: ["Atlantic Ocean", "Indian Ocean", "Arctic Ocean", "Pacific Ocean"], correctAnswerIndex: 3, category: "Geography" },
+                { question: "In what year did World War II end?", answers: ["1942", "1945", "1950", "1939"], correctAnswerIndex: 1, category: "History" },
+                { question: "What is the chemical symbol for water?", answers: ["O2", "H2O", "CO2", "NaCl"], correctAnswerIndex: 1, category: "Science" },
+                { question: "Which company developed the JavaScript language?", answers: ["Microsoft", "Apple", "Netscape", "Google"], correctAnswerIndex: 2, category: "Tech" },
+                { question: "What is the speed of light?", answers: ["300,000 km/s", "150,000 km/s", "500,000 km/s", "1,000,000 km/s"], correctAnswerIndex: 0, category: "Science" },
+                { question: "Who wrote 'Romeo and Juliet'?", answers: ["Charles Dickens", "William Shakespeare", "Jane Austen", "Mark Twain"], correctAnswerIndex: 1, category: "Literature" }
+            ];
+            
+            let gameState = {};
+            let canvas, ctx;
+            let assets = { backgroundImage: null, sounds: {} };
+            let domElements = {};
+            let modals = {};
+            let lastTime = 0;
+            let questionTimeoutId = null;
+            let feedbackTimeoutId = null;
+
+            function init() {
+                canvas = document.getElementById('gameCanvas');
+                ctx = canvas.getContext('2d');
+                canvas.width = GAME_CONFIG.NATIVE_WIDTH;
+                canvas.height = GAME_CONFIG.NATIVE_HEIGHT;
+
+                cacheDOMElements();
+                initModals();
+                
+                resizeGameCanvasMaintainAspectRatio();
+                window.addEventListener('resize', resizeGameCanvasMaintainAspectRatio);
+                
+                loadAssets().then(() => {
+                    bindEventListeners();
+                    resetGameState();
+                    showScreen('menu-screen');
+                    domElements.loadingScreen.classList.add('d-none');
+                    requestAnimationFrame(gameLoop);
+                }).catch(error => {
+                    console.error("Error loading assets:", error);
+                    domElements.loadingIndicator.innerHTML = `<i class="bi bi-exclamation-triangle-fill text-danger me-2"></i> Failed to load game assets. Please refresh.`;
+                });
+            }
+
+            function cacheDOMElements() {
+                domElements.gameWrapper = document.getElementById('game-wrapper');
+                domElements.loadingScreen = document.getElementById('loading-screen');
+                domElements.loadingIndicator = document.getElementById('loading-indicator');
+                domElements.menuScreen = document.getElementById('menu-screen');
+                domElements.startGameBtn = document.getElementById('startGameBtn');
+                domElements.instructionsBtn = document.getElementById('instructionsBtn');
+                
+                domElements.gameplayUI = document.getElementById('gameplay-ui');
+                domElements.scoreDisplay = document.getElementById('scoreDisplay');
+                domElements.livesDisplay = document.getElementById('livesDisplay');
+                domElements.timerDisplay = document.getElementById('timerDisplay');
+                domElements.questionText = document.getElementById('questionText');
+                domElements.answerButtonsContainer = document.getElementById('answerButtonsContainer');
+
+                domElements.finalScoreDisplay = document.getElementById('finalScoreDisplay');
+                domElements.highScoreMessage = document.getElementById('highScoreMessage');
+                domElements.highScoresList = document.getElementById('highScoresList');
+                domElements.playAgainBtn = document.getElementById('playAgainBtn');
+                domElements.backToMenuBtn = document.getElementById('backToMenuBtn');
+            }
+
+            function initModals() {
+                modals.instructions = new bootstrap.Modal(document.getElementById('instructionsModal'));
+                modals.gameOver = new bootstrap.Modal(document.getElementById('gameOverModal'));
+            }
+
+            function loadAssets() {
+                const soundFiles = {
+                    correct: 'https://cdn.jsdelivr.net/gh/PixelBootstrap/PixelSounds@gh-pages/Sounds/positive.wav',
+                    incorrect: 'https://cdn.jsdelivr.net/gh/PixelBootstrap/PixelSounds@gh-pages/Sounds/negative.wav',
+                    click: 'https://cdn.jsdelivr.net/gh/PixelBootstrap/PixelSounds@gh-pages/Sounds/click.wav',
+                    gameOver: 'https://cdn.jsdelivr.net/gh/PixelBootstrap/PixelSounds@gh-pages/Sounds/explosion.wav',
+                    backgroundMusic: 'https://cdn.jsdelivr.net/gh/klesst/misc/pixel-platformer-music-nes-chiptune-8-bit-music-by-heatleybros-X6S4Y2A.mp3' 
+                };
+
+                const promises = [];
+
+                for (const key in soundFiles) {
+                    promises.push(new Promise((resolve, reject) => {
+                        assets.sounds[key] = new Howl({
+                            src: [soundFiles[key]],
+                            volume: key === 'backgroundMusic' ? 0.2 : 0.5,
+                            loop: key === 'backgroundMusic',
+                            onload: resolve,
+                            onloaderror: (id, err) => { console.warn(`Sound load error: ${key}`, err); resolve(); } // Resolve even on error to not block game
+                        });
+                    }));
+                }
+                
+                promises.push(fetchArtInstituteImage(GAME_CONFIG.ART_INSTITUTE_SEARCH_TERM).then(img => {
+                    assets.backgroundImage = img;
+                }).catch(err => {
+                    console.warn("Failed to load background image from Art Institute:", err);
+                    assets.backgroundImage = null; // Game can run without it
+                }));
+                
+                return Promise.all(promises);
+            }
+
+            async function fetchArtInstituteImage(searchTerm) {
+                try {
+                    const searchUrl = `https://api.artic.edu/api/v1/artworks/search?q=${encodeURIComponent(searchTerm)}&query[term][is_public_domain]=true&fields=id,title,image_id,config&limit=1`;
+                    const response = await fetch(searchUrl);
+                    if (!response.ok) throw new Error(`API request failed: ${response.status}`);
+                    const searchData = await response.json();
+
+                    if (searchData.data && searchData.data.length > 0 && searchData.data[0].image_id) {
+                        const artwork = searchData.data[0];
+                        const imageUrl = `${artwork.config.iiif_url}/${artwork.image_id}/full/843,/0/default.jpg`;
+                        
+                        return new Promise((resolve, reject) => {
+                            const img = new Image();
+                            img.onload = () => resolve(img);
+                            img.onerror = () => {
+                                console.warn(`Failed to load image from URL: ${imageUrl}`);
+                                resolve(null); // Resolve with null if specific image fails
+                            };
+                            img.src = imageUrl;
+                        });
+                    } else {
+                        console.warn("No suitable public domain image found from Art Institute for:", searchTerm);
+                        return null;
+                    }
+                } catch (error) {
+                    console.error("Error fetching image from Art Institute API:", error);
+                    return null;
+                }
+            }
+
+
+            function bindEventListeners() {
+                domElements.startGameBtn.addEventListener('click', startGame);
+                domElements.playAgainBtn.addEventListener('click', startGame);
+                domElements.backToMenuBtn.addEventListener('click', () => {
+                    playSound('click');
+                    modals.gameOver.hide();
+                    showScreen('menu-screen');
+                    gameState.phase = 'menu';
+                    if (assets.sounds.backgroundMusic && !assets.sounds.backgroundMusic.playing()) {
+                        assets.sounds.backgroundMusic.play();
+                    }
+                });
+            }
+            
+            function playSound(soundName) {
+                if (assets.sounds[soundName]) {
+                    try {
+                        assets.sounds[soundName].play();
+                    } catch (e) {
+                        console.warn("Error playing sound:", soundName, e);
+                    }
+                }
+            }
+
+            function resetGameState() {
+                gameState.phase = 'loading';
+                gameState.score = 0;
+                gameState.lives = GAME_CONFIG.START_LIVES;
+                gameState.currentQuestionIndex = -1;
+                gameState.availableQuestions = [...QUESTIONS_DATA].sort(() => 0.5 - Math.random()); // Shuffle questions
+                gameState.timeLeftOnQuestion = 0;
+                gameState.highScores = JSON.parse(localStorage.getItem('metaMindQuestHighScores')) || [];
+            }
+
+            function startGame() {
+                playSound('click');
+                resetGameState();
+                gameState.phase = 'playing';
+                modals.gameOver.hide();
+                showScreen('gameplay-ui');
+                updateHUD();
+                loadNextQuestion();
+                if (assets.sounds.backgroundMusic && !assets.sounds.backgroundMusic.playing()) {
+                    assets.sounds.backgroundMusic.play();
+                }
+            }
+            
+            function showScreen(screenId) {
+                ['loading-screen', 'menu-screen', 'gameplay-ui'].forEach(id => {
+                    document.getElementById(id).classList.add('d-none');
+                });
+                if (screenId) {
+                    document.getElementById(screenId).classList.remove('d-none');
+                    document.getElementById(screenId).classList.add('fade-in');
+                }
+            }
+
+            function gameLoop(timestamp) {
+                const deltaTime = Math.min(0.1, (timestamp - lastTime) / 1000);
+                lastTime = timestamp;
+
+                update(deltaTime);
+                render();
+                requestAnimationFrame(gameLoop);
+            }
+
+            function update(dt) {
+                if (gameState.phase === 'playing') {
+                    gameState.timeLeftOnQuestion -= dt;
+                    domElements.timerDisplay.textContent = Math.max(0, Math.ceil(gameState.timeLeftOnQuestion));
+                    
+                    if (gameState.timeLeftOnQuestion <= 0 && !gameState.answerProcessed) {
+                        handleAnswer(null); // Timeout
+                    }
+                }
+            }
+
+            function render() {
+                ctx.fillStyle = GAME_CONFIG.COLORS.BACKGROUND;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                if (assets.backgroundImage) {
+                    const aspect = assets.backgroundImage.width / assets.backgroundImage.height;
+                    let drawWidth = canvas.width;
+                    let drawHeight = canvas.width / aspect;
+                    if (drawHeight < canvas.height) {
+                        drawHeight = canvas.height;
+                        drawWidth = canvas.height * aspect;
+                    }
+                    const offsetX = (canvas.width - drawWidth) / 2;
+                    const offsetY = (canvas.height - drawHeight) / 2;
+                    ctx.globalAlpha = 0.2; // Make background subtle
+                    ctx.drawImage(assets.backgroundImage, offsetX, offsetY, drawWidth, drawHeight);
+                    ctx.globalAlpha = 1.0;
+                }
+                
+                // Game elements drawn on canvas can go here if needed.
+                // For this version, most UI is HTML.
+                // Example: Timer bar
+                if (gameState.phase === 'playing' && gameState.currentQuestionData) {
+                    const timerBarWidth = (gameState.timeLeftOnQuestion / GAME_CONFIG.QUESTION_TIME_LIMIT) * canvas.width;
+                    ctx.fillStyle = GAME_CONFIG.COLORS.TIMER_BAR;
+                    ctx.fillRect(0, canvas.height - 10, timerBarWidth, 10);
+                }
+            }
+            
+            function updateHUD() {
+                domElements.scoreDisplay.textContent = gameState.score;
+                domElements.livesDisplay.textContent = gameState.lives;
+            }
+
+            function loadNextQuestion() {
+                clearTimeout(questionTimeoutId);
+                clearTimeout(feedbackTimeoutId);
+                gameState.answerProcessed = false;
+                domElements.answerButtonsContainer.innerHTML = ''; // Clear previous answer buttons
+
+                gameState.currentQuestionIndex++;
+                if (gameState.currentQuestionIndex >= gameState.availableQuestions.length || gameState.lives <= 0) {
+                    gameOver();
+                    return;
+                }
+
+                gameState.currentQuestionData = gameState.availableQuestions[gameState.currentQuestionIndex];
+                domElements.questionText.textContent = gameState.currentQuestionData.question;
+                
+                gameState.currentQuestionData.answers.forEach((answer, index) => {
+                    const button = document.createElement('button');
+                    button.classList.add('btn', 'btn-outline-info', 'btn-game', 'answer-btn');
+                    button.textContent = answer;
+                    button.addEventListener('click', () => handleAnswer(index));
+                    domElements.answerButtonsContainer.appendChild(button);
+                });
+
+                gameState.timeLeftOnQuestion = GAME_CONFIG.QUESTION_TIME_LIMIT;
+                updateHUD();
+            }
+
+            function handleAnswer(selectedIndex) {
+                if (gameState.answerProcessed) return;
+                gameState.answerProcessed = true;
+                
+                clearTimeout(questionTimeoutId);
+                
+                const correct = selectedIndex === gameState.currentQuestionData.correctAnswerIndex;
+                const answerButtons = domElements.answerButtonsContainer.querySelectorAll('.answer-btn');
+
+                answerButtons.forEach((btn, idx) => {
+                    btn.disabled = true;
+                    if (idx === gameState.currentQuestionData.correctAnswerIndex) {
+                        btn.classList.add('correct');
+                        btn.classList.remove('btn-outline-info');
+                    } else if (idx === selectedIndex && !correct) {
+                        btn.classList.add('incorrect');
+                        btn.classList.remove('btn-outline-info');
+                    }
+                });
+
+                if (correct) {
+                    playSound('correct');
+                    gameState.score += GAME_CONFIG.POINTS_PER_CORRECT_ANSWER;
+                    domElements.questionText.textContent = "Correct!";
+                } else {
+                    playSound('incorrect');
+                    gameState.lives--;
+                    if (selectedIndex === null) { // Timeout
+                         domElements.questionText.textContent = "Time's up!";
+                    } else {
+                         domElements.questionText.textContent = "Incorrect!";
+                    }
+                }
+                updateHUD();
+
+                feedbackTimeoutId = setTimeout(() => {
+                    if (gameState.lives > 0) {
+                        loadNextQuestion();
+                    } else {
+                        gameOver();
+                    }
+                }, 1500); 
+            }
+
+            function gameOver() {
+                playSound('gameOver');
+                if (assets.sounds.backgroundMusic && assets.sounds.backgroundMusic.playing()) {
+                    assets.sounds.backgroundMusic.stop();
+                }
+                gameState.phase = 'gameOver';
+                domElements.finalScoreDisplay.textContent = gameState.score;
+                updateHighScores();
+                displayHighScores();
+                modals.gameOver.show();
+                showScreen(null); // Hide game UI
+            }
+
+            function updateHighScores() {
+                gameState.highScores.push({ score: gameState.score, date: new Date().toLocaleDateString() });
+                gameState.highScores.sort((a, b) => b.score - a.score);
+                gameState.highScores = gameState.highScores.slice(0, GAME_CONFIG.MAX_HIGH_SCORES);
+                localStorage.setItem('metaMindQuestHighScores', JSON.stringify(gameState.highScores));
+
+                const isNewHighScore = gameState.highScores.some(entry => entry.score === gameState.score && entry.date === new Date().toLocaleDateString());
+                if (isNewHighScore && gameState.score > 0) {
+                    domElements.highScoreMessage.textContent = "Congratulations, new high score!";
+                } else if (gameState.score > 0) {
+                     domElements.highScoreMessage.textContent = "Well played!";
+                }
+                 else {
+                    domElements.highScoreMessage.textContent = "Better luck next time!";
+                }
+            }
+
+            function displayHighScores() {
+                domElements.highScoresList.innerHTML = '';
+                if (gameState.highScores.length === 0) {
+                    domElements.highScoresList.innerHTML = '<p class="text-body-secondary">No high scores yet. Be the first!</p>';
+                    return;
+                }
+                gameState.highScores.forEach((entry, index) => {
+                    const item = document.createElement('div');
+                    item.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center', 'bg-dark', 'bg-opacity-25', 'border-secondary');
+                    item.innerHTML = `<span>${index + 1}. ${entry.score} points</span> <small class="text-body-secondary">${entry.date}</small>`;
+                    domElements.highScoresList.appendChild(item);
+                });
+            }
+
+            function resizeGameCanvasMaintainAspectRatio() {
+                const nativeAspectRatio = GAME_CONFIG.NATIVE_WIDTH / GAME_CONFIG.NATIVE_HEIGHT;
+                let windowWidth = window.innerWidth;
+                let windowHeight = window.innerHeight;
+                const windowAspectRatio = windowWidth / windowHeight;
+
+                let scaledWidth, scaledHeight;
+
+                if (windowAspectRatio > nativeAspectRatio) {
+                    scaledHeight = windowHeight;
+                    scaledWidth = scaledHeight * nativeAspectRatio;
+                } else {
+                    scaledWidth = windowWidth;
+                    scaledHeight = scaledWidth / nativeAspectRatio;
+                }
+                
+                const wrapper = domElements.gameWrapper;
+                wrapper.style.width = Math.floor(scaledWidth) + 'px';
+                wrapper.style.height = Math.floor(scaledHeight) + 'px';
+
+                canvas.style.width = '100%';
+                canvas.style.height = '100%';
+            }
+            
+            document.addEventListener('DOMContentLoaded', init);
+
+            return { init }; 
+        })();
+
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

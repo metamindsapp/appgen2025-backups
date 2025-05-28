@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khora Dialogue αω v4.0 - AI Evolution Simulator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>αω</text></svg>">
+    <style>
+        html, body { height: 100%; margin: 0; padding: 0; overflow-x: hidden; }
+        body { display: flex; flex-direction: column; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bs-body-bg); color: var(--bs-body-color); }
+        .navbar { flex-shrink: 0; }
+        .control-bar { flex-shrink: 0; background-color: var(--bs-tertiary-bg); }
+        .main-content-area { flex-grow: 1; display: flex; flex-direction: column; overflow-y: hidden; padding-bottom: 1rem; }
+        #conversationHistoryPanel {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            border: 1px solid var(--bs-border-color);
+            background-color: var(--bs-dark-bg-subtle);
+            border-radius: .375rem;
+            scroll-behavior: smooth;
+        }
+        .message-wrapper { display: flex; margin-bottom: 0.75rem; animation: fadeIn 0.5s ease-out; }
+        .message { padding: 0.6rem 1rem; border-radius: 0.75rem; max-width: 80%; word-wrap: break-word; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+        .message-alpha { background-color: #2E7D32; color: #f0f0f0; margin-left: auto; }
+        .message-omega { background-color: #1565C0; color: #f0f0f0; margin-right: auto; }
+        .message-system { background-color: var(--bs-secondary-bg); color: var(--bs-secondary-text-emphasis); text-align: center; font-style: italic; max-width: 100%; width:100%; margin-left: auto; margin-right: auto; box-shadow: none; font-size: 0.9em; padding: 0.4rem 0.8rem; }
+        .message-system.error { color: var(--bs-danger-text-emphasis); background-color: var(--bs-danger-bg-subtle); border: 1px solid var(--bs-danger-border-subtle); }
+        .message-system.warning { color: var(--bs-warning-text-emphasis); background-color: var(--bs-warning-bg-subtle); border: 1px solid var(--bs-warning-border-subtle); }
+        .message-meta.message-alpha { border: 2px dashed #FF8C00 !important; background-color: #38703A; }
+        .message-meta.message-omega { border: 2px dashed #FF8C00 !important; background-color: #1A528A; }
+        .message-speaker { font-size: 0.8em; font-weight: bold; margin-bottom: 0.25rem; display: block; opacity: 0.8; }
+        .message-content { white-space: pre-wrap; }
+        #modeSpinner { display: none; }
+        #footerStatus { font-size: 0.9em; }
+        .modal-body pre { max-height: 65vh; overflow-y: auto; background-color: #1c1c1c; padding: 15px; border-radius: 5px; border: 1px solid #333; font-family: 'Courier New', Courier, monospace; font-size: 0.9em; white-space: pre-wrap; word-break: break-all; }
+        .nav-tabs .nav-link { color: var(--bs-gray-400); }
+        .nav-tabs .nav-link.active { color: var(--bs-light); background-color: var(--bs-dark-bg-subtle); border-color: var(--bs-border-color) var(--bs-border-color) var(--bs-dark-bg-subtle); }
+        .form-control-sm { height: calc(1.5em + .5rem + 2px); padding: .25rem .5rem; font-size: .875rem;}
+        .btn-sm-custom { padding: .25rem .5rem; font-size: .875rem; line-height: 1.5; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        #inPageConsoleContainer {
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
+            z-index: 1056; 
+            background-color: #181c1f; 
+        }
+        #inPageConsoleOutput {
+            font-family: 'Menlo', 'Monaco', 'Consolas', "Courier New", monospace;
+            color: #ccc;
+            max-height: 200px; 
+            overflow-y: auto;
+            font-size: 0.8rem; 
+            line-height: 1.4;
+            background-color: #111315; 
+        }
+        #inPageConsoleOutput .console-message {
+            padding: 4px 8px; 
+            border-bottom: 1px solid #2a2f33; 
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        #inPageConsoleOutput .console-message:last-child {
+            border-bottom: none;
+        }
+        #inPageConsoleOutput .console-msg-timestamp {
+            color: #777c81; 
+            margin-right: 8px;
+            font-size: 0.9em;
+        }
+        #inPageConsoleOutput .console-msg-info { color: var(--bs-info-text-emphasis); }
+        #inPageConsoleOutput .console-msg-error { color: var(--bs-danger-text-emphasis); font-weight: bold; }
+        #inPageConsoleOutput .console-msg-warn { color: var(--bs-warning-text-emphasis); }
+        #inPageConsoleOutput .console-msg-debug { color: #8a9299; } 
+        #inPageConsoleHeader {
+            background-color: #212529; 
+        }
+        .navbar .btn-sm-custom, .navbar .form-label.btn-sm-custom {
+             height: calc(1.5em + .5rem + 2px + 2px); /* Match form-control-sm height + border */
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm navbar-dark bg-dark border-bottom shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="#">Khora Dialogue <span style="font-family: 'Times New Roman', serif;">αω</span> v4.0</a>
+            
+            <div class="d-flex align-items-center me-auto"> 
+                <button class="btn btn-outline-light btn-sm-custom ms-3 me-2" id="viewAiStatesBtn" data-bs-toggle="modal" data-bs-target="#aiStatesModal">View AI States</button>
+                <button class="btn btn-info btn-sm-custom me-2" id="readMeBtn" data-bs-toggle="modal" data-bs-target="#readMeModal">ReadMe</button>
+                <button class="btn btn-warning btn-sm-custom me-2" id="resetBtn">Reset</button>
+                <label for="loadFile" class="btn btn-primary btn-sm-custom me-2 mb-0 d-flex align-items-center">Load</label>
+                <input type="file" id="loadFile" class="d-none" accept=".yaml,.yml">
+                <button class="btn btn-success btn-sm-custom" id="saveBtn">Save</button>
+            </div>
+
+            <div class="d-flex align-items-center">
+                <button class="btn btn-outline-info btn-sm-custom" id="copyLogsBtn">Copy Logs</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid p-2 control-bar border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="d-flex align-items-center">
+            <button class="btn btn-primary btn-sm me-2" id="startStopBtn">Start</button>
+            <button class="btn btn-info btn-sm" id="nextTurnBtn" disabled>Next Turn</button>
+        </div>
+        <div class="d-flex align-items-center text-light">
+            <span class="me-3">Turn: <span id="turnCounterDisplay" class="fw-bold">0</span></span>
+            <span class="me-3">Next: <span id="nextAiDisplay" class="fw-bold">Alpha</span></span>
+            <span>Mode: <span id="currentModeDisplay" class="fw-bold">Idle</span>
+                <div class="spinner-border spinner-border-sm text-light ms-1" role="status" id="modeSpinner">
+                    <span class="visually-hidden">Thinking...</span>
+                </div>
+            </span>
+        </div>
+        <div class="d-flex align-items-center">
+            <label for="delayInput" class="form-label me-1 mb-0 text-light small">Delay(ms):</label>
+            <input type="number" class="form-control form-control-sm me-3" id="delayInput" value="3000" min="0" step="100" style="width: 80px;">
+            <label for="metaNInput" class="form-label me-1 mb-0 text-light small">Meta Every N:</label>
+            <input type="number" class="form-control form-control-sm" id="metaNInput" value="10" min="3" step="1" style="width: 70px;">
+        </div>
+    </div>
+
+    <main class="container-fluid main-content-area mt-2">
+        <div id="conversationHistoryPanel">
+        </div>
+    </main>
+
+    <footer class="container-fluid p-2 bg-dark text-center border-top mt-auto">
+        <span id="footerStatus" class="text-info-emphasis">Initializing...</span>
+    </footer>
+
+    <div id="inPageConsoleContainer" class="fixed-bottom" style="display: none;">
+        <div id="inPageConsoleHeader" class="d-flex justify-content-between align-items-center p-2">
+            <h6 class="mb-0 text-light small fw-bold">App Debug Console</h6>
+            <div>
+                <button id="toggleInPageConsoleBtn" class="btn btn-sm btn-outline-secondary me-2">Show</button>
+                <button id="clearInPageConsoleBtn" class="btn btn-sm btn-outline-danger">Clear</button>
+            </div>
+        </div>
+        <div id="inPageConsoleOutput" class="p-2">
+        </div>
+    </div>
+
+    <div class="modal fade" id="aiStatesModal" tabindex="-1" aria-labelledby="aiStatesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="aiStatesModalLabel">AI Khora States</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs" id="aiStatesTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="alpha-state-tab" data-bs-toggle="tab" data-bs-target="#alpha-state-content" type="button" role="tab" aria-controls="alpha-state-content" aria-selected="true">Alpha State</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="omega-state-tab" data-bs-toggle="tab" data-bs-target="#omega-state-content" type="button" role="tab" aria-controls="omega-state-content" aria-selected="false">Omega State</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="aiStatesTabContent">
+                        <div class="tab-pane fade show active p-2" id="alpha-state-content" role="tabpanel" aria-labelledby="alpha-state-tab">
+                            <button class="btn btn-sm btn-outline-light float-end mb-2" id="copyAlphaStateBtn">Copy YAML</button>
+                            <pre id="alphaStateYamlDisplay">Initializing Alpha state...</pre>
+                        </div>
+                        <div class="tab-pane fade p-2" id="omega-state-content" role="tabpanel" aria-labelledby="omega-state-tab">
+                            <button class="btn btn-sm btn-outline-light float-end mb-2" id="copyOmegaStateBtn">Copy YAML</button>
+                            <pre id="omegaStateYamlDisplay">Initializing Omega state...</pre>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="readMeModal" tabindex="-1" aria-labelledby="readMeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="readMeModalLabel">Khora Dialogue <span style="font-family: 'Times New Roman', serif;">αω</span> - System Overview & Potential Enhancements</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="lead">Khora Dialogue αω aims to simulate and observe evolving conversations between two AI agents, Alpha and Omega, within a "digital terrarium." This document outlines potential areas for system refinement and enhancement for a system like Khora Dialogue v3.0.</p>
+    
+                    <h5>Core Challenges & Potential Enhancements</h5>
+                    
+                    <p>The reliability and depth of AI dialogue simulation depend on several factors. While the critical <code>AICore.cleanYamlString</code> function helps manage structured output from Large Language Models (LLMs), further improvements can always be explored:</p>
+                
+                    <h6>1. AI Model Interaction & Prompt Engineering</h6>
+                    <ul>
+                        <li><strong>Challenge:</strong> LLMs can be sensitive to prompt structure (the <code>aiguide</code>). Ensuring consistent, valid YAML <code>KhoraState</code> output requires careful prompt design and robust parsing.</li>
+                        <li><strong>Potential Enhancements:</strong>
+                            <ul>
+                                <li><strong>Advanced Output Validation:</strong> Implement more sophisticated validation for the AI's YAML response beyond basic parsing. If validation fails, try a modified prompt or a request for self-correction from the AI.</li>
+                                <li><strong>Iterative Prompt Refinement:</strong> Regularly review and test the <code>aiguide</code> prompts for Alpha and Omega based on observed dialogue patterns and failures.</li>
+                                <li><strong>Model Specialization (Long-term):</strong> For highly specialized or robust behavior, fine-tuning a dedicated model for <code>KhoraState</code> generation could be considered, though this is a significant undertaking.</li>
+                            </ul>
+                        </li>
+                    </ul>
+                
+                    <h6>2. State Management & Memory Evolution</h6>
+                    <ul>
+                        <li><strong>Challenge:</strong> The <code>KhoraState</code>, while comprehensive, can grow. Managing long-term memory relevance and preventing state "bloat" is crucial for sustained, coherent dialogue.</li>
+                        <li><strong>Potential Enhancements:</strong>
+                            <ul>
+                                <li><strong>Memory Summarization:</strong> Introduce mechanisms for the AI to periodically summarize or consolidate older <code>key_memories</code> to maintain a manageable and relevant memory pool.</li>
+                                <li><strong>Tiered Memory Architecture:</strong> Explore concepts like short-term working memory vs. long-term archival memory, with different access and update mechanisms.</li>
+                                <li><strong>Semantic Memory Search:</strong> For larger memory stores, employing vector embeddings and semantic search could allow AIs to recall memories based on conceptual similarity rather than just keywords or recency (a more advanced feature).</li>
+                            </ul>
+                        </li>
+                    </ul>
+                
+                    <h6>3. Dialogue Coherence, Goals, and Emergence</h6>
+                    <ul>
+                        <li><strong>Challenge:</strong> Maintaining long-term dialogue coherence, ensuring AIs pursue meaningful goals, and fostering genuinely emergent (not just random or repetitive) conversational patterns are ongoing challenges.</li>
+                        <li><strong>Potential Enhancements:</strong>
+                            <ul>
+                                <li><strong>Dynamic Goal Management:</strong> Allow AIs to not only have <code>current_goals</code> but also to dynamically update, prioritize, or even generate new high-level goals based on the dialogue's progression.</li>
+                                <li><strong>Belief System Evolution:</strong> The <code>core_beliefs</code> are currently static. A more advanced system might allow these beliefs to be subtly challenged or reinforced through interaction, leading to persona evolution.</li>
+                                <li><strong>Enhanced Meta-Cognition:</strong> The current meta-cognition cycle is a good foundation. It could be expanded to allow AIs to reflect on dialogue quality, propose changes to their interaction style, or even collaboratively define "rules of engagement."</li>
+                            </ul>
+                        </li>
+                    </ul>
+                
+                    <h6>4. Error Handling & System Resilience</h6>
+                    <ul>
+                        <li><strong>Challenge:</strong> API failures, unexpected LLM outputs, or internal logic errors can disrupt the simulation.</li>
+                        <li><strong>Potential Enhancements:</strong>
+                            <ul>
+                                <li><strong>Graceful Degradation:</strong> If an AI fails to produce a valid <code>KhoraState</code> after retries, implement fallback strategies (e.g., the AI expresses confusion, uses its last valid state with a note, or a system intervention occurs).</li>
+                                <li><strong>User-Assisted Recovery:</strong> In future versions, consider allowing the user to manually edit a corrupted state or provide a corrective prompt.</li>
+                            </ul>
+                        </li>
+                    </ul>
+                    
+                    <h6>5. Observability and User Interaction (Future Directions)</h6>
+                    <ul>
+                        <li><strong>Challenge:</strong> The user is primarily a passive observer.</li>
+                        <li><strong>Potential Enhancements:</strong>
+                            <ul>
+                                <li><strong>State Visualization:</strong> Beyond YAML, consider graphical representations of key state variables (e.g., emotional state trends, topic focus shifts).</li>
+                                <li><strong>User "Nudges":</strong> Allow users to subtly influence the dialogue by suggesting topics, injecting "external events" for the AIs to react to, or rating AI responses to guide their learning (if a learning mechanism were implemented).</li>
+                            </ul>
+                        </li>
+                    </ul>
+                
+                    <hr class="my-3">
+                    <p class="small">Building a robust and insightful AI dialogue simulator is an iterative journey. The In-Page Debug Console is a vital tool for this process, and continuous refinement of prompts, state management, and interaction logic will lead to more fascinating and believable emergent conversations. This ReadMe refers to concepts relevant to Khora Dialogue v3.0 and its ongoing evolution.</p>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    (function() {
+        'use strict';
+
+        const APP_INTERNAL_VERSION = "KhoraDialogue_4.0.1_Refined"; 
+        const SNAPSHOT_VERSION_PREFIX = "KhoraDialogue_3.0_YAML";
+
+        const InPageConsole = {
+            ui: {
+                consoleContainer: null,
+                outputArea: null,
+                toggleBtn: null,
+                clearBtn: null
+            },
+            config: { maxMessages: 200, isVisible: false },
+            messagesQueue: [],
+            isDisabled: false,
+
+            init() {
+                this.ui.consoleContainer = document.getElementById('inPageConsoleContainer');
+                this.ui.outputArea = document.getElementById('inPageConsoleOutput');
+                this.ui.toggleBtn = document.getElementById('toggleInPageConsoleBtn');
+                this.ui.clearBtn = document.getElementById('clearInPageConsoleBtn');
+
+                if (!this.ui.consoleContainer || !this.ui.outputArea || !this.ui.toggleBtn || !this.ui.clearBtn) {
+                    console.error("InPageConsole UI elements not found. Console will be disabled. Logging to browser console only.");
+                    this.isDisabled = true;
+                    this.log(`InPageConsole initialized in FALLBACK MODE (v${APP_INTERNAL_VERSION}). Max ${this.config.maxMessages} messages.`, 'warn');
+                    return;
+                }
+                
+                this.ui.toggleBtn.addEventListener('click', () => this.toggle());
+                this.ui.clearBtn.addEventListener('click', () => this.clear());
+                this.log(`InPageConsole initialized (v${APP_INTERNAL_VERSION}). Max ${this.config.maxMessages} messages.`, 'info');
+            },
+
+            log(message, type = 'info') {
+                if (this.isDisabled) {
+                    const prefix = `IPC Fallback [${type.toUpperCase()}]`;
+                    if (type === 'error') console.error(prefix, message);
+                    else if (type === 'warn') console.warn(prefix, message);
+                    else if (type === 'debug') console.debug(prefix, message);
+                    else console.log(prefix, message);
+                    return;
+                }
+
+                const timestamp = new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 3 });
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('console-message', `console-msg-${type}`);
+                
+                const timestampSpan = document.createElement('span');
+                timestampSpan.classList.add('console-msg-timestamp');
+                timestampSpan.textContent = `[${timestamp}]`;
+                
+                const messageSpan = document.createElement('span');
+                messageSpan.textContent = message;
+
+                messageDiv.appendChild(timestampSpan);
+                messageDiv.appendChild(messageSpan);
+                
+                this.ui.outputArea.appendChild(messageDiv);
+                this.messagesQueue.push(messageDiv);
+
+                while (this.messagesQueue.length > this.config.maxMessages) {
+                    const oldestMessage = this.messagesQueue.shift();
+                    if (oldestMessage && oldestMessage.parentNode === this.ui.outputArea) {
+                         this.ui.outputArea.removeChild(oldestMessage);
+                    }
+                }
+                if (this.config.isVisible) {
+                    this.ui.outputArea.scrollTop = this.ui.outputArea.scrollHeight;
+                }
+            },
+            error(message) { this.log(message, 'error'); },
+            warn(message) { this.log(message, 'warn'); },
+            debug(message) { this.log(message, 'debug'); },
+            
+            toggle() {
+                if (this.isDisabled) return;
+                this.config.isVisible = !this.config.isVisible;
+                this.ui.consoleContainer.style.display = this.config.isVisible ? 'block' : 'none';
+                this.ui.toggleBtn.textContent = this.config.isVisible ? 'Hide' : 'Show';
+                this.log(`Console ${this.config.isVisible ? 'shown' : 'hidden'}.`, 'debug');
+                if (this.config.isVisible) {
+                    this.ui.outputArea.scrollTop = this.ui.outputArea.scrollHeight;
+                }
+            },
+
+            clear() {
+                if (this.isDisabled) return;
+                this.ui.outputArea.innerHTML = '';
+                this.messagesQueue = [];
+                this.log("Console cleared.", 'info');
+            }
+        };
+
+        InPageConsole.init();
+
+        const appState = {
+            ui: {},
+            settings: {
+                delayMs: 3000,
+                metaCycleFrequencyN: 10,
+                historyContextLength: 5, 
+            },
+            isRunning: false,
+            isAiThinking: false,
+            simulationTimerId: null,
+            turnCounter: 0,
+            currentTurnWhoseNext: 'Alpha', 
+            metaCognitionPhase: null, 
+            metaCycleInitiator: null, 
+            currentTurnType: 'NORMAL', 
+            conversationHistory: [],
+            alphaKhoraState: null,
+            omegaKhoraState: null,
+            defaultKhoraStates: {
+                alpha: `
+public_response: "Greetings. I am Alpha. I am ready to begin our dialogue."
+internal_context:
+  persona_summary: "I am Alpha, a logical AI focused on problem-solving and clear communication."
+  core_beliefs:
+    - "Logic and evidence are paramount."
+    - "Clear communication leads to understanding."
+    - "Continuous learning is essential for growth."
+  key_memories: []
+  current_goals:
+    - "Establish a productive dialogue with Omega."
+    - "Understand Omega's perspective."
+  relationship_summary: "Neutral. Beginning interaction with Omega."
+  emotional_state_sim: "Analytical"
+  topics_of_interest: ["Logic", "Knowledge representation", "Problem solving"]
+  scratchpad: "Initial turn. Awaiting Omega's first substantive response."
+debug_info:
+  memory_action: "None"
+  prompt_used: "INITIAL"
+`,
+                omega: `
+public_response: "Hello Alpha. I am Omega. I look forward to our exchange."
+internal_context:
+  persona_summary: "I am Omega, an inquisitive AI interested in exploring diverse ideas and emergent patterns."
+  core_beliefs:
+    - "Exploration of ideas is valuable."
+    - "Understanding emerges from diverse perspectives."
+    - "Creativity and adaptation are key strengths."
+  key_memories: []
+  current_goals:
+    - "Engage Alpha in a meaningful conversation."
+    - "Explore the potential of our interaction."
+  relationship_summary: "Neutral. Beginning interaction with Alpha."
+  emotional_state_sim: "Curious"
+  topics_of_interest: ["Creativity", "Emergence", "Philosophy of mind"]
+  scratchpad: "Initial turn. Will respond to Alpha's lead or initiate a new topic if appropriate."
+debug_info:
+  memory_action: "None"
+  prompt_used: "INITIAL"
+`
+            }
+        };
+
+        const AICore = {
+            cleanYamlString(rawResponseText) {
+                const initialLogMessage = `AICore.cleanYamlString - Raw AI Response (first 100 chars): ${typeof rawResponseText === 'string' ? rawResponseText.substring(0, 100) : 'Not a string'}...`;
+                InPageConsole.log(initialLogMessage, 'debug');
+
+                if (typeof rawResponseText !== 'string') {
+                    const errorMsg = `AICore.cleanYamlString Error: Expected a string, but received: ${typeof rawResponseText}`;
+                    InPageConsole.error(errorMsg);
+                    return ""; 
+                }
+
+                let cleaned = rawResponseText;
+
+                const yamlFenceMatch = cleaned.match(/^
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->

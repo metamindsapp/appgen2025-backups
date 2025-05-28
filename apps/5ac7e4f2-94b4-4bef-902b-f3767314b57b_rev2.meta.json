@@ -1,0 +1,17 @@
+{
+  "projectId": "5ac7e4f2-94b4-4bef-902b-f3767314b57b",
+  "revisionString": "2",
+  "projectNameDisplay": "cage",
+  "userPromptForThisRevision": "the balls should collide with each other too",
+  "basedOnRevisionString": "1",
+  "savedAt": "2025-05-26T20:36:04.775Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/dalle_d0bd7f4f-f45.png",
+      "url": "/generated_images/dalle_d0bd7f4f-f45.png",
+      "description": "A very subtle, abstract background texture for a physics game. Light theme. Should evoke a sense of clean, modern, slightly technological space. Perhaps a soft, blurred geometric pattern or a gentle light gradient with minimal noise. Colors should be very light grays, off-whites, and possibly a hint of pale cool blue (e.g., hex #f0f4f8, #e8edf2). It must not be distracting, primarily serving as a non-plain backdrop for the canvas. High resolution to look good scaled.",
+      "purpose": "Subtle background for the game canvas to enhance visual appeal. It will be drawn onto the canvas as the first layer.",
+      "isNewlyGenerated": true
+    }
+  ]
+}
