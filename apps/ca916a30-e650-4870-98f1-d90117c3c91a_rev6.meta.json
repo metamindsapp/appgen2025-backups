@@ -1,0 +1,10 @@
+{
+  "projectId": "ca916a30-e650-4870-98f1-d90117c3c91a",
+  "revisionString": "6",
+  "projectNameDisplay": "Particle simulation ",
+  "projectType": "game",
+  "userPromptForThisRevision": "Hmm electrostatics aren’t working still. Change that to a better em simulation I know that means you’ll also need to give particles mass based on size and collision. Also dropdown in settings isn’t quite right as it doesn’t select the item I touch haha",
+  "basedOnRevisionString": "5",
+  "savedAt": "2025-05-29T17:23:59.471Z",
+  "imageAssets": []
+}

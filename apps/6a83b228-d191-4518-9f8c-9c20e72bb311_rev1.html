@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beekeeping Tycoon</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow-x: hidden;
+            background-color: #1A202C;
+            color: #E2E8F0;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        #app {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        main {
+            flex: 1;
+            padding-bottom: 20px;
+        }
+        .nav-wrapper {
+            background-color: #2D3748;
+            box-shadow: none;
+        }
+        .card {
+            background-color: #2D3748;
+            color: #E2E8F0;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        .card-content {
+            color: #E2E8F0;
+        }
+        .card .card-title {
+            color: #E2E8F0;
+            font-weight: 500;
+        }
+        .btn-large.amber.darken-2, .btn.amber.darken-2 {
+            background-color: #ffb300 !important;
+            color: #1A202C !important;
+            transition: background-color 0.3s ease;
+        }
+        .btn-large.amber.darken-2:hover, .btn.amber.darken-2:hover {
+            background-color: #ffa000 !important;
+        }
+        .btn.red.darken-2 {
+            background-color: #d32f2f !important;
+            color: #E2E8F0 !important;
+        }
+        .btn.green.darken-2 {
+            background-color: #388e3c !important;
+            color: #E2E8F0 !important;
+        }
+        .btn-flat.white-text {
+            color: #E2E8F0 !important;
+        }
+        .input-field input[type="text"]:not(.browser-default),
+        .input-field input[type="text"]:not(.browser-default):focus {
+            border-bottom: 1px solid #E2E8F0;
+            box-shadow: 0 1px 0 0 #E2E8F0;
+            color: #E2E8F0;
+        }
+        .input-field input[type="text"]:not(.browser-default):focus + label {
+            color: #ffb300 !important;
+        }
+        .input-field label {
+            color: #E2E8F0;
+        }
+        .tabs {
+            background-color: #2D3748;
+        }
+        .tabs .tab a {
+            color: #E2E8F0;
+            background-color: #2D3748;
+        }
+        .tabs .tab a:hover {
+            color: #ffb300;
+        }
+        .tabs .tab a.active {
+            color: #ffb300;
+            background-color: #2D3748;
+        }
+        .tabs .indicator {
+            background-color: #ffb300;
+        }
+        .modal {
+            background-color: #1A202C;
+            color: #E2E8F0;
+            border-radius: 8px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+        }
+        .modal-content h4 {
+            color: #E2E8F0;
+        }
+        .modal-footer {
+            background-color: #2D3748;
+            border-top: 1px solid #3A455A;
+            padding: 10px 20px;
+        }
+        .modal-footer .btn-flat {
+            color: #ffb300;
+        }
+        .collection {
+            background-color: #2D3748;
+            border: none;
+        }
+        .collection .collection-item {
+            background-color: #3A455A;
+            color: #E2E8F0;
+            border-bottom: 1px solid #4A5568;
+        }
+        .collection .collection-item:last-child {
+            border-bottom: none;
+        }
+        .collection .collection-item.avatar {
+            min-height: auto;
+            padding-left: 0;
+        }
+        .collection .collection-item img.circle {
+            margin-right: 15px;
+        }
+        .preloader-wrapper.small {
+            width: 20px;
+            height: 20px;
+            vertical-align: middle;
+        }
+        .spinner-layer.spinner-yellow-only {
+            border-color: #ffb300;
+        }
+        .ml-2 { margin-left: 0.5rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-3 { margin-top: 1rem; }
+        .text-center { text-align: center; }
+        i.material-icons.tiny {
+            font-size: 1.2rem;
+            vertical-align: middle;
+            margin-right: 5px;
+        }
+        .divider {
+            background-color: #4A5568;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body class="grey darken-4 white-text">
+    <div id="app">
+        <nav class="grey darken-3 z-depth-0">
+            <div class="nav-wrapper">
+                <a href="#" class="brand-logo center">Beekeeping Tycoon</a>
+                <ul id="nav-mobile" class="right hide-on-med-and-down">
+                    <li><a @click="openSettingsModal" class="waves-effect waves-light btn-flat white-text"><i class="material-icons left">settings</i>Settings</a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <main class="container" style="margin-top: 20px;">
+            <div class="row">
+                <div class="col s12 m4 l3">
+                    <div class="card grey darken-3">
+                        <div class="card-content white-text">
+                            <span class="card-title">Resources</span>
+                            <p><i class="material-icons tiny">local_florist</i> Honey: {{ formatNumber(resources.honey) }} ({{ formatNumber(productionRates.honeyPerSecond) }}/s)</p>
+                            <p><i class="material-icons tiny">group</i> Worker Bees: {{ formatNumber(upgrades.workerBee.level) }}</p>
+                            <p><i class="material-icons tiny">texture</i> Wax: {{ formatNumber(resources.wax) }} ({{ formatNumber(productionRates.waxPerSecond) }}/s)</p>
+                            <p><i class="material-icons tiny">star_rate</i> Royal Jelly: {{ formatNumber(resources.royalJelly) }} ({{ formatNumber(productionRates.royalJellyPerSecond) }}/s)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col s12 m8 l6">
+                    <div class="card grey darken-3 text-center" style="height: 100%;">
+                        <div class="card-content white-text center-align">
+                            <span class="card-title">Your Apiary</span>
+                            <img :src="currentHiveImage" alt="Current Beehive" class="responsive-img" style="max-height: 250px; margin-bottom: 20px;">
+                            <button @click="clickHoney" class="btn-large amber darken-2 waves-effect waves-light" style="width: 100%; margin-bottom: 10px;">
+                                <i class="material-icons left">add</i> Harvest Honey
+                            </button>
+                            <p class="flow-text">Click for {{ formatNumber(productionRates.honeyPerClick) }} Honey</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col s12 l3">
+                    <div class="card grey darken-3">
+                        <div class="card-content white-text">
+                            <ul class="tabs grey darken-3">
+                                <li class="tab col s4"><a class="active white-text" href="#bees-tab">Bees</a></li>
+                                <li class="tab col s4"><a class="white-text" href="#hive-tab">Hive</a></li>
+                                <li class="tab col s4"><a class="white-text" href="#rare-tab">Rare Bees</a></li>
+                            </ul>
+                            <div id="bees-tab" class="col s12">
+                                <h6 class="white-text">Worker Bees</h6>
+                                <button @click="buyUpgrade('workerBee')" :disabled="resources.honey < upgradeCosts.workerBee" class="btn amber darken-2 waves-effect waves-light" style="width: 100%; margin-bottom: 5px;">
+                                    Buy Worker Bee ({{ formatNumber(upgradeCosts.workerBee) }} Honey)
+                                </button>
+                                <p class="white-text">Current: {{ formatNumber(upgrades.workerBee.level) }} Bees</p>
+                                <div class="divider"></div>
+                                <h6 class="white-text">Queen Bee</h6>
+                                <button @click="buyUpgrade('queenBee')" :disabled="resources.honey < upgradeCosts.queenBee || resources.wax < upgradeCosts.queenBeeWax" class="btn amber darken-2 waves-effect waves-light" style="width: 100%; margin-bottom: 5px;">
+                                    Buy Queen Bee ({{ formatNumber(upgradeCosts.queenBee) }} Honey, {{ formatNumber(upgradeCosts.queenBeeWax) }} Wax)
+                                </button>
+                                <p class="white-text">Current: {{ formatNumber(upgrades.queenBee.level) }} Queens</p>
+                            </div>
+                            <div id="hive-tab" class="col s12">
+                                <h6 class="white-text">Hive Efficiency</h6>
+                                <button @click="buyUpgrade('hiveEfficiency')" :disabled="resources.honey < upgradeCosts.hiveEfficiency" class="btn amber darken-2 waves-effect waves-light" style="width: 100%; margin-bottom: 5px;">
+                                    Upgrade Efficiency ({{ formatNumber(upgradeCosts.hiveEfficiency) }} Honey)
+                                </button>
+                                <p class="white-text">Current Level: {{ formatNumber(upgrades.hiveEfficiency.level) }}</p>
+                                <div class="divider"></div>
+                                <h6 class="white-text">Wax Production</h6>
+                                <button @click="buyUpgrade('waxProduction')" :disabled="resources.honey < upgradeCosts.waxProduction" class="btn amber darken-2 waves-effect waves-light" style="width: 100%; margin-bottom: 5px;">
+                                    Unlock/Upgrade Wax ({{ formatNumber(upgradeCosts.waxProduction) }} Honey)
+                                </button>
+                                <p class="white-text">Current Level: {{ formatNumber(upgrades.waxProduction.level) }}</p>
+                                <div class="divider"></div>
+                                <h6 class="white-text">Apiary Expansion</h6>
+                                <button @click="buyUpgrade('apiaryExpansion')" :disabled="resources.honey < upgradeCosts.apiaryExpansion || resources.wax < upgradeCosts.apiaryExpansionWax" class="btn amber darken-2 waves-effect waves-light" style="width: 100%; margin-bottom: 5px;">
+                                    Expand Apiary ({{ formatNumber(upgradeCosts.apiaryExpansion) }} Honey, {{ formatNumber(upgradeCosts.apiaryExpansionWax) }} Wax)
+                                </button>
+                                <p class="white-text">Current Level: {{ formatNumber(upgrades.apiaryExpansion.level) }}</p>
+                            </div>
+                            <div id="rare-tab" class="col s12">
+                                <h6 class="white-text">Rare Bee Incubation</h6>
+                                <button @click="openImageGeneratorModal" :disabled="resources.royalJelly < 100" class="btn amber darken-2 waves-effect waves-light" style="width: 100%; margin-bottom: 5px;">
+                                    Generate Rare Bee (100 Royal Jelly)
+                                </button>
+                                <div class="divider"></div>
+                                <h6 class="white-text">Your Rare Bees:</h6>
+                                <ul class="collection grey darken-3" v-if="rareBeesUnlocked.length > 0">
+                                    <li class="collection-item grey darken-2 white-text" v-for="bee in rareBeesUnlocked" :key="bee.name">
+                                        <img :src="bee.imageUrl" :alt="bee.name" class="circle" style="width: 40px; height: 40px; vertical-align: middle; margin-right: 10px;">
+                                        {{ bee.name }} <br>
+                                        <span class="grey-text text-lighten-2" style="font-size: 0.8em;">Bonus: {{ formatNumber(bee.bonusValue * 100) }}% {{ bee.bonusType === 'honeyProduction' ? 'Honey' : 'Wax' }}</span>
+                                    </li>
+                                </ul>
+                                <p v-else class="white-text">No rare bees yet. Generate one!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <div id="settings-modal" class="modal grey darken-4 white-text">
+            <div class="modal-content">
+                <h4 class="white-text">Settings</h4>
+                <button @click="saveGame" class="btn amber darken-2 waves-effect waves-light">Save Game</button>
+                <button @click="loadGame" class="btn amber darken-2 waves-effect waves-light ml-2">Load Game</button>
+                <button @click="resetGame" class="btn red darken-2 waves-effect waves-light ml-2">Reset Game</button>
+                <p class="grey-text text-lighten-2 mt-3">Game auto-saves every 30 seconds.</p>
+            </div>
+            <div class="modal-footer grey darken-4">
+                <a href="#!" class="modal-close waves-effect waves-green btn-flat white-text">Close</a>
+            </div>
+        </div>
+
+        <div id="image-gen-modal" class="modal grey darken-4 white-text">
+            <div class="modal-content">
+                <h4 class="white-text">Generate Rare Bee Image</h4>
+                <p class="grey-text text-lighten-2">Cost: 100 Royal Jelly</p>
+                <div class="input-field">
+                    <input id="image_prompt" type="text" class="validate white-text" v-model="imagePrompt">
+                    <label for="image_prompt">Describe your rare bee (e.g., "A glowing bee with blue wings")</label>
+                </div>
+                <button @click="generateRareBeeImage" :disabled="isGeneratingImage || !imagePrompt || resources.royalJelly < 100" class="btn amber darken-2 waves-effect waves-light">
+                    <span v-if="isGeneratingImage">Generating... <div class="preloader-wrapper small active"><div class="spinner-layer spinner-yellow-only"><div class="circle-clipper left"><div class="circle"></div></div><div class="gap-patch"><div class="circle"></div></div><div class="circle-clipper right"><div class="circle"></div></div></div></div></span>
+                    <span v-else>Generate Bee</span>
+                </button>
+                <p v-if="imageGenerationError" class="red-text">{{ imageGenerationError }}</p>
+                <div v-if="generatedImageUrl" class="mt-3 center-align">
+                    <h5 class="white-text">Generated Rare Bee:</h5>
+                    <img :src="generatedImageUrl" alt="Generated Rare Bee" class="responsive-img" style="max-height: 200px; border: 2px solid #ffb300;">
+                    <button @click="unlockGeneratedBee" class="btn green darken-2 waves-effect waves-light mt-2">Add to Collection</button>
+                </div>
+            </div>
+            <div class="modal-footer grey darken-4">
+                <a href="#!" class="modal-close waves-effect waves-green btn-flat white-text">Close</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script>
+        const app = Vue.createApp({
+            data() {
+                return {
+                    resources: {
+                        honey: 0,
+                        wax: 0,
+                        royalJelly: 0,
+                    },
+                    productionRates: {
+                        honeyPerClick: 1,
+                        honeyPerSecond: 0,
+                        waxPerSecond: 0,
+                        royalJellyPerSecond: 0.001,
+                    },
+                    upgrades: {
+                        workerBee: { level: 0, baseCost: 10, costMultiplier: 1.15, honeyPerSecondBase: 0.1 },
+                        queenBee: { level: 0, baseCostHoney: 1000, baseCostWax: 100, costMultiplier: 1.2, honeyMultiplier: 1.5 },
+                        hiveEfficiency: { level: 0, baseCost: 50, costMultiplier: 1.2, productionMultiplier: 1.05 },
+                        waxProduction: { level: 0, baseCost: 200, costMultiplier: 1.3, waxPerSecondBase: 0.05 },
+                        apiaryExpansion: { level: 0, baseCostHoney: 5000, baseCostWax: 500, costMultiplier: 1.5, honeyMultiplier: 2 },
+                    },
+                    rareBeesUnlocked: [],
+
+                    gameLoopInterval: null,
+                    autoSaveInterval: null,
+                    settingsModalInstance: null,
+                    imageGenModalInstance: null,
+                    imagePrompt: '',
+                    generatedImageUrl: '',
+                    isGeneratingImage: false,
+                    imageGenerationError: '',
+                    hiveImages: [
+                        '/generated_images/imagen3_1a434d1d-39f.png',
+                        '/generated_images/imagen3_8d3dc55d-bd8.png',
+                        '/generated_images/imagen3_7397e9ce-ca8.png'
+                    ],
+                };
+            },
+            computed: {
+                upgradeCosts() {
+                    return {
+                        workerBee: Math.floor(this.upgrades.workerBee.baseCost * Math.pow(this.upgrades.workerBee.costMultiplier, this.upgrades.workerBee.level)),
+                        queenBee: Math.floor(this.upgrades.queenBee.baseCostHoney * Math.pow(this.upgrades.queenBee.costMultiplier, this.upgrades.queenBee.level)),
+                        queenBeeWax: Math.floor(this.upgrades.queenBee.baseCostWax * Math.pow(this.upgrades.queenBee.costMultiplier, this.upgrades.queenBee.level)),
+                        hiveEfficiency: Math.floor(this.upgrades.hiveEfficiency.baseCost * Math.pow(this.upgrades.hiveEfficiency.costMultiplier, this.upgrades.hiveEfficiency.level)),
+                        waxProduction: Math.floor(this.upgrades.waxProduction.baseCost * Math.pow(this.upgrades.waxProduction.costMultiplier, this.upgrades.waxProduction.level)),
+                        apiaryExpansion: Math.floor(this.upgrades.apiaryExpansion.baseCostHoney * Math.pow(this.upgrades.apiaryExpansion.costMultiplier, this.upgrades.apiaryExpansion.level)),
+                        apiaryExpansionWax: Math.floor(this.upgrades.apiaryExpansion.baseCostWax * Math.pow(this.upgrades.apiaryExpansion.costMultiplier, this.upgrades.apiaryExpansion.level)),
+                    };
+                },
+                currentHiveImage() {
+                    const index = Math.min(this.upgrades.apiaryExpansion.level, this.hiveImages.length - 1);
+                    return this.hiveImages[index];
+                }
+            },
+            methods: {
+                initGame() {
+                    this.calculateProductionRates();
+                    this.startGameLoop();
+                    this.startAutoSave();
+                },
+                startGameLoop() {
+                    if (this.gameLoopInterval) clearInterval(this.gameLoopInterval);
+                    this.gameLoopInterval = setInterval(() => {
+                        this.resources.honey = parseFloat((this.resources.honey + this.productionRates.honeyPerSecond).toFixed(2));
+                        this.resources.wax = parseFloat((this.resources.wax + this.productionRates.waxPerSecond).toFixed(2));
+                        this.resources.royalJelly = parseFloat((this.resources.royalJelly + this.productionRates.royalJellyPerSecond).toFixed(4));
+                    }, 1000);
+                },
+                startAutoSave() {
+                    if (this.autoSaveInterval) clearInterval(this.autoSaveInterval);
+                    this.autoSaveInterval = setInterval(() => {
+                        this.saveGame();
+                    }, 30 * 1000);
+                },
+                calculateProductionRates() {
+                    let honeyPerSecond = this.upgrades.workerBee.level * this.upgrades.workerBee.honeyPerSecondBase;
+                    let waxPerSecond = this.upgrades.waxProduction.level * this.upgrades.waxProduction.waxPerSecondBase;
+
+                    honeyPerSecond *= (1 + (this.upgrades.queenBee.level * this.upgrades.queenBee.honeyMultiplier));
+                    honeyPerSecond *= (1 + (this.upgrades.hiveEfficiency.level * this.upgrades.hiveEfficiency.productionMultiplier));
+                    honeyPerSecond *= (1 + (this.upgrades.apiaryExpansion.level * this.upgrades.apiaryExpansion.honeyMultiplier));
+
+                    this.rareBeesUnlocked.forEach(bee => {
+                        if (bee.bonusType === 'honeyProduction') {
+                            honeyPerSecond *= (1 + bee.bonusValue);
+                        } else if (bee.bonusType === 'waxProduction') {
+                            waxPerSecond += (this.productionRates.waxPerSecond * bee.bonusValue);
+                        }
+                    });
+
+                    this.productionRates.honeyPerSecond = parseFloat(honeyPerSecond.toFixed(2));
+                    this.productionRates.waxPerSecond = parseFloat(waxPerSecond.toFixed(2));
+                },
+                clickHoney() {
+                    this.resources.honey += this.productionRates.honeyPerClick;
+                },
+                buyUpgrade(type) {
+                    let upgrade = this.upgrades[type];
+                    let costHoney = this.upgradeCosts[type];
+                    let costWax = 0;
+
+                    if (type === 'queenBee') {
+                        costWax = this.upgradeCosts.queenBeeWax;
+                    } else if (type === 'apiaryExpansion') {
+                        costWax = this.upgradeCosts.apiaryExpansionWax;
+                    }
+
+                    if (this.resources.honey >= costHoney && this.resources.wax >= costWax) {
+                        this.resources.honey -= costHoney;
+                        this.resources.wax -= costWax;
+                        upgrade.level++;
+                        this.calculateProductionRates();
+                        M.toast({html: `Upgrade ${type} purchased!`, classes: 'amber darken-2'});
+                    } else {
+                        M.toast({html: `Not enough resources for ${type} upgrade!`, classes: 'red darken-2'});
+                    }
+                },
+                saveGame() {
+                    try {
+                        const gameState = {
+                            resources: this.resources,
+                            upgrades: this.upgrades,
+                            rareBeesUnlocked: this.rareBeesUnlocked,
+                        };
+                        localStorage.setItem('beekeepingGame', JSON.stringify(gameState));
+                        M.toast({html: 'Game Saved!', classes: 'green darken-2'});
+                    } catch (e) {
+                        console.error('Error saving game:', e);
+                        M.toast({html: 'Error saving game!', classes: 'red darken-2'});
+                    }
+                },
+                loadGame() {
+                    try {
+                        const savedState = localStorage.getItem('beekeepingGame');
+                        if (savedState) {
+                            const gameState = JSON.parse(savedState);
+                            
+                            this.resources = Object.assign({}, this.$options.data().resources, gameState.resources);
+                            for (const key in this.$options.data().upgrades) {
+                                if (gameState.upgrades && gameState.upgrades[key]) {
+                                    this.upgrades[key] = Object.assign({}, this.$options.data().upgrades[key], gameState.upgrades[key]);
+                                } else {
+                                    this.upgrades[key] = JSON.parse(JSON.stringify(this.$options.data().upgrades[key]));
+                                }
+                            }
+                            this.rareBeesUnlocked = gameState.rareBeesUnlocked || [];
+
+                            this.calculateProductionRates();
+                            M.toast({html: 'Game Loaded!', classes: 'green darken-2'});
+                        } else {
+                            M.toast({html: 'No saved game found, starting new game.', classes: 'blue darken-2'});
+                        }
+                    } catch (e) {
+                        console.error('Error loading game:', e);
+                        M.toast({html: 'Error loading game, starting new game.', classes: 'red darken-2'});
+                        this.resetGame();
+                    }
+                },
+                resetGame() {
+                    if (confirm('Are you sure you want to reset your game? This cannot be undone!')) {
+                        localStorage.removeItem('beekeepingGame');
+                        Object.assign(this.$data, this.$options.data());
+                        this.initGame();
+                        M.toast({html: 'Game Reset!', classes: 'red darken-2'});
+                    }
+                },
+                formatNumber(num) {
+                    if (num === undefined || num === null) return '0';
+                    if (num < 1000) return num.toFixed(num % 1 === 0 ? 0 : (num === 0 ? 0 : 2));
+                    const si = [
+                        { value: 1, symbol: "" },
+                        { value: 1E3, symbol: "k" },
+                        { value: 1E6, symbol: "M" },
+                        { value: 1E9, symbol: "B" },
+                        { value: 1E12, symbol: "T" },
+                        { value: 1E15, symbol: "P" },
+                        { value: 1E18, symbol: "E" }
+                    ];
+                    const rx = /\.0+$|(\.[0-9]*[1-9])0+$/;
+                    let i;
+                    for (i = si.length - 1; i > 0; i--) {
+                        if (num >= si[i].value) {
+                            break;
+                        }
+                    }
+                    return (num / si[i].value).toFixed(2).replace(rx, "$1") + si[i].symbol;
+                },
+                openSettingsModal() {
+                    this.settingsModalInstance.open();
+                },
+                openImageGeneratorModal() {
+                    if (this.resources.royalJelly >= 100) {
+                        this.imagePrompt = '';
+                        this.generatedImageUrl = '';
+                        this.imageGenerationError = '';
+                        this.imageGenModalInstance.open();
+                    } else {
+                        M.toast({html: 'Need 100 Royal Jelly to generate a Rare Bee!', classes: 'red darken-2'});
+                    }
+                },
+                async generateRareBeeImage() {
+                    if (!this.imagePrompt) {
+                        this.imageGenerationError = 'Please enter a description for your rare bee.';
+                        return;
+                    }
+                    if (this.resources.royalJelly < 100) {
+                        this.imageGenerationError = 'Not enough Royal Jelly (100 required).';
+                        return;
+                    }
+
+                    this.isGeneratingImage = true;
+                    this.imageGenerationError = '';
+                    this.generatedImageUrl = '';
+
+                    try {
+                        const response = await fetch('/api/generate-image-on-demand', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                prompt: `A stylized, beautiful bee with the following characteristics: ${this.imagePrompt}. Dark theme, detailed, digital art, isometric view.`,
+                                aspectRatio: '1:1'
+                            })
+                        });
+                        const data = await response.json();
+
+                        if (data.success) {
+                            this.generatedImageUrl = data.imageUrl;
+                            M.toast({html: 'Rare Bee image generated! Add it to your collection.', classes: 'green darken-2'});
+                        } else {
+                            this.imageGenerationError = data.error || 'Failed to generate image.';
+                            M.toast({html: `Image generation failed: ${this.imageGenerationError}`, classes: 'red darken-2'});
+                        }
+                    } catch (error) {
+                        console.error('Error calling image generation API:', error);
+                        this.imageGenerationError = 'Network error or API unavailable.';
+                        M.toast({html: `Network error: ${this.imageGenerationError}`, classes: 'red darken-2'});
+                    } finally {
+                        this.isGeneratingImage = false;
+                    }
+                },
+                unlockGeneratedBee() {
+                    if (this.generatedImageUrl) {
+                        this.resources.royalJelly -= 100;
+                        const newBee = {
+                            name: this.imagePrompt.length > 30 ? this.imagePrompt.substring(0, 27) + '...' : this.imagePrompt,
+                            imageUrl: this.generatedImageUrl,
+                            description: this.imagePrompt,
+                            bonusType: Math.random() < 0.7 ? 'honeyProduction' : 'waxProduction',
+                            bonusValue: Math.random() * 0.05 + 0.01
+                        };
+                        this.rareBeesUnlocked.push(newBee);
+                        this.calculateProductionRates();
+                        this.generatedImageUrl = '';
+                        this.imagePrompt = '';
+                        M.toast({html: `Rare Bee "${newBee.name}" added to collection!`, classes: 'blue darken-2'});
+                        this.imageGenModalInstance.close();
+                    }
+                }
+            },
+            mounted() {
+                const settingsModalElem = document.getElementById('settings-modal');
+                this.settingsModalInstance = M.Modal.init(settingsModalElem);
+
+                const imageGenModalElem = document.getElementById('image-gen-modal');
+                this.imageGenModalInstance = M.Modal.init(imageGenModalElem, {
+                    onOpenEnd: () => {
+                        M.updateTextFields();
+                    }
+                });
+
+                const tabsElem = document.querySelector('.tabs');
+                M.Tabs.init(tabsElem);
+
+                this.loadGame();
+                this.initGame();
+            },
+            beforeUnmount() {
+                clearInterval(this.gameLoopInterval);
+                clearInterval(this.autoSaveInterval);
+            }
+        });
+
+        app.mount('#app');
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

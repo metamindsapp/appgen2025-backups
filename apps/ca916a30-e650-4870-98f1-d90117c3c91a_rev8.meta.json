@@ -1,0 +1,10 @@
+{
+  "projectId": "ca916a30-e650-4870-98f1-d90117c3c91a",
+  "revisionString": "8",
+  "projectNameDisplay": "Particle simulation ",
+  "projectType": "game",
+  "userPromptForThisRevision": "Okay it’s working! But I think it’s backwards for the electromagnetic interactions, like repels like but right now seems to attract",
+  "basedOnRevisionString": "7",
+  "savedAt": "2025-05-29T17:40:54.792Z",
+  "imageAssets": []
+}

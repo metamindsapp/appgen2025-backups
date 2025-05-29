@@ -1,0 +1,10 @@
+{
+  "projectId": "ca916a30-e650-4870-98f1-d90117c3c91a",
+  "revisionString": "7",
+  "projectNameDisplay": "Particle simulation ",
+  "projectType": "game",
+  "userPromptForThisRevision": "Don’t use dropdown in settings. Also the electro magnetic interactions between particles still isn’t working. You can do this",
+  "basedOnRevisionString": "6",
+  "savedAt": "2025-05-29T17:32:00.104Z",
+  "imageAssets": []
+}
