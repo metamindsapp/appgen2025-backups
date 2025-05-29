@@ -1,0 +1,18 @@
+{
+  "projectId": "d9615b74-b84f-4f0d-aac4-4810e1b3ba77",
+  "revisionString": "1",
+  "projectNameDisplay": "Lemonade tycoon game",
+  "projectType": "game",
+  "userPromptForThisRevision": "UI-based 'game' that runs one hour per 10sec. lots of features and upgrades. ai generated reviews from 1/100 customers too. full featured",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-05-29T16:22:36.404Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/imagen3_f2779cb6-de0.png",
+      "url": "/generated_images/imagen3_f2779cb6-de0.png",
+      "description": "A charming, stylized, slightly retro-inspired logo for a lemonade stand game. It should feature a cartoon-style lemon, perhaps with a friendly face or a straw, and a small, simple lemonade glass. The text 'Lemonade Tycoon' should be prominently featured, with 'Squeeze the Day!' as a smaller tagline. The color palette should be vibrant yellows, light blues, and a touch of green against a dark, inviting background (to match the dark theme). The art style should be clean and engaging, suitable for a game logo. No complex scenes, just a clear logo. Make it feel inviting and slightly whimsical.",
+      "purpose": "Main menu logo for the Lemonade Tycoon game",
+      "isNewlyGenerated": true
+    }
+  ]
+}

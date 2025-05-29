@@ -1,0 +1,10 @@
+{
+  "projectId": "ca916a30-e650-4870-98f1-d90117c3c91a",
+  "revisionString": "2",
+  "projectNameDisplay": "Particle simulation ",
+  "projectType": "game",
+  "userPromptForThisRevision": "[2025-05-29T16:39:28.585Z] [UNCAUGHT_ERROR] TypeError: undefined is not an object (evaluating 'M.FormSelect.getInstance(this.dom.interactionModeSelect).input') at https://beepboopbeepgen.replit.app/apps/ca916a30-e650-4870-98f1-d90117c3c91a_rev1.html#!:702:73 updateUIFromSettings@https://beepboopbeepgen.replit.app/apps/ca916a30-e650-4870-98f1-d90117c3c91a_rev1.html:702:73\r\n@https://beepboopbeepgen.replit.app/apps/ca916a30-e650-4870-98f1-d90117c3c91a_rev1.html:739:43\r\n\r\nAlso it should have a reset button right on screen, and an optional reset every x seconds option. And particlenlifetime options should be much longer. And an optional for adding more particles over time. And for varied sizes and colors",
+  "basedOnRevisionString": "1",
+  "savedAt": "2025-05-29T16:44:00.704Z",
+  "imageAssets": []
+}

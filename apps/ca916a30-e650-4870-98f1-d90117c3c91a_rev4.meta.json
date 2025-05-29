@@ -1,0 +1,10 @@
+{
+  "projectId": "ca916a30-e650-4870-98f1-d90117c3c91a",
+  "revisionString": "4",
+  "projectNameDisplay": "Particle simulation ",
+  "projectType": "game",
+  "userPromptForThisRevision": "I think you broke interaction to create and auto creation. Also can we have 2 base types of particle + and - with very weak electrostatic effects? ",
+  "basedOnRevisionString": "3",
+  "savedAt": "2025-05-29T17:09:30.485Z",
+  "imageAssets": []
+}

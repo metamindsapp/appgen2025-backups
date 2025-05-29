@@ -1,0 +1,10 @@
+{
+  "projectId": "ca916a30-e650-4870-98f1-d90117c3c91a",
+  "revisionString": "3",
+  "projectNameDisplay": "Particle simulation ",
+  "projectType": "game",
+  "userPromptForThisRevision": "Touching shows a circle but doesn’t impact the particles right now? Finish that properly and finish anything else unfinished. Settings close should reset the sim to the new settings too. Trails need to decay. Careful though we are close now!",
+  "basedOnRevisionString": "2",
+  "savedAt": "2025-05-29T16:59:05.903Z",
+  "imageAssets": []
+}

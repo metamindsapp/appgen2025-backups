@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lemonade Tycoon: Squeeze the Day!</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212; /* Deeper dark background */
+            color: #E2E8F0; /* Light text */
+            overflow: hidden; /* Prevent scrolling */
+        }
+        .game-screen {
+            min-height: calc(100vh - 1.5rem);
+            width: 100%;
+            display: none;
+        }
+        .game-screen.active {
+            display: flex;
+        }
+        #customerReviews {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        #simStandVisual {
+            position: relative;
+            overflow: hidden;
+            animation: pulseStand 2s infinite alternate;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3); /* Subtle glow */
+        }
+        @keyframes pulseStand {
+            from { transform: scale(1); }
+            to { transform: scale(1.02); }
+        }
+        .sale-effect {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            background-color: rgba(255, 255, 0, 0.7);
+            border-radius: 50%;
+            opacity: 0;
+            animation: salePop 0.8s ease-out forwards;
+        }
+        @keyframes salePop {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+        }
+        .star-rating .bi-star-fill {
+            color: gold;
+        }
+        .star-rating .bi-star {
+            color: #4A5568; /* Darker gray for empty stars */
+        }
+        .nav-tabs .nav-link {
+            color: #E2E8F0;
+            border-color: #4A5568;
+            background-color: #2D3748;
+            transition: all 0.3s ease;
+        }
+        .nav-tabs .nav-link:hover {
+            border-color: #6B7280;
+        }
+        .nav-tabs .nav-link.active {
+            color: #66CCFF; /* Primary blue accent for active tab */
+            background-color: #1A202C; /* Slightly darker for active tab background */
+            border-color: #66CCFF;
+            border-bottom-color: #1A202C;
+        }
+        .form-range::-webkit-slider-thumb {
+            background-color: #66CCFF;
+            border: 1px solid #66CCFF;
+            box-shadow: 0 0 5px rgba(102, 204, 255, 0.5);
+        }
+        .form-range::-moz-range-thumb {
+            background-color: #66CCFF;
+            border: 1px solid #66CCFF;
+            box-shadow: 0 0 5px rgba(102, 204, 255, 0.5);
+        }
+        .form-range::-ms-thumb {
+            background-color: #66CCFF;
+            border: 1px solid #66CCFF;
+            box-shadow: 0 0 5px rgba(102, 204, 255, 0.5);
+        }
+        .btn-primary {
+            background-color: #66CCFF;
+            border-color: #66CCFF;
+            color: #1A202C;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #4AB8E0;
+            border-color: #4AB8E0;
+        }
+        .btn-success {
+            background-color: #4CAF50;
+            border-color: #4CAF50;
+            color: #1A202C;
+            transition: all 0.3s ease;
+        }
+        .btn-success:hover {
+            background-color: #45A049;
+            border-color: #45A049;
+        }
+        .btn-outline-light {
+            border-color: #E2E8F0;
+            color: #E2E8F0;
+            transition: all 0.3s ease;
+        }
+        .btn-outline-light:hover {
+            background-color: #E2E8F0;
+            color: #1A202C;
+        }
+        .btn-outline-info {
+            border-color: #00BCD4;
+            color: #00BCD4;
+            transition: all 0.3s ease;
+        }
+        .btn-outline-info:hover {
+            background-color: #00BCD4;
+            color: #1A202C;
+        }
+        .btn-info {
+            background-color: #00BCD4;
+            border-color: #00BCD4;
+            color: #1A202C;
+        }
+        .card {
+            background-color: #2D3748 !important; /* Ensure card background is dark */
+            border-color: #4A5568 !important;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .card-header {
+            background-color: #4A5568 !important;
+            color: #F8F9FA !important;
+        }
+        .modal-content {
+            background-color: #2D3748 !important;
+            border-color: #4A5568 !important;
+        }
+        .modal-header, .modal-footer {
+            background-color: #4A5568 !important;
+            border-color: #1A202C !important;
+        }
+        .list-group-item {
+            background-color: #2D3748 !important;
+            border-color: #4A5568 !important;
+        }
+    </style>
+</head>
+<body data-bs-theme="dark" class="bg-dark text-light vh-100 d-flex flex-column">
+    <div id="game-container" class="container-fluid d-flex flex-column flex-grow-1 p-3">
+        <div id="mainMenuScreen" class="game-screen active d-flex flex-column justify-content-center align-items-center text-center">
+            <h1 class="display-3 mb-4">Lemonade Tycoon: Squeeze the Day!</h1>
+            <img id="logo-image" src="/generated_images/imagen3_f2779cb6-de0.png" alt="Stylized lemon and lemonade glass logo for Lemonade Tycoon game" class="img-fluid mb-4" style="max-width: 250px;">
+            <button id="startGameBtn" class="btn btn-primary btn-lg mb-3">Start New Game</button>
+            <button id="instructionsBtn" class="btn btn-outline-light btn-lg">Instructions</button>
+        </div>
+
+        <div id="gameScreen" class="game-screen d-none flex-column flex-grow-1">
+            <div class="d-flex justify-content-between align-items-center mb-3 p-2 bg-secondary rounded shadow-sm">
+                <h3 class="mb-0"><span class="badge bg-success">Money: $<span id="moneyDisplay">0.00</span></span></h3>
+                <h3 class="mb-0"><span class="badge bg-info">Day: <span id="dayDisplay">1</span></span></h3>
+                <h3 class="mb-0"><span class="badge bg-warning">Reputation: <span id="reputationDisplay">50</span>/100</span></h3>
+            </div>
+
+            <ul class="nav nav-tabs nav-justified mb-3" id="gameTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="prepTabButton" data-bs-toggle="tab" data-bs-target="#prepTabContent" type="button" role="tab" aria-controls="prepTabContent" aria-selected="true">Day Prep</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="upgradesTabButton" data-bs-toggle="tab" data-bs-target="#upgradesTabContent" type="button" role="tab" aria-controls="upgradesTabContent" aria-selected="false">Upgrades & Research</button>
+                </li>
+            </ul>
+
+            <div class="tab-content flex-grow-1" id="gameTabContent">
+                <div class="tab-pane fade show active" id="prepTabContent" role="tabpanel" aria-labelledby="prepTabButton">
+                    <div class="row g-3">
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card bg-dark text-light border-secondary h-100">
+                                <div class="card-header bg-secondary text-white">Ingredients</div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="lemonsInput" class="form-label">Lemons <span id="lemonsCost">($0.00)</span></label>
+                                        <input type="range" class="form-range" id="lemonsInput" min="0" max="100" value="0">
+                                        <div class="d-flex justify-content-between"><small>Buy: <span id="lemonsBuyAmount">0</span></small><small>Owned: <span id="lemonsOwned">0</span></small></div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="sugarInput" class="form-label">Sugar <span id="sugarCost">($0.00)</span></label>
+                                        <input type="range" class="form-range" id="sugarInput" min="0" max="100" value="0">
+                                        <div class="d-flex justify-content-between"><small>Buy: <span id="sugarBuyAmount">0</span></small><small>Owned: <span id="sugarOwned">0</span></small></div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="iceInput" class="form-label">Ice <span id="iceCost">($0.00)</span></label>
+                                        <input type="range" class="form-range" id="iceInput" min="0" max="100" value="0">
+                                        <div class="d-flex justify-content-between"><small>Buy: <span id="iceBuyAmount">0</span></small><small>Owned: <span id="iceOwned">0</span></small></div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="cupsInput" class="form-label">Cups <span id="cupsCost">($0.00)</span></label>
+                                        <input type="range" class="form-range" id="cupsInput" min="0" max="100" value="0">
+                                        <div class="d-flex justify-content-between"><small>Buy: <span id="cupsBuyAmount">0</span></small><small>Owned: <span id="cupsOwned">0</span></small></div>
+                                    </div>
+                                    <button id="buyIngredientsBtn" class="btn btn-success w-100">Purchase Ingredients</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card bg-dark text-light border-secondary h-100">
+                                <div class="card-header bg-secondary text-white">Recipe & Pricing</div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="recipeRatioInput" class="form-label">Recipe Ratio (Lemon:Sugar)</label>
+                                        <input type="range" class="form-range" id="recipeRatioInput" min="0" max="100" value="50">
+                                        <div class="d-flex justify-content-between"><small>Sour</small><small>Sweet</small></div>
+                                        <small class="d-block text-center mt-2">Current Ratio: <span id="recipeRatioDisplay">50:50</span></small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="priceInput" class="form-label">Price Per Cup ($<span id="priceDisplay">1.00</span>)</label>
+                                        <input type="range" class="form-range" id="priceInput" min="50" max="500" value="100">
+                                        <div class="d-flex justify-content-between"><small>$0.50</small><small>$5.00</small></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 col-lg-4">
+                            <div class="card bg-dark text-light border-secondary h-100">
+                                <div class="card-header bg-secondary text-white">Marketing</div>
+                                <div class="card-body" id="marketingOptions">
+                                    <button class="btn btn-outline-info w-100 mb-2 marketing-option" data-marketing-id="flyers">Flyers ($10) - Local Reach</button>
+                                    <button class="btn btn-outline-info w-100 mb-2 marketing-option" data-marketing-id="socialMedia">Social Media ($50) - Wider Reach</button>
+                                    <button class="btn btn-outline-info w-100 marketing-option" data-marketing-id="radioAd">Radio Ad ($200) - Mass Appeal</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="startDayBtn" class="btn btn-primary btn-lg w-100 mt-4">Start Day</button>
+                </div>
+
+                <div class="tab-pane fade" id="upgradesTabContent" role="tabpanel" aria-labelledby="upgradesTabButton">
+                    <div class="row g-3" id="upgradesList">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="simulationScreen" class="game-screen d-none flex-column justify-content-center align-items-center text-center">
+            <h2 class="mb-4">Day <span id="simDayDisplay">1</span> Simulation in Progress...</h2>
+            <div class="progress w-75 mb-3" role="progressbar" aria-label="Simulation Progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                <div class="progress-bar bg-info" style="width: 0%" id="simProgressBar"></div>
+            </div>
+            <p class="h4">Simulated Time: <span id="simTimeDisplay">8:00 AM</span></p>
+            <p class="h5">Cups Sold: <span id="simCupsSold">0</span></p>
+            <p class="h5">Current Profit: $<span id="simProfit">0.00</span></p>
+            <div id="simStandVisual" class="mt-4 p-3 border border-secondary rounded" style="width: 300px; height: 150px; background-color: #2c3e50; position: relative; overflow: hidden;">
+                <p class="text-white text-center fw-bold mt-2">Lemonade Stand</p>
+                <div class="position-absolute bottom-0 start-0 w-100 bg-success" style="height: 10px;"></div>
+                <div class="position-absolute top-0 start-50 translate-middle-x bg-warning" style="width: 10px; height: 50px;"></div>
+                <div class="position-absolute top-0 start-50 translate-middle-x bg-danger rounded-circle" style="width: 80px; height: 80px; opacity: 0.7;"></div>
+                <div id="salePopEffect" class="sale-effect d-none"></div>
+            </div>
+        </div>
+
+        <div id="endDayScreen" class="game-screen d-none flex-column justify-content-center align-items-center text-center">
+            <h2 class="mb-4">Day <span id="endDayNumber">1</span> Summary</h2>
+            <div class="card bg-dark text-light border-secondary w-75 mb-4">
+                <div class="card-body">
+                    <p class="h5 mb-2">Total Sales: <span id="summaryCupsSold">0</span> cups</p>
+                    <p class="h5 mb-2">Revenue: $<span id="summaryRevenue">0.00</span></p>
+                    <p class="h5 mb-2">Expenses: $<span id="summaryExpenses">0.00</span></p>
+                    <p class="h4 mb-3">Net Profit: <span id="summaryNetProfit" class="text-success">$0.00</span></p>
+                    <p class="h5">New Reputation: <span id="summaryReputation">50</span>/100</p>
+                </div>
+            </div>
+
+            <h3 class="mb-3">Customer Reviews</h3>
+            <div id="customerReviews" class="list-group list-group-flush bg-dark border border-secondary rounded mb-4 overflow-auto" style="max-height: 300px; width: 75%;">
+                <div class="list-group-item bg-dark text-light border-bottom border-secondary text-center py-4" id="reviewsLoadingPlaceholder">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading reviews...</span>
+                    </div>
+                    <p class="mt-2">Generating customer feedback...</p>
+                </div>
+            </div>
+            <button id="nextDayBtn" class="btn btn-primary btn-lg">Next Day</button>
+        </div>
+
+        <div id="gameOverScreen" class="game-screen d-none flex-column justify-content-center align-items-center text-center">
+            <h1 class="display-3 text-danger mb-4">GAME OVER!</h1>
+            <p class="h4 mb-2" id="gameOverReason">You ran out of money!</p>
+            <p class="h4 mb-4">Days Survived: <span id="finalDaysSurvived">0</span></p>
+            <p class="h4 mb-4">Max Profit Achieved: $<span id="finalMaxProfit">0.00</span></p>
+            <button id="playAgainBtn" class="btn btn-primary btn-lg">Play Again</button>
+        </div>
+    </div>
+
+    <div class="modal fade" id="instructionsModal" tabindex="-1" aria-labelledby="instructionsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content bg-dark text-light border-secondary">
+                <div class="modal-header bg-secondary border-bottom border-dark">
+                    <h5 class="modal-title" id="instructionsModalLabel">How to Play Lemonade Tycoon</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Welcome to Lemonade Tycoon: Squeeze the Day! Your goal is to build the most profitable lemonade stand in town.</p>
+                    <h6>Gameplay Loop:</h6>
+                    <ol>
+                        <li><strong>Day Prep:</strong> Purchase ingredients, set your recipe (Lemon:Sugar ratio), determine your price per cup, and invest in marketing.</li>
+                        <li><strong>Upgrades & Research:</strong> Spend money on permanent upgrades like a better stand, juicers, coolers, staff, or research to improve your lemonade quality and efficiency.</li>
+                        <li><strong>Start Day:</strong> Once ready, click 'Start Day' to simulate the day's sales in real-time.</li>
+                        <li><strong>End of Day Summary:</strong> Review your daily profit/loss, and read customer reviews that directly impact your reputation.</li>
+                        <li><strong>Next Day:</strong> Plan for the next day based on your results.</li>
+                    </ol>
+                    <h6>Key Factors:</h6>
+                    <ul>
+                        <li><strong>Reputation:</strong> Increases with good reviews, decreases with bad ones. Higher reputation attracts more customers.</li>
+                        <li><strong>Recipe:</strong> Find the perfect balance for broad appeal.</li>
+                        <li><strong>Pricing:</strong> Too high, customers won't buy. Too low, you won't make profit.</li>
+                        <li><strong>Ingredients:</strong> Higher quality ingredients lead to better reviews.</li>
+                        <li><strong>Upgrades:</strong> Essential for long-term growth and efficiency.</li>
+                    </ul>
+                    <p>Good luck, and happy squeezing!</p>
+                </div>
+                <div class="modal-footer bg-secondary border-top border-dark">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got It!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
+    <script>
+        const gameState = {
+            money: 100.00,
+            day: 1,
+            reputation: 50,
+            inventory: {
+                lemons: 0,
+                sugar: 0,
+                ice: 0,
+                cups: 0
+            },
+            recipe: {
+                lemonRatio: 50
+            },
+            pricePerCup: 1.00,
+            marketingActive: null,
+            upgrades: {
+                stand: { level: 0 },
+                equipment: { level: 0 },
+                staff: { level: 0 },
+                research: { level: 0 }
+            },
+            maxProfitAchieved: 0,
+            daysSurvived: 0,
+            daily: {
+                cupsSold: 0,
+                revenue: 0,
+                expenses: 0,
+                netProfit: 0,
+                customerReviews: []
+            }
+        };
+
+        const gameConfig = {
+            ingredientPrices: {
+                lemons: 0.20, sugar: 0.10, ice: 0.05, cups: 0.02
+            },
+            marketingCampaigns: {
+                flyers: { name: 'Flyers', cost: 10, customerBoost: 10, duration: 1, description: "Local flyers, small boost." },
+                socialMedia: { name: 'Social Media', cost: 50, customerBoost: 30, duration: 1, description: "Online presence, medium boost." },
+                radioAd: { name: 'Radio Ad', cost: 200, customerBoost: 70, duration: 1, description: "Radio advertisement, large boost." }
+            },
+            upgrades: {
+                stand: [
+                    { id: 'stand_basic', name: 'Basic Stand', cost: 0, reputationBoost: 0, customerBoost: 0, description: 'Your humble beginning.' },
+                    { id: 'stand_upgraded', name: 'Upgraded Stand', cost: 200, reputationBoost: 5, customerBoost: 10, description: 'A more appealing look.' },
+                    { id: 'stand_kiosk', name: 'Modern Kiosk', cost: 1000, reputationBoost: 15, customerBoost: 30, description: 'A professional setup.' }
+                ],
+                equipment: [
+                    { id: 'equip_manual', name: 'Manual Juicer', cost: 0, efficiency: 1, description: 'Basic hand juicer.' },
+                    { id: 'equip_electric', name: 'Electric Juicer', cost: 150, efficiency: 1.5, description: 'Faster juicing, less effort.' },
+                    { id: 'equip_industrial', name: 'Industrial Juicer', cost: 750, efficiency: 2.5, description: 'Maximum output, minimal waste.' }
+                ],
+                staff: [
+                    { id: 'staff_none', name: 'No Staff', cost: 0, serviceQuality: 0, maxCustomersMultiplier: 1, description: 'You do it all.', dailyCost: 0 },
+                    { id: 'staff_parttime', name: 'Part-Time Assistant', cost: 50, serviceQuality: 10, maxCustomersMultiplier: 1.5, description: 'Extra hands for busy days.', dailyCost: 5 },
+                    { id: 'staff_fulltime', name: 'Full-Time Manager', cost: 250, serviceQuality: 30, maxCustomersMultiplier: 2, description: 'Professional service, boosts capacity.', dailyCost: 15 }
+                ],
+                research: [
+                    { id: 'research_basic', name: 'Basic Recipes', cost: 0, qualityBoost: 0, description: 'Standard lemonade.' },
+                    { id: 'research_advanced', name: 'Advanced Mixology', cost: 300, qualityBoost: 10, description: 'Unlock better taste profiles.' },
+                    { id: 'research_secret', name: 'Secret Ingredients', cost: 1200, qualityBoost: 25, description: 'Unique flavors, premium quality.' }
+                ]
+            },
+            baseCustomers: 50,
+            reputationEffect: 0.5,
+            priceElasticity: 0.1,
+            gameOverMoneyThreshold: -500,
+            gameOverReputationThreshold: 10
+        };
+
+        const DOMElements = {};
+        const cacheDOMElements = () => {
+            const ids = [
+                'mainMenuScreen', 'startGameBtn', 'instructionsBtn',
+                'gameScreen', 'moneyDisplay', 'dayDisplay', 'reputationDisplay',
+                'prepTabContent', 'upgradesTabContent', 'gameTabs', 'prepTabButton', 'upgradesTabButton',
+                'lemonsInput', 'sugarInput', 'iceInput', 'cupsInput',
+                'lemonsCost', 'sugarCost', 'iceCost', 'cupsCost',
+                'lemonsBuyAmount', 'sugarBuyAmount', 'iceBuyAmount', 'cupsBuyAmount',
+                'lemonsOwned', 'sugarOwned', 'iceOwned', 'cupsOwned',
+                'buyIngredientsBtn',
+                'recipeRatioInput', 'recipeRatioDisplay',
+                'priceInput', 'priceDisplay',
+                'marketingOptions', 'startDayBtn',
+                'upgradesList',
+                'simulationScreen', 'simDayDisplay', 'simProgressBar', 'simTimeDisplay', 'simCupsSold', 'simProfit', 'simStandVisual', 'salePopEffect',
+                'endDayScreen', 'endDayNumber', 'summaryCupsSold', 'summaryRevenue', 'summaryExpenses', 'summaryNetProfit', 'summaryReputation', 'customerReviews', 'reviewsLoadingPlaceholder', 'nextDayBtn',
+                'gameOverScreen', 'gameOverReason', 'finalDaysSurvived', 'finalMaxProfit', 'playAgainBtn',
+                'instructionsModal', 'logo-image'
+            ];
+            ids.forEach(id => { DOMElements[id] = document.getElementById(id); });
+        };
+
+        const UIManager = (() => {
+            const showScreen = (screenId) => {
+                document.querySelectorAll('.game-screen').forEach(screen => {
+                    screen.classList.add('d-none');
+                    screen.classList.remove('active');
+                });
+                DOMElements[screenId].classList.remove('d-none');
+                DOMElements[screenId].classList.add('active');
+            };
+
+            const updateGameStats = () => {
+                DOMElements.moneyDisplay.textContent = gameState.money.toFixed(2);
+                DOMElements.dayDisplay.textContent = gameState.day;
+                DOMElements.reputationDisplay.textContent = gameState.reputation.toFixed(0);
+                DOMElements.lemonsOwned.textContent = gameState.inventory.lemons;
+                DOMElements.sugarOwned.textContent = gameState.inventory.sugar;
+                DOMElements.iceOwned.textContent = gameState.inventory.ice;
+                DOMElements.cupsOwned.textContent = gameState.inventory.cups;
+            };
+
+            const updateIngredientCosts = () => {
+                DOMElements.lemonsCost.textContent = `($${(parseInt(DOMElements.lemonsInput.value) * gameConfig.ingredientPrices.lemons).toFixed(2)})`;
+                DOMElements.sugarCost.textContent = `($${(parseInt(DOMElements.sugarInput.value) * gameConfig.ingredientPrices.sugar).toFixed(2)})`;
+                DOMElements.iceCost.textContent = `($${(parseInt(DOMElements.iceInput.value) * gameConfig.ingredientPrices.ice).toFixed(2)})`;
+                DOMElements.cupsCost.textContent = `($${(parseInt(DOMElements.cupsInput.value) * gameConfig.ingredientPrices.cups).toFixed(2)})`;
+
+                DOMElements.lemonsBuyAmount.textContent = DOMElements.lemonsInput.value;
+                DOMElements.sugarBuyAmount.textContent = DOMElements.sugarInput.value;
+                DOMElements.iceBuyAmount.textContent = DOMElements.iceInput.value;
+                DOMElements.cupsBuyAmount.textContent = DOMElements.cupsInput.value;
+            };
+
+            const updateRecipeAndPrice = () => {
+                const lemonRatio = DOMElements.recipeRatioInput.value;
+                DOMElements.recipeRatioDisplay.textContent = `${lemonRatio}:${100 - lemonRatio}`;
+                gameState.recipe.lemonRatio = parseInt(lemonRatio);
+
+                const price = parseInt(DOMElements.priceInput.value) / 100;
+                DOMElements.priceDisplay.textContent = price.toFixed(2);
+                gameState.pricePerCup = price;
+            };
+
+            const renderMarketingOptions = () => {
+                DOMElements.marketingOptions.innerHTML = '';
+                for (const id in gameConfig.marketingCampaigns) {
+                    const campaign = gameConfig.marketingCampaigns[id];
+                    const button = document.createElement('button');
+                    button.classList.add('btn', 'w-100', 'mb-2', 'marketing-option');
+                    button.dataset.marketingId = id;
+                    button.textContent = `${campaign.name} ($${campaign.cost}) - ${campaign.description}`;
+                    if (gameState.marketingActive === id) {
+                        button.classList.add('btn-info');
+                        button.classList.remove('btn-outline-info');
+                    } else {
+                        button.classList.add('btn-outline-info');
+                        button.classList.remove('btn-info');
+                    }
+                    DOMElements.marketingOptions.appendChild(button);
+                }
+            };
+
+            const renderUpgrades = () => {
+                DOMElements.upgradesList.innerHTML = '';
+                for (const type in gameConfig.upgrades) {
+                    const currentLevel = gameState.upgrades[type].level;
+                    const nextUpgrade = gameConfig.upgrades[type][currentLevel + 1];
+                    const currentUpgrade = gameConfig.upgrades[type][currentLevel];
+
+                    const colDiv = document.createElement('div');
+                    colDiv.classList.add('col-md-6', 'col-lg-4');
+
+                    const card = document.createElement('div');
+                    card.classList.add('card', 'bg-dark', 'text-light', 'border-secondary', 'h-100');
+
+                    const cardHeader = document.createElement('div');
+                    cardHeader.classList.add('card-header', 'bg-secondary', 'text-white');
+                    cardHeader.textContent = type.charAt(0).toUpperCase() + type.slice(1) + ' Upgrades';
+
+                    const cardBody = document.createElement('div');
+                    cardBody.classList.add('card-body');
+
+                    const currentStatus = document.createElement('p');
+                    currentStatus.classList.add('mb-2');
+                    currentStatus.innerHTML = `<strong>Current:</strong> ${currentUpgrade ? currentUpgrade.name : 'N/A'}`;
+                    cardBody.appendChild(currentStatus);
+
+                    if (nextUpgrade) {
+                        const nextInfo = document.createElement('div');
+                        nextInfo.classList.add('mb-3');
+                        nextInfo.innerHTML = `
+                            <h5 class="card-title">${nextUpgrade.name}</h5>
+                            <p class="card-text">${nextUpgrade.description}</p>
+                            <p class="card-text">Cost: <span class="text-warning">$${nextUpgrade.cost}</span></p>
+                        `;
+                        cardBody.appendChild(nextInfo);
+
+                        const buyButton = document.createElement('button');
+                        buyButton.classList.add('btn', 'btn-success', 'w-100', 'buy-upgrade-btn');
+                        buyButton.textContent = `Purchase ${nextUpgrade.name}`;
+                        buyButton.dataset.upgradeType = type;
+                        buyButton.disabled = gameState.money < nextUpgrade.cost;
+                        cardBody.appendChild(buyButton);
+                    } else {
+                        const maxLevel = document.createElement('p');
+                        maxLevel.classList.add('text-success');
+                        maxLevel.textContent = 'Max Level Achieved!';
+                        cardBody.appendChild(maxLevel);
+                    }
+
+                    card.appendChild(cardHeader);
+                    card.appendChild(cardBody);
+                    colDiv.appendChild(card);
+                    DOMElements.upgradesList.appendChild(colDiv);
+                }
+            };
+
+            const displayCustomerReviews = (reviews) => {
+                DOMElements.customerReviews.innerHTML = '';
+                DOMElements.reviewsLoadingPlaceholder.classList.add('d-none');
+
+                if (reviews.length === 0) {
+                    const noReviews = document.createElement('div');
+                    noReviews.classList.add('list-group-item', 'bg-dark', 'text-light', 'text-center');
+                    noReviews.textContent = "No customer reviews today.";
+                    DOMElements.customerReviews.appendChild(noReviews);
+                    return;
+                }
+
+                reviews.forEach(review => {
+                    const reviewItem = document.createElement('div');
+                    reviewItem.classList.add('list-group-item', 'bg-dark', 'text-light', 'border-bottom', 'border-secondary');
+
+                    let starsHtml = '';
+                    for (let i = 0; i < 5; i++) {
+                        if (i < review.rating) {
+                            starsHtml += '<i class="bi bi-star-fill"></i>';
+                        } else {
+                            starsHtml += '<i class="bi bi-star"></i>';
+                        }
+                    }
+                    reviewItem.innerHTML = `<h6 class="mb-1 star-rating">${starsHtml}</h6><p class="mb-1">${review.comment}</p>`;
+                    DOMElements.customerReviews.appendChild(reviewItem);
+                });
+            };
+
+            const updateSimulationUI = (simulatedTime, cupsSold, currentProfit, progress) => {
+                DOMElements.simTimeDisplay.textContent = simulatedTime;
+                DOMElements.simCupsSold.textContent = cupsSold;
+                DOMElements.simProfit.textContent = currentProfit.toFixed(2);
+                DOMElements.simProgressBar.style.width = `${progress}%`;
+                DOMElements.simProgressBar.setAttribute('aria-valuenow', progress);
+            };
+
+            const triggerSaleEffect = () => {
+                DOMElements.salePopEffect.classList.remove('d-none');
+                void DOMElements.salePopEffect.offsetWidth;
+                DOMElements.salePopEffect.classList.add('d-none');
+            };
+
+            return {
+                showScreen,
+                updateGameStats,
+                updateIngredientCosts,
+                updateRecipeAndPrice,
+                renderMarketingOptions,
+                renderUpgrades,
+                displayCustomerReviews,
+                updateSimulationUI,
+                triggerSaleEffect
+            };
+        })();
+
+        const GameManager = (() => {
+            let simulationInterval = null;
+            let currentSimulatedHour = 8;
+            const simulationDuration = 10000;
+            const totalSimulatedHours = 12;
+            const realTimePerSimulatedHour = simulationDuration / totalSimulatedHours;
+            let soundsLoaded = false;
+            const sounds = {};
+
+            const loadSounds = () => {
+                if (soundsLoaded) return;
+                sounds.cash = new Howl({ src: ['https://assets.mixkit.co/sfx/preview/mixkit-fast-pop-up-2755.mp3'], volume: 0.5 });
+                sounds.upgrade = new Howl({ src: ['https://assets.mixkit.co/sfx/preview/mixkit-game-bonus-present-898.mp3'], volume: 0.6 });
+                sounds.badReview = new Howl({ src: ['https://assets.mixkit.co/sfx/preview/mixkit-negative-game-notification-2689.mp3'], volume: 0.7 });
+                sounds.goodReview = new Howl({ src: ['https://assets.mixkit.co/sfx/preview/mixkit-game-positive-response-1540.mp3'], volume: 0.7 });
+                soundsLoaded = true;
+            };
+
+            const calculateDailyOutcome = () => {
+                const { inventory, recipe, pricePerCup, marketingActive } = gameState;
+                const currentStand = gameConfig.upgrades.stand[gameState.upgrades.stand.level];
+                const currentEquipment = gameConfig.upgrades.equipment[gameState.upgrades.equipment.level];
+                const currentStaff = gameConfig.upgrades.staff[gameState.upgrades.staff.level];
+                const currentResearch = gameConfig.upgrades.research[gameState.upgrades.research.level];
+
+                let potentialCustomers = gameConfig.baseCustomers + (gameState.reputation * gameConfig.reputationEffect);
+                potentialCustomers += currentStand.customerBoost;
+
+                if (marketingActive && gameConfig.marketingCampaigns[marketingActive]) {
+                    potentialCustomers += gameConfig.marketingCampaigns[marketingActive].customerBoost;
+                }
+
+                const priceFactor = 1 - ((pricePerCup - 0.50) / 4.50) * gameConfig.priceElasticity;
+                potentialCustomers *= Math.max(0.1, priceFactor);
+
+                const maxCustomersCapacity = 100 + (currentStaff.maxCustomersMultiplier * 50);
+
+                const maxPossibleCups = Math.min(
+                    inventory.lemons,
+                    inventory.sugar,
+                    inventory.ice,
+                    inventory.cups
+                );
+                let actualCustomers = Math.min(potentialCustomers, maxCustomersCapacity, maxPossibleCups);
+                actualCustomers = Math.max(0, Math.floor(actualCustomers));
+
+                const cupsSold = actualCustomers;
+                const revenue = cupsSold * pricePerCup;
+                const ingredientCostPerCup = gameConfig.ingredientPrices.lemons + gameConfig.ingredientPrices.sugar + gameConfig.ingredientPrices.ice + gameConfig.ingredientPrices.cups;
+                const totalIngredientCost = cupsSold * ingredientCostPerCup;
+                let totalExpenses = totalIngredientCost;
+
+                if (marketingActive) {
+                    totalExpenses += gameConfig.marketingCampaigns[marketingActive].cost;
+                }
+                totalExpenses += currentStaff.dailyCost || 0;
+
+                const netProfit = revenue - totalExpenses;
+
+                gameState.daily.cupsSold = cupsSold;
+                gameState.daily.revenue = revenue;
+                gameState.daily.expenses = totalExpenses;
+                gameState.daily.netProfit = netProfit;
+
+                gameState.inventory.lemons -= cupsSold;
+                gameState.inventory.sugar -= cupsSold;
+                gameState.inventory.ice -= cupsSold;
+                gameState.inventory.cups -= cupsSold;
+
+                gameState.money += netProfit;
+
+                gameState.maxProfitAchieved = Math.max(gameState.maxProfitAchieved, gameState.money);
+            };
+
+            const generateCustomerReviews = async () => {
+                const numReviewsToGenerate = Math.min(5, Math.ceil(gameState.daily.cupsSold / 20));
+                gameState.daily.customerReviews = [];
+
+                if (numReviewsToGenerate === 0) {
+                    UIManager.displayCustomerReviews([]);
+                    return;
+                }
+
+                const currentStand = gameConfig.upgrades.stand[gameState.upgrades.stand.level];
+                const currentStaff = gameConfig.upgrades.staff[gameState.upgrades.staff.level];
+                const currentResearch = gameConfig.upgrades.research[gameState.upgrades.research.level];
+
+                let qualityFactor = 0;
+                if (gameState.recipe.lemonRatio < 30) qualityFactor -= 10;
+                if (gameState.recipe.lemonRatio > 70) qualityFactor -= 10;
+                qualityFactor += currentResearch.qualityBoost;
+
+                const qualityDesc = qualityFactor > 15 ? 'excellent' : (qualityFactor > 0 ? 'good' : (qualityFactor < -10 ? 'poor' : 'average'));
+
+                const priceDesc = gameState.pricePerCup < 1.00 ? 'very cheap' : (gameState.pricePerCup < 2.00 ? 'fair' : (gameState.pricePerCup < 3.50 ? 'a bit expensive' : 'overpriced'));
+                const serviceDesc = currentStaff.serviceQuality > 20 ? 'friendly and quick' : (currentStaff.serviceQuality > 0 ? 'okay' : 'slow and grumpy');
+                const standAttractivenessDesc = currentStand.reputationBoost > 10 ? 'very appealing' : (currentStand.reputationBoost > 0 ? 'decent' : 'run-down');
+                const reputationLevelDesc = gameState.reputation > 80 ? 'high' : (gameState.reputation > 40 ? 'moderate' : 'low');
+
+                const reviewPromises = [];
+                for (let i = 0; i < numReviewsToGenerate; i++) {
+                    const prompt = `You are a customer who just bought lemonade from a stand. The lemonade's quality was ${qualityDesc}, the price was ${priceDesc}, the service was ${serviceDesc}, and the stand looked ${standAttractivenessDesc}. The overall reputation of the stand is ${reputationLevelDesc}. Write a short, concise review (max 2 sentences) including a 1-5 star rating at the beginning of the review. Focus on the experience and taste. Example: '4 stars - Great lemonade, a bit pricey but worth it!'`;
+
+                    reviewPromises.push(
+                        fetch('/api/ai', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ msgforai: prompt })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success && data.response) {
+                                const match = data.response.match(/^(\d)\s*stars?\s*-\s*(.*)/i);
+                                if (match && match[1] && match[2]) {
+                                    const rating = parseInt(match[1]);
+                                    const comment = match[2].trim();
+                                    return { rating: Math.min(5, Math.max(1, rating)), comment };
+                                } else {
+                                    return { rating: Math.floor(Math.random() * 5) + 1, comment: data.response.split('.').shift() + '.' };
+                                }
+                            } else {
+                                throw new Error(data.error || 'No reply from AI');
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error generating review:", error);
+                            return { rating: Math.floor(Math.random() * 3) + 1, comment: "The lemonade was... an experience." };
+                        })
+                    );
+                }
+
+                const reviews = await Promise.all(reviewPromises);
+                gameState.daily.customerReviews = reviews;
+                UIManager.displayCustomerReviews(reviews);
+
+                if (reviews.length > 0) {
+                    const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0);
+                    const averageRating = totalRating / reviews.length;
+                    const reputationChange = (averageRating - 3) * 5;
+                    gameState.reputation = Math.max(0, Math.min(100, gameState.reputation + reputationChange));
+                    if (soundsLoaded) {
+                        if (averageRating >= 3.5) sounds.goodReview.play();
+                        else if (averageRating < 2.5) sounds.badReview.play();
+                    }
+                }
+            };
+
+            const checkGameOver = () => {
+                if (gameState.money < gameConfig.gameOverMoneyThreshold) {
+                    endGame("You ran out of money! Your stand went bankrupt.");
+                    return true;
+                }
+                if (gameState.reputation < gameConfig.gameOverReputationThreshold) {
+                    endGame("Your reputation plummeted! No one wants your lemonade anymore.");
+                    return true;
+                }
+                return false;
+            };
+
+            const endGame = (reason) => {
+                clearInterval(simulationInterval);
+                UIManager.showScreen('gameOverScreen');
+                DOMElements.gameOverReason.textContent = reason;
+                DOMElements.finalDaysSurvived.textContent = gameState.daysSurvived;
+                DOMElements.finalMaxProfit.textContent = gameState.maxProfitAchieved.toFixed(2);
+            };
+
+            const startNewGame = () => {
+                gameState.money = 100.00;
+                gameState.day = 1;
+                gameState.reputation = 50;
+                gameState.inventory = { lemons: 0, sugar: 0, ice: 0, cups: 0 };
+                gameState.recipe.lemonRatio = 50;
+                gameState.pricePerCup = 1.00;
+                gameState.marketingActive = null;
+                gameState.upgrades = {
+                    stand: { level: 0 },
+                    equipment: { level: 0 },
+                    staff: { level: 0 },
+                    research: { level: 0 }
+                };
+                gameState.maxProfitAchieved = 0;
+                gameState.daysSurvived = 0;
+                gameState.daily.customerReviews = [];
+
+                UIManager.updateGameStats();
+                UIManager.updateIngredientCosts();
+                UIManager.updateRecipeAndPrice();
+                UIManager.renderMarketingOptions();
+                UIManager.renderUpgrades();
+                UIManager.showScreen('gameScreen');
+                const prepTab = new bootstrap.Tab(DOMElements.prepTabButton);
+                prepTab.show();
+                loadSounds();
+            };
+
+            const startDaySimulation = () => {
+                if (checkGameOver()) return;
+
+                gameState.daily.cupsSold = 0;
+                gameState.daily.revenue = 0;
+                gameState.daily.expenses = 0;
+                gameState.daily.netProfit = 0;
+                gameState.daily.customerReviews = [];
+
+                UIManager.showScreen('simulationScreen');
+                DOMElements.simDayDisplay.textContent = gameState.day;
+                DOMElements.reviewsLoadingPlaceholder.classList.remove('d-none');
+
+                currentSimulatedHour = 8;
+                let elapsedTime = 0;
+                const intervalTime = 100;
+                const totalIntervals = simulationDuration / intervalTime;
+                let lastCupsSold = 0;
+
+                calculateDailyOutcome();
+
+                simulationInterval = setInterval(() => {
+                    elapsedTime += intervalTime;
+
+                    const progress = (elapsedTime / simulationDuration) * 100;
+                    const simulatedHoursPassed = (elapsedTime / realTimePerSimulatedHour);
+                    currentSimulatedHour = 8 + simulatedHoursPassed;
+
+                    let displayHour = Math.floor(currentSimulatedHour);
+                    let displayMinute = Math.floor((currentSimulatedHour - displayHour) * 60);
+                    let ampm = 'AM';
+                    if (displayHour >= 12) {
+                        ampm = 'PM';
+                        if (displayHour > 12) displayHour -= 12;
+                    }
+                    if (displayHour === 0) displayHour = 12;
+
+                    UIManager.updateSimulationUI(
+                        `${displayHour.toString().padStart(2, '0')}:${displayMinute.toString().padStart(2, '0')} ${ampm}`,
+                        gameState.daily.cupsSold,
+                        gameState.daily.netProfit,
+                        progress
+                    );
+
+                    if (gameState.daily.cupsSold > lastCupsSold) {
+                        UIManager.triggerSaleEffect();
+                        if (soundsLoaded) sounds.cash.play();
+                        lastCupsSold = gameState.daily.cupsSold;
+                    }
+
+                    if (elapsedTime >= simulationDuration) {
+                        clearInterval(simulationInterval);
+                        endDay();
+                    }
+                }, intervalTime);
+            };
+
+            const endDay = async () => {
+                gameState.daysSurvived++;
+                UIManager.showScreen('endDayScreen');
+                DOMElements.endDayNumber.textContent = gameState.day;
+                DOMElements.summaryCupsSold.textContent = gameState.daily.cupsSold;
+                DOMElements.summaryRevenue.textContent = gameState.daily.revenue.toFixed(2);
+                DOMElements.summaryExpenses.textContent = gameState.daily.expenses.toFixed(2);
+                DOMElements.summaryNetProfit.textContent = gameState.daily.netProfit.toFixed(2);
+                DOMElements.summaryNetProfit.classList.remove('text-success', 'text-danger');
+                DOMElements.summaryNetProfit.classList.add(gameState.daily.netProfit >= 0 ? 'text-success' : 'text-danger');
+                DOMElements.summaryReputation.textContent = gameState.reputation.toFixed(0);
+
+                await generateCustomerReviews();
+
+                if (checkGameOver()) return;
+            };
+
+            const nextDay = () => {
+                gameState.day++;
+                gameState.marketingActive = null;
+                UIManager.updateGameStats();
+                UIManager.renderMarketingOptions();
+                UIManager.renderUpgrades();
+                UIManager.showScreen('gameScreen');
+                const prepTab = new bootstrap.Tab(DOMElements.prepTabButton);
+                prepTab.show();
+            };
+
+            const buyIngredients = () => {
+                const lemonsToBuy = parseInt(DOMElements.lemonsInput.value);
+                const sugarToBuy = parseInt(DOMElements.sugarInput.value);
+                const iceToBuy = parseInt(DOMElements.iceInput.value);
+                const cupsToBuy = parseInt(DOMElements.cupsInput.value);
+
+                const totalCost =
+                    (lemonsToBuy * gameConfig.ingredientPrices.lemons) +
+                    (sugarToBuy * gameConfig.ingredientPrices.sugar) +
+                    (iceToBuy * gameConfig.ingredientPrices.ice) +
+                    (cupsToBuy * gameConfig.ingredientPrices.cups);
+
+                if (gameState.money >= totalCost) {
+                    gameState.money -= totalCost;
+                    gameState.inventory.lemons += lemonsToBuy;
+                    gameState.inventory.sugar += sugarToBuy;
+                    gameState.inventory.ice += iceToBuy;
+                    gameState.inventory.cups += cupsToBuy;
+
+                    DOMElements.lemonsInput.value = 0;
+                    DOMElements.sugarInput.value = 0;
+                    DOMElements.iceInput.value = 0;
+                    DOMElements.cupsInput.value = 0;
+
+                    UIManager.updateGameStats();
+                    UIManager.updateIngredientCosts();
+                    if (soundsLoaded) sounds.cash.play();
+                } else {
+                    alert('Not enough money to buy these ingredients!');
+                }
+            };
+
+            const buyUpgrade = (upgradeType) => {
+                const currentLevel = gameState.upgrades[upgradeType].level;
+                const nextUpgrade = gameConfig.upgrades[upgradeType][currentLevel + 1];
+
+                if (nextUpgrade && gameState.money >= nextUpgrade.cost) {
+                    gameState.money -= nextUpgrade.cost;
+                    gameState.upgrades[upgradeType].level++;
+                    UIManager.updateGameStats();
+                    UIManager.renderUpgrades();
+                    if (soundsLoaded) sounds.upgrade.play();
+                } else if (!nextUpgrade) {
+                    alert('Max level achieved for this upgrade!');
+                } else {
+                    alert('Not enough money for this upgrade!');
+                }
+            };
+
+            const selectMarketing = (marketingId) => {
+                gameState.marketingActive = marketingId;
+                UIManager.renderMarketingOptions();
+            };
+
+            const init = () => {
+                cacheDOMElements();
+                UIManager.showScreen('mainMenuScreen');
+
+                DOMElements.startGameBtn.addEventListener('click', startNewGame);
+                DOMElements.instructionsBtn.addEventListener('click', () => {
+                    const instructionsModal = new bootstrap.Modal(DOMElements.instructionsModal);
+                    instructionsModal.show();
+                });
+                DOMElements.startDayBtn.addEventListener('click', startDaySimulation);
+                DOMElements.nextDayBtn.addEventListener('click', nextDay);
+                DOMElements.playAgainBtn.addEventListener('click', startNewGame);
+
+                DOMElements.lemonsInput.addEventListener('input', UIManager.updateIngredientCosts);
+                DOMElements.sugarInput.addEventListener('input', UIManager.updateIngredientCosts);
+                DOMElements.iceInput.addEventListener('input', UIManager.updateIngredientCosts);
+                DOMElements.cupsInput.addEventListener('input', UIManager.updateIngredientCosts);
+                DOMElements.buyIngredientsBtn.addEventListener('click', buyIngredients);
+
+                DOMElements.recipeRatioInput.addEventListener('input', UIManager.updateRecipeAndPrice);
+                DOMElements.priceInput.addEventListener('input', UIManager.updateRecipeAndPrice);
+
+                DOMElements.marketingOptions.addEventListener('click', (event) => {
+                    if (event.target.classList.contains('marketing-option')) {
+                        selectMarketing(event.target.dataset.marketingId);
+                    }
+                });
+
+                DOMElements.upgradesList.addEventListener('click', (event) => {
+                    if (event.target.classList.contains('buy-upgrade-btn')) {
+                        buyUpgrade(event.target.dataset.upgradeType);
+                    }
+                });
+
+                UIManager.updateIngredientCosts();
+                UIManager.updateRecipeAndPrice();
+                UIManager.renderMarketingOptions();
+                UIManager.renderUpgrades();
+            };
+
+            return { init };
+        })();
+
+        document.addEventListener('DOMContentLoaded', GameManager.init);
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>
