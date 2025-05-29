@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kye's Diamond Quest</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            color: #212529;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        #game-container {
+            background-color: #f0f2f5;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #game-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            border-radius: 0.5rem;
+            background-color: #ffffff;
+            width: 95vw;
+            height: 95vh;
+            max-width: 1200px;
+            max-height: 800px;
+        }
+
+        .game-screen {
+            display: none;
+            width: 100%;
+            height: 100%;
+            background-color: #ffffff;
+        }
+        .active-screen {
+            display: flex !important;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #game-canvas-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #000000; 
+        }
+
+        #game-canvas {
+            display: block;
+            background-color: #202020; 
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -webkit-crisp-edges;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        #level-select-grid .row {
+            justify-content: center;
+        }
+        #level-select-grid .btn {
+            aspect-ratio: 1 / 1;
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0.5rem;
+            margin: 0.25rem;
+            min-width: 60px;
+            min-height: 60px;
+        }
+
+        .modal-content {
+            border: 1px solid #dee2e6;
+            background-color: #ffffff;
+            color: #212529;
+        }
+        .modal-header {
+            border-bottom: 1px solid #dee2e6;
+        }
+        .modal-footer {
+            border-top: 1px solid #dee2e6;
+        }
+
+        #instructions-screen img {
+            border: 1px solid #ced4da;
+            background-color: #e9ecef;
+            padding: 2px;
+            border-radius: 3px;
+            width: 24px; 
+            height: 24px; 
+            vertical-align: middle;
+            margin: 0 2px;
+        }
+        #game-hud {
+            font-size: 0.9rem;
+            color: #212529;
+        }
+        #game-hud button {
+            font-size: 0.8rem;
+        }
+        .btn-primary {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+        .btn-info {
+            background-color: #0dcaf0;
+            border-color: #0dcaf0;
+        }
+        .btn-warning {
+            background-color: #ffc107;
+            border-color: #ffc107;
+            color: #000;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+        .btn-success {
+            background-color: #198754;
+            border-color: #198754;
+        }
+        .progress-bar {
+            background-color: #0d6efd;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container" class="container-fluid vh-100 d-flex flex-column justify-content-center align-items-center p-0 m-0">
+        <div id="game-area" class="shadow-lg">
+            <div id="loading-screen" class="game-screen active-screen text-center p-3">
+                <h2 class="mb-3">Loading Kye's Diamond Quest...</h2>
+                <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;"><span class="visually-hidden">Loading...</span></div>
+                <div class="progress w-75 mx-auto" style="height: 25px;"><div id="loading-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated fs-6" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div></div>
+            </div>
+
+            <div id="main-menu-screen" class="game-screen text-center p-3">
+                <h1 class="mb-4 display-4">Kye's Diamond Quest</h1>
+                <div class="d-grid gap-3 col-sm-8 col-md-6 col-lg-4 mx-auto">
+                    <button id="start-game-btn" class="btn btn-primary btn-lg">Start Game</button>
+                    <button id="level-select-btn" class="btn btn-secondary btn-lg">Level Select</button>
+                    <button id="instructions-btn" class="btn btn-info btn-lg">How to Play</button>
+                </div>
+            </div>
+
+            <div id="level-select-screen" class="game-screen p-3">
+                <h2 class="mb-4 text-center">Select Level</h2>
+                <div id="level-select-grid" class="container-fluid" style="max-width: 600px; overflow-y: auto; max-height: calc(100% - 120px);">
+                </div>
+                <button id="back-to-menu-from-level-select-btn" class="btn btn-outline-secondary mt-4 mx-auto d-block">Back to Main Menu</button>
+            </div>
+
+            <div id="instructions-screen" class="game-screen p-3">
+                <h2 class="mb-3 text-center">How to Play</h2>
+                <div class="card w-100" style="max-width: 700px; max-height: calc(100% - 100px); overflow-y: auto;"><div class="card-body text-start">
+                    <p><strong>Objective:</strong> Guide Kye <img id="instr-kye-img" src="" alt="Kye player character"> to collect all the diamonds <img id="instr-diamond-img" src="" alt="Sparkling diamond"> in each level!</p>
+                    <p><strong>Controls:</strong> Use <strong>Arrow Keys</strong> or <strong>WASD</strong> to move Kye. Press <strong>Escape</strong> to pause.</p>
+                    <h5 class="mt-3">Key Objects:</h5>
+                    <ul class="list-unstyled">
+                        <li><img id="instr-floor-img" src="" alt="Floor tile"> Floor: Walkable space.</li>
+                        <li><img id="instr-wall-img" src="" alt="Wall block"> Wall: Impassable.</li>
+                        <li><img id="instr-box-img" src="" alt="Pushable box"> Box: Pushable into empty space or onto diamonds.</li>
+                        <li><img id="instr-magnet-img" src="" alt="Magnet block"> Magnet Block: Push it and Kye sticks to it, moving together!</li>
+                        <li><img id="instr-arrow-up-img" src="" alt="Arrow Up block"> <img id="instr-arrow-down-img" src="" alt="Arrow Down block"> <img id="instr-arrow-left-img" src="" alt="Arrow Left block"> <img id="instr-arrow-right-img" src="" alt="Arrow Right block"> Arrow Block: One-way passage when stepped on. Solid for pushing boxes against.</li>
+                        <li><img id="instr-rocker-img" src="" alt="Rocker monster"> Rocker: Moves back and forth. Avoid it!</li>
+                        <li><img id="instr-eater-img" src="" alt="Eater monster"> Eater: Moves around. Avoid it! (They don't eat diamonds).</li>
+                    </ul>
+                </div></div>
+                <button id="back-to-menu-from-instructions-btn" class="btn btn-outline-secondary mt-4 mx-auto d-block">Back to Main Menu</button>
+            </div>
+
+            <div id="game-canvas-container" class="game-screen position-relative">
+                <div id="game-hud" class="position-absolute top-0 start-0 end-0 p-2 bg-light bg-opacity-75 d-flex justify-content-between align-items-center" style="z-index:10;">
+                    <span>Level: <strong id="hud-level-name">1</strong></span>
+                    <span>Diamonds: <strong id="hud-diamonds-collected">0</strong> / <strong id="hud-diamonds-total">0</strong></span>
+                    <div>
+                        <button id="pause-game-btn" class="btn btn-warning btn-sm py-1 px-2" title="Pause (Esc)"><i class="bi bi-pause-fill"></i></button>
+                        <button id="restart-level-btn-ingame" class="btn btn-danger btn-sm py-1 px-2" title="Restart Level"><i class="bi bi-arrow-clockwise"></i></button>
+                        <button id="menu-btn-ingame" class="btn btn-secondary btn-sm py-1 px-2" title="Main Menu"><i class="bi bi-list"></i></button>
+                    </div>
+                </div>
+                <canvas id="game-canvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="pause-modal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">Game Paused</h5></div>
+            <div class="modal-body text-center"><div class="d-grid gap-2 col-10 col-sm-8 mx-auto">
+                <button id="resume-game-btn" class="btn btn-success">Resume Game</button>
+                <button id="restart-level-modal-btn" class="btn btn-warning">Restart Level</button>
+                <button id="main-menu-modal-btn" class="btn btn-secondary">Main Menu</button>
+            </div></div>
+        </div></div>
+    </div>
+    <div class="modal fade" id="level-complete-modal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+         <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+            <div class="modal-header bg-success text-white"><h5 class="modal-title">Level Complete!</h5></div>
+            <div class="modal-body text-center"><p id="level-complete-message">Fantastic! You got all the diamonds!</p><div class="d-grid gap-2 col-10 col-sm-8 mx-auto">
+                <button id="next-level-btn" class="btn btn-primary">Next Level</button>
+                <button id="replay-level-lc-btn" class="btn btn-info">Replay This Level</button>
+                <button id="main-menu-lc-btn" class="btn btn-secondary">Main Menu</button>
+            </div></div>
+        </div></div>
+    </div>
+    <div class="modal fade" id="game-over-modal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+            <div class="modal-header bg-danger text-white"><h5 class="modal-title">Game Over!</h5></div>
+            <div class="modal-body text-center"><p id="game-over-message">Oh no, Kye met an untimely end!</p><div class="d-grid gap-2 col-10 col-sm-8 mx-auto">
+                <button id="restart-level-go-btn" class="btn btn-warning">Try Again</button>
+                <button id="main-menu-go-btn" class="btn btn-secondary">Main Menu</button>
+            </div></div>
+        </div></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
+    <script>
+        const App = (() => {
+            const TILE_SIZE = 32;
+            const GAME_WIDTH_TILES = 20;
+            const GAME_HEIGHT_TILES = 15;
+            const MOVE_DURATION = 150; 
+
+            let canvas, ctx;
+            let gameArea, gameCanvasContainer;
+            let loadingProgressBar;
+            let hudLevelName, hudDiamondsCollected, hudDiamondsTotal;
+            let pauseModal, levelCompleteModal, gameOverModal;
+            
+            let assets = {};
+            let assetsLoaded = 0;
+            let totalAssets = 0;
+
+            let currentScreen = 'loading';
+            let previousScreen = null;
+            let isPaused = false;
+            let animationFrameId = null;
+            let lastTime = 0;
+            let forceGameRestart = false;
+
+            let gameGrid = [];
+            let entities = [];
+            let player = null;
+            let totalDiamondsInLevel = 0;
+            let currentLevelIndex = 0;
+            let playerIsAnimating = false;
+            let activeAnimations = [];
+
+            const ASSET_PATHS = {
+                player: "/generated_images/dalle3_61fdba94-633.png",
+                diamond: "/generated_images/dalle3_50a60a9d-b6b.png",
+                wall: "/generated_images/dalle3_a88e9439-483.png",
+                floor: "/generated_images/dalle3_f9932b71-4f4.png",
+                box: "/generated_images/dalle3_f6602569-3d4.png",
+                magnet: "/generated_images/dalle3_3e47a10d-25b.png",
+                rocker: "/generated_images/dalle3_48f3f382-4cf.png",
+                eater: "/generated_images/dalle3_22580a7e-825.png",
+                arrowUp: "/generated_images/dalle3_2fed1623-1ba.png",
+                arrowDown: "/generated_images/dalle3_7471ad32-926.png",
+                arrowLeft: "/generated_images/dalle3_a7489d18-a58.png",
+                arrowRight: "/generated_images/dalle3_a4cdf779-3b7.png",
+            };
+
+            const levels = [
+                {
+                    name: "Tutorial 1",
+                    data: [
+                        "WWWWWWWWWWWWWWWWWWWW",
+                        "W P D            W",
+                        "W WWW WWWWWWWWWW W",
+                        "W D              W",
+                        "W WWWWWWWWWW WWW W",
+                        "W            D W W",
+                        "W WWWWWWWWWW WWW W",
+                        "W D              W",
+                        "W WWWWWWWWWW WWW W",
+                        "W              D W",
+                        "WWWWWWWWWWWWWWWWWWWW",
+                        "                    ",
+                        "                    ",
+                        "                    ",
+                        "                    "
+                    ]
+                },
+                {
+                    name: "Push It!",
+                    data: [
+                        "WWWWWWWWWWWWWWWWWWWW",
+                        "W P B D          W",
+                        "W                W",
+                        "W   WWWWWWWWWW   W",
+                        "W   W  D  BW   W",
+                        "W   W  B  DW   W",
+                        "W   WWWWWWWWWW   W",
+                        "W                W",
+                        "W D B            W",
+                        "WWWWWWWWWWWWWWWWWWWW",
+                        "                    ",
+                        "                    ",
+                        "                    ",
+                        "                    ",
+                        "                    "
+                    ]
+                },
+                {
+                    name: "Sticky Situation",
+                    data: [
+                        "WWWWWWWWWWWWWWWWWWWW",
+                        "W P M D          W",
+                        "W                W",
+                        "W  WWWW   WWWWW  W",
+                        "W  W  M D W      W",
+                        "W  W      W  M D W",
+                        "W  WWWWWWWW      W",
+                        "W                W",
+                        "W D M            W",
+                        "WWWWWWWWWWWWWWWWWWWW",
+                        "                    ",
+                        "                    ",
+                        "                    ",
+                        "                    ",
+                        "                    "
+                    ]
+                },
+                 {
+                    name: "One Way Trip",
+                    data: [
+                        "WWWWWWWWWWWWWWWWWWWW",
+                        "W P TTTTD        W",
+                        "W W              W",
+                        "W W WWWWWWWWWWWW W",
+                        "W W W D        L W",
+                        "W W W WWWWWWWW W W",
+                        "W W W NUW      W W",
+                        "W W WWWWW      W W",
+                        "W D            W W",
+                        "WWWWWWWWWWWWWWWWWWWW",
+                        "                    ",
+                        "                    ",
+                        "                    ",
+                        "                    ",
+                        "                    "
+                    ]
+                },
+                {
+                    name: "Rocker Danger",
+                    data: [
+                        "WWWWWWWWWWWWWWWWWWWW",
+                        "W P     R      D W",
+                        "W WWWWWWWWWWWWWW W",
+                        "W D     R        W",
+                        "W WWWWWWWWWWWWWW W",
+                        "W       R      D W",
+                        "W WWWWWWWWWWWWWW W",
+                        "W D     R        W",
+                        "W WWWWWWWWWWWWWW W",
+                        "W                W",
+                        "WWWWWWWWWWWWWWWWWWWW",
+                        "                    ",
+                        "                    ",
+                        "                    ",
+                        "                    "
+                    ]
+                },
+                {
+                    name: "Eater Alley",
+                    data: [
+                        "WWWWWWWWWWWWWWWWWWWW",
+                        "W P E   D      E W",
+                        "W                W",
+                        "W D E          E W",
+                        "W                W",
+                        "W   E   D    E   W",
+                        "W                W",
+                        "W D E          E W",
+                        "W                W",
+                        "WWWWWWWWWWWWWWWWWWWW",
+                        "                    ",
+                        "                    ",
+                        "                    ",
+                        "                    ",
+                        "                    "
+                    ]
+                },
+                {
+                    name: "Mixed Bag",
+                    data: [
+                        "WWWWWWWWWWWWWWWWWWWW",
+                        "WP B  R  M D     W",
+                        "W W WWWWWWWWWWW  W",
+                        "W D W E   T   W  W",
+                        "W   W WWWWWWW W DW",
+                        "W B W L     N W  W",
+                        "W   W WWWWWWW W  W",
+                        "W D W  R    B W DW",
+                        "W   WWWWWWWWWWW  W",
+                        "W M E         D  W",
+                        "WWWWWWWWWWWWWWWWWWWW",
+                        "                    ",
+                        "                    ",
+                        "                    ",
+                        "                    "
+                    ]
+                },
+                {
+                    name: "The Final Challenge",
+                    data: [
+                        "WWWWWWWWWWWWWWWWWWWW",
+                        "WPD B M R E TTTTTW",
+                        "W W W W W W W D  W",
+                        "W D B M R E NNNNNW",
+                        "W W W W W W W W  W",
+                        "WPD B M R E TTTTTW",
+                        "W W W W W W W D  W",
+                        "W D B M R E NNNNNW",
+                        "W W W W W W W W  W",
+                        "WPD B M R E      W",
+                        "WWWWWWWWWWWWWWWWWWWW",
+                        "                    ",
+                        "                    ",
+                        "                    ",
+                        "                    "
+                    ]
+                }
+            ];
+
+            const SoundManager = (() => {
+                let sounds = {};
+                const soundFiles = {
+                    step: 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA', // Short silent WAV
+                    collect: 'data:audio/wav;base64,UklGRlICAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YUwBAACAgICAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAPAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBEBAQEBEZAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEQEBAQEBAQEBAQEBAQEBAQEBAQEICAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQECEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEIRAQEBAQEBEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEQEBAQEQEBAQECEQEBAQEBAQEBAQEBAQECAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE_EULA_THINKING_Okay, here's the refined code for the KYE Clone game. I've implemented the plan, focusing on fixing the black screen issue by ensuring the game loop starts correctly when switching to the 'Playing' screen. I've also added sound effects using Howler.js with silent Base64 encoded audio data as placeholders, implemented a simple particle system, and refined game mechanics like the Eater's behavior. The code is structured within a single HTML file using Bootstrap for styling and Vanilla JavaScript for game logic, as requested.
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->

@@ -1,0 +1,74 @@
+{
+  "projectId": "7c7d90d8-815f-43fb-9101-6bfe2332bd56",
+  "revisionString": "2",
+  "projectNameDisplay": "trenndy",
+  "projectType": "website",
+  "userPromptForThisRevision": "real data tho",
+  "basedOnRevisionString": "1",
+  "savedAt": "2025-05-29T07:08:06.274Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/dalle3_6e6da9d7-ef5.png",
+      "url": "/generated_images/dalle3_6e6da9d7-ef5.png",
+      "description": "Modern, minimalist logo for a data trends website named 'trenndy'. The logo should incorporate abstract representations of growth, data lines, or upward arrows, suggesting dynamism and insight. Clean lines, easily recognizable. Primary color should be a professional and vibrant blue (e.g., close to Bootstrap's primary #0D6EFD), possibly with a secondary accent of teal or light gray. Avoid overly complex details. The text 'trenndy' could be subtly integrated or a clean logotype to accompany an iconic mark. Output on a transparent background if possible, otherwise a clean white background.",
+      "purpose": "Website logo for the navbar (id: logoImage).",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_fa02ebd7-d57.png",
+      "url": "/generated_images/dalle3_fa02ebd7-d57.png",
+      "description": "Abstract hero banner image representing data visualization, connectivity, and emerging global trends. Should evoke a sense of technological advancement, insight, and forward movement. Use a light and airy color palette (predominantly whites, light grays, soft blues like #A8D8F0) with accents of a vibrant, optimistic color like a bright teal (#48C9B0) or a warm orange (#F39C12). Feature subtle geometric patterns, flowing lines, stylized representations of data streams or network connections. Modern, clean, and sophisticated aesthetic. Avoid human figures or overly specific real-world objects. High resolution for a banner.",
+      "purpose": "Main hero banner for the website homepage welcome section (id: heroImageBanner).",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_05bb9330-8e8.png",
+      "url": "/generated_images/dalle3_05bb9330-8e8.png",
+      "description": "Matching set of 6 category icons for a trends website, adhering to a light theme aesthetic. Icons should be simple, modern, and instantly recognizable, using a consistent flat design style. Each icon should visually represent: 1. Technology (e.g., stylized microchip, abstract gear, or interconnected nodes), 2. Social Media (e.g., minimalist speech bubbles, simplified network graph, or a user group icon), 3. Fashion (e.g., abstract representation of fabric, a hanger, or a stylized garment silhouette), 4. Finance (e.g., a clean upward trending graph arrow, an abstract coin/currency symbol, or a simple piggy bank), 5. Environment (e.g., a stylized leaf, a simple wave pattern, or a minimalist globe outline), 6. Pop Culture (e.g., an abstract film reel, a simplified musical note, or a basic star shape). Use a consistent primary color for all icons (e.g., a medium gray #6c757d or a muted blue #5c8ef2) on a transparent background if possible, or a very light gray/white circle/square background. Icons must be clear at small sizes (target 28x28px display).",
+      "purpose": "Small icons for trend category identification on cards and filters. To be named icon_tech.png, icon_social.png, icon_fashion.png, icon_finance.png, icon_environment.png, icon_popculture.png respectively.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_8eef466f-650.png",
+      "url": "/generated_images/dalle3_8eef466f-650.png",
+      "description": "A generic default category icon, stylistically consistent with the other 6 category icons (simple, modern, flat design). This icon could be a simple abstract shape like interconnected dots, a question mark in a circle, or a generic graph symbol. Use the same primary color (e.g., medium gray #6c757d or muted blue #5c8ef2) as the other category icons. For use when a specific category icon is missing.",
+      "purpose": "Default category icon if a specific one is unavailable (appState.imageAssetPaths.defaultCategoryIcon).",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_713dddaf-396.png",
+      "url": "/generated_images/dalle3_713dddaf-396.png",
+      "description": "A simple, modern, flat design icon representing Social Media for a light-themed trends website. Should be instantly recognizable. Examples: minimalist speech bubbles, simplified network graph, or a user group icon. Use Bootstrap's primary blue (#0D6EFD) as the main color on a transparent background. Icon must be clear at small sizes (target 28x28px display). Stylistically consistent with existing icon `/generated_images/dalle3_05bb9330-8e8.png` and default icon `/generated_images/dalle3_8eef466f-650.png`.",
+      "purpose": "Category icon for 'Social Media' (to be used for AppConfig.categories where id is 'social'). Example path: /app_assets/icon_social.png",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_2e110fbd-2dd.png",
+      "url": "/generated_images/dalle3_2e110fbd-2dd.png",
+      "description": "A simple, modern, flat design icon representing Fashion for a light-themed trends website. Examples: abstract representation of fabric, a hanger, or a stylized garment silhouette. Use Bootstrap's pink color (#d63384) as the main color on a transparent background. Icon must be clear at small sizes (target 28x28px display). Stylistically consistent with existing icon `/generated_images/dalle3_05bb9330-8e8.png` and default icon `/generated_images/dalle3_8eef466f-650.png`.",
+      "purpose": "Category icon for 'Fashion' (to be used for AppConfig.categories where id is 'fashion'). Example path: /app_assets/icon_fashion.png",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_01d68a2b-3a7.png",
+      "url": "/generated_images/dalle3_01d68a2b-3a7.png",
+      "description": "A simple, modern, flat design icon representing Finance for a light-themed trends website. Examples: a clean upward trending graph arrow, an abstract coin/currency symbol. Use Bootstrap's green color (#198754) as the main color on a transparent background. Icon must be clear at small sizes (target 28x28px display). Stylistically consistent with existing icon `/generated_images/dalle3_05bb9330-8e8.png` and default icon `/generated_images/dalle3_8eef466f-650.png`.",
+      "purpose": "Category icon for 'Finance' (to be used for AppConfig.categories where id is 'finance'). Example path: /app_assets/icon_finance.png",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_b14f9451-06e.png",
+      "url": "/generated_images/dalle3_b14f9451-06e.png",
+      "description": "A simple, modern, flat design icon representing Environment for a light-themed trends website. Examples: a stylized leaf, a simple wave pattern, or a minimalist globe outline. Use Bootstrap's orange color (#fd7e14) as the main color on a transparent background. Icon must be clear at small sizes (target 28x28px display). Stylistically consistent with existing icon `/generated_images/dalle3_05bb9330-8e8.png` and default icon `/generated_images/dalle3_8eef466f-650.png`.",
+      "purpose": "Category icon for 'Environment' (to be used for AppConfig.categories where id is 'environment'). Example path: /app_assets/icon_environment.png",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_b30d69b5-980.png",
+      "url": "/generated_images/dalle3_b30d69b5-980.png",
+      "description": "A simple, modern, flat design icon representing Pop Culture for a light-themed trends website. Examples: an abstract film reel, a simplified musical note, or a basic star shape. Use Bootstrap's purple color (#6f42c1) as the main color on a transparent background. Icon must be clear at small sizes (target 28x28px display). Stylistically consistent with existing icon `/generated_images/dalle3_05bb9330-8e8.png` and default icon `/generated_images/dalle3_8eef466f-650.png`.",
+      "purpose": "Category icon for 'Pop Culture' (to be used for AppConfig.categories where id is 'popculture'). Example path: /app_assets/icon_popculture.png",
+      "isNewlyGenerated": true
+    }
+  ]
+}

@@ -10,9 +10,11 @@
     {
       "placeholder_id": "/generated_images/dalle3_0a2b5353-47c.png",
       "url": "/generated_images/dalle3_0a2b5353-47c.png",
-      "description": "A captivating, wide hero image for a Parisian cat cafe named 'Kitten Kaboodle'. The scene should be a sun-drenched, cozy cafe interior. Several adorable, diverse cats (e.g., a ginger tabby, a calico, a black cat) are lounging comfortably on plush velvet chairs or by a window overlooking a charming Parisian street (subtle Haussmannian architecture visible). Sunlight streams in. Overall mood: Warm, inviting, whimsical, and chic. Style: Photorealistic with a soft, slightly dreamy quality. Dominant colors: Light creams, soft pastels (like blush pink or mint green), warm wood tones, with accents of soft coral (#FF6B6B). Avoid clutter. No text on image.",
+      "description": "Content replaced by: imagen_test_273c82dd.png (Original: Content replaced by: imagen_test_273c82dd.png (Original: A captivating, wide hero image for a Parisian cat cafe named 'Kitten Kaboodle'. The scene should be a sun-drenched, cozy cafe interior. Several adorable, diverse cats (e.g., a ginger tabby, a calico, a black cat) are lounging comfortably on plush velvet chairs or by a window overlooking a charming Parisian street (subtle Haussmannian architecture visible). Sunlight streams in. Overall mood: Warm, inviting, whimsical, and chic. Style: Photorealistic with a soft, slightly dreamy quality. Dominant colors: Light creams, soft pastels (like blush pink or mint green), warm wood tones, with accents of soft coral (#FF6B6B). Avoid clutter. No text on image.))",
       "purpose": "Main hero banner for the website homepage (background of #home section). Will be named something like `hero_image_kitten_kaboodle.png`.",
-      "isNewlyGenerated": true
+      "isNewlyGenerated": true,
+      "originalUploadedFilename": "imagen_test_273c82dd.png",
+      "swappedAt": "2025-05-29T07:01:06.931Z"
     },
     {
       "placeholder_id": "/generated_images/dalle3_9d14677b-43c.png",

@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>trenndy - Explore Evolving Trends</title>
+    <meta name="description" content="trenndy: Your dashboard for discovering and visualizing trends over time. Explore simulated data insights from technology, fashion, social media, and more.">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f4f7f6; 
+    color: #333;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex-grow: 1;
+}
+
+.navbar-brand img { transition: transform 0.3s ease; }
+.navbar-brand:hover img { transform: rotate(-5deg) scale(1.1); }
+.nav-link { transition: color 0.2s ease-in-out; }
+.nav-link:hover, .nav-link.active { color: #007bff !important; }
+
+#heroImageBanner {
+    border: 5px solid white; 
+    max-height: 350px; 
+    object-fit: cover;
+    width: 100%;
+}
+
+#filters {
+    top: 60px; 
+    background-color: rgba(255, 255, 255, 0.95) !important; 
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border-bottom: 1px solid #dee2e6;
+    z-index: 1020; 
+}
+.navbar {
+    z-index: 1030;
+}
+
+
+.trend-card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+    display: flex;
+    flex-direction: column;
+}
+.trend-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+.trend-card .card-header {
+    background-color: transparent;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 0.75rem 1rem;
+}
+.trend-card .card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+.category-icon {
+    width: 28px;
+    height: 28px;
+    opacity: 0.8;
+}
+.trend-card .card-body {
+    padding: 1rem;
+    flex-grow: 1; 
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.trend-description {
+    font-size: 0.85rem;
+    color: #555;
+    margin-bottom: 0.75rem;
+    min-height: 50px; 
+    flex-grow: 1;
+}
+.mini-chart-container {
+    width: 100%;
+    height: 80px; 
+    margin-bottom: 0.75rem;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    overflow: hidden; 
+}
+.mini-chart-container svg {
+    display: block; 
+}
+.trend-stats {
+    font-size: 0.9rem;
+}
+.current-value { color: #007bff; }
+.change-value.positive { color: #198754; } 
+.change-value.negative { color: #dc3545; } 
+.change-value.neutral { color: #6c757d; } 
+
+.trend-card .card-footer {
+    background-color: transparent;
+    border-top: 1px solid #f0f0f0;
+    padding: 0.75rem 1rem;
+}
+.trend-card .btn {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+}
+
+.chart-line {
+    fill: none;
+    stroke-width: 2px;
+}
+.chart-area {
+    stroke: none;
+    opacity: 0.2;
+}
+.chart-dot {
+    stroke-width: 1px;
+    stroke: white; 
+}
+.axis-line {
+    stroke: #ccc;
+    stroke-width: 1px;
+}
+.axis-text {
+    font-size: 10px;
+    fill: #777;
+}
+
+#spotlightContent .display-6 { font-weight: 300; }
+#spotlightChartContainer {
+    height: 350px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+}
+#spotlightImageContainer img, #modalImageContainer img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    margin-top: 1rem;
+}
+.ai-content-area {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    border: 1px solid #e9ecef;
+}
+.ai-content-area h6 {
+    font-weight: 600;
+    color: #343a40;
+}
+
+.modal-xl { max-width: 900px; }
+
+.modal-header { border-bottom: 1px solid #dee2e6; }
+.modal-footer { border-top: 1px solid #dee2e6; }
+
+.spinner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100px; 
+}
+.spinner-container.inline {
+    min-height: auto;
+    display: inline-flex;
+    vertical-align: middle;
+    margin-left: 8px;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+@media (max-width: 991px) { 
+    #filters {
+         top: 56px; 
+    }
+}
+
+@media (max-width: 768px) {
+    #filters {
+        position: static; 
+    }
+    .display-5 { font-size: 2.5rem; }
+    #spotlightChartContainer { height: 250px; }
+    #heroImageBanner { max-height: 250px; }
+}
+    </style>
+</head>
+<body class="bg-light">
+
+    <header class="bg-white shadow-sm sticky-top">
+        <nav class="navbar navbar-expand-lg navbar-light container">
+            <a class="navbar-brand fw-bold" href="#">
+                <img src="" alt="trenndy logo" id="logoImage" style="height: 30px; margin-right: 10px; vertical-align: middle;">
+                trenndy
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link active" aria-current="page" href="#home">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#dashboard">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#spotlight">Spotlight</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="home" class="py-5 text-center bg-white">
+            <div class="container">
+                <div class="row py-lg-4">
+                    <div class="col-lg-8 col-md-10 mx-auto">
+                        <img src="" alt="Abstract representation of data trends" id="heroImageBanner" class="img-fluid mb-4 rounded shadow-sm">
+                        <h1 class="fw-light display-5">Welcome to trenndy</h1>
+                        <p class="lead text-muted">Discover and explore emerging trends across various domains. See how patterns evolve over time with our curated visualizations.</p>
+                        <p id="featuredTrendWelcome" class="fst-italic text-primary my-3"></p>
+                        <p>
+                            <a href="#dashboard" class="btn btn-primary my-2 rounded-pill px-4">Explore Dashboard</a>
+                            <a href="#spotlight" class="btn btn-outline-secondary my-2 rounded-pill px-4">View Trend Spotlight</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="filters" class="py-3 sticky-top">
+             <div class="container">
+                <div class="row g-3 align-items-center justify-content-center">
+                    <div class="col-md-4">
+                        <label for="categoryFilter" class="form-label visually-hidden">Filter by Category:</label>
+                        <select id="categoryFilter" class="form-select form-select-lg">
+                            <option value="all" selected>All Categories</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="timeRangeFilter" class="form-label visually-hidden">Filter by Time Range:</label>
+                        <select id="timeRangeFilter" class="form-select form-select-lg">
+                            <option value="all" selected>All Time</option>
+                            <option value="3">Last 3 Months</option>
+                            <option value="6">Last 6 Months</option>
+                            <option value="12">Last 12 Months</option>
+                            <option value="24">Last 24 Months</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="dashboard" class="py-5">
+            <div class="container">
+                <h2 class="pb-3 mb-4 h3 fw-light text-center border-bottom">Trend Dashboard</h2>
+                <div id="trendGrid" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                </div>
+                <div id="noResultsMessage" class="alert alert-info mt-4 d-none text-center" role="alert">
+                    No trends match your current filter criteria. Try adjusting your filters!
+                </div>
+            </div>
+        </section>
+
+        <section id="spotlight" class="py-5 bg-white">
+            <div class="container">
+                <h2 class="pb-3 mb-4 h3 fw-light text-center border-bottom">Trend Spotlight</h2>
+                <div id="spotlightContent" class="row align-items-center">
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="py-4 mt-auto bg-dark text-white text-center">
+        <div class="container">
+            <p class="mb-1">&copy; <span id="currentYear"></span> trenndy. All Rights Reserved. (Simulated Data for Demonstration)</p>
+            <ul class="list-inline mb-0 small">
+                <li class="list-inline-item"><a href="#" class="text-white-50 text-decoration-none">Privacy Policy</a></li>
+                <li class="list-inline-item">|</li>
+                <li class="list-inline-item"><a href="#" class="text-white-50 text-decoration-none">Terms of Service</a></li>
+            </ul>
+        </div>
+    </footer>
+
+    <div class="modal fade" id="trendModal" tabindex="-1" aria-labelledby="trendModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="trendModalLabel">Trend Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="trendModalBody">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+(function() {
+    const AppConfig = {
+        defaultTimeRangeMonths: 12,
+        aiImageAspectRatio: '16:9',
+        categories: [
+            { id: 'tech', name: 'Technology', icon: '', color: '#17a2b8' },
+            { id: 'social', name: 'Social Media', icon: '', color: '#007bff' },
+            { id: 'fashion', name: 'Fashion', icon: '', color: '#e83e8c' },
+            { id: 'finance', name: 'Finance', icon: '', color: '#28a745' },
+            { id: 'environment', name: 'Environment', icon: '', color: '#fd7e14' },
+            { id: 'popculture', name: 'Pop Culture', icon: '', color: '#6f42c1' }
+        ],
+        imagePaths: {} 
+    };
+
+    let allTrendsData = [
+        {
+            id: 'tech_ai_adoption', name: 'AI Adoption Rate', categoryId: 'tech',
+            description: 'Tracks the percentage of businesses integrating AI technologies. Shows significant growth, especially in enterprise solutions.',
+            data: generateRandomTrendData(24, 5, 85, new Date(2023, 0, 1))
+        },
+        {
+            id: 'tech_vr_market', name: 'VR Market Growth', categoryId: 'tech',
+            description: 'Monitors the consumer and enterprise VR market size and adoption. Steady growth with spikes during new hardware releases.',
+            data: generateRandomTrendData(24, 10, 60, new Date(2023, 0, 1))
+        },
+        {
+            id: 'social_video_users', name: 'Short-Form Video Users', categoryId: 'social',
+            description: 'Represents active users on dominant short-form video platforms. Exponential growth followed by maturation.',
+            data: generateRandomTrendData(24, 200, 800, new Date(2023, 0, 1), true)
+        },
+        {
+            id: 'social_influencer_economy', name: 'Influencer Economy Size', categoryId: 'social',
+            description: 'Tracks the estimated market size of the influencer marketing industry. Consistent upward trajectory.',
+            data: generateRandomTrendData(24, 5, 30, new Date(2023, 0, 1))
+        }
+    ];
+
+    let domElements = {};
+
+    let appState = {
+        currentFilterCategory: 'all',
+        currentFilterTimeRange: 'all',
+        spotlightTrendId: null,
+        imageAssetPaths: {}
+    };
+
+    function generateRandomTrendData(numPoints, startValue, maxValue, startDate, allowVolatility = false) {
+        const data = [];
+        let currentValue = startValue;
+        const date = new Date(startDate);
+        const overallTrendFactor = (maxValue - startValue) / numPoints;
+
+        for (let i = 0; i < numPoints; i++) {
+            const monthStr = (date.getMonth() + 1).toString().padStart(2, '0');
+            const lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+            const dayStr = lastDayOfMonth.toString().padStart(2, '0');
+            data.push({ date: `${date.getFullYear()}-${monthStr}-${dayStr}`, value: Math.max(0, Math.round(currentValue)) });
+            
+            let increment = overallTrendFactor * (1 + (Math.random() - 0.5) * (allowVolatility ? 0.8 : 0.3));
+            if(allowVolatility && Math.random() < 0.15) {
+                increment *= (Math.random() > 0.5 ? 1.8 : -1.2);
+            }
+            currentValue += increment;
+            currentValue = Math.max(0, Math.min(currentValue, maxValue * 1.2)); 
+            date.setMonth(date.getMonth() + 1);
+        }
+        return data;
+    }
+    
+    function getCategoryById(categoryId) {
+        return AppConfig.categories.find(cat => cat.id === categoryId);
+    }
+
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    }
+
+    function getFilteredTrends() {
+        let trends = JSON.parse(JSON.stringify(allTrendsData)); 
+        if (appState.currentFilterCategory !== 'all') {
+            trends = trends.filter(trend => trend.categoryId === appState.currentFilterCategory);
+        }
+
+        if (appState.currentFilterTimeRange !== 'all') {
+            const monthsToInclude = parseInt(appState.currentFilterTimeRange);
+            trends = trends.map(trend => {
+                const filteredData = trend.data.slice(-monthsToInclude);
+                return { ...trend, data: filteredData };
+            }).filter(trend => trend.data.length > 0);
+        }
+        return trends;
+    }
+    
+    function getFullTrendDataById(trendId) {
+        const trend = allTrendsData.find(t => t.id === trendId);
+        if (!trend) return null;
+        return JSON.parse(JSON.stringify(trend)); 
+    }
+    
+    function drawSVGChart(container, dataPoints, categoryColor, isMini = true) {
+        container.innerHTML = ''; 
+        if (!dataPoints || dataPoints.length < 2) {
+            container.innerHTML = `<p class="text-center small text-muted p-2 d-flex align-items-center justify-content-center h-100">${isMini ? 'Not enough data' : 'Not enough data for chart.'}</p>`;
+            return;
+        }
+
+        const svgNS = "http://www.w3.org/2000/svg";
+        const svg = document.createElementNS(svgNS, "svg");
+        const padding = isMini ? { top: 5, right: 5, bottom: 5, left: 5 } : { top: 20, right: 20, bottom: 30, left: 40 };
+        const width = container.clientWidth;
+        const height = container.clientHeight;
+
+        if (width === 0 || height === 0) return; 
+
+        svg.setAttribute("width", "100%");
+        svg.setAttribute("height", "100%");
+        svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+        svg.style.overflow = "visible";
+
+        const values = dataPoints.map(dp => dp.value);
+        const minVal = Math.min(...values);
+        const maxVal = Math.max(...values);
+        const valueRange = maxVal - minVal === 0 ? 1 : maxVal - minVal; 
+
+        const xStep = (dataPoints.length > 1) ? (width - padding.left - padding.right) / (dataPoints.length - 1) : (width - padding.left - padding.right);
+        
+        const normalizeY = val => height - padding.bottom - ((val - minVal) / valueRange) * (height - padding.top - padding.bottom);
+
+        let pathD = `M ${padding.left} ${normalizeY(values[0])}`;
+        for (let i = 1; i < values.length; i++) {
+            pathD += ` L ${padding.left + i * xStep} ${normalizeY(values[i])}`;
+        }
+
+        const line = document.createElementNS(svgNS, "path");
+        line.setAttribute("d", pathD);
+        line.setAttribute("class", "chart-line");
+        line.setAttribute("stroke", categoryColor || "#007bff");
+        svg.appendChild(line);
+
+        if (!isMini) {
+            const areaPathD = pathD + ` L ${padding.left + (values.length - 1) * xStep} ${height - padding.bottom} L ${padding.left} ${height - padding.bottom} Z`;
+            const area = document.createElementNS(svgNS, "path");
+            area.setAttribute("d", areaPathD);
+            area.setAttribute("class", "chart-area");
+            area.setAttribute("fill", categoryColor || "#007bff");
+            svg.appendChild(area);
+
+            dataPoints.forEach((dp, i) => {
+                const circle = document.createElementNS(svgNS, "circle");
+                circle.setAttribute("cx", padding.left + i * xStep);
+                circle.setAttribute("cy", normalizeY(dp.value));
+                circle.setAttribute("r", "3");
+                circle.setAttribute("fill", categoryColor || "#007bff");
+                circle.setAttribute("class", "chart-dot");
+                svg.appendChild(circle);
+            });
+
+            const xAxisLine = document.createElementNS(svgNS, "line");
+            xAxisLine.setAttribute("x1", padding.left);
+            xAxisLine.setAttribute("y1", height - padding.bottom);
+            xAxisLine.setAttribute("x2", width - padding.right);
+            xAxisLine.setAttribute("y2", height - padding.bottom);
+            xAxisLine.setAttribute("class", "axis-line");
+            svg.appendChild(xAxisLine);
+
+            const yAxisLine = document.createElementNS(svgNS, "line");
+            yAxisLine.setAttribute("x1", padding.left);
+            yAxisLine.setAttribute("y1", padding.top);
+            yAxisLine.setAttribute("x2", padding.left);
+            yAxisLine.setAttribute("y2", height - padding.bottom);
+            yAxisLine.setAttribute("class", "axis-line");
+            svg.appendChild(yAxisLine);
+
+            const minLabel = document.createElementNS(svgNS, "text");
+            minLabel.setAttribute("x", padding.left - 8);
+            minLabel.setAttribute("y", height - padding.bottom + 4);
+            minLabel.setAttribute("text-anchor", "end");
+            minLabel.setAttribute("class", "axis-text");
+            minLabel.textContent = Math.round(minVal);
+            svg.appendChild(minLabel);
+
+            const maxLabel = document.createElementNS(svgNS, "text");
+            maxLabel.setAttribute("x", padding.left - 8);
+            maxLabel.setAttribute("y", padding.top + 4); 
+            maxLabel.setAttribute("text-anchor", "end");
+            maxLabel.setAttribute("class", "axis-text");
+            maxLabel.textContent = Math.round(maxVal);
+            svg.appendChild(maxLabel);
+
+            const startDateLabel = document.createElementNS(svgNS, "text");
+            startDateLabel.setAttribute("x", padding.left);
+            startDateLabel.setAttribute("y", height - padding.bottom + 15);
+            startDateLabel.setAttribute("text-anchor", "start");
+            startDateLabel.setAttribute("class", "axis-text");
+            startDateLabel.textContent = formatDate(dataPoints[0].date);
+            svg.appendChild(startDateLabel);
+
+            const endDateLabel = document.createElementNS(svgNS, "text");
+            endDateLabel.setAttribute("x", width - padding.right);
+            endDateLabel.setAttribute("y", height - padding.bottom + 15);
+            endDateLabel.setAttribute("text-anchor", "end");
+            endDateLabel.setAttribute("class", "axis-text");
+            endDateLabel.textContent = formatDate(dataPoints[dataPoints.length - 1].date);
+            svg.appendChild(endDateLabel);
+        }
+        container.appendChild(svg);
+    }
+
+    function renderTrendCard(trend) {
+        const category = getCategoryById(trend.categoryId);
+        const trendValueCurrent = trend.data.length > 0 ? trend.data[trend.data.length - 1].value : 0;
+        const trendValuePrevious = trend.data.length > 1 ? trend.data[trend.data.length - 2].value : trendValueCurrent;
+        const change = trendValueCurrent - trendValuePrevious;
+        const percentChange = trendValuePrevious !== 0 ? (change / trendValuePrevious) * 100 : (trendValueCurrent > 0 ? 100 : 0);
+
+        let changeClass = 'neutral';
+        let changeIcon = '<i class="bi bi-dash"></i>';
+        if (percentChange > 0.5) {
+            changeClass = 'positive';
+            changeIcon = '<i class="bi bi-arrow-up-right"></i>';
+        } else if (percentChange < -0.5) {
+            changeClass = 'negative';
+            changeIcon = '<i class="bi bi-arrow-down-left"></i>';
+        }
+        
+        const cardCol = document.createElement('div');
+        cardCol.className = 'col';
+        const categoryIconSrc = category.icon || appState.imageAssetPaths.defaultCategoryIcon || 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+        cardCol.innerHTML = `
+            <div class="card h-100 trend-card shadow-sm" data-trend-id="${trend.id}">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0 h6">${trend.name}</h3>
+                    <img src="${categoryIconSrc}" alt="${category.name} category icon" class="category-icon">
+                </div>
+                <div class="card-body">
+                    <p class="trend-description">${trend.description.substring(0, 100)}${trend.description.length > 100 ? '...' : ''}</p>
+                    <div class="mini-chart-container mb-3"></div>
+                    <div class="trend-stats">
+                        <p class="mb-1">Current Index: <span class="fw-bold current-value">${Math.round(trendValueCurrent)}</span></p>
+                        <p class="mb-0">Change: <span class="change-value ${changeClass} fw-bold">${percentChange.toFixed(1)}% ${changeIcon}</span></p>
+                    </div>
+                </div>
+                <div class="card-footer text-center d-flex justify-content-around">
+                    <button class="btn btn-sm btn-outline-primary view-details-btn flex-fill me-1">Details</button>
+                    <button class="btn btn-sm btn-outline-info generate-image-btn flex-fill me-1">AI Visual</button>
+                    <button class="btn btn-sm btn-outline-success generate-summary-btn flex-fill">AI Summary</button>
+                </div>
+            </div>
+        `;
+        domElements.trendGrid.appendChild(cardCol);
+        const chartContainer = cardCol.querySelector('.mini-chart-container');
+        setTimeout(() => drawSVGChart(chartContainer, trend.data, category.color, true), 0); 
+    }
+
+    function renderDashboard() {
+        domElements.trendGrid.innerHTML = ''; 
+        const trendsToDisplay = getFilteredTrends();
+
+        if (trendsToDisplay.length === 0) {
+            domElements.noResultsMessage.classList.remove('d-none');
+        } else {
+            domElements.noResultsMessage.classList.add('d-none');
+            trendsToDisplay.forEach(renderTrendCard);
+        }
+    }
+    
+    function populateCategoryFilter() {
+        AppConfig.categories.forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat.id;
+            option.textContent = cat.name;
+            domElements.categoryFilter.appendChild(option);
+        });
+    }
+
+    function populateSpotlight(trendId = null) {
+        const trendToSpotlight = trendId ? getFullTrendDataById(trendId) : getFullTrendDataById(allTrendsData[Math.floor(Math.random() * allTrendsData.length)].id);
+        
+        if (!trendToSpotlight) {
+            domElements.spotlightContent.innerHTML = '<p class="text-center text-muted">No trend selected for spotlight.</p>';
+            return;
+        }
+        appState.spotlightTrendId = trendToSpotlight.id;
+        const category = getCategoryById(trendToSpotlight.categoryId);
+
+        domElements.spotlightContent.innerHTML = `
+            <div class="col-lg-6">
+                <h3 class="display-6 fw-bold lh-1 mb-3">${trendToSpotlight.name}</h3>
+                <p class="lead"><span class="badge me-2" style="background-color:${category.color}; color:white;">${category.name}</span> ${trendToSpotlight.description}</p>
+                <div class="ai-content-area mt-3">
+                    <h6>AI Generated Insights:</h6>
+                    <div id="spotlightAISummaryText" class="fst-italic small" style="min-height: 40px;">Click "Get AI Insights" to generate notes...</div>
+                    <div id="spotlightAISummaryLoader" class="spinner-container d-none my-2"><div class="spinner-border spinner-border-sm text-info" role="status"><span class="visually-hidden">Loading...</span></div></div>
+                    <button id="getSpotlightAISummaryBtn" class="btn btn-sm btn-info mt-2 w-100">Get AI Insights</button>
+                </div>
+            </div>
+            <div class="col-lg-6 mt-4 mt-lg-0">
+                <div id="spotlightChartContainer" class="shadow-sm"></div>
+                <div id="spotlightImageContainer" class="mt-3 text-center" style="min-height: 150px;">
+                     <small class="text-muted">Click "Generate AI Visual" for an artistic representation.</small>
+                </div>
+                <div id="spotlightImageLoader" class="spinner-container d-none my-2"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>
+                <div class="text-center mt-3">
+                   <button id="spotlightGenerateImageBtn" class="btn btn-primary w-100">Generate AI Visual</button>
+                </div>
+            </div>
+        `;
+        const chartContainer = domElements.spotlightContent.querySelector('#spotlightChartContainer');
+        setTimeout(() => drawSVGChart(chartContainer, trendToSpotlight.data, category.color, false), 0);
+    }
+
+    function showTrendModal(trendId, options = {}) {
+        const trend = getFullTrendDataById(trendId); 
+        if (!trend) return;
+
+        const category = getCategoryById(trend.categoryId);
+        domElements.trendModalLabel.textContent = trend.name;
+
+        domElements.trendModalBody.innerHTML = `
+            <div class="row">
+                <div class="col-md-7">
+                    <h4><span class="badge me-2" style="background-color:${category.color}; color:white;">${category.name}</span> ${trend.name}</h4>
+                    <p class="text-muted">${trend.description}</p>
+                    <div id="modalChartContainer" style="height: 300px; width:100%; background-color: #f8f9fa; border-radius: 6px;"></div>
+                </div>
+                <div class="col-md-5">
+                    <div class="ai-content-area mb-3">
+                        <h6>AI Generated Visual</h6>
+                        <div id="modalImageContainer" class="text-center my-2" style="min-height:150px;">
+                            <small class="text-muted">Click "Generate Visual" to create an AI image.</small>
+                        </div>
+                        <div id="modalImageLoader" class="spinner-container d-none"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>
+                        <button class="btn btn-sm btn-primary w-100 generate-image-btn-modal" data-trend-id="${trend.id}">Generate Visual</button>
+                    </div>
+                    <div class="ai-content-area">
+                        <h6>AI Generated Summary</h6>
+                        <div id="modalSummaryText" class="fst-italic small my-2" style="min-height: 50px;">Click "Generate Summary" for AI insights.</div>
+                        <div id="modalSummaryLoader" class="spinner-container d-none"><div class="spinner-border spinner-border-sm text-info" role="status"><span class="visually-hidden">Loading...</span></div></div>
+                        <button class="btn btn-sm btn-info w-100 generate-summary-btn-modal" data-trend-id="${trend.id}">Generate Summary</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        const modalInstance = bootstrap.Modal.getInstance(domElements.trendModal) || new bootstrap.Modal(domElements.trendModal);
+        
+        const chartContainer = domElements.trendModalBody.querySelector('#modalChartContainer');
+
+        const onModalShown = () => {
+            drawSVGChart(chartContainer, trend.data, category.color, false);
+            
+            if (options.autoAction) {
+                if (options.autoAction === 'image') {
+                    const modalImageButton = domElements.trendModalBody.querySelector('.generate-image-btn-modal');
+                    if (modalImageButton) {
+                         handleAIGeneration(trend.id, 'image', {
+                            loader: domElements.trendModalBody.querySelector('#modalImageLoader'),
+                            container: domElements.trendModalBody.querySelector('#modalImageContainer'),
+                            button: modalImageButton
+                        });
+                    }
+                } else if (options.autoAction === 'summary') {
+                    const modalSummaryButton = domElements.trendModalBody.querySelector('.generate-summary-btn-modal');
+                    if (modalSummaryButton) {
+                        handleAIGeneration(trend.id, 'summary', {
+                            loader: domElements.trendModalBody.querySelector('#modalSummaryLoader'),
+                            container: domElements.trendModalBody.querySelector('#modalSummaryText'),
+                            button: modalSummaryButton
+                        });
+                    }
+                }
+            }
+            domElements.trendModal.removeEventListener('shown.bs.modal', onModalShown);
+        };
+        
+        domElements.trendModal.addEventListener('shown.bs.modal', onModalShown, { once: true });
+        modalInstance.show();
+    }
+    
+    function displayFeaturedTrendWelcome() {
+        if (allTrendsData.length > 0) {
+            const randomIndex = Math.floor(Math.random() * allTrendsData.length);
+            const featuredTrend = allTrendsData[randomIndex];
+            if (domElements.featuredTrendWelcome) {
+                 domElements.featuredTrendWelcome.innerHTML = `✨ Today's Highlight: <a href="#spotlight" class="fw-bold text-decoration-none spotlight-link" data-trend-id-spotlight="${featuredTrend.id}">${featuredTrend.name}</a> - see it in the Spotlight!`;
+            }
+        }
+    }
+
+    async function handleAIGeneration(trendId, type, uiElements) {
+        const trend = getFullTrendDataById(trendId); 
+        if (!trend) return;
+
+        const { loader, container, button } = uiElements;
+        
+        loader.classList.remove('d-none');
+        if(button) button.disabled = true;
+        container.innerHTML = ''; 
+
+        try {
+            if (type === 'image') {
+                const prompt = `Create an abstract, artistic, and visually compelling conceptual image representing the core idea of the trend: "${trend.name}". Description: "${trend.description}". The image should be suitable for a light-themed, modern data analytics website. Emphasize dynamism and insight. Aspect ratio ${AppConfig.aiImageAspectRatio}. Use colors that evoke innovation and clarity, perhaps with hints of ${getCategoryById(trend.categoryId).color}.`;
+                const response = await fetch('/api/generate-image-on-demand', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: prompt, aspectRatio: AppConfig.aiImageAspectRatio })
+                });
+                if (!response.ok) throw new Error(`API request failed with status ${response.status}`);
+                const result = await response.json();
+                if (result.success && result.imageUrl) {
+                    container.innerHTML = `<img src="${result.imageUrl}" alt="AI generated visual for ${trend.name}" class="img-fluid rounded shadow-sm">`;
+                } else {
+                    throw new Error(result.error || 'Failed to generate image.');
+                }
+            } else if (type === 'summary') {
+                const aiguidePrompt = `You are an insightful trend analyst. Provide a concise (1-2 sentences) summary or potential implication for the given trend. Be engaging and focus on key takeaways.`;
+                const userQuery = `Trend Name: "${trend.name}". Description: "${trend.description}". Provide your summary.`;
+                const response = await fetch('/api/ai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        aiguide: aiguidePrompt,
+                        msgforai: userQuery
+                    })
+                });
+                if (!response.ok) throw new Error(`API request failed with status ${response.status}`);
+                const result = await response.json();
+                if (result.success && result.response) {
+                    container.innerHTML = `<p class="mb-0">${result.response}</p>`;
+                } else {
+                    throw new Error(result.error || 'Failed to generate summary.');
+                }
+            }
+        } catch (error) {
+            console.error(`Error generating AI ${type}:`, error);
+            container.innerHTML = `<small class="text-danger d-block text-center p-2">Oops! Error generating ${type}. ${error.message}</small>`;
+        } finally {
+            loader.classList.add('d-none');
+            if(button) button.disabled = false;
+        }
+    }
+
+    function handleFilterChange() {
+        appState.currentFilterCategory = domElements.categoryFilter.value;
+        appState.currentFilterTimeRange = domElements.timeRangeFilter.value;
+        renderDashboard();
+    }
+
+    function handleGridActions(event) {
+        const target = event.target;
+        const cardButton = target.closest('.btn');
+        if (!cardButton) return;
+
+        const card = target.closest('.trend-card');
+        if (!card) return;
+        const trendId = card.dataset.trendId;
+
+        if (cardButton.classList.contains('view-details-btn')) {
+            showTrendModal(trendId);
+        } else if (cardButton.classList.contains('generate-image-btn')) {
+            showTrendModal(trendId, { autoAction: 'image' });
+        } else if (cardButton.classList.contains('generate-summary-btn')) {
+            showTrendModal(trendId, { autoAction: 'summary' });
+        }
+    }
+    
+    function handleModalActions(event) {
+        const target = event.target;
+        const trendId = target.dataset.trendId;
+        if (!trendId) return;
+
+        if (target.classList.contains('generate-image-btn-modal')) {
+            handleAIGeneration(trendId, 'image', {
+                loader: domElements.trendModalBody.querySelector('#modalImageLoader'),
+                container: domElements.trendModalBody.querySelector('#modalImageContainer'),
+                button: target
+            });
+        } else if (target.classList.contains('generate-summary-btn-modal')) {
+            handleAIGeneration(trendId, 'summary', {
+                loader: domElements.trendModalBody.querySelector('#modalSummaryLoader'),
+                container: domElements.trendModalBody.querySelector('#modalSummaryText'),
+                button: target
+            });
+        }
+    }
+
+    function handleSpotlightOrWelcomeLink(event) {
+        const target = event.target;
+        let trendIdForSpotlight = null;
+
+        if (target.id === 'getSpotlightAISummaryBtn' || target.id === 'spotlightGenerateImageBtn') {
+            trendIdForSpotlight = appState.spotlightTrendId;
+        } else if (target.classList.contains('spotlight-link') && target.dataset.trendIdSpotlight) {
+            event.preventDefault();
+            trendIdForSpotlight = target.dataset.trendIdSpotlight;
+            populateSpotlight(trendIdForSpotlight);
+            const spotlightSection = document.getElementById('spotlight');
+            if (spotlightSection) {
+                spotlightSection.scrollIntoView({ behavior: 'smooth' });
+            }
+            return; 
+        }
+
+        if (!trendIdForSpotlight) return;
+
+        if (target.id === 'getSpotlightAISummaryBtn') {
+            handleAIGeneration(trendIdForSpotlight, 'summary', {
+                loader: domElements.spotlightContent.querySelector('#spotlightAISummaryLoader'),
+                container: domElements.spotlightContent.querySelector('#spotlightAISummaryText'),
+                button: target
+            });
+        } else if (target.id === 'spotlightGenerateImageBtn') {
+             handleAIGeneration(trendIdForSpotlight, 'image', {
+                loader: domElements.spotlightContent.querySelector('#spotlightImageLoader'),
+                container: domElements.spotlightContent.querySelector('#spotlightImageContainer'),
+                button: target
+            });
+        }
+    }
+    
+    function setAssetPaths(availableAssets) {
+        appState.imageAssetPaths = { ...AppConfig.imagePaths, ...availableAssets };
+        
+        if (domElements.logoImage) domElements.logoImage.src = appState.imageAssetPaths.logo || '';
+        if (domElements.heroImageBanner) domElements.heroImageBanner.src = appState.imageAssetPaths.heroBanner || '';
+
+        AppConfig.categories.forEach(cat => {
+            cat.icon = appState.imageAssetPaths[`icon_${cat.id}`] || appState.imageAssetPaths.defaultCategoryIcon || '';
+        });
+    }
+
+    function init() {
+        domElements = {
+            logoImage: document.getElementById('logoImage'),
+            heroImageBanner: document.getElementById('heroImageBanner'),
+            categoryFilter: document.getElementById('categoryFilter'),
+            timeRangeFilter: document.getElementById('timeRangeFilter'),
+            trendGrid: document.getElementById('trendGrid'),
+            noResultsMessage: document.getElementById('noResultsMessage'),
+            spotlightContent: document.getElementById('spotlightContent'),
+            trendModal: document.getElementById('trendModal'),
+            trendModalLabel: document.getElementById('trendModalLabel'),
+            trendModalBody: document.getElementById('trendModalBody'),
+            currentYear: document.getElementById('currentYear'),
+            featuredTrendWelcome: document.getElementById('featuredTrendWelcome')
+        };
+
+        const actualAssets = {
+             logo: "/generated_images/dalle3_6e6da9d7-ef5.png",
+             heroBanner: "/generated_images/dalle3_fa02ebd7-d57.png",
+             icon_tech: "/generated_images/dalle3_05bb9330-8e8.png", 
+             icon_social: "/generated_images/dalle3_05bb9330-8e8.png", 
+             icon_fashion: "/generated_images/dalle3_05bb9330-8e8.png",
+             icon_finance: "/generated_images/dalle3_05bb9330-8e8.png",
+             icon_environment: "/generated_images/dalle3_05bb9330-8e8.png",
+             icon_popculture: "/generated_images/dalle3_05bb9330-8e8.png",
+             defaultCategoryIcon: "/generated_images/dalle3_8eef466f-650.png"
+        };
+        setAssetPaths(actualAssets);
+        
+        if(domElements.currentYear) domElements.currentYear.textContent = new Date().getFullYear();
+        populateCategoryFilter();
+        
+        const otherCategoriesData = [
+            { id: 'fashion_vintage_revival', name: 'Vintage Fashion Resurgence', categoryId: 'fashion', description: 'Growing interest in second-hand and vintage clothing items, driven by sustainability and unique styles.', data: generateRandomTrendData(24, 20, 70, new Date(2023,0,1), true) },
+            { id: 'fashion_techwear', name: 'Techwear Popularity', categoryId: 'fashion', description: 'Fusion of technical fabrics and utilitarian design in everyday apparel.', data: generateRandomTrendData(24, 15, 65, new Date(2023,0,1)) },
+            { id: 'finance_crypto_mainstream', name: 'Crypto Mainstream Mentions', categoryId: 'finance', description: 'Frequency of cryptocurrency discussions in mainstream financial news.', data: generateRandomTrendData(24, 30, 90, new Date(2023,0,1), true) },
+            { id: 'finance_esg_investing', name: 'ESG Investing Growth', categoryId: 'finance', description: 'Assets under management in ESG (Environmental, Social, Governance) focused funds.', data: generateRandomTrendData(24, 100, 500, new Date(2023,0,1)) },
+            { id: 'environment_ev_sales', name: 'Electric Vehicle Sales', categoryId: 'environment', description: 'Global sales figures for electric vehicles, indicating a shift towards sustainable transport.', data: generateRandomTrendData(24, 50, 300, new Date(2023,0,1)) },
+            { id: 'environment_renewable_capacity', name: 'Renewable Energy Capacity', categoryId: 'environment', description: 'Newly installed renewable energy capacity worldwide (e.g., solar, wind).', data: generateRandomTrendData(24, 200, 700, new Date(2023,0,1)) },
+            { id: 'popculture_streaming_wars', name: 'Streaming Service Subscriptions', categoryId: 'popculture', description: 'Total subscriptions across major video streaming platforms.', data: generateRandomTrendData(24, 300, 950, new Date(2023,0,1)) },
+            { id: 'popculture_gaming_hours', name: 'Average Weekly Gaming Hours', categoryId: 'popculture', description: 'Estimated average hours spent gaming per week by active gamers.', data: generateRandomTrendData(24, 8, 25, new Date(2023,0,1), true) }
+        ];
+        allTrendsData.push(...otherCategoriesData);
+
+        renderDashboard();
+        populateSpotlight(); 
+        displayFeaturedTrendWelcome();
+
+        domElements.categoryFilter.addEventListener('change', handleFilterChange);
+        domElements.timeRangeFilter.addEventListener('change', handleFilterChange);
+        domElements.trendGrid.addEventListener('click', handleGridActions);
+        if(domElements.trendModalBody) domElements.trendModalBody.addEventListener('click', handleModalActions); 
+        document.body.addEventListener('click', handleSpotlightOrWelcomeLink);
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+
+})();
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>
