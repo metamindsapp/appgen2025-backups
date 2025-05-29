@@ -1,0 +1,81 @@
+{
+  "projectId": "5f2266cd-1f60-4328-ad7b-a45d8f6fcfbe",
+  "revisionString": "3",
+  "projectNameDisplay": "Happy Face",
+  "projectType": "webapp",
+  "userPromptForThisRevision": "change over to imagen image generation plese",
+  "basedOnRevisionString": "2",
+  "savedAt": "2025-05-29T10:19:05.406Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/dalle_0770ee4e-c6a.png",
+      "url": "/generated_images/dalle_0770ee4e-c6a.png",
+      "description": "A simple, friendly, and cheerful happy face icon or illustration suitable for a dark theme background. It should be clearly recognizable as a happy face.",
+      "purpose": "Default happy face image displayed on app load.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_689df2ca-f46.png",
+      "url": "/generated_images/dalle_689df2ca-f46.png",
+      "description": "A cartoon-style sad face icon. Simple, clear, and easily distinguishable from a happy face. Blueish or grey tones. Should fit a dark theme. Circular or slightly squarish.",
+      "purpose": "Sad face image for the game (penalty if clicked).",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_42358784-898.png",
+      "url": "/generated_images/dalle_42358784-898.png",
+      "description": "A cartoon-style angry face icon. Visibly upset, perhaps with furrowed brows and a frown. Red or dark orange accents. Clearly distinguishable. Should fit a dark theme. Circular or slightly squarish.",
+      "purpose": "Angry face image for the game (major penalty if clicked).",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_71a08560-efb.png",
+      "url": "/generated_images/dalle_71a08560-efb.png",
+      "description": "A shiny, golden, cartoon-style happy face icon. Looks special and rewarding. Bright yellow/gold with sparkles or a gleam effect. Should fit a dark theme. Circular or slightly squarish.",
+      "purpose": "Golden happy face (power-up/bonus points) for the game.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_e93dd2fa-d27.png",
+      "url": "/generated_images/dalle_e93dd2fa-d27.png",
+      "description": "A subtle, abstract dark game background. Could feature very faint outlines of various emoticons or geometric patterns. Overall dark grey, dark blue, or deep purple. Not distracting. Suitable for a game canvas background.",
+      "purpose": "Main game background to be drawn on the canvas.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_ade24c0d-184.png",
+      "url": "/generated_images/imagen3_ade24c0d-184.png",
+      "description": "A very cheerful, friendly, and iconic happy face emoji. Simple, clean lines, bright vibrant yellow color with a subtle, warm, inviting glow. Perfectly circular. Designed for a dark theme, ensuring high contrast and excellent visibility. Modern, polished cartoon style. No complex textures, just smooth surfaces.",
+      "purpose": "Default happy face image for the game, displayed on app load and used as the primary target if no custom face is generated.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_3d137e63-826.png",
+      "url": "/generated_images/imagen3_3d137e63-826.png",
+      "description": "A cartoon-style sad face icon, clearly expressing disappointment with a downturned mouth and large, sorrowful, teary eyes. Cool blue or greyish-blue tones, perhaps with a slight desaturated look. Simple, circular shape. Easily distinguishable from other faces. Designed for a dark theme, high contrast. Modern, polished cartoon style.",
+      "purpose": "Sad face image for the game (penalty if clicked).",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_0104d7f8-3a3.png",
+      "url": "/generated_images/imagen3_0104d7f8-3a3.png",
+      "description": "A visibly angry cartoon face icon. Furrowed brows creating a 'V' shape, an aggressive frown or snarl, perhaps showing gritted teeth. Fiery red or deep orange colors with bright highlights suggesting heat or rage. Strong, clear lines, circular shape. Designed for a dark theme, high contrast. Modern, polished cartoon style.",
+      "purpose": "Angry face image for the game (major penalty if clicked).",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_9c3f73f2-d6d.png",
+      "url": "/generated_images/imagen3_9c3f73f2-d6d.png",
+      "description": "A special, shiny, metallic golden happy face icon. Looks very rewarding, exciting, and valuable. Bright, polished gold with sparkling highlights, lens flare, or a gleam effect. Friendly, joyful expression. Circular shape. Designed for a dark theme, ensuring it stands out with outstanding contrast and allure. Modern, polished cartoon style.",
+      "purpose": "Golden happy face (power-up/bonus points) for the game.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_1f8fd955-eb4.png",
+      "url": "/generated_images/imagen3_1f8fd955-eb4.png",
+      "description": "A subtle, abstract dark game background suitable for a 2D clicker game. Dominated by dark cool tones like deep cosmic blue, dark indigo, or mysterious purple. Features very faint, almost imperceptible, soft-glowing outlines of various emoticons (happy, sad, surprised) or playful geometric patterns (swirls, bubbles, stars) drifting in the void. The overall mood should be unobtrusive, atmospheric, and not distract from foreground game elements. Smooth gradients, perhaps a hint of fine star-like particles or nebulae. Should tile seamlessly if possible, or be large enough to cover common screen dimensions without obvious repetition if not tiling.",
+      "purpose": "Main game background to be drawn on the canvas, providing an immersive, dark-themed backdrop.",
+      "isNewlyGenerated": true
+    }
+  ]
+}

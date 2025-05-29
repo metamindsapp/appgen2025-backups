@@ -1,0 +1,10 @@
+{
+  "projectId": "df4e9991-8278-4fc3-b7a7-9cc3c570e4cf",
+  "revisionString": "7",
+  "projectNameDisplay": " Khora Dialogue αω v4.0 - AI Evolution Simulator",
+  "projectType": "webapp",
+  "userPromptForThisRevision": "we have a normal way to do Copy Logs\r\n\r\ngo back to that,   get rid of the attempted build of console display in the app, that never worked anyway.   make a revision note at the top of the read me timestamped, make sure all else in readme is maintained. ",
+  "basedOnRevisionString": "6",
+  "savedAt": "2025-05-29T10:42:19.482Z",
+  "imageAssets": []
+}

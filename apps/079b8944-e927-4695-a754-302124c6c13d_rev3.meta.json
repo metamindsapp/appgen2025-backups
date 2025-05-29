@@ -1,0 +1,60 @@
+{
+  "projectId": "079b8944-e927-4695-a754-302124c6c13d",
+  "revisionString": "3",
+  "projectNameDisplay": "Pixel Art Purgatory: A Generative Soul-Searching Adventure",
+  "projectType": "webapp",
+  "userPromptForThisRevision": "fix",
+  "basedOnRevisionString": "2",
+  "savedAt": "2025-05-29T07:37:15.955Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/dalle_6e164216-630.png",
+      "url": "/generated_images/dalle_6e164216-630.png",
+      "description": "Pixel art sprite sheet for the player character. Includes idle (4 frames), run (6 frames), and jump (3 frames) animations, all facing right. Style: 8-bit pixel art, simple design, blue color palette.",
+      "purpose": "Player character sprite sheet for animations",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_d5b53d86-a74.png",
+      "url": "/generated_images/dalle_d5b53d86-a74.png",
+      "description": "Pixel art sprite for a basic ground/solid tile. Style: 8-bit pixel art, simple texture, grey/brown color palette.",
+      "purpose": "Basic solid tile sprite",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_51095cbc-44a.png",
+      "url": "/generated_images/dalle_51095cbc-44a.png",
+      "description": "Pixel art sprite for a hazard tile (e.g., spikes). Style: 8-bit pixel art, red color palette, clear hazard indication.",
+      "purpose": "Hazard tile sprite",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_c7894143-982.png",
+      "url": "/generated_images/dalle_c7894143-982.png",
+      "description": "Pixel art sprite for the level goal. Style: 8-bit pixel art, glowing/bright yellow color palette, distinct shape.",
+      "purpose": "Goal tile sprite",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_3a4e47b4-982.png",
+      "url": "/generated_images/dalle_3a4e47b4-982.png",
+      "description": "Pixel art sprite sheet for a basic patrolling enemy. Includes movement animation (4 frames), facing right. Style: 8-bit pixel art, simple design, red color palette.",
+      "purpose": "Basic enemy sprite sheet",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_710605d8-410.png",
+      "url": "/generated_images/dalle_710605d8-410.png",
+      "description": "Pixel art sprite for a collectible item (e.g., a glowing orb). Style: 8-bit pixel art, small, bright, animated (implied by multiple frames in sheet or just draw as single frame), various colors.",
+      "purpose": "Collectible item sprite",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_a225873d-dea.png",
+      "url": "/generated_images/dalle_a225873d-dea.png",
+      "description": "Pixel art sprite for a power-up item (e.g., a star or icon representing effect). Style: 8-bit pixel art, distinct from collectibles, bright color, perhaps an icon for speed or shield.",
+      "purpose": "Power-up item sprite",
+      "isNewlyGenerated": true
+    }
+  ]
+}

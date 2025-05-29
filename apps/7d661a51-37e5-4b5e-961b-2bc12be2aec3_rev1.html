@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Constellations - Generative Art</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        #app-container {
+            /* Uses vh-100 for full height */
+        }
+
+        header h1 {
+            font-weight: 300;
+            color: #79c0ff; 
+            letter-spacing: 0.1em;
+        }
+
+        #constellation-canvas {
+            display: block;
+            background-color: #030508; 
+            cursor: crosshair;
+        }
+
+        #canvas-container {
+            /* Flex grow handled by bootstrap class */
+        }
+
+        #control-panel {
+            background-color: #161b22; 
+            scrollbar-width: thin;
+            scrollbar-color: #495057 #161b22;
+        }
+
+        #control-panel::-webkit-scrollbar { width: 8px; }
+        #control-panel::-webkit-scrollbar-track { background: #161b22; }
+        #control-panel::-webkit-scrollbar-thumb {
+            background-color: #495057;
+            border-radius: 4px;
+            border: 2px solid #161b22;
+        }
+
+        .bg-darker-custom { 
+            background-color: #0d1117; 
+        }
+
+        #seed-myth-display {
+            font-family: 'Georgia', serif;
+            font-size: 0.85rem;
+            color: #c9d1d9; 
+            border: 1px solid #30363d;
+            padding: 8px;
+            border-radius: 4px;
+            background-color: #010409; 
+            white-space: pre-wrap;
+        }
+        #seed-myth-display::-webkit-scrollbar { width: 6px; }
+        #seed-myth-display::-webkit-scrollbar-thumb { background-color: #30363d; }
+
+
+        #seed-emotion-display {
+            color: #58a6ff; 
+        }
+
+        .form-range::-webkit-slider-thumb {
+          background-color: #58a6ff;
+        }
+        .form-range::-moz-range-thumb {
+          background-color: #58a6ff;
+        }
+        .form-range:focus::-webkit-slider-thumb {
+            box-shadow: 0 0 0 0.25rem rgba(88, 166, 255, 0.25);
+        }
+        .form-range:focus::-moz-range-thumb {
+            box-shadow: 0 0 0 0.25rem rgba(88, 166, 255, 0.25);
+        }
+
+
+        .gallery-item-card {
+            transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+        }
+         .gallery-item-card .btn { 
+            transition: background-color 0.2s ease-out, border-color 0.2s ease-out;
+        }
+        .gallery-item-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(88, 166, 255, 0.2);
+        }
+        .gallery-item-thumbnail {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-bottom: 1px solid #30363d;
+            background-color: #010409;
+        }
+
+        .btn-outline-danger { color: #f15f6b; border-color: #f15f6b; }
+        .btn-outline-danger:hover { background-color: #f15f6b; color: white; }
+        .btn-outline-info { color: #58a6ff; border-color: #58a6ff; }
+        .btn-outline-info:hover { background-color: #58a6ff; color: white; }
+        .btn-outline-secondary { color: #8b949e; border-color: #8b949e; }
+        .btn-outline-secondary:hover { background-color: #8b949e; color: white; }
+        .btn-outline-success { color: #3fb950; border-color: #3fb950; }
+        .btn-outline-success:hover { background-color: #3fb950; color: white; }
+
+
+        .text-light-emphasis { color: #adb5bd !important; }
+
+        #canvas-loading-overlay p {
+            text-shadow: 0 0 5px rgba(0,0,0,0.7);
+        }
+    </style>
+</head>
+<body class="bg-dark text-light">
+    <div id="app-container" class="container-fluid d-flex flex-column vh-100 p-0">
+        <header class="text-center p-2 bg-opacity-10 bg-black shadow-sm">
+            <h1>Constellations</h1>
+        </header>
+
+        <main class="flex-grow-1 d-flex position-relative overflow-hidden">
+            <div id="canvas-container" class="flex-grow-1 position-relative">
+                <canvas id="constellation-canvas"></canvas>
+                <div id="canvas-loading-overlay" class="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-75 d-flex flex-column justify-content-center align-items-center d-none">
+                    <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p id="loading-message" class="ms-3 mb-0 fs-5 text-light">Generating celestial magic...</p>
+                </div>
+            </div>
+
+            <div id="control-panel" class="p-3 border-start border-secondary" style="width: 350px; min-width:300px; overflow-y: auto;">
+                <h4 class="mb-3 border-bottom pb-2 border-secondary">Controls</h4>
+
+                <div class="mb-3">
+                    <p class="form-text text-light-emphasis small">Click on the canvas to plant a new star seed. Click an existing seed to select it.</p>
+                </div>
+
+                <div class="d-grid gap-2 mb-3">
+                    <button id="clear-canvas-btn" class="btn btn-outline-danger btn-sm">Clear Universe</button>
+                    <button id="gallery-toggle-btn" class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#gallery-modal">Open Gallery</button>
+                    <button id="save-constellation-btn" class="btn btn-outline-success btn-sm">Save Constellation</button>
+                </div>
+                <hr class="border-secondary">
+
+                <div id="selected-seed-controls" class="d-none">
+                    <h5 class="mb-1">Star Seed: <span id="selected-seed-id" class="text-info small"></span></h5>
+                    
+                    <div class="mb-2 p-2 border border-secondary rounded bg-darker-custom">
+                        <h6>Mythos:</h6>
+                        <p id="seed-myth-display" class="small mb-1" style="min-height: 80px; max-height:150px; overflow-y:auto;"></p>
+                        <p id="seed-emotion-display" class="small fst-italic text-info"></p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="brightness-slider" class="form-label small">Brightness: <span id="brightness-value" class="badge bg-secondary">50</span></label>
+                        <input type="range" class="form-range" id="brightness-slider" min="10" max="100" value="50">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="emotion-charge-slider" class="form-label small">Emotional Charge: <span id="emotion-charge-value" class="badge bg-secondary">0</span></label>
+                        <input type="range" class="form-range" id="emotion-charge-slider" min="-100" max="100" value="0">
+                    </div>
+                    <button id="deselect-seed-btn" class="btn btn-outline-secondary btn-sm w-100">Deselect Seed</button>
+                </div>
+                <div id="no-seed-selected-placeholder">
+                     <p class="text-muted text-center mt-4">Select a seed to view its details and adjust its properties.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="modal fade" id="gallery-modal" tabindex="-1" aria-labelledby="galleryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="galleryModalLabel">Constellation Gallery</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="gallery-items-container" class="row">
+                    </div>
+                    <p id="no-saved-constellations" class="text-center text-muted d-none">No constellations saved yet. Create something beautiful and save it!</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const MAX_SEEDS = 50;
+        const NEIGHBOR_RADIUS_FACTOR = 4; 
+
+        let canvas, ctx, loadingOverlay, loadingMessage, controlPanel, selectedSeedControls,
+            noSeedSelectedPlaceholder, selectedSeedIdDisplay, seedMythDisplay, seedEmotionDisplay,
+            brightnessSlider, brightnessValueDisplay, emotionChargeSlider, emotionChargeValueDisplay,
+            clearCanvasBtn, galleryToggleBtn, saveConstellationBtn, galleryModalElement, galleryItemsContainer,
+            noSavedConstellationsMsg, deselectSeedBtn;
+
+        let appState = {
+            seeds: [],
+            selectedSeed: null,
+            isInteracting: false,
+            animationFrameId: null,
+            particles: [],
+            gallery: [],
+            canvasWidth: 0,
+            canvasHeight: 0,
+        };
+
+        class StarSeed {
+            constructor(x, y, id = null, myth = null, emotionalTone = null, brightness = 50, emotionalCharge = 0, seedImageUrl = null, nebulaImageUrl = null) {
+                this.id = id || `seed-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                this.x = x;
+                this.y = y;
+                this.rawMyth = myth || "";
+                this.myth = myth ? formatMythForDisplay(myth) : "Awaiting cosmic whispers...";
+                this.emotionalTone = emotionalTone || { category: "neutral", score: 0.5 };
+                this.brightness = parseInt(brightness);
+                this.emotionalCharge = parseInt(emotionalCharge);
+                
+                this.seedImageObj = null;
+                this.seedImageUrl = seedImageUrl;
+                this.nebulaImageObj = null;
+                this.nebulaImageUrl = nebulaImageUrl;
+                
+                this.isLoadingMyth = !myth;
+                this.isLoadingSeedImage = false;
+                this.isLoadingNebulaImage = false;
+
+                this.currentScale = 1;
+                this.pulseSpeed = Math.random() * 0.005 + 0.002;
+                this.pulsePhase = Math.random() * Math.PI * 2;
+                this.targetX = x; this.targetY = y;
+                this.driftFactor = 0.005;
+
+                this.seedImageLoadPromise = Promise.resolve();
+                this.nebulaImageLoadPromise = Promise.resolve();
+
+                if (seedImageUrl) {
+                    this.isLoadingSeedImage = true;
+                    this.seedImageLoadPromise = this.loadImageAsset('seed', seedImageUrl);
+                }
+                if (nebulaImageUrl) {
+                    this.isLoadingNebulaImage = true;
+                    this.nebulaImageLoadPromise = this.loadImageAsset('nebula', nebulaImageUrl);
+                }
+            }
+
+            async loadImageAsset(type, url) {
+                try {
+                    const img = await loadImagePromise(url);
+                    if (type === 'seed') {
+                        this.seedImageObj = img;
+                    } else if (type === 'nebula') {
+                        this.nebulaImageObj = img;
+                    }
+                } catch (error) {
+                    console.error(`Error loading ${type} image for seed ${this.id} from ${url}:`, error.message);
+                } finally {
+                    if (type === 'seed') this.isLoadingSeedImage = false;
+                    if (type === 'nebula') this.isLoadingNebulaImage = false;
+                }
+            }
+
+            updateProperties(brightness, emotionalCharge) {
+                this.brightness = parseInt(brightness);
+                this.emotionalCharge = parseInt(emotionalCharge);
+            }
+
+            draw(ctx) {
+                const baseSize = Math.min(appState.canvasWidth, appState.canvasHeight) * 0.035;
+                const size = baseSize * this.currentScale;
+                const alpha = this.brightness / 100;
+
+                ctx.save();
+                if (this.seedImageObj) {
+                    ctx.globalAlpha = alpha;
+                    ctx.drawImage(this.seedImageObj, this.x - size / 2, this.y - size / 2, size, size);
+                } else if (this.isLoadingSeedImage) {
+                    ctx.fillStyle = `rgba(200, 200, 255, ${0.5 * alpha})`;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, size / 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = `rgba(255, 255, 255, ${0.7 * alpha})`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.font = `${size/2}px sans-serif`;
+                    ctx.fillText("✨", this.x, this.y);
+                } else { 
+                    ctx.fillStyle = `rgba(100, 100, 120, ${0.3 * alpha})`;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, size / 4, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
+
+                if (appState.selectedSeed === this) {
+                    ctx.strokeStyle = 'rgba(100, 150, 255, 0.8)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, size / 2 + 5, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+            }
+
+            drawNebula(ctx) {
+                ctx.save();
+                if (this.nebulaImageObj) {
+                    const nebulaBaseSize = Math.min(appState.canvasWidth, appState.canvasHeight) * 0.35;
+                    const nebulaSize = nebulaBaseSize * this.currentScale * (1 + Math.abs(this.emotionalCharge)/150);
+                    const nebulaAlpha = Math.min(0.15 + (this.brightness / 300) + Math.abs(this.emotionalCharge)/600, 0.6);
+                    
+                    ctx.globalAlpha = nebulaAlpha;
+                    ctx.globalCompositeOperation = 'lighter';
+                    ctx.drawImage(this.nebulaImageObj, this.x - nebulaSize / 2, this.y - nebulaSize / 2, nebulaSize, nebulaSize);
+                }
+                ctx.restore();
+            }
+
+            updateAnimation() {
+                this.pulsePhase += this.pulseSpeed * (1 + Math.abs(this.emotionalCharge) / 150);
+                this.currentScale = 1 + Math.sin(this.pulsePhase) * 0.03 * (1 + this.brightness / 100);
+
+                this.x += (this.targetX - this.x) * this.driftFactor;
+                this.y += (this.targetY - this.y) * this.driftFactor;
+                if (Math.random() < 0.01) { 
+                    const driftRadius = Math.min(appState.canvasWidth, appState.canvasHeight) * 0.025;
+                    this.targetX = this.x + (Math.random() - 0.5) * 2 * driftRadius;
+                    this.targetY = this.y + (Math.random() - 0.5) * 2 * driftRadius;
+                    this.targetX = Math.max(driftRadius, Math.min(appState.canvasWidth - driftRadius, this.targetX));
+                    this.targetY = Math.max(driftRadius, Math.min(appState.canvasHeight - driftRadius, this.targetY));
+                }
+            }
+
+            getSerializableState() {
+                return {
+                    id: this.id, x: this.x, y: this.y, rawMyth: this.rawMyth,
+                    emotionalTone: this.emotionalTone, brightness: this.brightness,
+                    emotionalCharge: this.emotionalCharge, seedImageUrl: this.seedImageUrl,
+                    nebulaImageUrl: this.nebulaImageUrl
+                };
+            }
+        }
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * appState.canvasWidth;
+                this.y = Math.random() * appState.canvasHeight;
+                this.size = Math.random() * 1.2 + 0.3;
+                this.speedX = (Math.random() - 0.5) * 0.08;
+                this.speedY = (Math.random() - 0.5) * 0.08;
+                this.opacity = Math.random() * 0.25 + 0.05;
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x < -this.size || this.x > appState.canvasWidth + this.size) {
+                    this.x = Math.random() * appState.canvasWidth; 
+                    this.y = Math.random() < 0.5 ? -this.size : appState.canvasHeight + this.size;
+                }
+                if (this.y < -this.size || this.y > appState.canvasHeight + this.size) {
+                     this.y = Math.random() * appState.canvasHeight;
+                     this.x = Math.random() < 0.5 ? -this.size : appState.canvasWidth + this.size;
+                }
+            }
+
+            draw(ctx) {
+                ctx.fillStyle = `rgba(200, 220, 255, ${this.opacity})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            canvas = document.getElementById('constellation-canvas');
+            ctx = canvas.getContext('2d');
+            loadingOverlay = document.getElementById('canvas-loading-overlay');
+            loadingMessage = document.getElementById('loading-message');
+            controlPanel = document.getElementById('control-panel');
+            selectedSeedControls = document.getElementById('selected-seed-controls');
+            noSeedSelectedPlaceholder = document.getElementById('no-seed-selected-placeholder');
+            selectedSeedIdDisplay = document.getElementById('selected-seed-id');
+            seedMythDisplay = document.getElementById('seed-myth-display');
+            seedEmotionDisplay = document.getElementById('seed-emotion-display');
+            brightnessSlider = document.getElementById('brightness-slider');
+            brightnessValueDisplay = document.getElementById('brightness-value');
+            emotionChargeSlider = document.getElementById('emotion-charge-slider');
+            emotionChargeValueDisplay = document.getElementById('emotion-charge-value');
+            clearCanvasBtn = document.getElementById('clear-canvas-btn');
+            galleryToggleBtn = document.getElementById('gallery-toggle-btn');
+            saveConstellationBtn = document.getElementById('save-constellation-btn');
+            galleryModalElement = new bootstrap.Modal(document.getElementById('gallery-modal'));
+            galleryItemsContainer = document.getElementById('gallery-items-container');
+            noSavedConstellationsMsg = document.getElementById('no-saved-constellations');
+            deselectSeedBtn = document.getElementById('deselect-seed-btn');
+            
+            setupCanvas();
+            initParticles(75);
+            loadGallery();
+            addEventListeners();
+            updateControlPanelUI();
+            gameLoop();
+        });
+
+        function setupCanvas() {
+            const container = document.getElementById('canvas-container');
+            appState.canvasWidth = container.clientWidth;
+            appState.canvasHeight = container.clientHeight;
+            canvas.width = appState.canvasWidth;
+            canvas.height = appState.canvasHeight;
+            
+            window.addEventListener('resize', () => {
+                appState.canvasWidth = container.clientWidth;
+                appState.canvasHeight = container.clientHeight;
+                canvas.width = appState.canvasWidth;
+                canvas.height = appState.canvasHeight;
+                initParticles(appState.particles.length);
+            });
+        }
+
+        function initParticles(count) {
+            appState.particles = [];
+            for (let i = 0; i < count; i++) {
+                appState.particles.push(new Particle());
+            }
+        }
+
+        function addEventListeners() {
+            canvas.addEventListener('click', handleCanvasClick);
+            brightnessSlider.addEventListener('input', handleSliderChange);
+            emotionChargeSlider.addEventListener('input', handleSliderChange);
+            clearCanvasBtn.addEventListener('click', handleClearCanvas);
+            saveConstellationBtn.addEventListener('click', saveConstellation);
+            deselectSeedBtn.addEventListener('click', () => {
+                appState.selectedSeed = null;
+                updateControlPanelUI();
+            });
+        }
+
+        async function handleCanvasClick(event) {
+            if (appState.isInteracting) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            const clickedSeed = findClickedSeed(x, y);
+            if (clickedSeed) {
+                appState.selectedSeed = clickedSeed;
+                updateControlPanelUI();
+                return;
+            }
+
+            if (appState.seeds.length >= MAX_SEEDS) {
+                showTemporaryMessage("Universe is too crowded for new stars!", "warning");
+                return;
+            }
+
+            const newSeed = new StarSeed(x, y);
+            appState.seeds.push(newSeed);
+            appState.selectedSeed = newSeed;
+            updateControlPanelUI();
+
+            appState.isInteracting = true;
+            showLoadingOverlay("Dreaming up a new star...");
+
+            try {
+                updateLoadingMessage("Whispering to the cosmos for a myth...");
+                const mythText = await generateMythForSeedAPI(newSeed);
+                newSeed.rawMyth = mythText;
+                newSeed.myth = formatMythForDisplay(mythText);
+                newSeed.isLoadingMyth = false;
+                updateControlPanelUI();
+
+                updateLoadingMessage("Interpreting celestial emotions...");
+                const emotion = await analyzeMythEmotionAPI(newSeed.rawMyth);
+                newSeed.emotionalTone = emotion;
+                updateControlPanelUI();
+
+                updateLoadingMessage("Sculpting the star's form...");
+                const seedVisualUrl = await generateVisualAPI(newSeed, 'seed');
+                newSeed.seedImageUrl = seedVisualUrl;
+                await newSeed.loadImageAsset('seed', seedVisualUrl);
+
+                updateLoadingMessage("Painting its cosmic aura...");
+                const nebulaVisualUrl = await generateVisualAPI(newSeed, 'nebula');
+                newSeed.nebulaImageUrl = nebulaVisualUrl;
+                await newSeed.loadImageAsset('nebula', nebulaVisualUrl);
+
+            } catch (error) {
+                console.error("Error during seed creation pipeline:", error);
+                showTemporaryMessage(`Error creating star: ${error.message || "Unknown error"}`, "danger");
+                if (appState.seeds.includes(newSeed)) {
+                    appState.seeds = appState.seeds.filter(s => s.id !== newSeed.id);
+                    if(appState.selectedSeed === newSeed) appState.selectedSeed = null;
+                }
+            } finally {
+                appState.isInteracting = false;
+                hideLoadingOverlay();
+                updateControlPanelUI();
+            }
+        }
+
+        function findClickedSeed(x, y) {
+            const clickRadiusBase = Math.min(appState.canvasWidth, appState.canvasHeight) * 0.025;
+            for (let i = appState.seeds.length - 1; i >= 0; i--) {
+                const seed = appState.seeds[i];
+                const seedVisualSize = (Math.min(appState.canvasWidth, appState.canvasHeight) * 0.035 * seed.currentScale) / 2;
+                const effectiveClickRadius = clickRadiusBase + seedVisualSize;
+                const distance = Math.sqrt((x - seed.x)**2 + (y - seed.y)**2);
+                if (distance < effectiveClickRadius ) {
+                    return seed;
+                }
+            }
+            return null;
+        }
+
+        function handleSliderChange(event) {
+            if (!appState.selectedSeed) return;
+            const value = event.target.value;
+            if (event.target.id === 'brightness-slider') {
+                appState.selectedSeed.brightness = parseInt(value);
+                brightnessValueDisplay.textContent = value;
+                brightnessValueDisplay.className = `badge bg-${getBadgeColorForValue(value, 10, 100)}`;
+            } else if (event.target.id === 'emotion-charge-slider') {
+                appState.selectedSeed.emotionalCharge = parseInt(value);
+                emotionChargeValueDisplay.textContent = value;
+                emotionChargeValueDisplay.className = `badge bg-${getBadgeColorForValue(value, -100, 100, true)}`;
+            }
+        }
+        
+        function getBadgeColorForValue(value, min, max, isSigned = false) {
+            const range = max - min;
+            const third = range / 3;
+            
+            if (isSigned) {
+                if (value < min + third) return "info";
+                if (value > max - third) return "warning";
+            } else {
+                if (value < min + third) return "info";
+                if (value > max - third) return "warning";
+            }
+            return "secondary";
+        }
+
+
+        function handleClearCanvas() {
+            if (confirm("Are you sure you want to clear the entire universe? This cannot be undone.")) {
+                appState.seeds = [];
+                appState.selectedSeed = null;
+                updateControlPanelUI();
+            }
+        }
+
+        async function generateMythForSeedAPI(seed) {
+            const userPrompt = `Generate a short, evocative, 2-3 sentence mini-myth for a newly discovered celestial entity. Be poetic and hint at its nature or origin. Focus on themes of wonder, mystery, cosmic events, or ancient power. Current celestial entity ID: ${seed.id}.`;
+            const systemPrompt = "You are a cosmic storyteller, crafting brief myths for celestial phenomena.";
+            try {
+                const response = await fetch('/api/ai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ aiguide: systemPrompt, msgforai: userPrompt })
+                });
+                if (!response.ok) throw new Error(`API Error: ${response.status} ${response.statusText}`);
+                const data = await response.json();
+                if (!data.success) throw new Error(data.error || "Myth generation AI failed.");
+                return data.response || "Cosmic silence... the myth remains elusive.";
+            } catch (error) {
+                console.error("Myth Generation API Error:", error);
+                return "A flicker of static... the myth was lost in transmission.";
+            }
+        }
+
+        async function analyzeMythEmotionAPI(mythText) {
+            const userPrompt = `Analyze the primary emotional tone of the following text: "${mythText}". Categorize it into one: 'serene', 'turbulent', 'joyful', 'melancholic', 'awe-inspiring', 'ominous', 'creative', 'destructive'. Provide the category and a confidence score (0.0-1.0) as a JSON object like {"category": "X", "score": Y}. Only output the JSON object.`;
+            const systemPrompt = "You are an emotion analysis AI. Respond only with the requested JSON object.";
+            try {
+                const response = await fetch('/api/ai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ aiguide: systemPrompt, msgforai: userPrompt })
+                });
+                if (!response.ok) throw new Error(`API Error: ${response.status} ${response.statusText}`);
+                const data = await response.json();
+                if (!data.success) throw new Error(data.error || "Emotion analysis AI failed.");
+                
+                if (typeof data.response === 'string') {
+                    try { return JSON.parse(data.response); }
+                    catch (e) { 
+                        console.warn("Failed to parse emotion JSON from AI:", data.response, e);
+                        return { category: "unknown", score: 0 };
+                    }
+                }
+                return data.response || { category: "unknown", score: 0 };
+            } catch (error) {
+                console.error("Emotion Analysis API Error:", error);
+                return { category: "unknown", score: 0 };
+            }
+        }
+
+        function getColorsForEmotion(emotionalTone) {
+            const tone = (emotionalTone.category || "neutral").toLowerCase();
+            if (tone === 'joyful' || tone === 'creative') return "warm yellows, bright oranges, vibrant pinks, golden hues";
+            if (tone === 'serene' || tone === 'awe-inspiring') return "soft blues, gentle greens, ethereal whites, pale lavender, silver sparkles";
+            if (tone === 'melancholic') return "deep blues, muted purples, cool grays, hints of silver";
+            if (tone === 'turbulent' || tone === 'destructive') return "fiery reds, stark oranges, deep crimsons, electric blues, contrasting blacks";
+            if (tone === 'ominous') return "dark purples, shadowy grays, sickly greens, blood reds, deep indigo";
+            return "neutral cosmic dust colors, shimmering silvers, faint starlight hues";
+        }
+
+        async function generateVisualAPI(seed, visualType) {
+            let promptText;
+            const mythSnippet = seed.rawMyth.substring(0, 250);
+            const emotionColors = getColorsForEmotion(seed.emotionalTone);
+            const brightnessHint = seed.brightness > 70 ? "very bright" : seed.brightness < 30 ? "dimly glowing" : "moderately glowing";
+            const emotionalChargeHint = seed.emotionalCharge > 50 ? "highly charged with positive energy" : seed.emotionalCharge < -50 ? "highly charged with negative energy" : "neutral emotional charge";
+
+
+            if (visualType === 'seed') {
+                promptText = `Generate an image of a single, unique, bioluminescent organic star seed. It's a ${brightnessHint}, ${emotionalChargeHint} celestial entity. Abstract and ethereal, set against a dark void (transparent background is highly preferred). Inspired by the myth: "${mythSnippet}". It should primarily feature colors like ${emotionColors}. Style: cosmic light, otherworldly, detailed, vibrant, slightly abstract.`;
+            } else { 
+                promptText = `Generate an image of a subtle, ethereal nebula background. It's a ${brightnessHint}, ${emotionalChargeHint} cosmic cloud. Abstract cosmic dust and faint starlight, designed to be layered beautifully with other nebulae. Inspired by the myth: "${mythSnippet}". Colors should reflect ${emotionColors}. Emphasize transparency and soft, diffuse edges for blending. Style: dreamy space art, atmospheric, soft focus.`;
+            }
+
+            try {
+                const response = await fetch('/api/generate-image-on-demand', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: promptText, aspectRatio: (visualType === 'seed' ? "1:1" : "16:9") })
+                });
+                if (!response.ok) throw new Error(`API Error: ${response.status} ${response.statusText}`);
+                const data = await response.json();
+                if (!data.success) throw new Error(data.error || "Image generation failed.");
+                return data.imageUrl;
+            } catch (error) {
+                console.error(`${visualType} Visual Generation API Error:`, error);
+                throw error;
+            }
+        }
+
+        function loadImagePromise(url) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = "Anonymous"; 
+                img.onload = () => resolve(img);
+                img.onerror = () => reject(new Error(`Failed to load image: ${url}`));
+                img.src = url;
+            });
+        }
+
+        function updateControlPanelUI() {
+            if (appState.selectedSeed) {
+                selectedSeedControls.classList.remove('d-none');
+                noSeedSelectedPlaceholder.classList.add('d-none');
+                selectedSeedIdDisplay.textContent = `...${appState.selectedSeed.id.slice(-8)}`;
+                
+                if (appState.selectedSeed.isLoadingMyth) {
+                    seedMythDisplay.innerHTML = '<span class="text-muted">Loading myth...</span>';
+                } else {
+                    seedMythDisplay.textContent = appState.selectedSeed.myth;
+                }
+                const tone = appState.selectedSeed.emotionalTone;
+                seedEmotionDisplay.textContent = `Tone: ${tone.category} (Score: ${typeof tone.score === 'number' ? tone.score.toFixed(2) : 'N/A'})`;
+                
+                brightnessSlider.value = appState.selectedSeed.brightness;
+                brightnessValueDisplay.textContent = appState.selectedSeed.brightness;
+                brightnessValueDisplay.className = `badge bg-${getBadgeColorForValue(appState.selectedSeed.brightness, 10, 100)}`;
+
+                emotionChargeSlider.value = appState.selectedSeed.emotionalCharge;
+                emotionChargeValueDisplay.textContent = appState.selectedSeed.emotionalCharge;
+                emotionChargeValueDisplay.className = `badge bg-${getBadgeColorForValue(appState.selectedSeed.emotionalCharge, -100, 100, true)}`;
+
+            } else {
+                selectedSeedControls.classList.add('d-none');
+                noSeedSelectedPlaceholder.classList.remove('d-none');
+            }
+        }
+
+        function formatMythForDisplay(mythText) {
+            return mythText.replace(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|!)\s+/g, '\n\n');
+        }
+
+        function showLoadingOverlay(message) {
+            loadingMessage.textContent = message;
+            loadingOverlay.classList.remove('d-none');
+        }
+        function updateLoadingMessage(message) {
+            loadingMessage.textContent = message;
+        }
+        function hideLoadingOverlay() {
+            loadingOverlay.classList.add('d-none');
+        }
+
+        function showTemporaryMessage(message, type = 'info') {
+            const existingAlert = document.getElementById('temporary-alert-top');
+            if (existingAlert) existingAlert.remove();
+
+            const alertDiv = document.createElement('div');
+            alertDiv.id = 'temporary-alert-top';
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x m-3 p-2 shadow`;
+            alertDiv.style.zIndex = "2050"; 
+            alertDiv.setAttribute('role', 'alert');
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close btn-sm p-2" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            const bsAlert = bootstrap.Alert.getOrCreateInstance(alertDiv);
+            setTimeout(() => {
+                bsAlert.close();
+            }, 4000);
+        }
+
+        function gameLoop() {
+            appState.animationFrameId = requestAnimationFrame(gameLoop);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            appState.particles.forEach(p => {
+                p.update();
+                p.draw(ctx);
+            });
+
+            appState.seeds.forEach(seed => {
+                seed.updateAnimation();
+                seed.drawNebula(ctx);
+            });
+            
+            ctx.globalCompositeOperation = 'source-over';
+            drawConnections(ctx);
+
+            appState.seeds.forEach(seed => {
+                seed.draw(ctx);
+            });
+        }
+
+        function drawConnections(ctx) {
+            if (appState.seeds.length < 2) return;
+            const drawnConnections = new Set();
+
+            appState.seeds.forEach(s1 => {
+                appState.seeds.forEach(s2 => {
+                    if (s1.id === s2.id) return;
+                    const connectionId = [s1.id, s2.id].sort().join('-');
+                    if (drawnConnections.has(connectionId)) return;
+
+                    const dist = Math.sqrt((s1.x - s2.x)**2 + (s1.y - s2.y)**2);
+                    const maxDist = Math.min(appState.canvasWidth, appState.canvasHeight) / NEIGHBOR_RADIUS_FACTOR;
+
+                    if (dist < maxDist) {
+                        drawnConnections.add(connectionId);
+                        const opacityFactor = (1 - dist / maxDist);
+                        const avgBrightness = (s1.brightness + s2.brightness) / 200; 
+                        const finalOpacity = Math.max(0.05, opacityFactor * avgBrightness * 0.6);
+                        
+                        let r=150, g=150, b=200;
+                        const chargeSum = s1.emotionalCharge + s2.emotionalCharge;
+                        if (chargeSum > 50) { r=220; g=200; b=120; } 
+                        else if (chargeSum < -50) { r=120; g=150; b=230; } 
+
+                        ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${finalOpacity})`;
+                        const baseWidth = 0.5 + (opacityFactor * 1.5);
+                        const pulseMagnitude = 0.25 * (1 + (s1.emotionalCharge + s2.emotionalCharge)/400);
+                        ctx.lineWidth = Math.max(0.5, baseWidth * (1 + Math.sin(Date.now() * 0.0005 + s1.pulsePhase + s2.pulsePhase) * pulseMagnitude));
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(s1.x, s1.y);
+                        const cp1x = s1.x + (s2.x - s1.x) / 3 + (Math.random() - 0.5) * dist/6 * (1 + s1.emotionalCharge/200);
+                        const cp1y = s1.y + (s2.y - s1.y) / 3 + (Math.random() - 0.5) * dist/6 * (1 + s1.emotionalCharge/200);
+                        const cp2x = s1.x + (s2.x - s1.x) * 2/3 + (Math.random() - 0.5) * dist/6 * (1 + s2.emotionalCharge/200);
+                        const cp2y = s1.y + (s2.y - s1.y) * 2/3 + (Math.random() - 0.5) * dist/6 * (1 + s2.emotionalCharge/200);
+                        ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, s2.x, s2.y);
+                        ctx.stroke();
+                    }
+                });
+            });
+        }
+
+        const GALLERY_STORAGE_KEY = 'constellationsGallery';
+
+        function saveConstellation() {
+            if (appState.seeds.length === 0) {
+                showTemporaryMessage("Cannot save an empty universe.", "warning");
+                return;
+            }
+            const name = prompt("Enter a name for this constellation:", `Cosmic Tapestry ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`);
+            if (!name) return;
+
+            const thumbnailDataUrl = canvas.toDataURL('image/jpeg', 0.2); 
+
+            const constellationData = {
+                name: name,
+                timestamp: Date.now(),
+                thumbnail: thumbnailDataUrl,
+                seeds: appState.seeds.map(s => s.getSerializableState())
+            };
+            appState.gallery.unshift(constellationData);
+            if (appState.gallery.length > 20) appState.gallery = appState.gallery.slice(0, 20);
+            
+            try {
+                localStorage.setItem(GALLERY_STORAGE_KEY, JSON.stringify(appState.gallery));
+                showTemporaryMessage(`Constellation "${name}" saved!`, "success");
+                populateGalleryModal();
+            } catch (e) {
+                console.error("Error saving to localStorage:", e);
+                showTemporaryMessage("Failed to save. Storage might be full or an error occurred.", "danger");
+            }
+        }
+
+        function loadGallery() {
+            try {
+                const storedGallery = localStorage.getItem(GALLERY_STORAGE_KEY);
+                if (storedGallery) {
+                    appState.gallery = JSON.parse(storedGallery);
+                }
+            } catch (e) {
+                console.error("Error loading gallery from localStorage:", e);
+                appState.gallery = [];
+                localStorage.removeItem(GALLERY_STORAGE_KEY);
+            }
+            populateGalleryModal();
+        }
+
+        function populateGalleryModal() {
+            galleryItemsContainer.innerHTML = '';
+            if (appState.gallery.length === 0) {
+                noSavedConstellationsMsg.classList.remove('d-none');
+                return;
+            }
+            noSavedConstellationsMsg.classList.add('d-none');
+
+            appState.gallery.forEach((item, index) => {
+                const cardWrapper = document.createElement('div');
+                cardWrapper.className = 'col-md-6 col-lg-4 mb-3';
+                const cardContent = `
+                    <div class="card bg-darker-custom text-light gallery-item-card h-100">
+                        <img src="${item.thumbnail}" class="card-img-top gallery-item-thumbnail" alt="${item.name}">
+                        <div class="card-body d-flex flex-column p-2">
+                            <h6 class="card-title text-info mb-1 small">${item.name}</h6>
+                            <p class="card-text small text-muted flex-grow-1" style="font-size:0.75rem;">${new Date(item.timestamp).toLocaleString()}</p>
+                            <div class="mt-auto d-grid gap-1">
+                                <button class="btn btn-sm btn-primary load-btn" data-index="${index}">Load</button>
+                                <button class="btn btn-sm btn-outline-danger delete-btn" data-index="${index}">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                cardWrapper.innerHTML = cardContent;
+                galleryItemsContainer.appendChild(cardWrapper);
+            });
+
+            galleryItemsContainer.querySelectorAll('.load-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.target.dataset.index);
+                    loadConstellationFromGallery(index);
+                    galleryModalElement.hide();
+                });
+            });
+            galleryItemsContainer.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    if (confirm("Are you sure you want to delete this saved constellation?")) {
+                        const index = parseInt(e.target.dataset.index);
+                        deleteConstellationFromGallery(index);
+                    }
+                });
+            });
+        }
+
+        function loadConstellationFromGallery(index) {
+            const item = appState.gallery[index];
+            if (!item) return;
+
+            appState.seeds = [];
+            appState.selectedSeed = null;
+            showLoadingOverlay("Recreating universe...");
+            
+            const allImageLoadPromises = [];
+            item.seeds.forEach(seedData => {
+                const seed = new StarSeed(
+                    seedData.x, seedData.y, seedData.id, seedData.rawMyth,
+                    seedData.emotionalTone, seedData.brightness, seedData.emotionalCharge,
+                    seedData.seedImageUrl, seedData.nebulaImageUrl
+                );
+                appState.seeds.push(seed);
+                allImageLoadPromises.push(seed.seedImageLoadPromise, seed.nebulaImageLoadPromise);
+            });
+
+            Promise.allSettled(allImageLoadPromises).finally(() => {
+                hideLoadingOverlay();
+                updateControlPanelUI();
+                showTemporaryMessage(`Constellation "${item.name}" loaded.`, "info");
+            });
+        }
+
+        function deleteConstellationFromGallery(index) {
+            appState.gallery.splice(index, 1);
+            try {
+                localStorage.setItem(GALLERY_STORAGE_KEY, JSON.stringify(appState.gallery));
+            } catch (e) { 
+                console.error("Error saving gallery after delete:", e);
+                showTemporaryMessage("Error updating gallery storage.", "warning");
+            }
+            populateGalleryModal();
+        }
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

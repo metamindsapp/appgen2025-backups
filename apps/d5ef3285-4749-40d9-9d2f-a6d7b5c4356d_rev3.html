@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Imagen 3 Power Tool</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            background-color: #0d1117;
+            color: #c9d1d9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .card {
+            border: 1px solid #30363d;
+            background-color: #161b22;
+        }
+        .card-header {
+            background-color: #1f242c;
+            border-bottom: 1px solid #30363d;
+        }
+        .form-control, .form-select {
+            background-color: #0d1117;
+            color: #c9d1d9;
+            border-color: #30363d;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #58a6ff;
+            box-shadow: 0 0 0 0.25rem rgba(88, 166, 255, 0.25);
+            background-color: #161b22;
+            color: #c9d1d9;
+        }
+        .form-label {
+            color: #8b949e;
+        }
+        .btn-primary {
+            background-color: #238636;
+            border-color: #238636;
+        }
+        .btn-primary:hover, .btn-primary:focus {
+            background-color: #2ea043;
+            border-color: #2ea043;
+        }
+        .btn-outline-secondary {
+            color: #8b949e;
+            border-color: #30363d;
+        }
+        .btn-outline-secondary:hover, .btn-outline-secondary:focus {
+            color: #c9d1d9;
+            background-color: #21262d;
+            border-color: #8b949e;
+        }
+        #imageDisplayArea {
+            min-height: 300px;
+            background-color: #0d1117;
+            border-radius: 0.375rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+            padding: 1rem;
+            transition: background-color 0.3s ease;
+        }
+        #imageDisplayArea img#generatedImage {
+            border-radius: 0.25rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,.075);
+        }
+        #loadingSpinnerContainer p {
+            color: #8b949e;
+        }
+        .modifier-tag {
+            cursor: pointer;
+            background-color: #21262d;
+            border-color: #30363d;
+            color: #8b949e;
+        }
+        .modifier-tag:hover {
+            background-color: #30363d;
+            color: #c9d1d9;
+        }
+        .alert-info#appleConstraintNotice {
+            background-color: rgba(58, 138, 234, 0.15);
+            border-color: rgba(58, 138, 234, 0.3);
+            color: #79c0ff;
+        }
+        #appleIconElement {
+            width: 24px;
+            height: 24px;
+            vertical-align: middle;
+        }
+        .history-item {
+            background-color: #21262d;
+            border-color: #30363d;
+            color: #c9d1d9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+        }
+        .history-item:hover {
+            background-color: #30363d;
+        }
+        .history-item-thumbnail {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 0.25rem;
+            margin-right: 15px;
+            background-color: #30363d; 
+        }
+        .history-item-details {
+            flex-grow: 1;
+            overflow: hidden;
+        }
+        .history-item-prompt {
+            font-size: 0.9em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+        .history-item-meta {
+            font-size: 0.75em;
+            color: #8b949e;
+        }
+        .shadow-custom { 
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.25)!important; 
+        }
+        #generatedPromptDisplay {
+            font-size: 0.85em;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+    <header class="bg-dark text-white text-center py-3 shadow-sm">
+        <div class="container">
+            <h1><i class="bi bi-stars"></i> Imagen 3 Power Tool <i class="bi bi-stars"></i></h1>
+        </div>
+    </header>
+
+    <main class="container-fluid flex-grow-1 py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-7 col-md-9">
+                
+                <div class="card mb-4 shadow-custom">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-pencil-square"></i> Create Your Image</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="promptInput" class="form-label">Your Creative Prompt:</label>
+                            <div class="input-group">
+                                <textarea class="form-control" id="promptInput" rows="3" placeholder="e.g., A majestic lion in a futuristic city"></textarea>
+                                <button class="btn btn-outline-secondary" type="button" id="inspireMeBtn" title="Inspire Me!"><i class="bi bi-lightbulb"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="aspectRatioSelect" class="form-label">Aspect Ratio:</label>
+                                <select class="form-select" id="aspectRatioSelect">
+                                    <option value="1:1" selected>1:1 (Square)</option>
+                                    <option value="16:9">16:9 (Landscape)</option>
+                                    <option value="9:16">9:16 (Portrait)</option>
+                                    <option value="4:3">4:3 (Standard)</option>
+                                    <option value="3:4">3:4 (Tall)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="seedInput" class="form-label">Seed (Optional):</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="seedInput" placeholder="e.g., 12345">
+                                    <button class="btn btn-outline-secondary" type="button" id="randomSeedBtn" title="Random Seed"><i class="bi bi-shuffle"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Quick Modifiers:</label>
+                            <div id="modifierTagsContainer" class="d-flex flex-wrap gap-2">
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-sm-flex justify-content-sm-start">
+                            <button type="button" class="btn btn-primary btn-lg px-4 gap-3" id="generateBtn"><i class="bi bi-magic"></i> Generate Image</button>
+                            <button type="button" class="btn btn-outline-secondary px-4" id="clearPromptBtn"><i class="bi bi-x-circle"></i> Clear Prompt</button>
+                        </div>
+                        
+                        <div class="alert alert-info mt-3 d-flex align-items-center" role="alert" id="appleConstraintNotice">
+                            <img src="/generated_images/imagen3_de23e73c-4c0.png" alt="Falling apple icon" id="appleIconElement" class="me-2">
+                            <div>
+                                Remember: An apple falling from a tree will automagically appear in your image!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4 shadow-custom">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-image"></i> Generated Image</h5>
+                    </div>
+                    <div class="card-body text-center" id="imageDisplayArea">
+                        <div id="loadingSpinnerContainer" class="py-5" style="display: none;">
+                            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2">Generating your masterpiece...</p>
+                        </div>
+                        <p id="imagePlaceholder" class="text-muted py-5">Your generated image will appear here.</p>
+                        <img id="generatedImage" src="" alt="Generated image" class="img-fluid rounded shadow-sm" style="display: none; max-height: 70vh;">
+                        <div id="generatedPromptDisplay" class="mt-2 text-muted small" style="display: none;"></div>
+                        <div id="imageActions" class="mt-3" style="display: none;">
+                            <button class="btn btn-success btn-sm me-2" id="downloadBtn"><i class="bi bi-download"></i> Download</button>
+                            <button class="btn btn-info btn-sm" id="copyPromptBtn"><i class="bi bi-clipboard"></i> Copy Prompt</button>
+                        </div>
+                        <p id="errorMessage" class="text-danger fw-bold py-3" style="display: none;"></p>
+                    </div>
+                </div>
+
+                <div class="card shadow-custom">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-clock-history"></i> Generation History</h5>
+                    </div>
+                    <div class="card-body">
+                        <p id="historyPlaceholder" class="text-muted">No generations in history yet. Create an image to see it here!</p>
+                        <div id="historyContainer" class="list-group">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-dark text-white text-center py-3 mt-auto">
+        <div class="container">
+            <p class="mb-0">&copy; <span id="currentYear"></span> Imagen 3 Power Tool. Crafted with AI.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function() {
+            const promptInput = document.getElementById('promptInput');
+            const generateBtn = document.getElementById('generateBtn');
+            const clearPromptBtn = document.getElementById('clearPromptBtn');
+            const inspireMeBtn = document.getElementById('inspireMeBtn');
+            const aspectRatioSelect = document.getElementById('aspectRatioSelect');
+            const seedInput = document.getElementById('seedInput');
+            const randomSeedBtn = document.getElementById('randomSeedBtn');
+            const modifierTagsContainer = document.getElementById('modifierTagsContainer');
+
+            const imageDisplayArea = document.getElementById('imageDisplayArea');
+            const loadingSpinnerContainer = document.getElementById('loadingSpinnerContainer');
+            const imagePlaceholder = document.getElementById('imagePlaceholder');
+            const generatedImage = document.getElementById('generatedImage');
+            const generatedPromptDisplay = document.getElementById('generatedPromptDisplay');
+            const imageActions = document.getElementById('imageActions');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const copyPromptBtn = document.getElementById('copyPromptBtn');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            const historyContainer = document.getElementById('historyContainer');
+            const historyPlaceholder = document.getElementById('historyPlaceholder');
+            const currentYearEl = document.getElementById('currentYear');
+
+            const APPLE_SUFFIX = ", with an apple falling from a tree somewhere in the image.";
+            const MAX_HISTORY_ITEMS = 5;
+            let imageHistory = [];
+
+            const modifiers = [
+                'cinematic lighting', 'watercolor', 'pixel art', 'fantasy art', 'steampunk',
+                'photo realistic', 'illustration', '3d render', 'vintage photo', 'macro shot',
+                'impressionistic', 'surreal', 'abstract', 'vibrant colors', 'monochromatic',
+                'in the style of Van Gogh', 'cyberpunk city', 'enchanted forest', 'desert landscape',
+                'under a starry sky', 'dramatic shadows', 'minimalist', 'art deco', 'gothic'
+            ];
+
+            const inspiringPrompts = [
+                "A bioluminescent forest at twilight", "Steampunk owl detective with a monocle", 
+                "Floating islands in a crimson sky during a meteor shower", "A library inside a giant crystal cavern", 
+                "Robot street musician playing a futuristic violin in a rainy neon city",
+                "A serene underwater kingdom made of coral and pearls", "A lone astronaut discovering an ancient alien artifact on Mars",
+                "A whimsical treehouse village connected by rope bridges in a magical forest",
+                "A dragon made of stardust soaring through a nebula", "A cozy bookstore cafe on a snowy evening"
+            ];
+
+            function initializeApp() {
+                currentYearEl.textContent = new Date().getFullYear();
+                initializeModifiers();
+                loadHistory();
+                setupEventListeners();
+                updateHistoryDisplay();
+            }
+
+            function initializeModifiers() {
+                modifiers.forEach(tagText => {
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.classList.add('btn', 'btn-outline-secondary', 'btn-sm', 'modifier-tag');
+                    button.textContent = tagText;
+                    modifierTagsContainer.appendChild(button);
+                });
+            }
+
+            function setupEventListeners() {
+                generateBtn.addEventListener('click', handleGenerateImage);
+                promptInput.addEventListener('keypress', (event) => {
+                    if (event.key === 'Enter' && !event.shiftKey) {
+                        event.preventDefault();
+                        handleGenerateImage();
+                    }
+                });
+                clearPromptBtn.addEventListener('click', handleClearPrompt);
+                inspireMeBtn.addEventListener('click', handleInspireMe);
+                randomSeedBtn.addEventListener('click', handleRandomSeed);
+                downloadBtn.addEventListener('click', handleDownloadImage);
+                copyPromptBtn.addEventListener('click', handleCopyPrompt);
+
+                modifierTagsContainer.addEventListener('click', (event) => {
+                    if (event.target.classList.contains('modifier-tag')) {
+                        const currentPrompt = promptInput.value.trim();
+                        const tagToAdd = event.target.textContent;
+                        promptInput.value = currentPrompt ? `${currentPrompt} ${tagToAdd}` : tagToAdd;
+                        promptInput.focus();
+                    }
+                });
+
+                historyContainer.addEventListener('click', (event) => {
+                    const target = event.target.closest('.history-reload-btn');
+                    if (target) {
+                        const index = parseInt(target.dataset.index, 10);
+                        if (!isNaN(index) && imageHistory[index]) {
+                            handleHistoryReload(imageHistory[index]);
+                        }
+                    }
+                });
+            }
+
+            function showLoadingState() {
+                generateBtn.disabled = true;
+                promptInput.disabled = true;
+                aspectRatioSelect.disabled = true;
+                seedInput.disabled = true;
+                inspireMeBtn.disabled = true;
+                randomSeedBtn.disabled = true;
+                clearPromptBtn.disabled = true;
+
+                loadingSpinnerContainer.style.display = 'block';
+                imagePlaceholder.style.display = 'none';
+                generatedImage.style.display = 'none';
+                generatedPromptDisplay.style.display = 'none';
+                imageActions.style.display = 'none';
+                errorMessage.style.display = 'none';
+            }
+
+            function hideLoadingState() {
+                generateBtn.disabled = false;
+                promptInput.disabled = false;
+                aspectRatioSelect.disabled = false;
+                seedInput.disabled = false;
+                inspireMeBtn.disabled = false;
+                randomSeedBtn.disabled = false;
+                clearPromptBtn.disabled = false;
+                loadingSpinnerContainer.style.display = 'none';
+            }
+            
+            function displayGeneratedImage(imageUrl, fullPrompt) {
+                generatedImage.src = imageUrl;
+                generatedImage.alt = fullPrompt;
+                generatedImage.style.display = 'block';
+                generatedPromptDisplay.textContent = `Full prompt: ${fullPrompt}`;
+                generatedPromptDisplay.style.display = 'block';
+                imagePlaceholder.style.display = 'none';
+                errorMessage.style.display = 'none';
+                imageActions.style.display = 'block';
+            }
+
+            function displayError(message) {
+                errorMessage.textContent = `Error: ${message}`;
+                errorMessage.style.display = 'block';
+                imagePlaceholder.style.display = 'block'; 
+                generatedImage.style.display = 'none';
+                generatedPromptDisplay.style.display = 'none';
+                imageActions.style.display = 'none';
+            }
+
+            async function handleGenerateImage() {
+                const userPrompt = promptInput.value.trim();
+                if (!userPrompt) {
+                    displayError('Prompt cannot be empty.');
+                    return;
+                }
+
+                const finalPrompt = userPrompt + APPLE_SUFFIX;
+                const aspectRatio = aspectRatioSelect.value;
+                const seedValue = seedInput.value.trim() ? parseInt(seedInput.value.trim(), 10) : null;
+
+                showLoadingState();
+
+                try {
+                    const payload = {
+                        prompt: finalPrompt,
+                        aspectRatio: aspectRatio
+                    };
+                    if (seedValue !== null && !isNaN(seedValue)) {
+                        payload.seed = seedValue;
+                    }
+
+                    const response = await fetch('/api/generate-image-on-demand', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok && data.success && data.imageUrl) {
+                        displayGeneratedImage(data.imageUrl, finalPrompt);
+                        addGenerationToHistory(userPrompt, aspectRatio, seedValue, data.imageUrl, finalPrompt);
+                    } else {
+                        displayError(data.error || 'Failed to generate image. Please try again.');
+                        console.error('Image generation API error:', data);
+                    }
+                } catch (error) {
+                    displayError('Network error. Could not connect to the image generation service.');
+                    console.error('Fetch error:', error);
+                } finally {
+                    hideLoadingState();
+                }
+            }
+
+            function handleClearPrompt() {
+                promptInput.value = '';
+                promptInput.focus();
+            }
+
+            function handleInspireMe() {
+                const randomIndex = Math.floor(Math.random() * inspiringPrompts.length);
+                promptInput.value = inspiringPrompts[randomIndex];
+                promptInput.focus();
+            }
+
+            function handleRandomSeed() {
+                seedInput.value = Math.floor(Math.random() * 1000000);
+            }
+
+            function handleDownloadImage() {
+                if (!generatedImage.src || generatedImage.src.startsWith('data:')) return;
+                const link = document.createElement('a');
+                link.href = generatedImage.src;
+                
+                const promptPart = generatedImage.alt.substring(0, generatedImage.alt.indexOf(APPLE_SUFFIX)).trim() || "generated-image";
+                const safeFilename = promptPart.replace(/[^a-z0-9_]+/gi, '-').replace(/^-+|-+$/g, '').substring(0, 50) || "image";
+                link.download = `${safeFilename}.png`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            function handleCopyPrompt() {
+                if (generatedPromptDisplay.textContent) {
+                    const fullPromptText = generatedPromptDisplay.textContent.replace('Full prompt: ', '');
+                    navigator.clipboard.writeText(fullPromptText)
+                        .then(() => {
+                            const originalText = copyPromptBtn.innerHTML;
+                            copyPromptBtn.innerHTML = '<i class="bi bi-check-lg"></i> Copied!';
+                            setTimeout(() => { copyPromptBtn.innerHTML = originalText; }, 2000);
+                        })
+                        .catch(err => {
+                            console.error('Failed to copy prompt: ', err);
+                            const originalText = copyPromptBtn.innerHTML;
+                            copyPromptBtn.innerHTML = '<i class="bi bi-x-octagon-fill"></i> Error';
+                             setTimeout(() => { copyPromptBtn.innerHTML = originalText; }, 2000);
+                        });
+                }
+            }
+
+            function addGenerationToHistory(userPrompt, aspectRatio, seed, imageUrl, fullPrompt) {
+                const newEntry = { userPrompt, aspectRatio, seed, imageUrl, fullPrompt, timestamp: new Date().toISOString() };
+                imageHistory.unshift(newEntry);
+                if (imageHistory.length > MAX_HISTORY_ITEMS) {
+                    imageHistory.pop();
+                }
+                saveHistory();
+                updateHistoryDisplay();
+            }
+
+            function saveHistory() {
+                try {
+                    localStorage.setItem('imageGenPowerToolHistory', JSON.stringify(imageHistory));
+                } catch (e) {
+                    console.error("Failed to save history to localStorage:", e);
+                }
+            }
+
+            function loadHistory() {
+                try {
+                    const storedHistory = localStorage.getItem('imageGenPowerToolHistory');
+                    if (storedHistory) {
+                        imageHistory = JSON.parse(storedHistory);
+                    }
+                } catch (e) {
+                    console.error("Failed to load history from localStorage:", e);
+                    imageHistory = [];
+                }
+            }
+
+            function updateHistoryDisplay() {
+                historyContainer.innerHTML = '';
+                if (imageHistory.length === 0) {
+                    historyPlaceholder.style.display = 'block';
+                    return;
+                }
+                historyPlaceholder.style.display = 'none';
+
+                imageHistory.forEach((item, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'list-group-item history-item';
+                    
+                    const img = document.createElement('img');
+                    img.src = item.imageUrl;
+                    img.alt = `History: ${item.userPrompt.substring(0,30)}...`;
+                    img.className = 'history-item-thumbnail';
+                    img.onerror = () => { 
+                        img.style.display = 'none'; 
+                        const placeholderIcon = document.createElement('div');
+                        placeholderIcon.className = 'history-item-thumbnail d-flex align-items-center justify-content-center';
+                        placeholderIcon.innerHTML = '<i class="bi bi-image-alt fs-3 text-muted"></i>';
+                        div.insertBefore(placeholderIcon, detailsDiv);
+                    };
+
+
+                    const detailsDiv = document.createElement('div');
+                    detailsDiv.className = 'history-item-details';
+
+                    const promptSpan = document.createElement('span');
+                    promptSpan.className = 'history-item-prompt';
+                    promptSpan.textContent = item.userPrompt;
+                    
+                    const metaSpan = document.createElement('span');
+                    metaSpan.className = 'history-item-meta';
+                    metaSpan.textContent = `Ratio: ${item.aspectRatio}${item.seed ? ', Seed: ' + item.seed : ''} | ${new Date(item.timestamp).toLocaleDateString()}`;
+                    
+                    detailsDiv.appendChild(promptSpan);
+                    detailsDiv.appendChild(metaSpan);
+
+                    const reloadButton = document.createElement('button');
+                    reloadButton.className = 'btn btn-sm btn-outline-info history-reload-btn';
+                    reloadButton.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Reload';
+                    reloadButton.dataset.index = index;
+                    
+                    div.appendChild(img);
+                    div.appendChild(detailsDiv);
+                    div.appendChild(reloadButton);
+                    historyContainer.appendChild(div);
+                });
+            }
+            
+            function handleHistoryReload(historyEntry) {
+                promptInput.value = historyEntry.userPrompt;
+                aspectRatioSelect.value = historyEntry.aspectRatio;
+                seedInput.value = historyEntry.seed || '';
+                displayGeneratedImage(historyEntry.imageUrl, historyEntry.fullPrompt);
+                imageDisplayArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            document.addEventListener('DOMContentLoaded', initializeApp);
+        })();
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

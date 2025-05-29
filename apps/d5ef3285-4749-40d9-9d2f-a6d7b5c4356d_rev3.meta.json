@@ -1,0 +1,18 @@
+{
+  "projectId": "d5ef3285-4749-40d9-9d2f-a6d7b5c4356d",
+  "revisionString": "3",
+  "projectNameDisplay": "IMAGE GEN",
+  "projectType": "webapp",
+  "userPromptForThisRevision": "switch to the new imagen 3 image generation please",
+  "basedOnRevisionString": "2",
+  "savedAt": "2025-05-29T10:29:59.466Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/imagen3_de23e73c-4c0.png",
+      "url": "/generated_images/imagen3_de23e73c-4c0.png",
+      "description": "A small, simple, flat design icon of a single red apple, suitable for a dark theme UI. The apple should appear to be slightly in motion, as if just starting to fall, perhaps with a tiny motion blur or a very subtle stylized 'whoosh' line. The icon should be clean, easily recognizable at small sizes (e.g., 24x24 or 32x32 pixels), and primarily red with a small green leaf and brown stem. Background should be transparent.",
+      "purpose": "Icon to be displayed next to the 'apple falling from a tree' constraint notice in the webapp UI, to visually reinforce the theme. ID: appleIcon",
+      "isNewlyGenerated": true
+    }
+  ]
+}

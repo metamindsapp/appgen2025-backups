@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Face Frenzy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
+    <style>
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #1A202C;
+            color: #E2E8F0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: #2D3748;
+            flex-shrink: 0; 
+        }
+
+        #gameTitle {
+            font-weight: bold;
+            color: #90cdf4; 
+        }
+
+        #scoreDisplay, #timerDisplay, #highScoreDisplay, #comboDisplay {
+            font-weight: bold;
+            color: #faf089; 
+        }
+
+        #gameArea {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        #gameCanvasWrapper {
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            border-radius: 0.5rem;
+            background-color: #000; 
+            display: flex; 
+            justify-content: center;
+            align-items: center;
+        }
+
+        #gameCanvas {
+            display: block;
+            background-color: transparent; 
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -webkit-crisp-edges;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            touch-action: none;
+        }
+        
+        .card-custom {
+            background-color: #2D3748;
+            border: 1px solid #4A5568;
+        }
+
+        .form-control-custom {
+             background-color: #4A5568;
+             color: #E2E8F0;
+             border-color: #718096;
+        }
+         .form-control-custom::placeholder {
+            color: #A0AEC0;
+         }
+         .form-control-custom:focus {
+            background-color: #4A5568;
+            color: #E2E8F0;
+            border-color: #63B3ED;
+            box-shadow: 0 0 0 0.25rem rgba(99, 179, 237, 0.25);
+         }
+
+        .btn-primary {
+            background-color: #63b3ed;
+            border-color: #63b3ed;
+        }
+        .btn-primary:hover, .btn-primary:focus {
+             background-color: #4299e1;
+             border-color: #4299e1;
+         }
+        .btn-info {
+            background-color: #4fd1c5;
+            border-color: #4fd1c5;
+        }
+        .btn-info:hover, .btn-info:focus {
+            background-color: #38b2ac;
+            border-color: #38b2ac;
+        }
+        .modal-content {
+            background-color: #2D3748;
+            border: 1px solid #4A5568;
+        }
+        .modal-header, .modal-footer {
+            border-color: #4A5568;
+        }
+        .btn-close-white {
+            filter: invert(1) grayscale(100%) brightness(200%);
+        }
+        #customFacePreview {
+            border: 2px solid #4A5568;
+            background-color: #1A202C;
+        }
+        .screen {
+            width: 100%;
+            max-width: 600px; 
+        }
+        #loadingIndicator {
+            text-align: center;
+        }
+        #loadingIndicator .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header class="container-fluid py-2 shadow-sm">
+        <div class="row align-items-center gy-2 gy-md-0">
+            <div class="col-12 col-md-auto text-center text-md-start">
+                <h1 id="gameTitle" class="mb-0 h4">Happy Face Frenzy</h1>
+            </div>
+            <div class="col-12 col-md text-center">
+                <div class="d-flex justify-content-center align-items-center flex-wrap gap-2">
+                    <span>Score: <span id="scoreDisplay">0</span></span>
+                    <span>Time: <span id="timerDisplay">60</span>s</span>
+                    <span class="d-none" id="comboDisplayArea">Combo: <span id="comboDisplay">x1</span></span>
+                    <button id="pauseButton" class="btn btn-sm btn-outline-warning d-none">Pause</button>
+                </div>
+            </div>
+            <div class="col-12 col-md-auto text-center text-md-end">
+                 <span class="me-2">High Score: <span id="highScoreDisplay">0</span></span>
+                 <button id="muteButton" class="btn btn-sm btn-outline-light">Mute</button>
+            </div>
+        </div>
+    </header>
+
+    <main id="gameArea" class="container-fluid flex-grow-1 d-flex flex-column align-items-center justify-content-center p-3">
+        
+        <div id="loadingIndicator" class="d-none">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 lead">Loading assets...</p>
+        </div>
+
+        <div id="gameCanvasWrapper" class="shadow rounded d-none">
+            <canvas id="gameCanvas"></canvas>
+        </div>
+
+        <div id="menuScreen" class="text-center p-4 card card-custom screen">
+            <h2 class="mb-3">Welcome!</h2>
+            <p class="lead mb-4">Click the happy faces, avoid the others!</p>
+            <div id="menuErrorDisplay" class="alert alert-danger d-none" role="alert"></div>
+            <button id="startGameBtn" class="btn btn-primary btn-lg mb-2 w-100">Start Game</button>
+            <button id="customizeFaceBtn" class="btn btn-info mb-2 w-100">Customize Target Face</button>
+            <button id="instructionsBtn" class="btn btn-secondary w-100">How to Play</button>
+        </div>
+
+        <div id="customizeFaceScreen" class="col-12 col-md-8 col-lg-6 text-center p-4 card card-custom screen d-none">
+             <h2 class="mb-3">Customize Your Happy Face!</h2>
+             <img id="customFacePreview" src="/generated_images/imagen3_ade24c0d-184.png" alt="Custom Happy Face Preview" class="img-fluid mb-3 rounded shadow" style="width: 128px; height: 128px; object-fit: contain;">
+             <div class="mb-3">
+                 <label for="promptInput" class="form-label text-start w-100">Describe your desired happy face:</label>
+                 <input type="text" class="form-control form-control-custom mb-2" id="promptInput" placeholder="e.g., 'Smiling astronaut cat', 'Pixel art happy computer', 'Steampunk smiley gear'">
+             </div>
+             <div class="mb-3">
+                <label for="seedInput" class="form-label text-start w-100">Optional Seed (for style consistency):</label>
+                <input type="number" class="form-control form-control-custom" id="seedInput" placeholder="e.g., 12345 (integer)">
+             </div>
+             <div class="mb-3">
+                 <button id="generateCustomFaceBtn" class="btn btn-success w-100 mb-2">Generate My Face</button>
+                 <button id="useDefaultFaceBtn" class="btn btn-outline-light w-100 mb-2">Use Default Happy Face</button>
+             </div>
+             <div id="customFaceFeedbackArea" class="text-muted mt-2 small" style="min-height: 24px;"></div>
+             <button id="backToMenuBtn_Customize" class="btn btn-secondary mt-3 w-100">Back to Menu</button>
+        </div>
+    </main>
+
+    <div class="modal fade" id="instructionsModal" tabindex="-1" aria-labelledby="instructionsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="instructionsModalLabel">How to Play Happy Face Frenzy</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Get ready for some frantic fun!</p>
+                    <ul>
+                        <li>Click on <strong class="text-success">Happy Faces</strong> (your customized one or the default) to score <strong class="text-success">+10 points</strong>!</li>
+                        <li>Click on <strong class="text-warning">Golden Happy Faces</strong> for <strong class="text-warning">+50 bonus points</strong>!</li>
+                        <li>Avoid clicking <strong class="text-info">Sad Faces</strong> (<strong class="text-info">-10 points</strong>).</li>
+                        <li>Definitely avoid clicking <strong class="text-danger">Angry Faces</strong> (<strong class="text-danger">-25 points</strong> and combo break!).</li>
+                        <li>Each game round lasts <strong>60 seconds</strong>.</li>
+                        <li>Build combos by hitting good faces consecutively for a score multiplier! Max combo x5.</li>
+                        <li>Game gets faster over time!</li>
+                    </ul>
+                    <p>Good luck and have fun!</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got it!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="gameOverModal" tabindex="-1" aria-labelledby="gameOverModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="gameOverModalLabel">Game Over!</h5>
+                </div>
+                <div class="modal-body text-center">
+                    <h4>Your Score: <span id="finalScoreDisplay">0</span></h4>
+                    <p>High Score: <span id="gameOverHighScoreDisplay">0</span></p>
+                    <p id="newHighScoreMessage" class="text-warning fw-bold d-none">New High Score!</p>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button id="playAgainBtn" type="button" class="btn btn-primary">Play Again</button>
+                    <button id="backToMenuBtn_GameOver" type="button" class="btn btn-secondary">Back to Menu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="pauseModal" tabindex="-1" aria-labelledby="pauseModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="pauseModalLabel">Game Paused</h5>
+                </div>
+                <div class="modal-body text-center">
+                    <p>Take a break!</p>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button id="resumeGameBtn" type="button" class="btn btn-primary">Resume Game</button>
+                    <button id="quitToMenuBtn_Pause" type="button" class="btn btn-secondary">Quit to Menu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function() {
+            'use strict';
+            const GAME_CONFIG = {
+                CANVAS_NATIVE_WIDTH: 800,
+                CANVAS_NATIVE_HEIGHT: 600,
+                GAME_DURATION_SECONDS: 60,
+                FACE_SPAWN_INTERVAL_MIN_INITIAL: 600, 
+                FACE_SPAWN_INTERVAL_MAX_INITIAL: 1600, 
+                FACE_SPAWN_INTERVAL_MIN_FINAL: 300, 
+                FACE_SPAWN_INTERVAL_MAX_FINAL: 800,  
+                FACE_LIFETIME_MS_INITIAL: 3500,
+                FACE_LIFETIME_MS_FINAL: 2000, 
+                FACE_SIZE_MIN: 60,
+                FACE_SIZE_MAX: 100,
+                POINTS_HAPPY: 10,
+                POINTS_GOLDEN: 50,
+                POINTS_PENALTY_SAD: -10,
+                POINTS_PENALTY_ANGRY: -25,
+                COMBO_MAX: 5,
+                PARTICLE_COUNT: 20,
+                PARTICLE_LIFETIME: 500, 
+                PARTICLE_SPEED: 3,
+                FACE_DESPAWN_ANIM_DURATION: 300 
+            };
+
+            const ASSET_PATHS = {
+                defaultHappy: "/generated_images/imagen3_ade24c0d-184.png",
+                sad: "/generated_images/imagen3_3d137e63-826.png",
+                angry: "/generated_images/imagen3_0104d7f8-3a3.png",
+                golden: "/generated_images/imagen3_9c3f73f2-d6d.png",
+                background: "/generated_images/imagen3_1f8fd955-eb4.png",
+            };
+
+            const SOUND_FILES = { 
+                hitHappy: 'sfx_hit_happy.wav', 
+                hitGolden: 'sfx_hit_golden.wav',
+                hitSad: 'sfx_hit_sad.wav',
+                hitAngry: 'sfx_hit_angry.wav',
+                spawn: 'sfx_spawn.wav',
+                combo: 'sfx_combo.wav',
+                gameOver: 'sfx_game_over.wav',
+                click: 'sfx_ui_click.wav'
+            };
+
+            let canvas, ctx, gameManager, uiManager, assetLoader, soundManager, inputHandler;
+            let bootstrapInstructionsModal, bootstrapGameOverModal, bootstrapPauseModal;
+
+            class AssetLoader {
+                constructor() {
+                    this.images = {};
+                    this.sounds = {};
+                    this.playerCustomFaceImage = null; 
+                    this.totalAssetsToLoad = 0;
+                    this.loadedAssetsCount = 0;
+                }
+
+                async loadAll() {
+                    const imageLoadPromises = [];
+                    for (const key in ASSET_PATHS) {
+                        imageLoadPromises.push(this.loadImage(key, ASSET_PATHS[key]));
+                    }
+                    this.totalAssetsToLoad = imageLoadPromises.length + (typeof Howl !== 'undefined' ? Object.keys(SOUND_FILES).length : 0);
+                    
+                    await Promise.all(imageLoadPromises);
+                    this.loadSounds(); 
+                    
+                    if (!this.playerCustomFaceImage && this.isAssetValid('defaultHappy')) {
+                        this.playerCustomFaceImage = this.images.defaultHappy;
+                    }
+                }
+
+                loadImage(key, src) {
+                    return new Promise((resolve) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            this.images[key] = img;
+                            this.loadedAssetsCount++;
+                            resolve(img);
+                        };
+                        img.onerror = () => {
+                            console.error(`Failed to load image: ${src}. A placeholder will be used.`);
+                            this.images[key] = new Image(); 
+                            this.images[key].loadError = true; 
+                            this.loadedAssetsCount++; 
+                            resolve(this.images[key]); 
+                        };
+                        img.src = src;
+                    });
+                }
+                
+                loadSounds() {
+                    if (typeof Howl === 'undefined') {
+                        console.warn("Howler.js not loaded. Sounds will be disabled.");
+                        this.loadedAssetsCount += Object.keys(SOUND_FILES).length;
+                        return;
+                    }
+                    for (const key in SOUND_FILES) {
+                        this.sounds[key] = new Howl({
+                            src: [SOUND_FILES[key]], 
+                            onload: () => { this.loadedAssetsCount++; },
+                            onloaderror: (id, err) => {
+                                console.warn(`Failed to load sound ${SOUND_FILES[key]}:`, err);
+                                this.loadedAssetsCount++; 
+                            }
+                        });
+                    }
+                }
+                isAssetValid(imageKey) {
+                    const img = (imageKey === 'playerCustom') ? this.playerCustomFaceImage : this.images[imageKey];
+                    return img && img.complete && !img.loadError && img.naturalHeight !== 0;
+                }
+                isFullyLoaded() { return this.loadedAssetsCount >= this.totalAssetsToLoad; }
+            }
+
+            class SoundManager {
+                constructor(assetLoaderInstance) {
+                    this.assetLoader = assetLoaderInstance;
+                    this.isMuted = false;
+                    this.uiButton = document.getElementById('muteButton');
+                    this.uiButton.addEventListener('click', () => this.toggleMute());
+                    this.updateButtonText();
+                }
+
+                play(soundName) {
+                    if (this.isMuted || typeof Howl === 'undefined' || !this.assetLoader.sounds[soundName]) return;
+                    if (this.assetLoader.sounds[soundName].state() === 'loaded') {
+                        this.assetLoader.sounds[soundName].play();
+                    }
+                }
+
+                toggleMute() {
+                    this.isMuted = !this.isMuted;
+                    if (typeof Howl !== 'undefined') {
+                        Howler.mute(this.isMuted);
+                    }
+                    this.updateButtonText();
+                    if (!this.isMuted) this.play('click'); 
+                }
+                updateButtonText() {
+                    this.uiButton.textContent = this.isMuted ? 'Unmute' : 'Mute';
+                }
+            }
+            
+            class UIManager {
+                constructor() {
+                    this.scoreDisplay = document.getElementById('scoreDisplay');
+                    this.timerDisplay = document.getElementById('timerDisplay');
+                    this.highScoreDisplay = document.getElementById('highScoreDisplay');
+                    this.comboDisplay = document.getElementById('comboDisplay');
+                    this.comboDisplayArea = document.getElementById('comboDisplayArea');
+                    
+                    this.finalScoreDisplay = document.getElementById('finalScoreDisplay');
+                    this.gameOverHighScoreDisplay = document.getElementById('gameOverHighScoreDisplay');
+                    this.newHighScoreMessage = document.getElementById('newHighScoreMessage');
+
+                    this.customFacePreview = document.getElementById('customFacePreview');
+                    this.customFaceFeedbackArea = document.getElementById('customFaceFeedbackArea');
+                    this.promptInput = document.getElementById('promptInput');
+                    this.menuErrorDisplay = document.getElementById('menuErrorDisplay');
+                    this.loadingIndicator = document.getElementById('loadingIndicator');
+                    this.pauseButton = document.getElementById('pauseButton');
+                }
+
+                updateScore(score) { this.scoreDisplay.textContent = score; }
+                updateTimer(time) { this.timerDisplay.textContent = Math.max(0, Math.ceil(time)); }
+                updateHighScore(score) { this.highScoreDisplay.textContent = score; }
+                updateCombo(multiplier) {
+                    if (multiplier > 1) {
+                        this.comboDisplayArea.classList.remove('d-none');
+                        this.comboDisplay.textContent = `x${multiplier}`;
+                    } else {
+                        this.comboDisplayArea.classList.add('d-none');
+                    }
+                }
+
+                showScreen(screenId) {
+                    ['menuScreen', 'customizeFaceScreen', 'gameCanvasWrapper', 'loadingIndicator'].forEach(id => {
+                        document.getElementById(id).classList.add('d-none');
+                    });
+                    if (screenId) document.getElementById(screenId).classList.remove('d-none');
+                    this.togglePauseButton(screenId === 'gameCanvasWrapper');
+                }
+                
+                togglePauseButton(show) {
+                    if (show) this.pauseButton.classList.remove('d-none');
+                    else this.pauseButton.classList.add('d-none');
+                }
+
+                showModal(modalInstance) { if(modalInstance) modalInstance.show(); }
+                hideModal(modalInstance) { if(modalInstance) modalInstance.hide(); }
+
+                setCustomFacePreview(imageUrl) { 
+                    if (imageUrl) this.customFacePreview.src = imageUrl;
+                    else this.customFacePreview.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"; 
+                }
+                showCustomFaceFeedback(message, isError = false) {
+                    this.customFaceFeedbackArea.textContent = message;
+                    this.customFaceFeedbackArea.className = 'mt-2 small'; 
+                    if (isError) {
+                        this.customFaceFeedbackArea.classList.add('text-danger');
+                    } else if (message) {
+                        this.customFaceFeedbackArea.classList.add('text-success');
+                    } else {
+                         this.customFaceFeedbackArea.classList.add('text-muted');
+                    }
+                }
+                clearCustomFaceFeedback() { 
+                    this.customFaceFeedbackArea.textContent = ''; 
+                    this.customFaceFeedbackArea.className = 'text-muted mt-2 small';
+                }
+                
+                displayGameOver(score, highScore, isNewHigh) {
+                    this.finalScoreDisplay.textContent = score;
+                    this.gameOverHighScoreDisplay.textContent = highScore;
+                    this.newHighScoreMessage.classList.toggle('d-none', !isNewHigh);
+                    this.showModal(bootstrapGameOverModal);
+                }
+                showMenuError(message) {
+                    this.menuErrorDisplay.textContent = message;
+                    this.menuErrorDisplay.classList.remove('d-none');
+                }
+                hideMenuError() { this.menuErrorDisplay.classList.add('d-none');}
+            }
+
+            class InputHandler {
+                constructor(canvasElement, gameManagerInstance) {
+                    this.canvas = canvasElement;
+                    this.gameManager = gameManagerInstance;
+                    this.boundClickHandler = this.handleClick.bind(this);
+                    this.boundTouchHandler = this.handleTouch.bind(this);
+                }
+                
+                addListeners() {
+                    this.canvas.addEventListener('mousedown', this.boundClickHandler);
+                    this.canvas.addEventListener('touchstart', this.boundTouchHandler, { passive: false });
+                }
+                removeListeners() {
+                    this.canvas.removeEventListener('mousedown', this.boundClickHandler);
+                    this.canvas.removeEventListener('touchstart', this.boundTouchHandler);
+                }
+
+                handleClick(event) {
+                    const { gameX, gameY } = this.getCanvasCoordinates(event.clientX, event.clientY);
+                    this.gameManager.handleCanvasInteraction(gameX, gameY);
+                }
+
+                handleTouch(event) {
+                    event.preventDefault(); 
+                    if (event.touches.length > 0) {
+                        const touch = event.touches[0];
+                        const { gameX, gameY } = this.getCanvasCoordinates(touch.clientX, touch.clientY);
+                        this.gameManager.handleCanvasInteraction(gameX, gameY);
+                    }
+                }
+                
+                getCanvasCoordinates(clientX, clientY) {
+                    const rect = this.canvas.getBoundingClientRect();
+                    const scaleX = this.canvas.width / rect.width;
+                    const scaleY = this.canvas.height / rect.height;
+                    const gameX = (clientX - rect.left) * scaleX;
+                    const gameY = (clientY - rect.top) * scaleY;
+                    return { gameX, gameY };
+                }
+            }
+
+            class Face {
+                constructor(x, y, type, image, points, lifetime, size) {
+                    this.x = x; this.y = y; this.type = type; this.image = image; this.points = points;
+                    this.lifetime = lifetime; this.size = size; this.width = size; this.height = size;
+                    this.createdAt = performance.now();
+                    this.isActive = true; this.isHit = false;
+                    this.currentScale = 0.1; this.targetScale = 1.0; this.animationSpeed = 7.0; 
+                    this.isDespawning = false; this.despawnTimer = 0; this.alpha = 1.0;
+                }
+
+                update(dt) {
+                    const now = performance.now();
+                    if (this.isDespawning) {
+                        this.despawnTimer += dt * 1000;
+                        const despawnProgress = Math.min(1, this.despawnTimer / GAME_CONFIG.FACE_DESPAWN_ANIM_DURATION);
+                        this.currentScale = this.targetScale * (1 - despawnProgress);
+                        this.alpha = 1 - despawnProgress;
+                        if (despawnProgress >= 1) this.isActive = false;
+                    } else if (now - this.createdAt > this.lifetime && !this.isHit) {
+                        this.isDespawning = true;
+                    } else if (this.currentScale < this.targetScale && !this.isHit) {
+                        this.currentScale += this.animationSpeed * dt;
+                        if (this.currentScale >= this.targetScale) this.currentScale = this.targetScale;
+                    }
+                }
+
+                draw(ctx) {
+                    let imageToDraw = this.image;
+                    let imageKey = this.type;
+                    if (this.type === 'happy') {
+                        imageKey = (this.image === assetLoader.playerCustomFaceImage) ? 'playerCustom' : 'defaultHappy';
+                    }
+                    
+                    if (!assetLoader.isAssetValid(imageKey)) {
+                         if (imageKey === 'playerCustom' && assetLoader.isAssetValid('defaultHappy')) {
+                            imageToDraw = assetLoader.images.defaultHappy; 
+                         } else { return; } 
+                    }
+                    
+                    ctx.save();
+                    ctx.globalAlpha = this.alpha;
+                    ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
+                    ctx.scale(this.currentScale, this.currentScale);
+                    ctx.drawImage(imageToDraw, -this.width / 2, -this.height / 2, this.width, this.height);
+                    ctx.restore();
+                }
+
+                isClicked(clickX, clickY) {
+                    if (this.isDespawning || this.isHit) return false;
+                    const centerX = this.x + this.width / 2;
+                    const centerY = this.y + this.height / 2;
+                    const radius = (this.width * this.currentScale) / 2 * 0.9; 
+                    const distanceSq = Math.pow(clickX - centerX, 2) + Math.pow(clickY - centerY, 2);
+                    return distanceSq <= radius * radius;
+                }
+                onHit() { this.isHit = true; this.isActive = false; }
+            }
+            
+            class Particle { 
+                constructor(x, y, color, size, lifetime, vx, vy) {
+                    this.x = x; this.y = y; this.color = color; this.size = size;
+                    this.initialLifetime = lifetime; this.lifetime = lifetime;
+                    this.vx = vx; this.vy = vy; this.opacity = 1;
+                }
+                update(dt) {
+                    this.x += this.vx * dt * 100; this.y += this.vy * dt * 100;
+                    this.lifetime -= dt * 1000;
+                    this.opacity = Math.max(0, this.lifetime / this.initialLifetime);
+                }
+                draw(ctx) {
+                    ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.opacity})`;
+                    ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
+                }
+            }
+            class ParticleSystem {
+                constructor() { this.particles = []; }
+                createExplosion(x, y, color, count = GAME_CONFIG.PARTICLE_COUNT) {
+                    for (let i = 0; i < count; i++) {
+                        const angle = Math.random()*Math.PI*2; const speed = Math.random()*GAME_CONFIG.PARTICLE_SPEED+1;
+                        const vx = Math.cos(angle)*speed; const vy = Math.sin(angle)*speed;
+                        const size = Math.random()*3+2; const lifetime = Math.random()*GAME_CONFIG.PARTICLE_LIFETIME + (GAME_CONFIG.PARTICLE_LIFETIME/2);
+                        this.particles.push(new Particle(x,y,color,size,lifetime,vx,vy));
+                    }
+                }
+                update(dt) {
+                    for (let i = this.particles.length-1; i>=0; i--) {
+                        this.particles[i].update(dt);
+                        if (this.particles[i].lifetime <= 0) this.particles.splice(i,1);
+                    }
+                }
+                draw(ctx) { this.particles.forEach(p => p.draw(ctx)); }
+            }
+
+            class GameManager {
+                constructor() {
+                    this.state = 'MAIN_MENU'; 
+                    this.score = 0; this.timer = GAME_CONFIG.GAME_DURATION_SECONDS; this.highScore = 0;
+                    this.currentCombo = 0; this.comboMultiplier = 1;
+                    this.facesOnScreen = []; this.particleSystem = new ParticleSystem();
+                    this.lastFaceSpawnTime = 0; this.nextSpawnInterval = 0;
+                    this.gameStartTime = 0; this.lastFrameTime = 0; this.deltaTime = 0;
+                    this.animationFrameId = null;
+                    this.playerTargetFaceImage = null;
+                    this.generateCustomFaceBtn = document.getElementById('generateCustomFaceBtn');
+                    this.seedInput = document.getElementById('seedInput');
+                    this.currentSpawnIntervalMin = GAME_CONFIG.FACE_SPAWN_INTERVAL_MIN_INITIAL;
+                    this.currentSpawnIntervalMax = GAME_CONFIG.FACE_SPAWN_INTERVAL_MAX_INITIAL;
+                    this.currentFaceLifetime = GAME_CONFIG.FACE_LIFETIME_MS_INITIAL;
+                }
+
+                init() {
+                    this.loadHighScore();
+                    uiManager.updateHighScore(this.highScore);
+                    
+                    if (assetLoader.isAssetValid('defaultHappy')) {
+                        this.playerTargetFaceImage = assetLoader.images.defaultHappy; 
+                        uiManager.setCustomFacePreview(assetLoader.images.defaultHappy.src);
+                        uiManager.hideMenuError();
+                        document.getElementById('startGameBtn').disabled = false;
+                    } else {
+                        console.error("CRITICAL: Default happy face image failed to load or is invalid.");
+                        uiManager.setCustomFacePreview(''); 
+                        this.playerTargetFaceImage = null; 
+                        uiManager.showMenuError("Error: Core game image (default happy face) is missing. Please refresh or check console.");
+                        document.getElementById('startGameBtn').disabled = true; 
+                    }
+                    this.setCanvasDimensions(); 
+                    window.addEventListener('resize', () => this.setCanvasDimensions());
+                    uiManager.showScreen('menuScreen');
+                }
+                
+                setCanvasDimensions() {
+                    const nativeAspectRatio = GAME_CONFIG.CANVAS_NATIVE_WIDTH / GAME_CONFIG.CANVAS_NATIVE_HEIGHT;
+                    const gameArea = document.getElementById('gameArea');
+                    let availableWidth = gameArea.clientWidth;
+                    let availableHeight = gameArea.clientHeight;
+                    
+                    let scaledWidth, scaledHeight;
+                    if (availableWidth / availableHeight > nativeAspectRatio) {
+                        scaledHeight = availableHeight;
+                        scaledWidth = scaledHeight * nativeAspectRatio;
+                    } else {
+                        scaledWidth = availableWidth;
+                        scaledHeight = scaledWidth / nativeAspectRatio;
+                    }
+                    canvas.style.width = Math.floor(scaledWidth) + 'px';
+                    canvas.style.height = Math.floor(scaledHeight) + 'px';
+                }
+
+                async startGame() {
+                    soundManager.play('click');
+                    if (!this.playerTargetFaceImage && !assetLoader.isAssetValid('defaultHappy')) {
+                        uiManager.showMenuError("Cannot start: Default happy face image is missing.");
+                        return;
+                    }
+                    if (!this.playerTargetFaceImage && assetLoader.isAssetValid('defaultHappy')) {
+                         this.playerTargetFaceImage = assetLoader.images.defaultHappy; 
+                    }
+
+                    this.state = 'LOADING_ASSETS_FOR_GAME'; 
+                    uiManager.showScreen('loadingIndicator'); 
+                    
+                    if (this.playerTargetFaceImage === assetLoader.playerCustomFaceImage && assetLoader.playerCustomFaceImage && !assetLoader.playerCustomFaceImage.complete) {
+                        try {
+                            await new Promise((resolve, reject) => {
+                                assetLoader.playerCustomFaceImage.onload = resolve;
+                                assetLoader.playerCustomFaceImage.onerror = () => {
+                                    console.error("Custom face failed to load right before game start. Reverting to default.");
+                                    if(assetLoader.isAssetValid('defaultHappy')) {
+                                        this.playerTargetFaceImage = assetLoader.images.defaultHappy;
+                                        assetLoader.playerCustomFaceImage = assetLoader.images.defaultHappy; 
+                                        uiManager.setCustomFacePreview(assetLoader.images.defaultHappy.src);
+                                    } else { this.playerTargetFaceImage = null; }
+                                    resolve(); 
+                                };
+                            });
+                        } catch (e) { console.error("Error awaiting custom image load:", e); }
+                    }
+                    
+                    this.resetGameParameters();
+                    this.state = 'PLAYING';
+                    inputHandler.addListeners();
+                    uiManager.showScreen('gameCanvasWrapper');
+                    this.gameStartTime = performance.now();
+                    this.lastFrameTime = performance.now();
+                    this.lastFaceSpawnTime = performance.now();
+                    this.setNextSpawnInterval();
+                    if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
+                    this.animationFrameId = requestAnimationFrame(this.gameLoop.bind(this));
+                }
+
+                resetGameParameters() {
+                    this.score = 0; this.timer = GAME_CONFIG.GAME_DURATION_SECONDS;
+                    this.currentCombo = 0; this.comboMultiplier = 1;
+                    this.facesOnScreen = []; this.particleSystem.particles = [];
+                    this.currentSpawnIntervalMin = GAME_CONFIG.FACE_SPAWN_INTERVAL_MIN_INITIAL;
+                    this.currentSpawnIntervalMax = GAME_CONFIG.FACE_SPAWN_INTERVAL_MAX_INITIAL;
+                    this.currentFaceLifetime = GAME_CONFIG.FACE_LIFETIME_MS_INITIAL;
+                    uiManager.updateScore(this.score); uiManager.updateTimer(this.timer); uiManager.updateCombo(this.comboMultiplier);
+                }
+                
+                updateDifficulty() {
+                    const progress = Math.max(0, Math.min(1, (GAME_CONFIG.GAME_DURATION_SECONDS - this.timer) / GAME_CONFIG.GAME_DURATION_SECONDS));
+                    this.currentSpawnIntervalMin = GAME_CONFIG.FACE_SPAWN_INTERVAL_MIN_INITIAL - (GAME_CONFIG.FACE_SPAWN_INTERVAL_MIN_INITIAL - GAME_CONFIG.FACE_SPAWN_INTERVAL_MIN_FINAL) * progress;
+                    this.currentSpawnIntervalMax = GAME_CONFIG.FACE_SPAWN_INTERVAL_MAX_INITIAL - (GAME_CONFIG.FACE_SPAWN_INTERVAL_MAX_INITIAL - GAME_CONFIG.FACE_SPAWN_INTERVAL_MAX_FINAL) * progress;
+                    this.currentFaceLifetime = GAME_CONFIG.FACE_LIFETIME_MS_INITIAL - (GAME_CONFIG.FACE_LIFETIME_MS_INITIAL - GAME_CONFIG.FACE_LIFETIME_MS_FINAL) * progress;
+                    this.currentSpawnIntervalMin = Math.max(200, this.currentSpawnIntervalMin);
+                    this.currentSpawnIntervalMax = Math.max(this.currentSpawnIntervalMin + 50, this.currentSpawnIntervalMax);
+                    this.currentFaceLifetime = Math.max(1500, this.currentFaceLifetime);
+                }
+
+
+                gameLoop(timestamp) {
+                    this.deltaTime = Math.min(0.1, (timestamp - this.lastFrameTime) / 1000);
+                    this.lastFrameTime = timestamp;
+
+                    if (this.state === 'PLAYING') {
+                        this.updateGameLogic(this.deltaTime);
+                        this.renderGameGraphics();
+                    }
+                    
+                    if (this.state === 'PLAYING' || this.state === 'PAUSED') { 
+                         this.animationFrameId = requestAnimationFrame(this.gameLoop.bind(this));
+                    } else {
+                        if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
+                        this.animationFrameId = null;
+                    }
+                }
+
+                updateGameLogic(dt) {
+                    this.timer -= dt;
+                    this.updateDifficulty(); 
+                    if (this.timer <= 0) { this.gameOver(); return; }
+                    uiManager.updateTimer(this.timer);
+
+                    if (performance.now() - this.lastFaceSpawnTime > this.nextSpawnInterval) {
+                        this.trySpawnFace();
+                        this.lastFaceSpawnTime = performance.now();
+                        this.setNextSpawnInterval();
+                    }
+
+                    for (let i = this.facesOnScreen.length - 1; i >= 0; i--) {
+                        const face = this.facesOnScreen[i];
+                        face.update(dt);
+                        if (!face.isActive) this.facesOnScreen.splice(i, 1);
+                    }
+                    this.particleSystem.update(dt);
+                }
+                
+                setNextSpawnInterval() {
+                    this.nextSpawnInterval = Math.random() * (this.currentSpawnIntervalMax - this.currentSpawnIntervalMin) + this.currentSpawnIntervalMin;
+                }
+
+                renderGameGraphics() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    if (assetLoader.isAssetValid('background')) {
+                        ctx.drawImage(assetLoader.images.background, 0, 0, canvas.width, canvas.height);
+                    } else {
+                        ctx.fillStyle = '#101520'; ctx.fillRect(0,0,canvas.width, canvas.height);
+                    }
+                    this.facesOnScreen.forEach(face => face.draw(ctx));
+                    this.particleSystem.draw(ctx);
+                }
+
+                trySpawnFace() {
+                    const rand = Math.random();
+                    let type, imageAssetKey, points;
+                    const size = Math.random() * (GAME_CONFIG.FACE_SIZE_MAX - GAME_CONFIG.FACE_SIZE_MIN) + GAME_CONFIG.FACE_SIZE_MIN;
+
+                    if (rand < 0.05 && assetLoader.isAssetValid('golden')) { 
+                        type = 'golden'; imageAssetKey = 'golden'; points = GAME_CONFIG.POINTS_GOLDEN;
+                    } else if (rand < 0.20 && assetLoader.isAssetValid('angry')) { 
+                        type = 'angry'; imageAssetKey = 'angry'; points = GAME_CONFIG.POINTS_PENALTY_ANGRY;
+                    } else if (rand < 0.40 && assetLoader.isAssetValid('sad')) { 
+                        type = 'sad'; imageAssetKey = 'sad'; points = GAME_CONFIG.POINTS_PENALTY_SAD;
+                    } else { 
+                        type = 'happy'; 
+                        imageAssetKey = (this.playerTargetFaceImage === assetLoader.playerCustomFaceImage && assetLoader.isAssetValid('playerCustom')) ? 'playerCustom' : 'defaultHappy';
+                        points = GAME_CONFIG.POINTS_HAPPY;
+                        if (!assetLoader.isAssetValid(imageAssetKey)) { 
+                           if(assetLoader.isAssetValid('defaultHappy') && imageAssetKey !== 'defaultHappy') imageAssetKey = 'defaultHappy'; 
+                           else return; 
+                        }
+                    }
+                    
+                    const imageToUse = (imageAssetKey === 'playerCustom') ? assetLoader.playerCustomFaceImage : assetLoader.images[imageAssetKey];
+                    if (!imageToUse || !imageToUse.complete || imageToUse.naturalHeight === 0) return;
+
+
+                    const x = Math.random() * (canvas.width - size);
+                    const y = Math.random() * (canvas.height - size);
+                    
+                    this.facesOnScreen.push(new Face(x, y, type, imageToUse, points, this.currentFaceLifetime, size));
+                    soundManager.play('spawn');
+                }
+
+                handleCanvasInteraction(clickX, clickY) {
+                    if (this.state !== 'PLAYING') return;
+                    let hitFace = null;
+                    for (let i = this.facesOnScreen.length - 1; i >= 0; i--) {
+                        if (this.facesOnScreen[i].isClicked(clickX, clickY)) {
+                            hitFace = this.facesOnScreen[i]; break; 
+                        }
+                    }
+
+                    if (hitFace) {
+                        this.score += hitFace.points * this.comboMultiplier;
+                        hitFace.onHit();
+                        let particleColor = { r: 255, g: 255, b: 0 }; 
+                        if (hitFace.type === 'happy' || hitFace.type === 'golden') {
+                            this.currentCombo++;
+                            soundManager.play(hitFace.type === 'happy' ? 'hitHappy' : 'hitGolden');
+                        } else {
+                            this.currentCombo = 0; 
+                            particleColor = hitFace.type === 'sad' ? { r: 100, g: 100, b: 255 } : { r: 255, g: 0, b: 0 };
+                            soundManager.play(hitFace.type === 'sad' ? 'hitSad' : 'hitAngry');
+                        }
+                        this.particleSystem.createExplosion(hitFace.x + hitFace.width/2, hitFace.y + hitFace.height/2, particleColor);
+
+                        const oldMultiplier = this.comboMultiplier;
+                        this.comboMultiplier = this.currentCombo > 0 ? Math.min(GAME_CONFIG.COMBO_MAX, 1 + Math.floor(this.currentCombo / 5)) : 1;
+                        if(this.comboMultiplier > oldMultiplier) soundManager.play('combo');
+                        
+                        uiManager.updateScore(this.score); uiManager.updateCombo(this.comboMultiplier);
+                    }
+                }
+
+                gameOver() {
+                    soundManager.play('gameOver');
+                    this.state = 'GAME_OVER';
+                    inputHandler.removeListeners();
+                    if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
+                    this.animationFrameId = null;
+                    
+                    let isNewHigh = false;
+                    if (this.score > this.highScore) {
+                        this.highScore = this.score; this.saveHighScore(); isNewHigh = true;
+                    }
+                    uiManager.updateHighScore(this.highScore);
+                    uiManager.displayGameOver(this.score, this.highScore, isNewHigh);
+                }
+
+                pauseGame() {
+                    if (this.state === 'PLAYING') {
+                        this.state = 'PAUSED'; soundManager.play('click');
+                        uiManager.showModal(bootstrapPauseModal);
+                    }
+                }
+                resumeGame() {
+                    if (this.state === 'PAUSED') {
+                        this.state = 'PLAYING'; soundManager.play('click');
+                        uiManager.hideModal(bootstrapPauseModal);
+                        this.lastFrameTime = performance.now(); 
+                        if(!this.animationFrameId) this.animationFrameId = requestAnimationFrame(this.gameLoop.bind(this));
+                    }
+                }
+                
+                quitToMenu() {
+                    this.state = 'MAIN_MENU'; soundManager.play('click');
+                    inputHandler.removeListeners();
+                    if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
+                    this.animationFrameId = null;
+                    uiManager.hideModal(bootstrapPauseModal); uiManager.hideModal(bootstrapGameOverModal);
+                    uiManager.showScreen('menuScreen');
+                }
+
+                async customizeTargetFace(prompt) {
+                    if (!prompt) {
+                        uiManager.showCustomFaceFeedback('Please enter a description.', true); return;
+                    }
+                    uiManager.showCustomFaceFeedback('Generating image...');
+                    this.generateCustomFaceBtn.disabled = true;
+                    this.generateCustomFaceBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Generating...';
+
+                    const seedValueRaw = this.seedInput.value.trim();
+                    let seed = undefined;
+                    if (seedValueRaw) {
+                        const parsedSeed = parseInt(seedValueRaw, 10);
+                        if (!isNaN(parsedSeed)) {
+                            seed = parsedSeed;
+                        } else {
+                            uiManager.showCustomFaceFeedback('Invalid seed: Must be a number. Generating without seed.', true);
+                        }
+                    }
+
+                    const requestBody = {
+                        prompt: prompt,
+                        aspectRatio: '1:1'
+                    };
+                    if (seed !== undefined) {
+                        requestBody.seed = seed;
+                    }
+
+                    try {
+                        const response = await fetch('/api/generate-image-on-demand', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(requestBody)
+                        });
+                        const data = await response.json();
+
+                        if (response.ok && data.success) {
+                            const img = new Image();
+                            img.onload = () => {
+                                assetLoader.images['playerCustom'] = img; 
+                                assetLoader.playerCustomFaceImage = img; 
+                                this.playerTargetFaceImage = img;
+                                uiManager.setCustomFacePreview(img.src);
+                                uiManager.showCustomFaceFeedback('Custom face generated!');
+                            };
+                            img.onerror = () => {
+                                uiManager.showCustomFaceFeedback('Failed to load the generated image. Default face will be used.', true);
+                                if (assetLoader.isAssetValid('defaultHappy')) {
+                                    this.playerTargetFaceImage = assetLoader.images.defaultHappy;
+                                    assetLoader.playerCustomFaceImage = assetLoader.images.defaultHappy;
+                                    uiManager.setCustomFacePreview(assetLoader.images.defaultHappy.src);
+                                } else {
+                                     uiManager.setCustomFacePreview(''); this.playerTargetFaceImage = null;
+                                }
+                                delete assetLoader.images['playerCustom']; 
+                            };
+                            img.src = data.imageUrl;
+                        } else {
+                            uiManager.showCustomFaceFeedback(`Error: ${data.error || 'Failed to generate image.'}`, true);
+                        }
+                    } catch (error) {
+                        console.error('Error during custom face generation:', error);
+                        uiManager.showCustomFaceFeedback('Network error. Could not generate image.', true);
+                    } finally {
+                        this.generateCustomFaceBtn.disabled = false;
+                        this.generateCustomFaceBtn.innerHTML = 'Generate My Face';
+                    }
+                }
+                
+                useDefaultFace() {
+                    soundManager.play('click');
+                    if (assetLoader.isAssetValid('defaultHappy')) {
+                        this.playerTargetFaceImage = assetLoader.images.defaultHappy;
+                        assetLoader.playerCustomFaceImage = assetLoader.images.defaultHappy; 
+                        uiManager.setCustomFacePreview(assetLoader.images.defaultHappy.src);
+                        uiManager.showCustomFaceFeedback('Default happy face selected.');
+                    } else {
+                        uiManager.showCustomFaceFeedback('Error: Default happy face image is not available.', true);
+                        uiManager.setCustomFacePreview(''); this.playerTargetFaceImage = null;
+                        assetLoader.playerCustomFaceImage = null;
+                    }
+                }
+
+                loadHighScore() {
+                    try {
+                        const savedScore = localStorage.getItem('happyFaceFrenzyHighScore');
+                        this.highScore = savedScore ? parseInt(savedScore, 10) : 0;
+                         if(isNaN(this.highScore)) this.highScore = 0;
+                    } catch(e) {
+                        console.error("Could not load high score from localStorage", e);
+                        this.highScore = 0;
+                    }
+                }
+                saveHighScore() { 
+                    try {
+                        localStorage.setItem('happyFaceFrenzyHighScore', this.highScore.toString()); 
+                    } catch(e) {
+                        console.error("Could not save high score to localStorage", e);
+                    }
+                }
+            }
+
+            async function initApp() {
+                canvas = document.getElementById('gameCanvas');
+                ctx = canvas.getContext('2d');
+                canvas.width = GAME_CONFIG.CANVAS_NATIVE_WIDTH;
+                canvas.height = GAME_CONFIG.CANVAS_NATIVE_HEIGHT;
+                ctx.imageSmoothingEnabled = false; 
+
+                uiManager = new UIManager();
+                uiManager.showScreen('loadingIndicator');
+
+                assetLoader = new AssetLoader();
+                await assetLoader.loadAll(); 
+                
+                soundManager = new SoundManager(assetLoader); 
+                gameManager = new GameManager();
+                inputHandler = new InputHandler(canvas, gameManager);
+                
+                bootstrapInstructionsModal = new bootstrap.Modal(document.getElementById('instructionsModal'));
+                bootstrapGameOverModal = new bootstrap.Modal(document.getElementById('gameOverModal'));
+                bootstrapPauseModal = new bootstrap.Modal(document.getElementById('pauseModal'));
+
+                document.getElementById('startGameBtn').addEventListener('click', () => gameManager.startGame());
+                document.getElementById('customizeFaceBtn').addEventListener('click', () => {
+                    soundManager.play('click'); uiManager.clearCustomFaceFeedback();
+                    uiManager.promptInput.value = ''; 
+                    if (gameManager && gameManager.seedInput) gameManager.seedInput.value = '';
+                    uiManager.showScreen('customizeFaceScreen');
+                });
+                document.getElementById('instructionsBtn').addEventListener('click', () => {
+                    soundManager.play('click'); uiManager.showModal(bootstrapInstructionsModal);
+                });
+                
+                gameManager.generateCustomFaceBtn.addEventListener('click', () => {
+                    soundManager.play('click'); gameManager.customizeTargetFace(uiManager.promptInput.value.trim())
+                });
+                document.getElementById('useDefaultFaceBtn').addEventListener('click', () => gameManager.useDefaultFace());
+                document.getElementById('backToMenuBtn_Customize').addEventListener('click', () => {
+                    soundManager.play('click'); uiManager.showScreen('menuScreen');
+                });
+
+                document.getElementById('playAgainBtn').addEventListener('click', () => {
+                    soundManager.play('click'); uiManager.hideModal(bootstrapGameOverModal); gameManager.startGame();
+                });
+                document.getElementById('backToMenuBtn_GameOver').addEventListener('click', () => gameManager.quitToMenu());
+                
+                uiManager.pauseButton.addEventListener('click', () => gameManager.pauseGame());
+                document.getElementById('resumeGameBtn').addEventListener('click', () => gameManager.resumeGame());
+                document.getElementById('quitToMenuBtn_Pause').addEventListener('click', () => gameManager.quitToMenu());
+                
+                gameManager.init(); 
+            }
+            
+            document.addEventListener('DOMContentLoaded', initApp);
+        })();
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

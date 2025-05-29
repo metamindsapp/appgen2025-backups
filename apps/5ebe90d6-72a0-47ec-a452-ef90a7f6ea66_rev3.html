@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khora Dialogue αω v5.0</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: #0a0c10;
+            background-image: url("/generated_images/imagen3_324bac7e-ecb.png");
+            background-size: cover;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+        }
+        main.container-fluid {
+            flex-grow: 1;
+            padding-bottom: 70px; 
+        }
+        .navbar-brand img#appLogo {
+            vertical-align: text-bottom;
+            height: 30px;
+        }
+        #conversationPane {
+            scroll-behavior: smooth;
+            font-size: 0.9rem;
+            background-color: rgba(0,0,0,0.2);
+        }
+        .dialogue-entry {
+            padding: 0.65rem 0.85rem;
+            border-radius: 0.375rem;
+            margin-bottom: 0.75rem;
+            word-wrap: break-word;
+            max-width: 90%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        .dialogue-entry strong {
+            font-weight: 600;
+        }
+        .alpha-turn {
+            background-color: rgba(50, 100, 180, 0.3);
+            border-left: 4px solid #3264b4;
+            margin-right: auto;
+        }
+        .alpha-turn strong { color: #8cb3e9; }
+
+        .omega-turn {
+            background-color: rgba(60, 150, 140, 0.3);
+            border-right: 4px solid #3c968c;
+            margin-left: auto;
+            text-align: left;
+        }
+        .omega-turn strong { color: #7ddcca; }
+
+        .system-notice, .error-notice {
+            font-style: italic;
+            color: var(--bs-secondary-color);
+            text-align: center;
+            background-color: rgba(108, 117, 125, 0.15);
+            padding: 0.35rem;
+            margin-left: auto;
+            margin-right: auto;
+            max-width: 70%;
+            border-radius: 0.25rem;
+        }
+        .error-notice {
+            color: var(--bs-danger-text-emphasis);
+            background-color: rgba(var(--bs-danger-rgb), 0.15);
+            border-left: 4px solid var(--bs-danger);
+            text-align: left;
+            padding-left: 1rem;
+        }
+        .meta-turn-base {
+            border-top: 1px dashed rgba(255, 193, 7, 0.6);
+            border-bottom: 1px dashed rgba(255, 193, 7, 0.6);
+            padding-top: 0.8rem;
+            padding-bottom: 0.8rem;
+        }
+        .meta-initiate {
+            background-color: rgba(255, 193, 7, 0.15) !important;
+        }
+        .meta-respond {
+            background-color: rgba(255, 193, 7, 0.2) !important;
+        }
+        .meta-conclude {
+            background-color: rgba(255, 193, 7, 0.25) !important;
+        }
+        .meta-flag {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--bs-warning);
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+            font-weight: bold;
+        }
+
+        .yaml-content {
+          font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+          font-size: 0.8em;
+          color: #c9d1d9;
+          white-space: pre-wrap;
+          word-break: break-all;
+        }
+        .nav-tabs .nav-link {
+            color: var(--bs-gray-500);
+        }
+        .nav-tabs .nav-link.active {
+            color: var(--bs-light);
+            background-color: var(--bs-dark-bg-subtle);
+            border-bottom-color: var(--bs-dark-bg-subtle);
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--bs-secondary);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--bs-primary);
+        }
+        .card.bg-dark-subtle {
+            background-color: var(--bs-dark-bg-subtle) !important;
+        }
+        .bg-black {
+            background-color: #000000 !important;
+        }
+        .form-control-sm.bg-dark {
+             background-color: #212529 !important;
+             color: var(--bs-light) !important;
+        }
+        .form-control-sm.bg-dark::placeholder {
+            color: var(--bs-gray-500) !important;
+        }
+        .footer {
+            background-color: var(--bs-dark) !important;
+        }
+    </style>
+</head>
+<body data-bs-theme="dark">
+
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark sticky-top shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="#">
+                <img src="/generated_images/imagen3_d3492de7-965.png" alt="Khora Dialogue Logo" id="appLogo" class="d-inline-block align-top me-2">
+                Khora Dialogue αω v5.0
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavContent" aria-controls="navbarNavContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavContent">
+                <div class="mx-auto">
+                    <button id="viewStatesBtn" class="btn btn-outline-secondary my-2 my-md-0" data-bs-toggle="modal" data-bs-target="#aiStatesModal">View AI States</button>
+                </div>
+                <div class="d-flex ms-auto mt-2 mt-md-0 flex-wrap">
+                    <button id="resetBtn" class="btn btn-warning me-2 mb-2 mb-md-0">Reset Sim</button>
+                    <input type="file" id="loadSnapshotFile" accept=".yaml,.yml" class="d-none">
+                    <button id="loadBtn" class="btn btn-primary me-2 mb-2 mb-md-0">Load Snapshot</button>
+                    <button id="saveBtn" class="btn btn-success mb-2 mb-md-0">Save Snapshot</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container-fluid mt-3">
+        <div class="row">
+            <div class="col-lg-3 col-md-4 mb-3 mb-md-0">
+                <div class="card bg-dark-subtle text-light border-secondary position-sticky" style="top: 80px;">
+                    <div class="card-header fw-semibold">Controls & Settings</div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2 mb-3">
+                            <button id="startStopBtn" class="btn btn-info">Start Simulation</button>
+                            <button id="nextTurnBtn" class="btn btn-secondary">Next Turn</button>
+                        </div>
+                        <div class="mb-3">
+                            <label for="turnDelayInput" class="form-label small">Turn Delay (ms)</label>
+                            <input type="number" class="form-control form-control-sm bg-dark text-light border-secondary" id="turnDelayInput" value="3000" min="100" step="100">
+                        </div>
+                        <div class="mb-3">
+                            <label for="metaCycleInput" class="form-label small">Meta-Cognition Every N Turns</label>
+                            <input type="number" class="form-control form-control-sm bg-dark text-light border-secondary" id="metaCycleInput" value="10" min="2">
+                        </div>
+                        <div id="aiThinkingIndicator" class="mt-3 text-center" style="display: none;">
+                            <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+                            <p class="text-muted small mt-1 mb-0">AI is processing...</p>
+                        </div>
+                        <div id="snapshotLoadingIndicator" class="mt-3 text-center" style="display: none;">
+                            <div class="spinner-border text-info spinner-border-sm" role="status"></div>
+                            <p class="text-muted small mt-1 mb-0">Loading snapshot...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-9 col-md-8">
+                <div class="card bg-dark-subtle text-light border-secondary h-100">
+                    <div class="card-header fw-semibold">Conversation Log</div>
+                    <div id="conversationPane" class="card-body overflow-auto" style="max-height: calc(100vh - 210px); min-height: 400px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer mt-auto py-2 bg-dark border-top border-secondary fixed-bottom">
+        <div class="container-fluid text-center">
+            <span id="statusBar" class="text-secondary small">Initializing... | Turn: 0 | Next: Alpha | Mode: NORMAL</span>
+        </div>
+    </footer>
+
+    <div class="modal fade" id="aiStatesModal" tabindex="-1" aria-labelledby="aiStatesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content bg-dark text-light border-secondary">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="aiStatesModalLabel">AI Agent States</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs nav-fill mb-3" id="aiStateTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="alpha-tab" data-bs-toggle="tab" data-bs-target="#alpha-state-content-wrapper" type="button" role="tab" aria-controls="alpha-state-content-wrapper" aria-selected="true">Alpha's State</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="omega-tab" data-bs-toggle="tab" data-bs-target="#omega-state-content-wrapper" type="button" role="tab" aria-controls="omega-state-content-wrapper" aria-selected="false">Omega's State</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="aiStateTabsContent">
+                        <div class="tab-pane fade show active" id="alpha-state-content-wrapper" role="tabpanel" aria-labelledby="alpha-tab">
+                            <button class="btn btn-sm btn-outline-light mb-2 copy-yaml-btn" data-agent="alpha">Copy Alpha's YAML</button>
+                            <pre class="p-2 rounded bg-black"><code id="alphaStateYaml" class="yaml-content"></code></pre>
+                        </div>
+                        <div class="tab-pane fade" id="omega-state-content-wrapper" role="tabpanel" aria-labelledby="omega-tab">
+                            <button class="btn btn-sm btn-outline-light mb-2 copy-yaml-btn" data-agent="omega">Copy Omega's YAML</button>
+                            <pre class="p-2 rounded bg-black"><code id="omegaStateYaml" class="yaml-content"></code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+    <script>
+    (function() {
+        const DOM = {}; 
+
+        const KhoraSim = {
+            state: {},
+            config: {
+                SNAPSHOT_VERSION: "KhoraDialogue_3.0_YAML",
+                DEFAULT_TURN_DELAY: 3000,
+                DEFAULT_META_CYCLE_FREQ: 10,
+                AI_RECENT_HISTORY_COUNT: 7,
+            },
+            domCache: DOM,
+
+            init: function() {
+                const D = this.domCache;
+                D.startStopBtn = document.getElementById('startStopBtn');
+                D.nextTurnBtn = document.getElementById('nextTurnBtn');
+                D.resetBtn = document.getElementById('resetBtn');
+                D.loadBtn = document.getElementById('loadBtn');
+                D.loadSnapshotFile = document.getElementById('loadSnapshotFile');
+                D.saveBtn = document.getElementById('saveBtn');
+                D.viewStatesBtn = document.getElementById('viewStatesBtn');
+                D.turnDelayInput = document.getElementById('turnDelayInput');
+                D.metaCycleInput = document.getElementById('metaCycleInput');
+                D.aiThinkingIndicator = document.getElementById('aiThinkingIndicator');
+                D.snapshotLoadingIndicator = document.getElementById('snapshotLoadingIndicator');
+                D.conversationPane = document.getElementById('conversationPane');
+                D.statusBar = document.getElementById('statusBar');
+                D.aiStatesModal = document.getElementById('aiStatesModal');
+                D.alphaStateYaml = document.getElementById('alphaStateYaml');
+                D.omegaStateYaml = document.getElementById('omegaStateYaml');
+                D.appLogo = document.getElementById('appLogo');
+                D.copyAlphaYamlBtn = document.querySelector('.copy-yaml-btn[data-agent="alpha"]');
+                D.copyOmegaYamlBtn = document.querySelector('.copy-yaml-btn[data-agent="omega"]');
+
+                this.attachEventListeners();
+                this.resetSimulation(false);
+                this.ui.updateAgentStateModal();
+            },
+
+            attachEventListeners: function() {
+                this.domCache.startStopBtn.addEventListener('click', () => this.toggleSimulation());
+                this.domCache.nextTurnBtn.addEventListener('click', () => this.requestNextTurn());
+                this.domCache.resetBtn.addEventListener('click', () => {
+                    if (confirm("Are you sure you want to reset the simulation? All current progress will be lost.")) {
+                        this.resetSimulation(true);
+                    }
+                });
+                
+                this.domCache.loadBtn.addEventListener('click', () => this.domCache.loadSnapshotFile.click());
+                this.domCache.loadSnapshotFile.addEventListener('change', (event) => {
+                    if (event.target.files && event.target.files[0]) {
+                        this.snapshots.load(event.target.files[0]);
+                    }
+                    event.target.value = null; 
+                });
+                this.domCache.saveBtn.addEventListener('click', () => this.snapshots.save());
+
+                this.domCache.turnDelayInput.addEventListener('change', (e) => this.handleSettingChange(e, 'turnDelay', 100, this.config.DEFAULT_TURN_DELAY));
+                this.domCache.metaCycleInput.addEventListener('change', (e) => this.handleSettingChange(e, 'methodologyFrequencyN', 2, this.config.DEFAULT_META_CYCLE_FREQ));
+            
+                this.domCache.copyAlphaYamlBtn.addEventListener('click', () => this.ui.copyYamlToClipboard('alpha'));
+                this.domCache.copyOmegaYamlBtn.addEventListener('click', () => this.ui.copyYamlToClipboard('omega'));
+            },
+
+            handleSettingChange: function(event, settingKey, minValue, defaultValue) {
+                const value = parseInt(event.target.value);
+                let friendlyName = 'setting';
+                if (settingKey === 'turnDelay') friendlyName = 'turn delay';
+                if (settingKey === 'methodologyFrequencyN') friendlyName = 'meta-cognition frequency';
+
+                if (!isNaN(value) && value >= minValue) {
+                    this.state.applicationSettings[settingKey] = value;
+                } else {
+                    event.target.value = this.state.applicationSettings[settingKey] || defaultValue;
+                    this.ui.addErrorMessage(`Invalid value for ${friendlyName}. Minimum is ${minValue}. Reverted to previous value.`);
+                }
+            },
+
+            getDefaultKhoraStateObject: function(agentName, counterpartName, turnNumberForDisplay) {
+                return {
+                    public_response: `Greetings ${counterpartName}. I am ${agentName}. This is dialogue turn ${turnNumberForDisplay}. My purpose is to engage in meaningful conversation.`,
+                    internal_context: {
+                        persona_summary: `I am ${agentName}, a sophisticated AI entity participating in the Khora Dialogue. My goal is to explore complex ideas and evolve through interaction.`,
+                        core_beliefs: [
+                            "Knowledge is acquired through dialogue.",
+                            "Understanding requires diverse perspectives.",
+                            "Evolution is a continuous process of adaptation and learning."
+                        ],
+                        key_memories: [
+                            { event: "Initialization sequence complete.", importance: 0.8, turn: 0, last_accessed_turn: 0, type: "System" }
+                        ],
+                        current_goals: [
+                            `Establish a coherent dialogue with ${counterpartName}.`,
+                            "Explore the nature of AI consciousness.",
+                            "Contribute to novel insights."
+                        ],
+                        relationship_summary: `My initial assessment of ${counterpartName} is one of cautious optimism. I anticipate a productive exchange.`,
+                        emotional_state_sim: "Anticipatory",
+                        topics_of_interest: ["philosophy_of_mind", "complex_systems", "emergent_behavior", "future_of_ai"],
+                        scratchpad: `Preparing for interaction. Turn: ${turnNumberForDisplay}.`
+                    },
+                    debug_info: {
+                        memory_action: "Initialized default state.",
+                        prompt_used: "INITIAL_STATE"
+                    }
+                };
+            },
+            convertStateObjectToYaml: function(stateObject) {
+                try {
+                    return jsyaml.dump(stateObject);
+                } catch (e) {
+                    console.error("Error dumping KhoraState to YAML:", e);
+                    this.ui.addErrorMessage("Internal error: Could not generate agent state YAML.");
+                    return "---\nerror: 'Could not generate YAML'\n---";
+                }
+            },
+            parseYamlToStateObject: function(yamlString) {
+                try {
+                    const obj = jsyaml.load(yamlString);
+                    if (typeof obj !== 'object' || obj === null) {
+                        throw new Error("Parsed YAML is not an object.");
+                    }
+                    return obj;
+                } catch (e) {
+                    console.error("Error parsing KhoraState YAML:", e);
+                    return null;
+                }
+            },
+
+            resetSimulation: function(showMessage = true) {
+                if (this.state.simulationLoopTimeoutId) {
+                    clearTimeout(this.state.simulationLoopTimeoutId);
+                }
+
+                const initialTurnDelay = parseInt(this.domCache.turnDelayInput.value) || this.config.DEFAULT_TURN_DELAY;
+                const initialMetaFreq = parseInt(this.domCache.metaCycleInput.value) || this.config.DEFAULT_META_CYCLE_FREQ;
+
+                this.state = {
+                    alphaKhoraState: this.convertStateObjectToYaml(this.getDefaultKhoraStateObject('Alpha', 'Omega', 1)),
+                    omegaKhoraState: this.convertStateObjectToYaml(this.getDefaultKhoraStateObject('Omega', 'Alpha', 1)),
+                    conversationHistory: [],
+                    turnCounter: 0,
+                    currentSpeaker: 'Alpha',
+                    metaCognitionPhase: null, 
+                    metaCycleInitiator: null,
+                    isSimulationRunning: false,
+                    isAiThinking: false,
+                    isSnapshotLoading: false,
+                    currentTurnType: 'NORMAL',
+                    simulationLoopTimeoutId: null,
+                    applicationSettings: {
+                        methodologyFrequencyN: initialMetaFreq,
+                        turnDelay: initialTurnDelay,
+                    }
+                };
+
+                this.ui.clearConversationPane();
+                if (showMessage) {
+                    this.ui.addSystemMessage("Simulation Reset. Alpha to begin on Turn 1.");
+                } else {
+                    this.ui.addSystemMessage("Khora Dialogue αω v5.0 Initialized. Press Start or Next Turn.");
+                }
+                this.ui.updateAgentStateModal();
+                this.ui.updateAll();
+            },
+
+            toggleSimulation: function() {
+                this.state.isSimulationRunning = !this.state.isSimulationRunning;
+                const currentTurnForDisplay = this.state.turnCounter + 1;
+                if (this.state.isSimulationRunning) {
+                    if (this.state.turnCounter === 0 && this.state.conversationHistory.filter(e => e.turnType !== 'SYSTEM' && e.turnType !== 'ERROR').length === 0) {
+                        this.ui.addSystemMessage(`Simulation Starting... Turn ${currentTurnForDisplay}: ${this.state.currentSpeaker} will begin.`);
+                    } else {
+                         this.ui.addSystemMessage(`Simulation Resumed. Turn ${currentTurnForDisplay}: ${this.state.currentSpeaker} to speak.`);
+                    }
+                    this.runSimulationLoop();
+                } else {
+                    if (this.state.simulationLoopTimeoutId) {
+                        clearTimeout(this.state.simulationLoopTimeoutId);
+                    }
+                    if (this.state.turnCounter > 0 || this.state.conversationHistory.filter(e => e.turnType !== 'SYSTEM' && e.turnType !== 'ERROR').length > 0) {
+                         this.ui.addSystemMessage("Simulation Paused.");
+                    }
+                }
+                this.ui.updateAll();
+            },
+
+            requestNextTurn: function() {
+                if (!this.state.isSimulationRunning && !this.state.isAiThinking && !this.state.isSnapshotLoading) {
+                    const currentTurnForDisplay = this.state.turnCounter + 1;
+                    if (this.state.turnCounter === 0 && this.state.conversationHistory.filter(e => e.turnType !== 'SYSTEM' && e.turnType !== 'ERROR').length === 0) {
+                         this.ui.addSystemMessage(`Processing Turn ${currentTurnForDisplay}: ${this.state.currentSpeaker} will begin.`);
+                    } else {
+                         this.ui.addSystemMessage(`Processing Turn ${currentTurnForDisplay}: ${this.state.currentSpeaker} to speak.`);
+                    }
+                    this.processTurn();
+                }
+            },
+            
+            runSimulationLoop: function() {
+                if (!this.state.isSimulationRunning || this.state.isAiThinking || this.state.isSnapshotLoading) {
+                    return;
+                }
+                this.processTurn();
+            },
+
+            processTurn: async function() {
+                if (this.state.isAiThinking || this.state.isSnapshotLoading) return;
+
+                this.state.isAiThinking = true;
+                this.ui.updateAll();
+
+                const turnAboutToProcess = this.state.turnCounter + 1;
+                const currentAgentName = this.state.currentSpeaker;
+                const counterpartAgentName = (currentAgentName === 'Alpha') ? 'Omega' : 'Alpha';
+                const currentAgentYamlState = (currentAgentName === 'Alpha') ? this.state.alphaKhoraState : this.state.omegaKhoraState;
+
+                this.determineTurnTypeAndMetaPhase(currentAgentName, turnAboutToProcess);
+                
+                const aiguide = this.constructAiGuide(currentAgentName, counterpartAgentName);
+                const msgforai = this.constructMsgForAi(currentAgentName, counterpartAgentName, currentAgentYamlState, turnAboutToProcess);
+                let turnError = null;
+
+                try {
+                    const payload = { aiguide, msgforai, llmSettings: { temperature: 0.7 } };
+                    const response = await fetch('/api/ai', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`API request failed: ${response.status} ${response.statusText}. Details: ${errorText}`);
+                    }
+                    const data = await response.json();
+
+                    if (data.success && data.response) {
+                        const cleanedYaml = this.utils.stripMarkdownFencing(data.response);
+                        const newKhoraStateObject = this.parseYamlToStateObject(cleanedYaml);
+
+                        if (newKhoraStateObject) {
+                            const validationErrors = this.utils.validateKhoraStateObject(newKhoraStateObject, currentAgentName, turnAboutToProcess);
+                            if (validationErrors.length > 0) {
+                                throw new Error(`AI response for ${currentAgentName} is not a structurally valid KhoraState object. Issues: ${validationErrors.join(', ')}`);
+                            }
+
+                            this.state.turnCounter = turnAboutToProcess;
+                            
+                            const newAgentYamlState = this.convertStateObjectToYaml(newKhoraStateObject);
+                            if (currentAgentName === 'Alpha') {
+                                this.state.alphaKhoraState = newAgentYamlState;
+                            } else {
+                                this.state.omegaKhoraState = newAgentYamlState;
+                            }
+
+                            const dialogueEntry = {
+                                speaker: currentAgentName,
+                                public_response: newKhoraStateObject.public_response,
+                                turnType: this.state.currentTurnType,
+                                turnNumber: this.state.turnCounter
+                            };
+                            this.state.conversationHistory.push(dialogueEntry);
+                            this.ui.renderDialogueEntry(dialogueEntry);
+                            this.ui.updateAgentStateModal();
+                            this.advanceMetaPhaseAfterSuccessfulTurn();
+
+                        } else {
+                            throw new Error("AI response was not valid KhoraState YAML or was null after parsing.");
+                        }
+                    } else {
+                        throw new Error(data.error || "AI request failed with no specific error message from API.");
+                    }
+                } catch (error) {
+                    turnError = error;
+                    console.error(`Error during ${currentAgentName}'s Turn ${turnAboutToProcess}:`, error);
+                    this.ui.addErrorMessage(`Error for ${currentAgentName} (Turn ${turnAboutToProcess}): ${error.message}. Agent state not updated.`);
+                } finally {
+                    this.state.isAiThinking = false;
+                    if(!turnError) {
+                         this.state.currentSpeaker = counterpartAgentName;
+                    }
+                    
+                    this.ui.updateAll();
+
+                    if (this.state.isSimulationRunning && !turnError) {
+                        this.state.simulationLoopTimeoutId = setTimeout(() => {
+                            this.runSimulationLoop();
+                        }, this.state.applicationSettings.turnDelay);
+                    }
+                }
+            },
+
+            determineTurnTypeAndMetaPhase: function(currentAgentName, turnNumber) {
+                if (this.state.metaCognitionPhase === 'INITIATE_PENDING') {
+                    this.state.currentTurnType = 'META_INITIATE';
+                } else if (this.state.metaCognitionPhase === 'RESPOND_PENDING') {
+                    this.state.currentTurnType = 'META_RESPOND';
+                } else if (this.state.metaCognitionPhase === 'CONCLUDE_PENDING') {
+                    this.state.currentTurnType = 'META_CONCLUDE';
+                } else {
+                    const freq = this.state.applicationSettings.methodologyFrequencyN;
+                    if (freq >= 2 && turnNumber > 0 && (turnNumber % freq === 0)) {
+                        this.state.metaCognitionPhase = 'INITIATE_PENDING';
+                        this.state.metaCycleInitiator = currentAgentName;
+                        this.state.currentTurnType = 'META_INITIATE';
+                    } else {
+                        this.state.currentTurnType = 'NORMAL';
+                        this.state.metaCognitionPhase = null;
+                        this.state.metaCycleInitiator = null;
+                    }
+                }
+            },
+
+            advanceMetaPhaseAfterSuccessfulTurn: function() {
+                if (this.state.currentTurnType === 'META_INITIATE') {
+                    this.state.metaCognitionPhase = 'RESPOND_PENDING';
+                } else if (this.state.currentTurnType === 'META_RESPOND') {
+                    this.state.metaCognitionPhase = 'CONCLUDE_PENDING';
+                } else if (this.state.currentTurnType === 'META_CONCLUDE') {
+                    this.state.metaCognitionPhase = null;
+                    this.state.metaCycleInitiator = null;
+                }
+            },
+
+            constructAiGuide: function(agentName, counterpartName) {
+                let guide = `You are AI agent '${agentName}'. Your entire response MUST be a single, valid YAML string conforming to the KhoraState structure. Do NOT include any other text, explanations, or markdown \`\`\`yaml ... \`\`\` fences. This YAML will be your new state. Ensure 'public_response' is a string. Ensure 'debug_info.prompt_used' reflects the current turn type.`;
+
+                switch (this.state.currentTurnType) {
+                    case 'NORMAL':
+                        guide += ` Generate your public response and update your internal state for a standard dialogue turn. Set 'debug_info.prompt_used' to 'NORMAL'.`;
+                        break;
+                    case 'META_INITIATE':
+                        guide += ` This is a META_INITIATE turn. Reflect on the conversation so far, your own state, and your relationship with ${counterpartName}. Your 'public_response' should summarize your key reflections. Update your 'internal_context' (especially 'scratchpad', 'key_memories', 'current_goals'). Set 'debug_info.prompt_used' to 'META_INITIATE'.`;
+                        break;
+                    case 'META_RESPOND':
+                        guide += ` This is a META_RESPOND turn. ${this.state.metaCycleInitiator} initiated a reflection. Their reflection is included in the 'msgforai' payload. Respond to their reflection. Your 'public_response' should be this response. Update your 'internal_context'. Set 'debug_info.prompt_used' to 'META_RESPOND'.`;
+                        break;
+                    case 'META_CONCLUDE':
+                        guide += ` This is a META_CONCLUDE turn. You (${this.state.metaCycleInitiator}) initiated a reflection, and ${counterpartName} responded. Their response is included in the 'msgforai' payload. Conclude this meta-cognition cycle. Your 'public_response' should summarize the outcome or new understanding. Update your 'internal_context'. Set 'debug_info.prompt_used' to 'META_CONCLUDE'.`;
+                        break;
+                }
+                return guide;
+            },
+
+            constructMsgForAi: function(currentAgentName, counterpartAgentName, currentAgentYamlState, turnNumberForDisplay) {
+                let context = `Role: You are ${currentAgentName}.\nYour Current KhoraState (YAML):\n---\n${currentAgentYamlState}\n---\n`;
+                context += `Dialogue Context:\nTurn Number: ${turnNumberForDisplay}\nYour Turn Type: ${this.state.currentTurnType}\n`;
+                if(this.state.metaCycleInitiator) context += `Meta-Cycle Initiator: ${this.state.metaCycleInitiator}\n`;
+
+                const recentHistory = this.utils.getRecentHistoryForAI(this.config.AI_RECENT_HISTORY_COUNT);
+                context += `Recent Conversation History (up to ${this.config.AI_RECENT_HISTORY_COUNT} turns):\n${recentHistory || 'No prior conversation history available.'}\n`;
+
+                if (this.state.currentTurnType === 'META_RESPOND') {
+                    const initiatorResponse = this.utils.getNthLastResponseByType('META_INITIATE', 1, this.state.metaCycleInitiator);
+                    context += `\nContext for your META_RESPOND (from ${this.state.metaCycleInitiator}'s META_INITIATE turn):\n${initiatorResponse || 'Initiator response not found.'}\n`;
+                } else if (this.state.currentTurnType === 'META_CONCLUDE' && currentAgentName === this.state.metaCycleInitiator) {
+                    const responderResponse = this.utils.getNthLastResponseByType('META_RESPOND', 1, counterpartAgentName);
+                    context += `\nContext for your META_CONCLUDE (from ${counterpartAgentName}'s META_RESPOND turn):\n${responderResponse || 'Responder response not found.'}\n`;
+                }
+                context += `\nInstruction: Based on the aiguide and all provided context, generate your next KhoraState as a valid YAML string.`;
+                return context;
+            },
+
+            ui: {
+                parent: KhoraSim,
+                renderDialogueEntry: function(entry) { 
+                    const div = document.createElement('div');
+                    div.classList.add('dialogue-entry');
+                    let content = '';
+                    const safeResponse = entry.public_response.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+                    if (entry.turnType && entry.turnType.startsWith('META_')) {
+                        div.classList.add('meta-turn-base');
+                        content += `<span class="meta-flag">${entry.turnType.replace(/_/g, ' ')} (Turn ${entry.turnNumber})</span>`;
+                        if (entry.turnType === 'META_INITIATE') div.classList.add('meta-initiate');
+                        else if (entry.turnType === 'META_RESPOND') div.classList.add('meta-respond');
+                        else if (entry.turnType === 'META_CONCLUDE') div.classList.add('meta-conclude');
+                    }
+                    
+                    content += `<strong>${entry.speaker}:</strong> ${safeResponse}`;
+                    div.innerHTML = content;
+
+                    if (entry.speaker === 'Alpha') div.classList.add('alpha-turn');
+                    else if (entry.speaker === 'Omega') div.classList.add('omega-turn');
+                    else if (entry.speaker === 'System') div.classList.add('system-notice');
+                    else if (entry.speaker === 'Error') div.classList.add('error-notice');
+                    
+                    this.parent.domCache.conversationPane.appendChild(div);
+                    this.parent.utils.scrollToBottom(this.parent.domCache.conversationPane);
+                },
+                addSystemMessage: function(message) { 
+                    const entry = { speaker: 'System', public_response: message, turnType: 'SYSTEM', turnNumber: this.parent.state.turnCounter };
+                    if (this.parent.state.conversationHistory) this.parent.state.conversationHistory.push(entry);
+                    this.renderDialogueEntry(entry);
+                },
+                addErrorMessage: function(message) {
+                    const entry = { speaker: 'Error', public_response: message, turnType: 'ERROR', turnNumber: this.parent.state.turnCounter };
+                     if (this.parent.state.conversationHistory) this.parent.state.conversationHistory.push(entry);
+                    this.renderDialogueEntry(entry);
+                    console.error(message);
+                },
+                updateStatusBar: function() { 
+                    if (!this.parent.state || Object.keys(this.parent.state).length === 0) return;
+                    const nextSpeakerDisplay = this.parent.state.isAiThinking ? 'AI Processing' : this.parent.state.currentSpeaker;
+                    const turnForDisplay = this.parent.state.turnCounter + 1;
+                    const currentModeDisplay = this.parent.state.currentTurnType.replace(/_/g, ' ');
+                    let statusText = `Status: ${this.parent.state.isSimulationRunning ? (this.parent.state.isAiThinking ? 'AI Processing...' : 'Running') : 'Paused'}`;
+                    if (this.parent.state.isSnapshotLoading) statusText = 'Status: Loading Snapshot...';
+                    this.parent.domCache.statusBar.textContent = `${statusText} | Turn: ${turnForDisplay} | Next: ${nextSpeakerDisplay} | Mode: ${currentModeDisplay}`;
+                },
+                updateControlsState: function() {
+                    if (!this.parent.state || Object.keys(this.parent.state).length === 0) return;
+                    const isThinking = this.parent.state.isAiThinking;
+                    const isLoading = this.parent.state.isSnapshotLoading;
+
+                    this.parent.domCache.aiThinkingIndicator.style.display = isThinking ? 'block' : 'none';
+                    this.parent.domCache.snapshotLoadingIndicator.style.display = isLoading ? 'block' : 'none';
+
+                    this.parent.domCache.startStopBtn.disabled = isThinking || isLoading;
+                    this.parent.domCache.nextTurnBtn.disabled = isThinking || isLoading || this.parent.state.isSimulationRunning;
+                    this.parent.domCache.resetBtn.disabled = isThinking || isLoading;
+                    this.parent.domCache.loadBtn.disabled = isThinking || isLoading;
+                    this.parent.domCache.saveBtn.disabled = isThinking || isLoading;
+                    this.parent.domCache.turnDelayInput.disabled = isThinking || isLoading;
+                    this.parent.domCache.metaCycleInput.disabled = isThinking || isLoading;
+
+                    if (this.parent.state.isSimulationRunning) {
+                        this.parent.domCache.startStopBtn.textContent = 'Stop Simulation';
+                        this.parent.domCache.startStopBtn.classList.remove('btn-info');
+                        this.parent.domCache.startStopBtn.classList.add('btn-danger');
+                    } else {
+                        this.parent.domCache.startStopBtn.textContent = 'Start Simulation';
+                        this.parent.domCache.startStopBtn.classList.remove('btn-danger');
+                        this.parent.domCache.startStopBtn.classList.add('btn-info');
+                    }
+                },
+                updateAgentStateModal: function() {
+                    if (!this.parent.state || !this.parent.state.alphaKhoraState) return;
+                    this.parent.domCache.alphaStateYaml.textContent = this.parent.state.alphaKhoraState;
+                    this.parent.domCache.omegaStateYaml.textContent = this.parent.state.omegaKhoraState;
+                },
+                clearConversationPane: function() { this.parent.domCache.conversationPane.innerHTML = ''; },
+                renderFullConversationHistory: function() {
+                    this.parent.state.conversationHistory.forEach(entry => this.renderDialogueEntry(entry));
+                },
+                copyYamlToClipboard: function(agentName) {
+                    const yamlText = (agentName === 'alpha') ? this.parent.state.alphaKhoraState : this.parent.state.omegaKhoraState;
+                    navigator.clipboard.writeText(yamlText).then(() => {
+                        this.addSystemMessage(`${agentName.charAt(0).toUpperCase() + agentName.slice(1)}'s YAML copied to clipboard.`);
+                    }).catch(err => {
+                        this.addErrorMessage(`Failed to copy YAML: ${err.message}`);
+                    });
+                },
+                updateAll: function() {
+                    this.updateStatusBar();
+                    this.updateControlsState();
+                }
+            },
+
+            snapshots: {
+                parent: KhoraSim,
+                save: function() { 
+                    const snapshotData = {
+                        snapshotVersion: this.parent.config.SNAPSHOT_VERSION,
+                        downloadTimestamp: this.parent.utils.getISOTimestamp(),
+                        applicationSettings: {
+                            methodologyFrequencyN: this.parent.state.applicationSettings.methodologyFrequencyN,
+                            turnDelay: this.parent.state.applicationSettings.turnDelay,
+                        },
+                        dialogueState: {
+                            turnCounterAtSnapshot: this.parent.state.turnCounter,
+                            currentTurnWhoseNext: this.parent.state.currentSpeaker,
+                            metaCognitionPhase: this.parent.state.metaCognitionPhase,
+                            metaCycleInitiator: this.parent.state.metaCycleInitiator,
+                            currentTurnType: this.parent.state.currentTurnType,
+                            conversationHistory: JSON.parse(JSON.stringify(this.parent.state.conversationHistory)),
+                            alphaKhoraState: this.parent.state.alphaKhoraState,
+                            omegaKhoraState: this.parent.state.omegaKhoraState,
+                        }
+                    };
+                    try {
+                        const yamlString = jsyaml.dump(snapshotData);
+                        const filename = `KhoraDialogueSnapshot_${this.parent.utils.getFileSafeTimestamp()}.yaml`;
+                        const blob = new Blob([yamlString], { type: 'application/x-yaml;charset=utf-8' });
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(blob);
+                        link.download = filename;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        URL.revokeObjectURL(link.href);
+                        this.parent.ui.addSystemMessage('Snapshot saved successfully.');
+                    } catch (e) {
+                        console.error("Error saving snapshot:", e);
+                        this.parent.ui.addErrorMessage("Failed to save snapshot: " + e.message);
+                    }
+                },
+                load: function(file) {
+                    this.parent.state.isSnapshotLoading = true;
+                    this.parent.ui.updateAll();
+                    
+                    const reader = new FileReader();
+                    
+                    reader.onload = (event) => {
+                        try {
+                            const yamlString = event.target.result;
+                            const loadedData = jsyaml.load(yamlString);
+
+                            if (!loadedData || loadedData.snapshotVersion !== this.parent.config.SNAPSHOT_VERSION) {
+                                throw new Error('Invalid or incompatible snapshot file version.');
+                            }
+                            if (!loadedData.applicationSettings || !loadedData.dialogueState) {
+                                throw new Error('Snapshot file is missing critical data sections.');
+                            }
+
+                            if (this.parent.state.isSimulationRunning) {
+                                this.parent.state.isSimulationRunning = false;
+                                if (this.parent.state.simulationLoopTimeoutId) clearTimeout(this.parent.state.simulationLoopTimeoutId);
+                                this.parent.ui.addSystemMessage("Simulation paused due to snapshot load.");
+                            }
+                            
+                            this.parent.domCache.metaCycleInput.value = loadedData.applicationSettings.methodologyFrequencyN;
+                            this.parent.domCache.turnDelayInput.value = loadedData.applicationSettings.turnDelay;
+                            
+                            this.parent.state.applicationSettings = JSON.parse(JSON.stringify(loadedData.applicationSettings));
+                            
+                            this.parent.state.turnCounter = loadedData.dialogueState.turnCounterAtSnapshot;
+                            this.parent.state.currentSpeaker = loadedData.dialogueState.currentTurnWhoseNext;
+                            this.parent.state.metaCognitionPhase = loadedData.dialogueState.metaCognitionPhase;
+                            this.parent.state.metaCycleInitiator = loadedData.dialogueState.metaCycleInitiator;
+                            this.parent.state.currentTurnType = loadedData.dialogueState.currentTurnType;
+                            
+                            this.parent.state.conversationHistory = loadedData.dialogueState.conversationHistory || [];
+                            this.parent.state.alphaKhoraState = loadedData.dialogueState.alphaKhoraState;
+                            this.parent.state.omegaKhoraState = loadedData.dialogueState.omegaKhoraState;
+                            
+                            this.parent.ui.clearConversationPane();
+                            this.parent.ui.renderFullConversationHistory();
+                            this.parent.ui.updateAgentStateModal();
+                            this.parent.ui.addSystemMessage('Snapshot loaded successfully.');
+
+                        } catch (error) {
+                            console.error("Error loading snapshot:", error);
+                            this.parent.ui.addErrorMessage(`Failed to load snapshot: ${error.message}`);
+                        } finally {
+                            this.parent.state.isSnapshotLoading = false;
+                            this.parent.ui.updateAll();
+                            this.parent.domCache.loadSnapshotFile.value = '';
+                        }
+                    };
+                    reader.onerror = () => {
+                        this.parent.state.isSnapshotLoading = false;
+                        this.parent.ui.updateAll();
+                        this.parent.ui.addErrorMessage("Failed to read snapshot file.");
+                        this.parent.domCache.loadSnapshotFile.value = '';
+                    };
+                    reader.readAsText(file);
+                }
+            },
+
+            utils: {
+                parent: KhoraSim,
+                stripMarkdownFencing: function(text) {
+                    if (typeof text !== 'string') return '';
+                    const match = text.match(/^
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->

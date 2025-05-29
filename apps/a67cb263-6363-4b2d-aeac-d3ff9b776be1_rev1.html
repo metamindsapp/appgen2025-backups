@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroFlow: Productivity Timer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: #0a0a0a;
+            background-image: url("/generated_images/imagen3_4dbf9b18-947.png");
+            background-size: cover;
+            background-attachment: fixed;
+        }
+        .navbar {
+            background-color: #000000 !important;
+        }
+        .nav-link {
+            transition: color 0.2s ease-in-out;
+        }
+        .nav-link.active {
+            font-weight: bold;
+            color: var(--bs-primary) !important;
+        }
+        .nav-link:hover {
+            color: var(--bs-info) !important;
+        }
+        #timerDisplay {
+            font-size: clamp(3.5rem, 10vw, 6rem);
+            color: var(--bs-primary);
+            letter-spacing: -2px;
+            font-weight: 300;
+        }
+        .progress {
+            background-color: #222;
+            height: 25px;
+        }
+        #timerProgressBar {
+            transition: width 0.25s linear, background-color 0.3s ease;
+        }
+        .focus-star {
+            cursor: pointer;
+            transition: color 0.15s ease-in-out, transform 0.1s ease-in-out;
+        }
+        .focus-star:hover {
+            transform: scale(1.2);
+        }
+        .focus-star.bi-star-fill {
+            color: var(--bs-warning);
+        }
+        #generatedImageContainer img {
+            max-width: 100%;
+            max-height: 450px;
+            object-fit: contain;
+            border-radius: var(--bs-border-radius-lg);
+            box-shadow: 0 0 20px rgba(var(--bs-primary-rgb), 0.3);
+        }
+        #imageGenerationSection {
+            background-color: #000000;
+            border: 1px solid var(--bs-border-color-translucent);
+        }
+        .card {
+            background-color: #111111 !important;
+            border-color: #333 !important;
+        }
+        .card-header {
+            background-color: #000000 !important;
+            border-bottom-color: #333 !important;
+        }
+        .app-view {
+            animation: fadeInView 0.5s ease-in-out;
+        }
+        @keyframes fadeInView {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #0D6EFD;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #0a58ca;
+        }
+        .modal-content {
+             background-color: #000000 !important;
+             border: 1px solid var(--bs-primary);
+        }
+        .bg-dark-subtle { background-color: #1a1a1a !important; }
+        .bg-black { background-color: #000000 !important; }
+
+        .form-control, .form-select {
+            background-color: rgba(40,40,40,0.7);
+            color: var(--bs-light);
+            border-color: #444;
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: rgba(50,50,50,0.8);
+            color: var(--bs-light);
+            border-color: var(--bs-primary);
+            box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+        }
+        .form-control::placeholder {
+            color: #888;
+        }
+        .input-group-text {
+            background-color: #333;
+            border-color: #444;
+        }
+    </style>
+</head>
+<body data-bs-theme="dark">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-black sticky-top shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="#">
+                <img src="/generated_images/imagen3_a325c57b-e8c.png" alt="NeuroFlow Logo" width="30" height="30" class="d-inline-block align-text-top me-2" id="appLogo">
+                NeuroFlow
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link active" href="#" data-view="timerView">Timer</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" data-view="chartView">Focus Chart</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" data-view="profilesView">Profiles</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" data-view="settingsView">Settings</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mt-4 mb-5 flex-grow-1">
+        <section id="timerView" class="app-view">
+            <div class="row justify-content-center">
+                <div class="col-lg-7 col-md-9 text-center">
+                    <div class="card border-secondary shadow">
+                        <div class="card-body p-4 p-md-5">
+                            <h2 id="sessionTitle" class="mb-3 display-6">Work Session</h2>
+                            <div id="timerDisplay" class="my-4">25:00</div>
+                            <div class="progress mb-4">
+                                <div id="timerProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text"><i class="bi bi-pencil-square"></i></span>
+                                <input type="text" id="taskInput" class="form-control form-control-lg" placeholder="Name your current task...">
+                                <button id="setTaskBtn" class="btn btn-outline-primary">Set</button>
+                            </div>
+                            <p id="currentTaskDisplay" class="text-muted fs-5 mb-4">Current Task: <span id="taskNameDisplay" class="fw-semibold">-</span></p>
+                            <div class="btn-toolbar justify-content-center" role="toolbar">
+                                <div class="btn-group me-2 mb-2" role="group">
+                                    <button id="startWorkBtn" class="btn btn-primary btn-lg"><i class="bi bi-play-circle-fill me-2"></i>Start Work</button>
+                                    <button id="startBreakBtn" class="btn btn-success btn-lg d-none"><i class="bi bi-cup-hot-fill me-2"></i>Start Break</button>
+                                </div>
+                                <div class="btn-group mb-2" role="group">
+                                    <button id="pauseResumeBtn" class="btn btn-warning btn-lg d-none"><i class="bi bi-pause-circle-fill me-2"></i>Pause</button>
+                                    <button id="skipBreakBtn" class="btn btn-secondary btn-lg d-none"><i class="bi bi-skip-forward-fill me-2"></i>Skip Break</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="imageGenerationSection" class="mt-5 p-4 rounded shadow-lg d-none">
+                <h4 class="text-info mb-3"><i class="bi bi-image-fill me-2"></i>Recharge Your Mind</h4>
+                <p class="text-muted">Generate a unique image to enjoy during your break.</p>
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-5">
+                        <label for="imageThemeSelect" class="form-label">Image Theme:</label>
+                        <select id="imageThemeSelect" class="form-select">
+                            <option value="Nature">Serene Nature</option>
+                            <option value="Abstract">Abstract Wonders</option>
+                            <option value="Calming Patterns">Calming Patterns</option>
+                            <option value="Space">Cosmic Vistas</option>
+                            <option value="Fantasy">Whimsical Fantasy</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                         <button id="generateImageBtn" class="btn btn-info w-100"><span id="generateImageSpinner" class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true"></span>Generate Image</button>
+                    </div>
+                </div>
+                <div id="imagePromptDisplay" class="mt-3 text-muted fst-italic small"></div>
+                <div id="generatedImageContainer" class="mt-3 text-center bg-dark-subtle p-3 rounded" style="min-height: 200px; display: flex; align-items: center; justify-content: center;">
+                    <span class="text-muted">Your image will appear here...</span>
+                </div>
+                <div id="imageError" class="alert alert-danger mt-3 d-none"></div>
+            </div>
+        </section>
+
+        <section id="chartView" class="app-view d-none">
+            <div class="card border-secondary shadow">
+                <div class="card-header"><h3 class="mb-0 text-primary"><i class="bi bi-bar-chart-line-fill me-2"></i>Focus History</h3></div>
+                <div class="card-body">
+                    <div class="mb-3 d-flex justify-content-between align-items-center">
+                        <select id="chartProfileSelect" class="form-select form-select-sm w-auto me-2 d-none"></select>
+                        <button id="exportChartDataBtn" class="btn btn-sm btn-outline-secondary"><i class="bi bi-download me-1"></i>Export Data (CSV)</button>
+                    </div>
+                    <div style="height: 400px; width: 100%;"><canvas id="focusChart"></canvas></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="profilesView" class="app-view d-none">
+            <div class="card border-secondary shadow">
+                <div class="card-header"><h3 class="mb-0 text-success"><i class="bi bi-person-bounding-box me-2"></i>User Profiles</h3></div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-5 mb-3">
+                            <label for="profileSelect" class="form-label">Active Profile:</label>
+                            <select id="profileSelect" class="form-select form-select-lg mb-2"></select>
+                            <button id="createNewProfileBtn" class="btn btn-success btn-sm me-1"><i class="bi bi-plus-circle-fill me-1"></i>New</button>
+                            <button id="editProfileBtn" class="btn btn-warning btn-sm me-1"><i class="bi bi-pencil-fill me-1"></i>Edit</button>
+                            <button id="deleteProfileBtn" class="btn btn-danger btn-sm"><i class="bi bi-trash-fill me-1"></i>Delete</button>
+                        </div>
+                        <div class="col-md-7">
+                            <form id="profileSettingsForm" class="p-3 border rounded border-secondary-subtle bg-black">
+                                <h4 id="profileFormTitle" class="mb-3 text-light">Profile Settings</h4>
+                                <input type="hidden" id="profileIdInput">
+                                <div class="mb-2"><label for="profileNameInput" class="form-label">Name:</label><input type="text" id="profileNameInput" class="form-control" required></div>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-sm-6"><label for="baseWorkDurationInput" class="form-label">Work (min):</label><input type="number" id="baseWorkDurationInput" class="form-control" value="25" min="5" max="90" required></div>
+                                    <div class="col-sm-6"><label for="baseShortBreakInput" class="form-label">Short Break (min):</label><input type="number" id="baseShortBreakInput" class="form-control" value="5" min="1" max="30" required></div>
+                                </div>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-sm-6"><label for="baseLongBreakInput" class="form-label">Long Break (min):</label><input type="number" id="baseLongBreakInput" class="form-control" value="15" min="5" max="60" required></div>
+                                    <div class="col-sm-6"><label for="sessionsBeforeLongBreakInput" class="form-label">Sessions/Long Break:</label><input type="number" id="sessionsBeforeLongBreakInput" class="form-control" value="4" min="1" max="10" required></div>
+                                </div>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-sm-6"><label for="minWorkDurationInput" class="form-label">Min Work (min):</label><input type="number" id="minWorkDurationInput" class="form-control" value="10" min="1" max="90" required></div>
+                                    <div class="col-sm-6"><label for="maxWorkDurationInput" class="form-label">Max Work (min):</label><input type="number" id="maxWorkDurationInput" class="form-control" value="75" min="5" max="120" required></div>
+                                </div>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-sm-6"><label for="minBreakDurationInput" class="form-label">Min Break (min):</label><input type="number" id="minBreakDurationInput" class="form-control" value="3" min="1" max="30" required></div>
+                                    <div class="col-sm-6"><label for="maxBreakDurationInput" class="form-label">Max Break (min):</label><input type="number" id="maxBreakDurationInput" class="form-control" value="30" min="1" max="60" required></div>
+                                </div>
+                                <button type="submit" id="saveProfileBtn" class="btn btn-primary mt-2"><i class="bi bi-save-fill me-1"></i>Save Profile</button>
+                                <button type="button" id="cancelProfileEditBtn" class="btn btn-secondary mt-2 ms-2 d-none">Cancel</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="settingsView" class="app-view d-none">
+            <div class="card border-secondary shadow">
+                <div class="card-header"><h3 class="mb-0 text-warning"><i class="bi bi-gear-fill me-2"></i>Settings</h3></div>
+                <div class="card-body">
+                    <div class="form-check form-switch mb-3 fs-5">
+                        <input class="form-check-input" type="checkbox" role="switch" id="soundNotificationSwitch" checked>
+                        <label class="form-check-label" for="soundNotificationSwitch">Sound Notifications</label>
+                    </div>
+                    <div class="form-check form-switch mb-3 fs-5">
+                        <input class="form-check-input" type="checkbox" role="switch" id="browserNotificationSwitch">
+                        <label class="form-check-label" for="browserNotificationSwitch">Browser Notifications</label>
+                    </div>
+                    <hr class="border-secondary">
+                    <h4 class="mt-4 text-danger-emphasis">Danger Zone</h4>
+                    <button id="clearAllDataBtn" class="btn btn-danger"><i class="bi bi-exclamation-triangle-fill me-1"></i>Clear All Local Data</button>
+                    <p class="form-text text-muted mt-1">This will remove all profiles and focus history. This action cannot be undone.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="modal fade" id="focusRatingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-primary shadow-lg">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title text-primary"><i class="bi bi-bullseye me-2"></i>Rate Your Focus</h5>
+                </div>
+                <div class="modal-body">
+                    <p>How focused were you during "<span id="ratedTaskName" class="fw-semibold"></span>"?</p>
+                    <div id="focusStarsContainer" class="d-flex justify-content-around fs-1 mb-3 text-secondary">
+                        <i class="bi bi-star focus-star" data-value="1" title="Barely Focused"></i>
+                        <i class="bi bi-star focus-star" data-value="2" title="Slightly Distracted"></i>
+                        <i class="bi bi-star focus-star" data-value="3" title="Moderately Focused"></i>
+                        <i class="bi bi-star focus-star" data-value="4" title="Well Focused"></i>
+                        <i class="bi bi-star focus-star" data-value="5" title="In the Zone!"></i>
+                    </div>
+                    <p id="focusLevelDescription" class="text-center text-muted small"></p>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" id="submitFocusRatingBtn" class="btn btn-primary" disabled>Submit & Start Break</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer mt-auto py-3 bg-black text-light text-center border-top border-secondary-subtle">
+        <div class="container">
+            <span>NeuroFlow &copy; <span id="currentYear"></span> - Powered by AI & Neuroscience Principles</span>
+        </div>
+    </footer>
+
+    <audio id="sessionEndSound" src="https://cdn.jsdelivr.net/gh/ksh-web-dev/misc-assets@main/sounds/positive_notification.mp3" preload="auto"></audio>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <script>
+        const App = {
+            timerInterval: null,
+            timeLeft: 0,
+            totalTime: 0,
+            currentSessionType: 'idle',
+            workSessionCount: 0,
+            completedWorkSessionsInCycle: 0,
+            currentFocusRating: 0,
+            currentTaskName: "Untitled Task",
+            soundEnabled: true,
+            browserNotificationsEnabled: false,
+            notificationPermission: 'default',
+            activeProfileId: null,
+            profiles: {},
+            chartInstance: null,
+            focusRatingModalInstance: null,
+            pausedSessionType: null,
+            dom: {},
+
+            LS_KEYS: {
+                PROFILES: 'neuroFlow_profiles_v2',
+                ACTIVE_PROFILE_ID: 'neuroFlow_activeProfileId_v2',
+                SETTINGS: 'neuroFlow_settings_v2'
+            },
+            DEFAULT_PROFILE_ID: 'guest_profile',
+            DEFAULT_PROFILE_SETTINGS: {
+                name: "Guest",
+                baseWorkDuration: 25, baseShortBreak: 5, baseLongBreak: 15,
+                sessionsBeforeLongBreak: 4,
+                minWorkDuration: 10, maxWorkDuration: 75,
+                minBreakDuration: 3, maxBreakDuration: 30,
+                focusHistory: []
+            },
+            FOCUS_DESCRIPTIONS: {
+                1: "Barely Focused", 2: "Slightly Distracted", 3: "Moderately Focused",
+                4: "Well Focused", 5: "In the Zone!"
+            },
+            NOTIFICATION_ICON_URL: "/generated_images/imagen3_f84d3052-27a.png",
+
+            init() {
+                this.initDOM();
+                this.initServiceWorkersAndNotifications();
+                this.loadSettings();
+                this.loadProfiles();
+                this.initEventListeners();
+                this.updateCurrentYear();
+                this.navigateToView('timerView');
+                this.focusRatingModalInstance = new bootstrap.Modal(this.dom.focusRatingModalEl);
+                this.resetTimerDisplay();
+                this.updateTaskDisplay();
+            },
+
+            initDOM() {
+                const D = document;
+                this.dom = {
+                    appLogo: D.getElementById('appLogo'),
+                    navLinks: D.querySelectorAll('.navbar-nav .nav-link'),
+                    views: D.querySelectorAll('.app-view'),
+                    sessionTitle: D.getElementById('sessionTitle'),
+                    timerDisplay: D.getElementById('timerDisplay'),
+                    timerProgressBar: D.getElementById('timerProgressBar'),
+                    taskInput: D.getElementById('taskInput'),
+                    setTaskBtn: D.getElementById('setTaskBtn'),
+                    currentTaskDisplay: D.getElementById('currentTaskDisplay'),
+                    taskNameDisplay: D.getElementById('taskNameDisplay'),
+                    startWorkBtn: D.getElementById('startWorkBtn'),
+                    startBreakBtn: D.getElementById('startBreakBtn'),
+                    pauseResumeBtn: D.getElementById('pauseResumeBtn'),
+                    skipBreakBtn: D.getElementById('skipBreakBtn'),
+                    imageGenerationSection: D.getElementById('imageGenerationSection'),
+                    imageThemeSelect: D.getElementById('imageThemeSelect'),
+                    generateImageBtn: D.getElementById('generateImageBtn'),
+                    generateImageSpinner: D.getElementById('generateImageSpinner'),
+                    imagePromptDisplay: D.getElementById('imagePromptDisplay'),
+                    generatedImageContainer: D.getElementById('generatedImageContainer'),
+                    imageError: D.getElementById('imageError'),
+                    focusChartCanvas: D.getElementById('focusChart'),
+                    exportChartDataBtn: D.getElementById('exportChartDataBtn'),
+                    chartProfileSelect: D.getElementById('chartProfileSelect'),
+                    profileSelect: D.getElementById('profileSelect'),
+                    createNewProfileBtn: D.getElementById('createNewProfileBtn'),
+                    editProfileBtn: D.getElementById('editProfileBtn'),
+                    deleteProfileBtn: D.getElementById('deleteProfileBtn'),
+                    profileSettingsForm: D.getElementById('profileSettingsForm'),
+                    profileFormTitle: D.getElementById('profileFormTitle'),
+                    profileIdInput: D.getElementById('profileIdInput'),
+                    profileNameInput: D.getElementById('profileNameInput'),
+                    baseWorkDurationInput: D.getElementById('baseWorkDurationInput'),
+                    baseShortBreakInput: D.getElementById('baseShortBreakInput'),
+                    baseLongBreakInput: D.getElementById('baseLongBreakInput'),
+                    sessionsBeforeLongBreakInput: D.getElementById('sessionsBeforeLongBreakInput'),
+                    minWorkDurationInput: D.getElementById('minWorkDurationInput'),
+                    maxWorkDurationInput: D.getElementById('maxWorkDurationInput'),
+                    minBreakDurationInput: D.getElementById('minBreakDurationInput'),
+                    maxBreakDurationInput: D.getElementById('maxBreakDurationInput'),
+                    saveProfileBtn: D.getElementById('saveProfileBtn'),
+                    cancelProfileEditBtn: D.getElementById('cancelProfileEditBtn'),
+                    soundNotificationSwitch: D.getElementById('soundNotificationSwitch'),
+                    browserNotificationSwitch: D.getElementById('browserNotificationSwitch'),
+                    clearAllDataBtn: D.getElementById('clearAllDataBtn'),
+                    focusRatingModalEl: D.getElementById('focusRatingModal'),
+                    ratedTaskName: D.getElementById('ratedTaskName'),
+                    focusStarsContainer: D.getElementById('focusStarsContainer'),
+                    focusStars: D.querySelectorAll('.focus-star'),
+                    focusLevelDescription: D.getElementById('focusLevelDescription'),
+                    submitFocusRatingBtn: D.getElementById('submitFocusRatingBtn'),
+                    currentYear: D.getElementById('currentYear'),
+                    sessionEndSound: D.getElementById('sessionEndSound')
+                };
+            },
+
+            updateCurrentYear() {
+                if (this.dom.currentYear) this.dom.currentYear.textContent = new Date().getFullYear();
+            },
+
+            initServiceWorkersAndNotifications() {
+                if ('Notification' in window) {
+                    this.notificationPermission = Notification.permission;
+                    this.dom.browserNotificationSwitch.disabled = false;
+                    if (this.notificationPermission === 'granted') {
+                        this.browserNotificationsEnabled = true;
+                        this.dom.browserNotificationSwitch.checked = true;
+                    } else if (this.notificationPermission === 'denied') {
+                         this.dom.browserNotificationSwitch.checked = false;
+                         this.dom.browserNotificationSwitch.disabled = true;
+                    }
+                } else {
+                    this.dom.browserNotificationSwitch.disabled = true;
+                    this.dom.browserNotificationSwitch.parentElement.title = "Browser notifications not supported.";
+                }
+            },
+
+            navigateToView(viewId) {
+                this.dom.views.forEach(view => view.classList.add('d-none'));
+                document.getElementById(viewId).classList.remove('d-none');
+                this.dom.navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.dataset.view === viewId) link.classList.add('active');
+                });
+                if (viewId === 'chartView') this.renderFocusChart();
+                if (viewId === 'profilesView') this.populateProfileForm(); 
+            },
+
+            loadProfiles() {
+                const storedProfiles = localStorage.getItem(this.LS_KEYS.PROFILES);
+                this.profiles = storedProfiles ? JSON.parse(storedProfiles) : {};
+                
+                if (Object.keys(this.profiles).length === 0) {
+                    const guestProfile = { id: this.DEFAULT_PROFILE_ID, ...JSON.parse(JSON.stringify(this.DEFAULT_PROFILE_SETTINGS)) };
+                    this.profiles[this.DEFAULT_PROFILE_ID] = guestProfile;
+                    this.activeProfileId = this.DEFAULT_PROFILE_ID;
+                    this.saveProfiles();
+                    localStorage.setItem(this.LS_KEYS.ACTIVE_PROFILE_ID, this.activeProfileId);
+                } else {
+                    this.activeProfileId = localStorage.getItem(this.LS_KEYS.ACTIVE_PROFILE_ID);
+                    if (!this.activeProfileId || !this.profiles[this.activeProfileId]) {
+                        this.activeProfileId = Object.keys(this.profiles)[0];
+                        localStorage.setItem(this.LS_KEYS.ACTIVE_PROFILE_ID, this.activeProfileId);
+                    }
+                }
+                this.populateProfileSelects();
+                this.populateProfileForm();
+            },
+
+            saveProfiles() {
+                localStorage.setItem(this.LS_KEYS.PROFILES, JSON.stringify(this.profiles));
+            },
+
+            populateProfileSelects() {
+                this.dom.profileSelect.innerHTML = '';
+                this.dom.chartProfileSelect.innerHTML = ''; 
+                const profileIds = Object.keys(this.profiles);
+
+                profileIds.forEach(profileId => {
+                    const profile = this.profiles[profileId];
+                    const option = new Option(profile.name, profile.id);
+                    if (profile.id === this.activeProfileId) option.selected = true;
+                    this.dom.profileSelect.add(option.cloneNode(true));
+                    this.dom.chartProfileSelect.add(option);
+                });
+                
+                const numProfiles = profileIds.length;
+                this.dom.chartProfileSelect.classList.toggle('d-none', numProfiles <= 1);
+                if (numProfiles > 0) {
+                     this.dom.chartProfileSelect.value = this.activeProfileId;
+                }
+            },
+            
+            getActiveProfile() {
+                return this.profiles[this.activeProfileId] || this.profiles[this.DEFAULT_PROFILE_ID] || JSON.parse(JSON.stringify(this.DEFAULT_PROFILE_SETTINGS));
+            },
+
+            handleProfileChange(event) {
+                this.activeProfileId = event.target.value;
+                localStorage.setItem(this.LS_KEYS.ACTIVE_PROFILE_ID, this.activeProfileId);
+                this.resetTimerState();
+                this.populateProfileForm();
+                if (this.dom.chartView.classList.contains('d-none') === false) {
+                    this.renderFocusChart();
+                }
+                 this.populateProfileSelects(); 
+            },
+            
+            populateProfileForm(profileIdToEdit = null) {
+                const profileToLoad = profileIdToEdit ? this.profiles[profileIdToEdit] : this.getActiveProfile();
+                if (!profileToLoad) return;
+
+                this.dom.profileFormTitle.textContent = profileIdToEdit ? `Edit Profile: ${profileToLoad.name}` : `Settings for: ${profileToLoad.name}`;
+                this.dom.profileIdInput.value = profileToLoad.id || '';
+                this.dom.profileNameInput.value = profileToLoad.name;
+                this.dom.baseWorkDurationInput.value = profileToLoad.baseWorkDuration;
+                this.dom.baseShortBreakInput.value = profileToLoad.baseShortBreak;
+                this.dom.baseLongBreakInput.value = profileToLoad.baseLongBreak;
+                this.dom.sessionsBeforeLongBreakInput.value = profileToLoad.sessionsBeforeLongBreak;
+                this.dom.minWorkDurationInput.value = profileToLoad.minWorkDuration;
+                this.dom.maxWorkDurationInput.value = profileToLoad.maxWorkDuration;
+                this.dom.minBreakDurationInput.value = profileToLoad.minBreakDuration;
+                this.dom.maxBreakDurationInput.value = profileToLoad.maxBreakDuration;
+                
+                this.dom.profileSettingsForm.classList.remove('d-none');
+                this.dom.cancelProfileEditBtn.classList.toggle('d-none', !profileIdToEdit);
+            },
+
+            handleSaveProfile(event) {
+                event.preventDefault();
+                const id = this.dom.profileIdInput.value || `profile_${Date.now()}`;
+                const isNew = !this.dom.profileIdInput.value;
+
+                const updatedProfile = {
+                    id: id,
+                    name: this.dom.profileNameInput.value.trim() || "Untitled Profile",
+                    baseWorkDuration: parseInt(this.dom.baseWorkDurationInput.value),
+                    baseShortBreak: parseInt(this.dom.baseShortBreakInput.value),
+                    baseLongBreak: parseInt(this.dom.baseLongBreakInput.value),
+                    sessionsBeforeLongBreak: parseInt(this.dom.sessionsBeforeLongBreakInput.value),
+                    minWorkDuration: parseInt(this.dom.minWorkDurationInput.value),
+                    maxWorkDuration: parseInt(this.dom.maxWorkDurationInput.value),
+                    minBreakDuration: parseInt(this.dom.minBreakDurationInput.value),
+                    maxBreakDuration: parseInt(this.dom.maxBreakDurationInput.value),
+                    focusHistory: (this.profiles[id] && this.profiles[id].focusHistory) ? this.profiles[id].focusHistory : []
+                };
+                this.profiles[id] = updatedProfile;
+                if (isNew || id === this.activeProfileId) {
+                     this.activeProfileId = id;
+                     localStorage.setItem(this.LS_KEYS.ACTIVE_PROFILE_ID, this.activeProfileId);
+                }
+                this.saveProfiles();
+                this.populateProfileSelects();
+                this.populateProfileForm(); 
+                this.dom.cancelProfileEditBtn.classList.add('d-none');
+                this.resetTimerState();
+                alert('Profile saved successfully!');
+            },
+            
+            handleCreateNewProfile() {
+                this.dom.profileSettingsForm.reset();
+                this.dom.profileIdInput.value = ''; 
+                this.dom.profileFormTitle.textContent = "Create New Profile";
+                this.dom.profileNameInput.value = "New Profile";
+                this.dom.baseWorkDurationInput.value = this.DEFAULT_PROFILE_SETTINGS.baseWorkDuration;
+                this.dom.baseShortBreakInput.value = this.DEFAULT_PROFILE_SETTINGS.baseShortBreak;
+                this.dom.baseLongBreakInput.value = this.DEFAULT_PROFILE_SETTINGS.baseLongBreak;
+                this.dom.sessionsBeforeLongBreakInput.value = this.DEFAULT_PROFILE_SETTINGS.sessionsBeforeLongBreak;
+                this.dom.minWorkDurationInput.value = this.DEFAULT_PROFILE_SETTINGS.minWorkDuration;
+                this.dom.maxWorkDurationInput.value = this.DEFAULT_PROFILE_SETTINGS.maxWorkDuration;
+                this.dom.minBreakDurationInput.value = this.DEFAULT_PROFILE_SETTINGS.minBreakDuration;
+                this.dom.maxBreakDurationInput.value = this.DEFAULT_PROFILE_SETTINGS.maxBreakDuration;
+                this.dom.cancelProfileEditBtn.classList.remove('d-none');
+            },
+
+            handleEditProfile() {
+                this.populateProfileForm(this.activeProfileId);
+            },
+            
+            handleCancelProfileEdit() {
+                this.populateProfileForm(); 
+                this.dom.cancelProfileEditBtn.classList.add('d-none');
+            },
+
+            handleDeleteProfile() {
+                if (Object.keys(this.profiles).length <= 1) {
+                    alert("Cannot delete the last profile. Create another profile first or edit this one.");
+                    return;
+                }
+                if (confirm(`Are you sure you want to delete profile "${this.getActiveProfile().name}"? This cannot be undone.`)) {
+                    delete this.profiles[this.activeProfileId];
+                    this.activeProfileId = Object.keys(this.profiles)[0];
+                    localStorage.setItem(this.LS_KEYS.ACTIVE_PROFILE_ID, this.activeProfileId);
+                    this.saveProfiles();
+                    this.populateProfileSelects();
+                    this.populateProfileForm();
+                    this.resetTimerState();
+                }
+            },
+
+            loadSettings() {
+                const storedSettings = localStorage.getItem(this.LS_KEYS.SETTINGS);
+                if (storedSettings) {
+                    const settings = JSON.parse(storedSettings);
+                    this.soundEnabled = settings.soundEnabled !== undefined ? settings.soundEnabled : true;
+                    if (this.notificationPermission !== 'denied') {
+                         this.browserNotificationsEnabled = settings.browserNotificationsEnabled !== undefined ? settings.browserNotificationsEnabled : false;
+                    } else {
+                        this.browserNotificationsEnabled = false;
+                    }
+                }
+                this.dom.soundNotificationSwitch.checked = this.soundEnabled;
+                this.dom.browserNotificationSwitch.checked = this.browserNotificationsEnabled && this.notificationPermission === 'granted';
+            },
+
+            saveSettings() {
+                const settings = {
+                    soundEnabled: this.soundEnabled,
+                    browserNotificationsEnabled: this.browserNotificationsEnabled && this.notificationPermission === 'granted'
+                };
+                localStorage.setItem(this.LS_KEYS.SETTINGS, JSON.stringify(settings));
+            },
+
+            handleClearAllData() {
+                if (confirm("Are you sure you want to clear ALL data? This includes all profiles, focus history, and settings. This action cannot be undone.")) {
+                    localStorage.removeItem(this.LS_KEYS.PROFILES);
+                    localStorage.removeItem(this.LS_KEYS.ACTIVE_PROFILE_ID);
+                    localStorage.removeItem(this.LS_KEYS.SETTINGS);
+                    this.profiles = {};
+                    this.activeProfileId = null;
+                    this.loadProfiles(); 
+                    this.resetTimerState();
+                    alert("All data cleared.");
+                }
+            },
+
+            resetTimerState() {
+                clearInterval(this.timerInterval);
+                this.timerInterval = null;
+                this.currentSessionType = 'idle';
+                this.workSessionCount = 0;
+                this.completedWorkSessionsInCycle = 0;
+                this.resetTimerDisplay();
+                this.updateButtonStates();
+                this.dom.imageGenerationSection.classList.add('d-none');
+            },
+
+            startWorkSession() {
+                const profile = this.getActiveProfile();
+                let durationMinutes = profile.baseWorkDuration;
+
+                if (this.currentFocusRating > 0 && (this.currentSessionType === 'shortBreak' || this.currentSessionType === 'longBreak' || this.currentSessionType === 'idle')) { 
+                    const adjusted = this.calculateAdjustedDurations(this.currentFocusRating);
+                    durationMinutes = adjusted.workMins;
+                }
+                
+                this.timeLeft = durationMinutes * 60;
+                this.totalTime = this.timeLeft;
+                this.currentSessionType = 'work';
+                this.dom.sessionTitle.textContent = `Work: ${this.currentTaskName}`;
+                this.dom.timerProgressBar.classList.remove('bg-success', 'bg-warning');
+                this.dom.timerProgressBar.classList.add('bg-primary');
+                this.startTimer();
+                this.updateButtonStates();
+                this.dom.imageGenerationSection.classList.add('d-none');
+            },
+
+            startBreakSession(isLongBreak = false) {
+                const profile = this.getActiveProfile();
+                let durationMinutes;
+
+                if (isLongBreak) {
+                    durationMinutes = profile.baseLongBreak;
+                } else {
+                    const adjusted = this.calculateAdjustedDurations(this.currentFocusRating);
+                    durationMinutes = adjusted.breakMins;
+                }
+
+                this.timeLeft = durationMinutes * 60;
+                this.totalTime = this.timeLeft;
+                this.currentSessionType = isLongBreak ? 'longBreak' : 'shortBreak';
+                this.dom.sessionTitle.textContent = isLongBreak ? "Long Break" : "Short Break";
+                this.dom.timerProgressBar.classList.remove('bg-primary', 'bg-warning');
+                this.dom.timerProgressBar.classList.add('bg-success');
+                this.startTimer();
+                this.updateButtonStates();
+                this.dom.imageGenerationSection.classList.remove('d-none');
+                this.dom.generatedImageContainer.innerHTML = '<span class="text-muted">Your image will appear here...</span>';
+                this.dom.imageError.classList.add('d-none');
+                this.dom.imagePromptDisplay.textContent = '';
+            },
+            
+            startTimer() {
+                clearInterval(this.timerInterval);
+                this.updateTimerDisplay(); 
+                this.timerInterval = setInterval(() => this.timerTick(), 1000);
+            },
+
+            pauseResumeTimer() {
+                if (this.currentSessionType === 'paused') {
+                    this.currentSessionType = this.pausedSessionType; 
+                    this.dom.timerProgressBar.classList.remove('bg-warning');
+                    if(this.currentSessionType === 'work') this.dom.timerProgressBar.classList.add('bg-primary');
+                    else this.dom.timerProgressBar.classList.add('bg-success');
+                    this.startTimer();
+                } else {
+                    if (this.timerInterval) { 
+                        this.pausedSessionType = this.currentSessionType;
+                        this.currentSessionType = 'paused';
+                        clearInterval(this.timerInterval);
+                        this.dom.timerProgressBar.classList.add('bg-warning');
+                    }
+                }
+                this.updateButtonStates();
+            },
+
+            skipCurrentBreak() {
+                this.handleSessionEnd();
+            },
+
+            timerTick() {
+                this.timeLeft--;
+                this.updateTimerDisplay();
+                if (this.timeLeft <= 0) {
+                    this.handleSessionEnd();
+                }
+            },
+
+            updateTimerDisplay() {
+                const minutes = Math.floor(this.timeLeft / 60);
+                const seconds = this.timeLeft % 60;
+                this.dom.timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                const progressPercent = this.totalTime > 0 ? ((this.totalTime - this.timeLeft) / this.totalTime) * 100 : (this.currentSessionType === 'idle' ? 0 : 100);
+                this.dom.timerProgressBar.style.width = `${progressPercent}%`;
+                this.dom.timerProgressBar.setAttribute('aria-valuenow', progressPercent);
+                
+                const dynamicTitle = (this.currentSessionType !== 'idle' && this.timeLeft > 0) ? 
+                    `${this.dom.timerDisplay.textContent} - ${this.dom.sessionTitle.textContent}` : 
+                    "NeuroFlow";
+                document.title = `${dynamicTitle} | Productivity Timer`;
+            },
+
+            resetTimerDisplay() {
+                const profile = this.getActiveProfile();
+                this.timeLeft = profile.baseWorkDuration * 60;
+                this.totalTime = this.timeLeft;
+                this.dom.sessionTitle.textContent = "Work Session";
+                this.updateTimerDisplay();
+                this.dom.timerProgressBar.style.width = '0%';
+                this.dom.timerProgressBar.setAttribute('aria-valuenow', 0);
+                this.dom.timerProgressBar.classList.remove('bg-success', 'bg-warning');
+                this.dom.timerProgressBar.classList.add('bg-primary');
+                document.title = "NeuroFlow: Productivity Timer";
+            },
+            
+            updateButtonStates() {
+                const isWorkSession = this.currentSessionType === 'work';
+                const isBreakSession = this.currentSessionType === 'shortBreak' || this.currentSessionType === 'longBreak';
+                const isPaused = this.currentSessionType === 'paused';
+                const isIdle = this.currentSessionType === 'idle';
+
+                this.dom.startWorkBtn.classList.toggle('d-none', !isIdle);
+                this.dom.startBreakBtn.classList.add('d-none'); 
+                
+                this.dom.pauseResumeBtn.classList.toggle('d-none', isIdle);
+                this.dom.pauseResumeBtn.innerHTML = isPaused ? '<i class="bi bi-play-circle-fill me-2"></i>Resume' : '<i class="bi bi-pause-circle-fill me-2"></i>Pause';
+                
+                this.dom.skipBreakBtn.classList.toggle('d-none', !(isBreakSession || (isPaused && (this.pausedSessionType === 'shortBreak' || this.pausedSessionType === 'longBreak'))));
+                
+                this.dom.taskInput.disabled = !isIdle;
+                this.dom.setTaskBtn.disabled = !isIdle;
+            },
+
+            updateTaskDisplay() {
+                this.dom.taskNameDisplay.textContent = this.currentTaskName;
+            },
+
+            setTask() {
+                const newTaskName = this.dom.taskInput.value.trim();
+                if (newTaskName) {
+                    this.currentTaskName = newTaskName;
+                    this.updateTaskDisplay();
+                }
+            },
+
+            handleSessionEnd() {
+                clearInterval(this.timerInterval);
+                this.timerInterval = null;
+                this.playSound(this.dom.sessionEndSound);
+                
+                const sessionTypeEnded = this.currentSessionType === 'paused' ? this.pausedSessionType : this.currentSessionType;
+                
+                if (sessionTypeEnded === 'work') {
+                    this.workSessionCount++;
+                    this.completedWorkSessionsInCycle++;
+                    this.showBrowserNotification("Work Session Complete!", `Time to rate your focus for "${this.currentTaskName}".`);
+                    this.currentSessionType = 'rating'; 
+                    this.showFocusRatingModal();
+                } else if (sessionTypeEnded === 'shortBreak' || sessionTypeEnded === 'longBreak') { 
+                    this.showBrowserNotification("Break Over!", "Time to get back to work.");
+                    this.currentSessionType = 'idle'; 
+                    this.startWorkSession();
+                } else {
+                     this.currentSessionType = 'idle';
+                }
+                this.updateButtonStates();
+            },
+
+            calculateAdjustedDurations(focusRating) {
+                const profile = this.getActiveProfile();
+                let workMins = profile.baseWorkDuration;
+                let breakMins = profile.baseShortBreak;
+
+                switch (focusRating) {
+                    case 5: workMins *= 1.15; breakMins *= 0.90; break; 
+                    case 4: workMins *= 1.05; break;
+                    case 3: breakMins *= 1.00; breakMins *= 1.05; break;
+                    case 2: workMins *= 0.85; breakMins *= 1.15; break;
+                    case 1: workMins *= 0.75; breakMins *= 1.25; break;
+                }
+
+                workMins = Math.round(Math.max(profile.minWorkDuration, Math.min(profile.maxWorkDuration, workMins)));
+                breakMins = Math.round(Math.max(profile.minBreakDuration, Math.min(profile.maxBreakDuration, breakMins)));
+                
+                return { workMins, breakMins };
+            },
+
+            showFocusRatingModal() {
+                this.dom.ratedTaskName.textContent = this.currentTaskName;
+                this.dom.focusStars.forEach(star => {
+                    star.classList.remove('bi-star-fill');
+                    star.classList.add('bi-star');
+                });
+                this.dom.focusLevelDescription.textContent = "";
+                this.dom.submitFocusRatingBtn.disabled = true;
+                this.currentFocusRating = 0;
+                this.focusRatingModalInstance.show();
+            },
+
+            handleFocusStarInteraction(event, type) {
+                const targetStarEl = event.target.closest('.focus-star');
+                if (!targetStarEl) return;
+                const value = parseInt(targetStarEl.dataset.value);
+                if (!value) return;
+
+                if (type === 'hover') {
+                    this.dom.focusStars.forEach(star => {
+                        const starValue = parseInt(star.dataset.value);
+                        if (starValue <= value) {
+                            star.classList.remove('bi-star');
+                            star.classList.add('bi-star-fill');
+                        } else {
+                            star.classList.remove('bi-star-fill');
+                            star.classList.add('bi-star');
+                        }
+                    });
+                } else if (type === 'click') {
+                    this.currentFocusRating = value;
+                    this.dom.submitFocusRatingBtn.disabled = false;
+                    this.dom.focusStars.forEach(star => {
+                        const starValue = parseInt(star.dataset.value);
+                        if (starValue <= this.currentFocusRating) {
+                            star.classList.remove('bi-star');
+                            star.classList.add('bi-star-fill');
+                        } else {
+                            star.classList.remove('bi-star-fill');
+                            star.classList.add('bi-star');
+                        }
+                    });
+                }
+                this.dom.focusLevelDescription.textContent = this.FOCUS_DESCRIPTIONS[value] || "";
+            },
+            
+            handleFocusStarMouseOut() {
+                 this.dom.focusStars.forEach(star => {
+                    const starValue = parseInt(star.dataset.value);
+                    if (this.currentFocusRating > 0) {
+                         star.classList.toggle('bi-star-fill', starValue <= this.currentFocusRating);
+                         star.classList.toggle('bi-star', starValue > this.currentFocusRating);
+                    } else {
+                         star.classList.remove('bi-star-fill');
+                         star.classList.add('bi-star');
+                    }
+                });
+                this.dom.focusLevelDescription.textContent = this.currentFocusRating > 0 ? this.FOCUS_DESCRIPTIONS[this.currentFocusRating] : "";
+            },
+
+            submitFocusRating() {
+                if (this.currentFocusRating === 0) return;
+                const profile = this.getActiveProfile();
+                const workDurationForHistory = this.totalTime > 0 ? Math.round(this.totalTime / 60) : profile.baseWorkDuration;
+
+                profile.focusHistory.push({
+                    timestamp: new Date().toISOString(),
+                    rating: this.currentFocusRating,
+                    taskName: this.currentTaskName,
+                    actualWorkDuration: workDurationForHistory
+                });
+                this.saveProfiles();
+                this.focusRatingModalInstance.hide();
+
+                const isLongBreakDue = this.completedWorkSessionsInCycle >= profile.sessionsBeforeLongBreak;
+                if (isLongBreakDue) {
+                    this.completedWorkSessionsInCycle = 0;
+                }
+                this.startBreakSession(isLongBreakDue);
+            },
+
+            renderFocusChart() {
+                const profileToChartId = this.dom.chartProfileSelect.value || this.activeProfileId;
+                const profile = this.profiles[profileToChartId];
+                
+                const ctx = this.dom.focusChartCanvas.getContext('2d');
+                if (this.chartInstance) {
+                    this.chartInstance.destroy();
+                }
+
+                if (!profile || !profile.focusHistory || profile.focusHistory.length === 0) {
+                    ctx.clearRect(0,0, this.dom.focusChartCanvas.width, this.dom.focusChartCanvas.height);
+                    ctx.font = "16px Inter, sans-serif";
+                    ctx.fillStyle = "#c9d1d9";
+                    ctx.textAlign = "center";
+                    ctx.fillText("No focus history yet for this profile.", this.dom.focusChartCanvas.width / 2, 50);
+                    return;
+                }
+
+                const labels = profile.focusHistory.map(entry => new Date(entry.timestamp).toLocaleDateString());
+                const ratings = profile.focusHistory.map(entry => entry.rating);
+                const durations = profile.focusHistory.map(entry => entry.actualWorkDuration);
+
+                this.chartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Focus Rating (1-5)',
+                                data: ratings,
+                                borderColor: 'rgba(13, 110, 253, 1)',
+                                backgroundColor: 'rgba(13, 110, 253, 0.2)',
+                                yAxisID: 'y',
+                                tension: 0.1,
+                                fill: true
+                            },
+                            {
+                                label: 'Work Duration (min)',
+                                data: durations,
+                                borderColor: 'rgba(25, 135, 84, 1)',
+                                backgroundColor: 'rgba(25, 135, 84, 0.2)',
+                                yAxisID: 'y1',
+                                tension: 0.1,
+                                fill: true
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { 
+                                ticks: { color: '#c9d1d9' }, 
+                                grid: { color: '#30363d' }
+                            },
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                title: { display: true, text: 'Focus Rating', color: '#c9d1d9' },
+                                ticks: { color: '#c9d1d9', stepSize: 1, min: 0, max: 5 },
+                                grid: { color: '#30363d' }
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                title: { display: true, text: 'Work Duration (min)', color: '#c9d1d9' },
+                                ticks: { color: '#c9d1d9' },
+                                grid: { drawOnChartArea: false } 
+                            }
+                        },
+                        plugins: {
+                            legend: { labels: { color: '#c9d1d9' } }
+                        }
+                    }
+                });
+            },
+
+            exportChartDataToCSV() {
+                const profileToChartId = this.dom.chartProfileSelect.value || this.activeProfileId;
+                const profile = this.profiles[profileToChartId];
+
+                if (!profile || !profile.focusHistory || profile.focusHistory.length === 0) {
+                    alert("No data to export for this profile.");
+                    return;
+                }
+                let csvContent = "data:text/csv;charset=utf-8,Timestamp,Task Name,Focus Rating,Actual Work Duration (min)\n";
+                profile.focusHistory.forEach(entry => {
+                    const row = [
+                        new Date(entry.timestamp).toLocaleString(),
+                        `"${entry.taskName.replace(/"/g, '""')}"`,
+                        entry.rating,
+                        entry.actualWorkDuration
+                    ].join(",");
+                    csvContent += row + "\n";
+                });
+
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `neuroflow_focushistory_${profile.name.replace(/\s/g, '_')}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            },
+
+            async handleGenerateImage() {
+                this.dom.generateImageBtn.disabled = true;
+                this.dom.generateImageSpinner.classList.remove('d-none');
+                this.dom.imageError.classList.add('d-none');
+                this.dom.generatedImageContainer.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>';
+                this.dom.imagePromptDisplay.textContent = 'Generating creative prompt...';
+
+                const theme = this.dom.imageThemeSelect.value;
+                const aiApiPrompt = `Generate a vivid and inspiring DALL-E or Imagen prompt for an image with the theme "${theme}". The image should be mood-boosting and suitable for a short break. Describe a visually rich scene. For example, if theme is Nature, 'A hyperrealistic image of a sun-dappled forest path, rays of light filtering through the canopy, vibrant green moss on ancient trees.'`;
+
+                try {
+                    const aiResponse = await fetch('/api/ai', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ msgforai: aiApiPrompt, aiguide: "You are an expert in crafting image generation prompts." })
+                    });
+                    if (!aiResponse.ok) throw new Error(`AI prompt generation failed: ${aiResponse.statusText} (status ${aiResponse.status})`);
+                    const aiData = await aiResponse.json();
+                    if (!aiData.success || !aiData.response) throw new Error(aiData.error || 'Failed to get prompt from AI.');
+                    
+                    const imagePrompt = aiData.response;
+                    this.dom.imagePromptDisplay.textContent = `Image Prompt: "${imagePrompt.substring(0,150)}${imagePrompt.length > 150 ? '...' : ''}"`;
+                    this.dom.generatedImageContainer.innerHTML = '<div class="spinner-border text-info" role="status"><span class="visually-hidden">Generating image...</span></div>';
+
+                    const imageGenResponse = await fetch('/api/generate-image-on-demand', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prompt: imagePrompt, aspectRatio: "16:9" })
+                    });
+                    if (!imageGenResponse.ok) throw new Error(`Image generation failed: ${imageGenResponse.statusText} (status ${imageGenResponse.status})`);
+                    const imageData = await imageGenResponse.json();
+
+                    if (imageData.success && imageData.imageUrl) {
+                        const img = new Image();
+                        img.onload = () => {
+                           this.dom.generatedImageContainer.innerHTML = '';
+                           this.dom.generatedImageContainer.appendChild(img);
+                        };
+                        img.onerror = () => {
+                            this.dom.imageError.textContent = 'Failed to load generated image.';
+                            this.dom.imageError.classList.remove('d-none');
+                            this.dom.generatedImageContainer.innerHTML = '<span class="text-danger">Error loading image.</span>';
+                        };
+                        img.src = imageData.imageUrl;
+                        img.alt = `AI Generated: ${imagePrompt.substring(0, 70)}...`;
+                        img.classList.add('img-fluid', 'rounded');
+                    } else {
+                        throw new Error(imageData.error || 'Image generation API returned an error.');
+                    }
+                } catch (error) {
+                    console.error("Image generation error:", error);
+                    this.dom.imageError.textContent = `Error: ${error.message}`;
+                    this.dom.imageError.classList.remove('d-none');
+                    this.dom.generatedImageContainer.innerHTML = '<span class="text-danger">Image generation failed. Please try again.</span>';
+                } finally {
+                    this.dom.generateImageBtn.disabled = false;
+                    this.dom.generateImageSpinner.classList.add('d-none');
+                }
+            },
+
+            playSound(soundElement) {
+                if (this.soundEnabled && soundElement) {
+                    soundElement.play().catch(e => console.warn("Sound play failed:", e));
+                }
+            },
+
+            showBrowserNotification(title, body) {
+                if (this.browserNotificationsEnabled && this.notificationPermission === 'granted') {
+                    try {
+                        new Notification(title, { body: body, icon: this.NOTIFICATION_ICON_URL });
+                    } catch (e) {
+                        console.warn("Browser notification failed:", e);
+                    }
+                }
+            },
+            
+            requestNotificationPermission() {
+                 if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+                    Notification.requestPermission().then(permission => {
+                        this.notificationPermission = permission;
+                        this.browserNotificationsEnabled = permission === 'granted';
+                        this.dom.browserNotificationSwitch.checked = this.browserNotificationsEnabled;
+                        if (permission === 'denied') {
+                            this.dom.browserNotificationSwitch.disabled = true;
+                            alert("Browser notifications have been disabled. You can re-enable them in your browser settings for this site.");
+                        }
+                        this.saveSettings();
+                    });
+                } else if (Notification.permission === 'denied') {
+                     alert("Browser notifications have been disabled. You can re-enable them in your browser settings for this site.");
+                     this.dom.browserNotificationSwitch.checked = false;
+                     this.dom.browserNotificationSwitch.disabled = true;
+                     this.browserNotificationsEnabled = false;
+                     this.saveSettings();
+                }
+            },
+
+            initEventListeners() {
+                this.dom.navLinks.forEach(link => link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.navigateToView(e.target.dataset.view);
+                }));
+                this.dom.startWorkBtn.addEventListener('click', () => this.startWorkSession());
+                this.dom.startBreakBtn.addEventListener('click', () => this.startBreakSession(false));
+                this.dom.pauseResumeBtn.addEventListener('click', () => this.pauseResumeTimer());
+                this.dom.skipBreakBtn.addEventListener('click', () => this.skipCurrentBreak());
+                this.dom.setTaskBtn.addEventListener('click', () => this.setTask());
+                this.dom.taskInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') this.setTask(); });
+                
+                this.dom.focusStarsContainer.addEventListener('click', (e) => this.handleFocusStarInteraction(e, 'click'));
+                this.dom.focusStarsContainer.addEventListener('mouseover', (e) => this.handleFocusStarInteraction(e, 'hover'));
+                this.dom.focusStarsContainer.addEventListener('mouseleave', () => this.handleFocusStarMouseOut());
+                this.dom.submitFocusRatingBtn.addEventListener('click', () => this.submitFocusRating());
+
+                this.dom.profileSelect.addEventListener('change', (e) => this.handleProfileChange(e));
+                this.dom.chartProfileSelect.addEventListener('change', () => this.renderFocusChart());
+                this.dom.createNewProfileBtn.addEventListener('click', () => this.handleCreateNewProfile());
+                this.dom.editProfileBtn.addEventListener('click', () => this.handleEditProfile());
+                this.dom.cancelProfileEditBtn.addEventListener('click', () => this.handleCancelProfileEdit());
+                this.dom.deleteProfileBtn.addEventListener('click', () => this.handleDeleteProfile());
+                this.dom.profileSettingsForm.addEventListener('submit', (e) => this.handleSaveProfile(e));
+
+                this.dom.soundNotificationSwitch.addEventListener('change', (e) => {
+                    this.soundEnabled = e.target.checked;
+                    this.saveSettings();
+                });
+                this.dom.browserNotificationSwitch.addEventListener('change', (e) => {
+                    this.browserNotificationsEnabled = e.target.checked;
+                    if (e.target.checked && this.notificationPermission !== 'granted') {
+                        this.requestNotificationPermission();
+                    } else {
+                         this.saveSettings();
+                    }
+                });
+                this.dom.clearAllDataBtn.addEventListener('click', () => this.handleClearAllData());
+                this.dom.generateImageBtn.addEventListener('click', () => this.handleGenerateImage());
+                this.dom.exportChartDataBtn.addEventListener('click', () => this.exportChartDataToCSV());
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => App.init());
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>
