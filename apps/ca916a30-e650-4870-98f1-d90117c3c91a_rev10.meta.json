@@ -1,0 +1,10 @@
+{
+  "projectId": "ca916a30-e650-4870-98f1-d90117c3c91a",
+  "revisionString": "10",
+  "projectNameDisplay": "Particle simulation ",
+  "projectType": "game",
+  "userPromptForThisRevision": "I think we reversed em attraction again, remember positive charge repels positive and attracts negative right? Gravity is the same between differently charged particles it’s based on mass. And gravity needs to fall off properly",
+  "basedOnRevisionString": "9",
+  "savedAt": "2025-05-29T18:17:51.403Z",
+  "imageAssets": []
+}

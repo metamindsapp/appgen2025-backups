@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beekeeping Tycoon: Hive Mind</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow-x: hidden;
+            background-color: #1A202C;
+            color: #E2E8F0;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        #app {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        main {
+            flex: 1;
+            padding-bottom: 20px;
+        }
+        .nav-wrapper {
+            background-color: #2D3748;
+            box-shadow: none;
+        }
+        .card {
+            background-color: #2D3748;
+            color: #E2E8F0;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        .card-content {
+            color: #E2E8F0;
+        }
+        .card .card-title {
+            color: #E2E8F0;
+            font-weight: 500;
+        }
+        .btn-large.amber.darken-2, .btn.amber.darken-2 {
+            background-color: #ffb300 !important;
+            color: #1A202C !important;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+        }
+        .btn-large.amber.darken-2:hover, .btn.amber.darken-2:hover {
+            background-color: #ffa000 !important;
+        }
+        .btn-large.amber.darken-2:active, .btn.amber.darken-2:active {
+            transform: translateY(1px);
+        }
+        .btn.red.darken-2 { background-color: #d32f2f !important; color: #E2E8F0 !important; }
+        .btn.green.darken-2 { background-color: #388e3c !important; color: #E2E8F0 !important; }
+        .btn-flat.white-text { color: #E2E8F0 !important; }
+        .input-field input[type="text"]:not(.browser-default),
+        .input-field input[type="text"]:not(.browser-default):focus {
+            border-bottom: 1px solid #E2E8F0;
+            box-shadow: 0 1px 0 0 #E2E8F0;
+            color: #E2E8F0;
+        }
+        .input-field input[type="text"]:not(.browser-default):focus + label { color: #ffb300 !important; }
+        .input-field label { color: #E2E8F0; }
+        .tabs { background-color: #2D3748; }
+        .tabs .tab a { color: #E2E8F0; background-color: #2D3748; }
+        .tabs .tab a:hover { color: #ffb300; }
+        .tabs .tab a.active { color: #ffb300; background-color: #2D3748; }
+        .tabs .indicator { background-color: #ffb300; }
+        .modal {
+            background-color: #1A202C;
+            color: #E2E8F0;
+            border-radius: 8px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+        }
+        .modal-content h4 { color: #E2E8F0; }
+        .modal-footer {
+            background-color: #2D3748;
+            border-top: 1px solid #3A455A;
+            padding: 10px 20px;
+        }
+        .modal-footer .btn-flat { color: #ffb300; }
+        .collection { background-color: #2D3748; border: none; }
+        .collection .collection-item {
+            background-color: #3A455A;
+            color: #E2E8F0;
+            border-bottom: 1px solid #4A5568;
+        }
+        .collection .collection-item:last-child { border-bottom: none; }
+        .collection .collection-item.avatar { min-height: auto; padding-left: 0; }
+        .collection .collection-item img.circle { margin-right: 15px; }
+        .preloader-wrapper.small { width: 20px; height: 20px; vertical-align: middle; }
+        .spinner-layer.spinner-yellow-only { border-color: #ffb300; }
+        .ml-2 { margin-left: 0.5rem; } .mt-2 { margin-top: 0.5rem; } .mt-3 { margin-top: 1rem; }
+        .text-center { text-align: center; }
+        i.material-icons.tiny { font-size: 1.2rem; vertical-align: middle; margin-right: 5px; }
+        .divider { background-color: #4A5568; margin: 15px 0; }
+        .beehive-img.click-animation {
+            animation: clickShrink 0.1s ease-out;
+        }
+        @keyframes clickShrink {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.98); }
+            100% { transform: scale(1); }
+        }
+        .material-tooltip {
+            background-color: #3A455A !important;
+            color: #E2E8F0 !important;
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-size: 0.9em;
+            opacity: 1 !important;
+        }
+    </style>
+</head>
+<body class="grey darken-4 white-text">
+    <div id="app">
+        <nav class="grey darken-3 z-depth-0">
+            <div class="nav-wrapper">
+                <a href="#" class="brand-logo center">Beekeeping Tycoon: Hive Mind</a>
+                <ul id="nav-mobile" class="right hide-on-med-and-down">
+                    <li><a @click="openSettingsModal" class="waves-effect waves-light btn-flat white-text"><i class="material-icons left">settings</i>Settings</a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <main class="container" style="margin-top: 20px;">
+            <div class="row">
+                <div class="col s12 m4 l3">
+                    <div class="card grey darken-3">
+                        <div class="card-content white-text">
+                            <span class="card-title">Resources</span>
+                            <p><i class="material-icons tiny">local_florist</i> Honey: {{ formatNumber(resources.honey) }} ({{ formatNumber(productionRates.honeyPerSecond) }}/s)</p>
+                            <p><i class="material-icons tiny">texture</i> Wax: {{ formatNumber(resources.wax) }} ({{ formatNumber(productionRates.waxPerSecond) }}/s)</p>
+                            <p><i class="material-icons tiny">star_rate</i> Royal Jelly: {{ formatNumber(resources.royalJelly) }} ({{ formatNumber(productionRates.royalJellyPerSecond) }}/s)</p>
+                            <p><i class="material-icons tiny">science</i> Research Points: {{ formatNumber(resources.researchPoints) }} ({{ formatNumber(productionRates.researchPointsPerSecond) }}/s)</p>
+                            <p><i class="material-icons tiny">emoji_events</i> Queen's Legacy: {{ formatNumber(resources.queensLegacyPoints) }} QLP</p>
+                            <p v-if="currentBeeEvent.text" class="amber-text text-lighten-2 mt-2">
+                                <i class="material-icons tiny">notifications_active</i> {{ currentBeeEvent.text }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col s12 m8 l6">
+                    <div class="card grey darken-3 text-center" style="height: 100%;">
+                        <div class="card-content white-text center-align">
+                            <span class="card-title">Your Apiary</span>
+                            <img :src="currentHiveImage" alt="Current Beehive" class="responsive-img beehive-img"
+                                :class="{'click-animation': isHoneyClicked}"
+                                @animationend="isHoneyClicked = false"
+                                style="max-height: 250px; margin-bottom: 20px;">
+                            <button @click="clickHoney" class="btn-large amber darken-2 waves-effect waves-light" style="width: 100%; margin-bottom: 10px;">
+                                <i class="material-icons left">add</i> Harvest Honey
+                            </button>
+                            <p class="flow-text">Click for {{ formatNumber(productionRates.honeyPerClick) }} Honey</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col s12 l3">
+                    <div class="card grey darken-3">
+                        <div class="card-content white-text">
+                            <ul class="tabs grey darken-3">
+                                <li class="tab col s3"><a class="active white-text" href="#bees-tab">Bees</a></li>
+                                <li class="tab col s3"><a class="white-text" href="#hive-tab">Hive</a></li>
+                                <li class="tab col s3"><a class="white-text" href="#research-tab">Research</a></li>
+                                <li class="tab col s3"><a class="white-text" href="#requeen-tab">Requeen</a></li>
+                            </ul>
+
+                            <div id="bees-tab" class="col s12">
+                                <div class="upgrade-item" v-for="(upgrade, key) in filteredUpgrades('bees')" :key="key">
+                                    <h6 class="white-text">{{ upgrade.name }}</h6>
+                                    <p class="grey-text text-lighten-2 tooltipped" :data-tooltip="upgrade.description" data-position="right">Level {{ formatNumber(upgrade.level) }}</p>
+                                    <button @click="buyUpgrade(key, 'bees')" :disabled="!canAfford(key, 'bees')" class="btn amber darken-2 waves-effect waves-light" style="width: 100%; margin-bottom: 5px;">
+                                        Buy ({{ getUpgradeCost(key, 'bees', 'honey') }} <i class="material-icons tiny">local_florist</i>
+                                        <span v-if="getUpgradeCost(key, 'bees', 'wax') > 0">, {{ getUpgradeCost(key, 'bees', 'wax') }} <i class="material-icons tiny">texture</i></span>
+                                        <span v-if="getUpgradeCost(key, 'bees', 'royalJelly') > 0">, {{ getUpgradeCost(key, 'bees', 'royalJelly') }} <i class="material-icons tiny">star_rate</i></span>
+                                        <span v-if="getUpgradeCost(key, 'bees', 'researchPoints') > 0">, {{ getUpgradeCost(key, 'bees', 'researchPoints') }} <i class="material-icons tiny">science</i></span>
+                                        )
+                                    </button>
+                                    <div class="divider"></div>
+                                </div>
+                                <h6 class="white-text">Your Rare Bees:</h6>
+                                <button @click="openImageGeneratorModal" :disabled="resources.royalJelly < 100" class="btn amber darken-2 waves-effect waves-light" style="width: 100%; margin-bottom: 5px;">
+                                    Generate Rare Bee (100 Royal Jelly)
+                                </button>
+                                <ul class="collection grey darken-3" v-if="rareBeesUnlocked.length > 0">
+                                    <li class="collection-item grey darken-2 white-text" v-for="bee in rareBeesUnlocked" :key="bee.name">
+                                        <img :src="bee.imageUrl" :alt="bee.name" class="circle" style="width: 40px; height: 40px; vertical-align: middle; margin-right: 10px;">
+                                        <div>
+                                            {{ bee.name }} <br>
+                                            <span class="grey-text text-lighten-2" style="font-size: 0.8em;">Bonus: {{ formatNumber(bee.bonusValue * 100) }}% {{ bee.bonusType === 'honeyProduction' ? 'Honey' : 'Wax' }}</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <p v-else class="white-text">No rare bees yet. Generate one!</p>
+                            </div>
+
+                            <div id="hive-tab" class="col s12">
+                                <div class="upgrade-item" v-for="(upgrade, key) in filteredUpgrades('hive')" :key="key">
+                                    <h6 class="white-text">{{ upgrade.name }}</h6>
+                                    <p class="grey-text text-lighten-2 tooltipped" :data-tooltip="upgrade.description" data-position="right">Level {{ formatNumber(upgrade.level) }}</p>
+                                    <button @click="buyUpgrade(key, 'hive')" :disabled="!canAfford(key, 'hive')" class="btn amber darken-2 waves-effect waves-light" style="width: 100%; margin-bottom: 5px;">
+                                        Buy ({{ getUpgradeCost(key, 'hive', 'honey') }} <i class="material-icons tiny">local_florist</i>
+                                        <span v-if="getUpgradeCost(key, 'hive', 'wax') > 0">, {{ getUpgradeCost(key, 'hive', 'wax') }} <i class="material-icons tiny">texture</i></span>
+                                        <span v-if="getUpgradeCost(key, 'hive', 'royalJelly') > 0">, {{ getUpgradeCost(key, 'hive', 'royalJelly') }} <i class="material-icons tiny">star_rate</i></span>
+                                        <span v-if="getUpgradeCost(key, 'hive', 'researchPoints') > 0">, {{ getUpgradeCost(key, 'hive', 'researchPoints') }} <i class="material-icons tiny">science</i></span>
+                                        )
+                                    </button>
+                                    <div class="divider"></div>
+                                </div>
+                            </div>
+
+                            <div id="research-tab" class="col s12">
+                                <div class="upgrade-item" v-for="(upgrade, key) in filteredUpgrades('research')" :key="key">
+                                    <h6 class="white-text">{{ upgrade.name }}</h6>
+                                    <p class="grey-text text-lighten-2 tooltipped" :data-tooltip="upgrade.description" data-position="right">Level {{ formatNumber(upgrade.level) }}</p>
+                                    <button @click="buyUpgrade(key, 'research')" :disabled="!canAfford(key, 'research')" class="btn amber darken-2 waves-effect waves-light" style="width: 100%; margin-bottom: 5px;">
+                                        Buy ({{ getUpgradeCost(key, 'research', 'honey') }} <i class="material-icons tiny">local_florist</i>
+                                        <span v-if="getUpgradeCost(key, 'research', 'wax') > 0">, {{ getUpgradeCost(key, 'research', 'wax') }} <i class="material-icons tiny">texture</i></span>
+                                        <span v-if="getUpgradeCost(key, 'research', 'royalJelly') > 0">, {{ getUpgradeCost(key, 'research', 'royalJelly') }} <i class="material-icons tiny">star_rate</i></span>
+                                        <span v-if="getUpgradeCost(key, 'research', 'researchPoints') > 0">, {{ getUpgradeCost(key, 'research', 'researchPoints') }} <i class="material-icons tiny">science</i></span>
+                                        )
+                                    </button>
+                                    <div class="divider"></div>
+                                </div>
+                            </div>
+
+                            <div id="requeen-tab" class="col s12 center-align">
+                                <h5 class="white-text">The Grand Requeening</h5>
+                                <p class="grey-text text-lighten-2">
+                                    Ready for a fresh start? Requeen your apiary to gain permanent Queen's Legacy Points (QLP),
+                                    boosting future runs. This will reset most of your progress!
+                                </p>
+                                <p class="white-text">Total Honey Produced: {{ formatNumber(totalHoneyProduced) }}</p>
+                                <p class="white-text" v-if="!canRequeen">
+                                    Next Requeening at {{ formatNumber(requeenMilestone) }} Total Honey Produced.
+                                </p>
+                                <button @click="openRequeenModal" :disabled="!canRequeen" class="btn-large amber darken-2 waves-effect waves-light mt-3">
+                                    Requeen Apiary!
+                                </button>
+                                <p class="white-text mt-2" v-if="resources.queensLegacyPoints > 0">
+                                    Current QLP Bonus: +{{ formatNumber(queensLegacyBonus * 100) }}% All Production
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <div id="settings-modal" class="modal grey darken-4 white-text">
+            <div class="modal-content">
+                <h4 class="white-text">Settings</h4>
+                <button @click="saveGame" class="btn amber darken-2 waves-effect waves-light">Save Game</button>
+                <button @click="loadGame" class="btn amber darken-2 waves-effect waves-light ml-2">Load Game</button>
+                <button @click="resetGame" class="btn red darken-2 waves-effect waves-light ml-2">Reset Game</button>
+                <p class="grey-text text-lighten-2 mt-3">Game auto-saves every 30 seconds.</p>
+            </div>
+            <div class="modal-footer grey darken-4">
+                <a href="#!" class="modal-close waves-effect waves-green btn-flat white-text">Close</a>
+            </div>
+        </div>
+
+        <div id="image-gen-modal" class="modal grey darken-4 white-text">
+            <div class="modal-content">
+                <h4 class="white-text">Generate Rare Bee Image</h4>
+                <p class="grey-text text-lighten-2">Cost: 100 Royal Jelly</p>
+                <div class="input-field">
+                    <input id="image_prompt" type="text" class="validate white-text" v-model="imagePrompt">
+                    <label for="image_prompt">Describe your rare bee (e.g., "A glowing bee with blue wings, wearing a tiny crown")</label>
+                </div>
+                <p class="grey-text text-lighten-2">Feeling stuck? Try: "A bee made of pure sunshine", "A ninja bee with tiny katana", "A bee wearing a tiny wizard hat".</p>
+                <button @click="generateRareBeeImage" :disabled="isGeneratingImage || !imagePrompt || resources.royalJelly < 100" class="btn amber darken-2 waves-effect waves-light">
+                    <span v-if="isGeneratingImage">Generating... <div class="preloader-wrapper small active"><div class="spinner-layer spinner-yellow-only"><div class="circle-clipper left"><div class="circle"></div></div><div class="gap-patch"><div class="circle"></div></div><div class="circle-clipper right"><div class="circle"></div></div></div></div></span>
+                    <span v-else>Generate Bee</span>
+                </button>
+                <p v-if="imageGenerationError" class="red-text">{{ imageGenerationError }}</p>
+                <div v-if="generatedImageUrl" class="mt-3 center-align">
+                    <h5 class="white-text">Generated Rare Bee:</h5>
+                    <img :src="generatedImageUrl" alt="Generated Rare Bee" class="responsive-img" style="max-height: 200px; border: 2px solid #ffb300;">
+                    <button @click="unlockGeneratedBee" class="btn green darken-2 waves-effect waves-light mt-2">Add to Collection</button>
+                </div>
+            </div>
+            <div class="modal-footer grey darken-4">
+                <a href="#!" class="modal-close waves-effect waves-green btn-flat white-text">Close</a>
+            </div>
+        </div>
+
+        <div id="requeen-modal" class="modal grey darken-4 white-text">
+            <div class="modal-content">
+                <h4 class="white-text">Confirm Requeening</h4>
+                <p class="grey-text text-lighten-2">
+                    Are you absolutely sure you want to Requeen your apiary? This will reset your Honey, Wax, Royal Jelly, Research Points,
+                    and all upgrade levels (except Queen's Legacy Points).
+                </p>
+                <p class="white-text">
+                    You will gain <span class="amber-text text-lighten-2">{{ formatNumber(calculateNewQLP()) }}</span> Queen's Legacy Points!
+                </p>
+                <p class="grey-text text-lighten-2">
+                    Your current QLP bonus is +{{ formatNumber(queensLegacyBonus * 100) }}%.
+                    After this Requeening, it will be +{{ formatNumber((queensLegacyBonus + (calculateNewQLP() * 0.005)) * 100) }}%!
+                </p>
+            </div>
+            <div class="modal-footer grey darken-4">
+                <button @click="requeenApiary" class="btn red darken-2 waves-effect waves-light">Confirm Requeen</button>
+                <a href="#!" class="modal-close waves-effect waves-green btn-flat white-text ml-2">Cancel</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script>
+        const app = Vue.createApp({
+            data() {
+                return {
+                    resources: {
+                        honey: 0,
+                        wax: 0,
+                        royalJelly: 0,
+                        researchPoints: 0,
+                        queensLegacyPoints: 0,
+                    },
+                    productionRates: {
+                        honeyPerClick: 1,
+                        honeyPerSecond: 0,
+                        waxPerSecond: 0,
+                        royalJellyPerSecond: 0.001,
+                        researchPointsPerSecond: 0,
+                    },
+                    upgrades: {
+                        bees: {
+                            workerBee: { level: 0, baseCost: { honey: 10 }, costMultiplier: 1.15, honeyPerSecondBase: 0.1, name: 'Worker Bee', description: 'They work hard, and they barely unionize. Mostly.' },
+                            queenBee: { level: 0, baseCost: { honey: 1000, wax: 100 }, costMultiplier: 1.2, honeyMultiplier: 1.5, royalJellyPerSecondBase: 0.005, name: 'Queen Bee', description: 'She\'s the boss. Don\'t ask what she does all day, it\'s confidential.' },
+                            droneBee: { level: 0, baseCost: { honey: 500, researchPoints: 50 }, costMultiplier: 1.25, royalJellyPerSecondBase: 0.01, waxPerSecondBase: 0.01, prerequisite: { category: 'research', upgrade: 'geneticSequencingI' }, name: 'Drone Bee', description: 'Just here for the royal jelly and good vibes. Don\'t judge.' },
+                            foragerBee: { level: 0, baseCost: { honey: 2000, wax: 200, researchPoints: 150 }, costMultiplier: 1.3, honeyPerClickMultiplier: 0.1, honeyPerSecondBase: 0.05, prerequisite: { category: 'research', upgrade: 'geneticSequencingII' }, name: 'Forager Bee', description: 'They bring home the bacon... or rather, the honey. And sometimes pollen.' },
+                        },
+                        hive: {
+                            hiveEfficiency: { level: 0, baseCost: { honey: 50 }, costMultiplier: 1.2, productionMultiplier: 1.05, name: 'Hive Efficiency', description: 'Streamlines the honey flow. Less sticky mess, more sweet success.' },
+                            waxProduction: { level: 0, baseCost: { honey: 200 }, costMultiplier: 1.3, waxPerSecondBase: 0.05, name: 'Wax Production', description: 'Turns nectar into structural masterpieces. Who needs architects?' },
+                            apiaryExpansion: { level: 0, baseCost: { honey: 5000, wax: 500 }, costMultiplier: 1.5, honeyMultiplier: 2, name: 'Apiary Expansion', description: 'More room for activities! Mostly honey-making. And naps.' },
+                            advancedComb: { level: 0, baseCost: { wax: 1000, researchPoints: 100 }, costMultiplier: 1.4, waxPerSecondMultiplier: 1.1, prerequisite: { category: 'research', upgrade: 'automatedHarvester' }, name: 'Advanced Comb Structure', description: 'Hexagons are the bestagons. And also super efficient.' },
+                            jellyFiltration: { level: 0, baseCost: { royalJelly: 50, researchPoints: 200 }, costMultiplier: 1.5, royalJellyPerSecondMultiplier: 1.15, prerequisite: { category: 'research', upgrade: 'royalJellyExtractor' }, name: 'Royal Jelly Filtration', description: 'For when your royal jelly needs that extra sparkle. And purity.' },
+                        },
+                        research: {
+                            rpGenerator: { level: 0, baseCost: { honey: 1000, wax: 100 }, costMultiplier: 1.2, researchPointsPerSecondBase: 0.01, name: 'Research Lab Core', description: 'The buzzing hub of innovation. Also where bees argue about quantum physics.' },
+                            geneticSequencingI: { level: 0, baseCost: { honey: 5000, researchPoints: 500 }, costMultiplier: 1.5, name: 'Genetic Sequencing I', description: 'Playing God with bees. What could go wrong? (Spoiler: Probably nothing.)' },
+                            geneticSequencingII: { level: 0, baseCost: { honey: 10000, wax: 1000, researchPoints: 1500 }, costMultiplier: 1.5, prerequisite: { category: 'research', upgrade: 'geneticSequencingI' }, name: 'Genetic Sequencing II', description: 'Advanced bee-gineering for a brighter, buzzier future.' },
+                            mutagenicPollen: { level: 0, baseCost: { royalJelly: 200, researchPoints: 1000 }, costMultiplier: 1.8, rareBeeBonusMultiplier: 0.1, prerequisite: { category: 'research', upgrade: 'geneticSequencingII' }, name: 'Mutagenic Pollen', description: 'Makes your rare bees even rarer. And possibly glow in the dark.' },
+                            automatedHarvester: { level: 0, baseCost: { wax: 2000, researchPoints: 750 }, costMultiplier: 1.4, honeyPerSecondMultiplier: 1.1, honeyPerClickMultiplier: 0.1, name: 'Automated Harvester', description: 'Finally, a machine that appreciates honey as much as we do. Maybe more.' },
+                            waxRefiner: { level: 0, baseCost: { honey: 3000, researchPoints: 800 }, costMultiplier: 1.3, waxPerSecondMultiplier: 1.1, waxCostReduction: 0.05, name: 'Wax Refiner', description: 'Turns crude wax into gleaming gold... or at least, more useful wax.' },
+                            royalJellyExtractor: { level: 0, baseCost: { royalJelly: 100, researchPoints: 1200 }, costMultiplier: 1.5, royalJellyPerSecondMultiplier: 1.2, name: 'Royal Jelly Extractor', description: 'Extracts the royal jelly with maximum efficiency. The queen is mildly annoyed.' },
+                            flowerMapping: { level: 0, baseCost: { honey: 4000, researchPoints: 1000 }, costMultiplier: 1.4, honeyPerSecondMultiplier: 1.1, waxPerSecondMultiplier: 1.1, name: 'Flower Mapping', description: 'Know thy flower. Know thy nectar. Know thy pollen. It\'s just good business.' },
+                            pheromoneLures: { level: 0, baseCost: { royalJelly: 150, researchPoints: 1500 }, costMultiplier: 1.6, royalJellyPerSecondMultiplier: 1.25, name: 'Pheromone Lures', description: 'Lures rare, exotic bees to your apiary. Just don\'t ask what\'s in the lure.' },
+                        }
+                    },
+                    rareBeesUnlocked: [],
+                    totalHoneyProduced: 0,
+                    requeenMilestone: 1000000,
+                    queensLegacyPoints: 0,
+                    
+                    gameLoopInterval: null,
+                    autoSaveInterval: null,
+                    eventInterval: null,
+                    settingsModalInstance: null,
+                    imageGenModalInstance: null,
+                    requeenModalInstance: null,
+                    imagePrompt: '',
+                    generatedImageUrl: '',
+                    isGeneratingImage: false,
+                    imageGenerationError: '',
+                    isHoneyClicked: false,
+                    hiveImages: [
+                        '/generated_images/imagen3_1a434d1d-39f.png',
+                        '/generated_images/imagen3_8d3dc55d-bd8.png',
+                        '/generated_images/imagen3_7397e9ce-ca8.png'
+                    ],
+                    beeEvents: [
+                        { id: 'rave', text: 'Bee Rave! (+15% Honey Production for 30s) - Someone left the disco ball on again.', effect: { type: 'honeyProduction', value: 0.15 }, duration: 30000 },
+                        { id: 'bear', text: 'Bear Spotted! (-10% Honey Production for 60s) - Quick, distract him with a picnic basket!', effect: { type: 'honeyProduction', value: -0.10 }, duration: 60000 },
+                        { id: 'fashion', text: 'Bee Fashion Show! (No effect, just flavor) - Your bees are looking fabulous today. Work it, queens!', effect: null, duration: 15000 },
+                        { id: 'lostBee', text: 'Lost Bee Returns! (+100 Honey) - Turns out he was just at the corner store, got distracted by a sale on pollen.', effect: { type: 'honeyGain', value: 100 }, duration: 5000 },
+                        { id: 'overheard', text: 'Overheard a bee complaining about the commute. Some things never change.', effect: null, duration: 10000 }
+                    ],
+                    currentBeeEvent: { text: '', effect: null, expires: 0, id: null },
+                };
+            },
+            computed: {
+                getUpgradeCost() {
+                    return (key, category, resourceType) => {
+                        const upgrade = this.upgrades[category][key];
+                        if (!upgrade || !upgrade.baseCost || !upgrade.baseCost[resourceType]) {
+                            return 0;
+                        }
+                        return Math.floor(upgrade.baseCost[resourceType] * Math.pow(upgrade.costMultiplier, upgrade.level));
+                    };
+                },
+                canAfford() {
+                    return (key, category) => {
+                        const upgrade = this.upgrades[category][key];
+                        if (!upgrade) return false;
+
+                        if (upgrade.prerequisite) {
+                            const prereqCategory = upgrade.prerequisite.category || 'research';
+                            const prereqUpgrade = this.upgrades[prereqCategory][upgrade.prerequisite.upgrade];
+                            if (!prereqUpgrade || prereqUpgrade.level === 0) {
+                                return false;
+                            }
+                        }
+
+                        for (const resourceType in upgrade.baseCost) {
+                            const cost = this.getUpgradeCost(key, category, resourceType);
+                            if (this.resources[resourceType] < cost) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    };
+                },
+                filteredUpgrades() {
+                    return (category) => {
+                        const filtered = {};
+                        for (const key in this.upgrades[category]) {
+                            const upgrade = this.upgrades[category][key];
+                            if (!upgrade.prerequisite || this.upgrades[upgrade.prerequisite.category || 'research'][upgrade.prerequisite.upgrade].level > 0) {
+                                filtered[key] = upgrade;
+                            }
+                        }
+                        return filtered;
+                    };
+                },
+                currentHiveImage() {
+                    const apiaryExpansionLevel = this.upgrades.hive.apiaryExpansion.level;
+                    const index = Math.min(apiaryExpansionLevel, this.hiveImages.length - 1);
+                    return this.hiveImages[index];
+                },
+                canRequeen() {
+                    return this.totalHoneyProduced >= this.requeenMilestone;
+                },
+                queensLegacyBonus() {
+                    return this.resources.queensLegacyPoints * 0.005;
+                }
+            },
+            methods: {
+                initGame() {
+                    this.loadGame();
+                    this.calculateProductionRates();
+                    this.startGameLoop();
+                    this.startAutoSave();
+                    this.startEventLoop();
+                },
+                startGameLoop() {
+                    if (this.gameLoopInterval) clearInterval(this.gameLoopInterval);
+                    this.gameLoopInterval = setInterval(() => {
+                        this.resources.honey = parseFloat((this.resources.honey + this.productionRates.honeyPerSecond).toFixed(2));
+                        this.resources.wax = parseFloat((this.resources.wax + this.productionRates.waxPerSecond).toFixed(2));
+                        this.resources.royalJelly = parseFloat((this.resources.royalJelly + this.productionRates.royalJellyPerSecond).toFixed(4));
+                        this.resources.researchPoints = parseFloat((this.resources.researchPoints + this.productionRates.researchPointsPerSecond).toFixed(2));
+                        this.totalHoneyProduced = parseFloat((this.totalHoneyProduced + this.productionRates.honeyPerSecond).toFixed(2));
+
+                        if (this.currentBeeEvent.expires > 0 && Date.now() > this.currentBeeEvent.expires) {
+                            this.currentBeeEvent = { text: '', effect: null, expires: 0, id: null };
+                            this.calculateProductionRates();
+                        }
+                    }, 1000);
+                },
+                startAutoSave() {
+                    if (this.autoSaveInterval) clearInterval(this.autoSaveInterval);
+                    this.autoSaveInterval = setInterval(() => {
+                        this.saveGame();
+                    }, 30 * 1000);
+                },
+                startEventLoop() {
+                    if (this.eventInterval) clearInterval(this.eventInterval);
+                    this.eventInterval = setInterval(() => {
+                        if (Math.random() < 0.2) {
+                            this.triggerRandomBeeEvent();
+                        }
+                    }, 60 * 1000);
+                },
+                calculateProductionRates() {
+                    let honeyPerSecond = 0;
+                    let waxPerSecond = 0;
+                    let royalJellyPerSecond = 0;
+                    let researchPointsPerSecond = 0;
+                    let honeyPerClick = 1;
+
+                    honeyPerSecond += this.upgrades.bees.workerBee.level * this.upgrades.bees.workerBee.honeyPerSecondBase;
+                    waxPerSecond += this.upgrades.hive.waxProduction.level * this.upgrades.hive.waxPerSecondBase;
+                    royalJellyPerSecond += this.upgrades.bees.queenBee.level * this.upgrades.bees.queenBee.royalJellyPerSecondBase;
+                    
+                    if (this.upgrades.bees.droneBee.level > 0 && this.upgrades.bees.droneBee.prerequisite.level > 0) {
+                        royalJellyPerSecond += this.upgrades.bees.droneBee.level * this.upgrades.bees.droneBee.royalJellyPerSecondBase;
+                        waxPerSecond += this.upgrades.bees.droneBee.level * this.upgrades.bees.droneBee.waxPerSecondBase;
+                    }
+                    if (this.upgrades.bees.foragerBee.level > 0 && this.upgrades.bees.foragerBee.prerequisite.level > 0) {
+                        honeyPerSecond += this.upgrades.bees.foragerBee.level * this.upgrades.bees.foragerBee.honeyPerSecondBase;
+                        honeyPerClick += this.upgrades.bees.foragerBee.level * this.upgrades.bees.foragerBee.honeyPerClickMultiplier;
+                    }
+                    
+                    researchPointsPerSecond += this.upgrades.research.rpGenerator.level * this.upgrades.research.rpGenerator.researchPointsPerSecondBase;
+
+                    let totalProductionMultiplier = 1;
+                    totalProductionMultiplier *= (1 + (this.upgrades.bees.queenBee.level * this.upgrades.bees.queenBee.honeyMultiplier));
+                    totalProductionMultiplier *= (1 + (this.upgrades.hive.hiveEfficiency.level * this.upgrades.hive.hiveEfficiency.productionMultiplier));
+                    totalProductionMultiplier *= (1 + (this.upgrades.hive.apiaryExpansion.level * this.upgrades.hive.apiaryExpansion.honeyMultiplier));
+
+                    honeyPerSecond *= totalProductionMultiplier;
+                    honeyPerClick *= totalProductionMultiplier;
+
+                    if (this.upgrades.research.automatedHarvester.level > 0) {
+                        honeyPerSecond *= (1 + (this.upgrades.research.automatedHarvester.level * this.upgrades.research.automatedHarvester.honeyPerSecondMultiplier));
+                        honeyPerClick *= (1 + (this.upgrades.research.automatedHarvester.level * this.upgrades.research.automatedHarvester.honeyPerClickMultiplier));
+                    }
+                    if (this.upgrades.research.waxRefiner.level > 0) {
+                        waxPerSecond *= (1 + (this.upgrades.research.waxRefiner.level * this.upgrades.research.waxPerSecondMultiplier));
+                    }
+                    if (this.upgrades.research.royalJellyExtractor.level > 0) {
+                        royalJellyPerSecond *= (1 + (this.upgrades.research.royalJellyExtractor.level * this.upgrades.research.royalJellyExtractor.royalJellyPerSecondMultiplier));
+                    }
+                    if (this.upgrades.hive.jellyFiltration.level > 0 && this.upgrades.hive.jellyFiltration.prerequisite.level > 0) {
+                        royalJellyPerSecond *= (1 + (this.upgrades.hive.jellyFiltration.level * this.upgrades.hive.jellyFiltration.royalJellyPerSecondMultiplier));
+                    }
+                    if (this.upgrades.hive.advancedComb.level > 0 && this.upgrades.hive.advancedComb.prerequisite.level > 0) {
+                        waxPerSecond *= (1 + (this.upgrades.hive.advancedComb.level * this.upgrades.hive.advancedComb.waxPerSecondMultiplier));
+                    }
+                    if (this.upgrades.research.flowerMapping.level > 0) {
+                        honeyPerSecond *= (1 + (this.upgrades.research.flowerMapping.level * this.upgrades.research.flowerMapping.honeyPerSecondMultiplier));
+                        waxPerSecond *= (1 + (this.upgrades.research.flowerMapping.level * this.upgrades.research.flowerMapping.waxPerSecondMultiplier));
+                    }
+                    if (this.upgrades.research.pheromoneLures.level > 0) {
+                        royalJellyPerSecond *= (1 + (this.upgrades.research.pheromoneLures.level * this.upgrades.research.pheromoneLures.royalJellyPerSecondMultiplier));
+                    }
+
+                    let rareBeeBonusMultiplier = 1;
+                    if (this.upgrades.research.mutagenicPollen.level > 0 && this.upgrades.research.mutagenicPollen.prerequisite.level > 0) {
+                        rareBeeBonusMultiplier += (this.upgrades.research.mutagenicPollen.level * this.upgrades.research.mutagenicPollen.rareBeeBonusMultiplier);
+                    }
+
+                    this.rareBeesUnlocked.forEach(bee => {
+                        if (bee.bonusType === 'honeyProduction') {
+                            honeyPerSecond *= (1 + (bee.bonusValue * rareBeeBonusMultiplier));
+                        } else if (bee.bonusType === 'waxProduction') {
+                            waxPerSecond *= (1 + (bee.bonusValue * rareBeeBonusMultiplier));
+                        }
+                    });
+
+                    const finalQLPBonus = 1 + this.queensLegacyBonus;
+                    honeyPerSecond *= finalQLPBonus;
+                    waxPerSecond *= finalQLPBonus;
+                    royalJellyPerSecond *= finalQLPBonus;
+                    researchPointsPerSecond *= finalQLPBonus;
+
+                    if (this.currentBeeEvent.effect && this.currentBeeEvent.effect.type === 'honeyProduction') {
+                        honeyPerSecond *= (1 + this.currentBeeEvent.effect.value);
+                    }
+
+                    this.productionRates.honeyPerSecond = parseFloat(honeyPerSecond.toFixed(2));
+                    this.productionRates.waxPerSecond = parseFloat(waxPerSecond.toFixed(2));
+                    this.productionRates.royalJellyPerSecond = parseFloat(royalJellyPerSecond.toFixed(4));
+                    this.productionRates.researchPointsPerSecond = parseFloat(researchPointsPerSecond.toFixed(2));
+                    this.productionRates.honeyPerClick = parseFloat(honeyPerClick.toFixed(2));
+                },
+                clickHoney() {
+                    this.resources.honey = parseFloat((this.resources.honey + this.productionRates.honeyPerClick).toFixed(2));
+                    this.totalHoneyProduced = parseFloat((this.totalHoneyProduced + this.productionRates.honeyPerClick).toFixed(2));
+                    this.isHoneyClicked = true;
+                },
+                buyUpgrade(key, category) {
+                    const upgrade = this.upgrades[category][key];
+                    if (!upgrade) return;
+
+                    if (!this.canAfford(key, category)) {
+                        M.toast({html: `Not enough resources or prerequisites for ${upgrade.name}!`, classes: 'red darken-2'});
+                        return;
+                    }
+
+                    for (const resourceType in upgrade.baseCost) {
+                        const cost = this.getUpgradeCost(key, category, resourceType);
+                        this.resources[resourceType] -= cost;
+                    }
+
+                    upgrade.level++;
+                    this.calculateProductionRates();
+                    M.toast({html: `Upgrade ${upgrade.name} purchased!`, classes: 'amber darken-2'});
+                    this.$nextTick(() => {
+                        M.Tooltip.init(document.querySelectorAll('.tooltipped'));
+                    });
+                },
+                saveGame() {
+                    try {
+                        const gameState = {
+                            resources: this.resources,
+                            upgrades: JSON.parse(JSON.stringify(this.upgrades)),
+                            rareBeesUnlocked: this.rareBeesUnlocked,
+                            totalHoneyProduced: this.totalHoneyProduced,
+                            requeenMilestone: this.requeenMilestone,
+                            queensLegacyPoints: this.resources.queensLegacyPoints,
+                            currentBeeEvent: this.currentBeeEvent,
+                        };
+                        localStorage.setItem('beekeepingGame', JSON.stringify(gameState));
+                        M.toast({html: 'Game Saved!', classes: 'green darken-2'});
+                    } catch (e) {
+                        console.error('Error saving game:', e);
+                        M.toast({html: 'Error saving game!', classes: 'red darken-2'});
+                    }
+                },
+                loadGame() {
+                    try {
+                        const savedState = localStorage.getItem('beekeepingGame');
+                        if (savedState) {
+                            const gameState = JSON.parse(savedState);
+                            
+                            Object.assign(this.resources, this.$options.data().resources, gameState.resources);
+                            
+                            for (const category in this.$options.data().upgrades) {
+                                if (!this.upgrades[category]) {
+                                    this.upgrades[category] = {};
+                                }
+                                for (const key in this.$options.data().upgrades[category]) {
+                                    if (gameState.upgrades && gameState.upgrades[category] && gameState.upgrades[category][key]) {
+                                        Object.assign(this.upgrades[category][key], this.$options.data().upgrades[category][key], gameState.upgrades[category][key]);
+                                    } else {
+                                        this.upgrades[category][key] = JSON.parse(JSON.stringify(this.$options.data().upgrades[category][key]));
+                                    }
+                                }
+                            }
+
+                            this.rareBeesUnlocked = gameState.rareBeesUnlocked || [];
+                            this.totalHoneyProduced = gameState.totalHoneyProduced || 0;
+                            this.requeenMilestone = gameState.requeenMilestone || 1000000;
+                            this.resources.queensLegacyPoints = gameState.queensLegacyPoints || 0;
+                            this.currentBeeEvent = gameState.currentBeeEvent || { text: '', effect: null, expires: 0, id: null };
+
+                            this.calculateProductionRates();
+                            M.toast({html: 'Game Loaded!', classes: 'green darken-2'});
+                        } else {
+                            M.toast({html: 'No saved game found, starting new game.', classes: 'blue darken-2'});
+                        }
+                    } catch (e) {
+                        console.error('Error loading game:', e);
+                        M.toast({html: 'Error loading game, starting new game.', classes: 'red darken-2'});
+                        this.resetGame();
+                    }
+                },
+                resetGame() {
+                    if (confirm('Are you sure you want to reset your game? This cannot be undone!')) {
+                        localStorage.removeItem('beekeepingGame');
+                        Object.assign(this.$data, this.$options.data());
+                        this.initGame();
+                        M.toast({html: 'Game Reset!', classes: 'red darken-2'});
+                    }
+                },
+                formatNumber(num) {
+                    if (num === undefined || num === null || isNaN(num)) return '0';
+                    num = parseFloat(num);
+                    if (num < 1000) return num.toFixed(num % 1 === 0 ? 0 : (num === 0 ? 0 : 2));
+                    const si = [
+                        { value: 1, symbol: "" },
+                        { value: 1E3, symbol: "k" },
+                        { value: 1E6, symbol: "M" },
+                        { value: 1E9, symbol: "B" },
+                        { value: 1E12, symbol: "T" },
+                        { value: 1E15, symbol: "P" },
+                        { value: 1E18, symbol: "E" }
+                    ];
+                    const rx = /\.0+$|(\.[0-9]*[1-9])0+$/;
+                    let i;
+                    for (i = si.length - 1; i > 0; i--) {
+                        if (num >= si[i].value) {
+                            break;
+                        }
+                    }
+                    return (num / si[i].value).toFixed(2).replace(rx, "$1") + si[i].symbol;
+                },
+                openSettingsModal() {
+                    this.settingsModalInstance.open();
+                },
+                openImageGeneratorModal() {
+                    if (this.resources.royalJelly >= 100) {
+                        this.imagePrompt = '';
+                        this.generatedImageUrl = '';
+                        this.imageGenerationError = '';
+                        this.imageGenModalInstance.open();
+                    } else {
+                        M.toast({html: 'Need 100 Royal Jelly to generate a Rare Bee!', classes: 'red darken-2'});
+                    }
+                },
+                async generateRareBeeImage() {
+                    if (!this.imagePrompt) {
+                        this.imageGenerationError = 'Please enter a description for your rare bee.';
+                        return;
+                    }
+                    if (this.resources.royalJelly < 100) {
+                        this.imageGenerationError = 'Not enough Royal Jelly (100 required).';
+                        return;
+                    }
+
+                    this.isGeneratingImage = true;
+                    this.imageGenerationError = '';
+                    this.generatedImageUrl = '';
+
+                    try {
+                        const response = await fetch('/api/generate-image-on-demand', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                prompt: `A stylized, beautiful, humorous bee with the following characteristics: ${this.imagePrompt}. Dark theme, detailed, digital art, isometric view.`,
+                                aspectRatio: '1:1'
+                            })
+                        });
+                        const data = await response.json();
+
+                        if (data.success) {
+                            this.generatedImageUrl = data.imageUrl;
+                            M.toast({html: 'Rare Bee image generated! Add it to your collection.', classes: 'green darken-2'});
+                        } else {
+                            this.imageGenerationError = data.error || 'Failed to generate image.';
+                            M.toast({html: `Image generation failed: ${this.imageGenerationError}`, classes: 'red darken-2'});
+                        }
+                    } catch (error) {
+                        console.error('Error calling image generation API:', error);
+                        this.imageGenerationError = 'Network error or API unavailable.';
+                        M.toast({html: `Network error: ${this.imageGenerationError}`, classes: 'red darken-2'});
+                    } finally {
+                        this.isGeneratingImage = false;
+                    }
+                },
+                unlockGeneratedBee() {
+                    if (this.generatedImageUrl) {
+                        this.resources.royalJelly -= 100;
+                        const beeName = this.imagePrompt.length > 30 ? this.imagePrompt.substring(0, 27) + '...' : this.imagePrompt || 'Mysterious Bee';
+                        const newBee = {
+                            name: beeName,
+                            imageUrl: this.generatedImageUrl,
+                            description: this.imagePrompt,
+                            bonusType: Math.random() < 0.7 ? 'honeyProduction' : 'waxProduction',
+                            bonusValue: Math.random() * 0.05 + 0.01
+                        };
+                        this.rareBeesUnlocked.push(newBee);
+                        this.calculateProductionRates();
+                        this.generatedImageUrl = '';
+                        this.imagePrompt = '';
+                        M.toast({html: `Rare Bee "${newBee.name}" added to collection!`, classes: 'blue darken-2'});
+                        this.imageGenModalInstance.close();
+                    }
+                },
+                triggerRandomBeeEvent() {
+                    const event = this.beeEvents[Math.floor(Math.random() * this.beeEvents.length)];
+                    this.currentBeeEvent.text = event.text;
+                    this.currentBeeEvent.effect = event.effect;
+                    this.currentBeeEvent.id = event.id;
+
+                    if (event.effect && event.effect.type === 'honeyGain') {
+                        this.resources.honey = parseFloat((this.resources.honey + event.effect.value).toFixed(2));
+                        this.totalHoneyProduced = parseFloat((this.totalHoneyProduced + event.effect.value).toFixed(2));
+                        M.toast({html: event.text, classes: 'green darken-2'});
+                        this.currentBeeEvent = { text: '', effect: null, expires: 0, id: null };
+                    } else {
+                        M.toast({html: event.text, classes: 'amber darken-2'});
+                        if (event.duration) {
+                            this.currentBeeEvent.expires = Date.now() + event.duration;
+                        } else {
+                            this.currentBeeEvent.expires = Date.now() + 10000;
+                        }
+                        this.calculateProductionRates();
+                    }
+                },
+                openRequeenModal() {
+                    this.requeenModalInstance.open();
+                },
+                calculateNewQLP() {
+                    return Math.floor(this.totalHoneyProduced / this.requeenMilestone) * 10;
+                },
+                requeenApiary() {
+                    const newQLP = this.calculateNewQLP();
+                    this.resources.queensLegacyPoints += newQLP;
+
+                    const initialData = this.$options.data();
+                    Object.assign(this.resources, initialData.resources);
+                    this.resources.queensLegacyPoints = this.resources.queensLegacyPoints;
+
+                    for (const category in this.upgrades) {
+                        for (const key in this.upgrades[category]) {
+                            this.upgrades[category][key].level = initialData.upgrades[category][key].level;
+                        }
+                    }
+
+                    this.rareBeesUnlocked = [];
+                    this.totalHoneyProduced = 0;
+                    this.requeenMilestone = this.requeenMilestone * 2;
+                    this.currentBeeEvent = { text: '', effect: null, expires: 0, id: null };
+
+                    this.calculateProductionRates();
+                    M.toast({html: `Requeening successful! Gained ${this.formatNumber(newQLP)} QLP!`, classes: 'green darken-2'});
+                    this.requeenModalInstance.close();
+                }
+            },
+            mounted() {
+                const settingsModalElem = document.getElementById('settings-modal');
+                this.settingsModalInstance = M.Modal.init(settingsModalElem);
+
+                const imageGenModalElem = document.getElementById('image-gen-modal');
+                this.imageGenModalInstance = M.Modal.init(imageGenModalElem, {
+                    onOpenEnd: () => {
+                        M.updateTextFields();
+                    }
+                });
+
+                const requeenModalElem = document.getElementById('requeen-modal');
+                this.requeenModalInstance = M.Modal.init(requeenModalElem);
+
+                const tabsElem = document.querySelector('.tabs');
+                M.Tabs.init(tabsElem);
+
+                this.loadGame();
+                this.initGame();
+                this.$nextTick(() => {
+                    M.Tooltip.init(document.querySelectorAll('.tooltipped'));
+                });
+            },
+            beforeUnmount() {
+                clearInterval(this.gameLoopInterval);
+                clearInterval(this.autoSaveInterval);
+                clearInterval(this.eventInterval);
+            }
+        });
+
+        app.mount('#app');
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

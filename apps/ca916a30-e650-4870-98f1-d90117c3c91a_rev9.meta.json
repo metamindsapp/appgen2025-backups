@@ -1,0 +1,10 @@
+{
+  "projectId": "ca916a30-e650-4870-98f1-d90117c3c91a",
+  "revisionString": "9",
+  "projectNameDisplay": "Particle simulation ",
+  "projectType": "game",
+  "userPromptForThisRevision": "Okay expand the range for the sliders. And let’s add mass (proportionate to size) and “gravity” (weak for default settings). And an option to make mass and charge strength decay as a particle decays ",
+  "basedOnRevisionString": "8",
+  "savedAt": "2025-05-29T18:08:07.003Z",
+  "imageAssets": []
+}

@@ -1,0 +1,1827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mesmerizing Particle Playground</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #121212;
+            height: 100%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Roboto', sans-serif;
+            color: #e0e0e0;
+        }
+
+        #app-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #000;
+        }
+
+        #particleCanvas {
+            display: block;
+            background-color: transparent;
+        }
+
+        #hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            background-color: rgba(33, 33, 33, 0.7);
+            padding: 10px 15px;
+            border-radius: 5px;
+            color: #e0e0e0;
+            font-size: 0.9em;
+            min-width: 120px;
+        }
+        #hud p {
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .modal {
+            background-color: #212121 !important;
+            color: #e0e0e0;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-footer {
+            background-color: #1a1a1a !important;
+            border-top: 1px solid #333 !important;
+        }
+        .modal .modal-content h4 {
+            color: #e0e0e0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+        .modal .modal-content label.active {
+            color: #e0e0e0 !important;
+        }
+
+        .input-field label {
+            color: #e0e0e0 !important;
+        }
+
+        .input-field input[type=text]:focus + label {
+            color: #9c27b0 !important;
+        }
+
+        .input-field input[type=text]:focus {
+            border-bottom: 1px solid #9c27b0 !important;
+            box-shadow: 0 1px 0 0 #9c27b0 !important;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            background-color: #9c27b0;
+            border: none;
+            box-shadow: 0 0 0 4px rgba(156, 39, 176, 0.4);
+        }
+        input[type=range]::-moz-range-thumb {
+            background-color: #9c27b0;
+            border: none;
+            box-shadow: 0 0 0 4px rgba(156, 39, 176, 0.4);
+        }
+        input[type=range]::-ms-thumb {
+            background-color: #9c27b0;
+            border: none;
+            box-shadow: 0 0 0 4px rgba(156, 39, 176, 0.4);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            background-color: #616161;
+            border-radius: 5px;
+        }
+        input[type=range]::-moz-range-track {
+            background-color: #616161;
+            border-radius: 5px;
+        }
+        input[type=range]::-ms-track {
+            background-color: #616161;
+            border-radius: 5px;
+        }
+
+        .switch label input[type=checkbox]:checked+.lever {
+            background-color: #616161 !important;
+        }
+        .switch label input[type=checkbox]:checked+.lever:after {
+            background-color: #9c27b0 !important;
+        }
+        .switch label .lever {
+            background-color: #424242 !important;
+        }
+        .switch label .lever:after {
+            background-color: #bdbdbd !important;
+        }
+
+        .btn-flat.white-text {
+            color: #e0e0e0 !important;
+        }
+        .btn-flat.white-text:hover {
+            background-color: rgba(255, 255, 255, 0.08) !important;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 10px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .btn-group .btn {
+            flex-grow: 1;
+            border-radius: 0;
+            margin: 0;
+            height: 45px;
+            line-height: 45px;
+            padding: 0 10px;
+            font-size: 0.85rem;
+            background-color: #424242 !important;
+            color: #e0e0e0 !important;
+            transition: background-color 0.2s ease;
+        }
+        .btn-group .btn:first-child {
+            border-top-left-radius: 4px;
+            border-bottom-left-radius: 4px;
+        }
+        .btn-group .btn:last-child {
+            border-top-right-radius: 4px;
+            border-bottom-right-radius: 4px;
+        }
+        .btn-group .btn.active {
+            background-color: #9c27b0 !important;
+            font-weight: bold;
+        }
+        .btn-group .btn:hover {
+            background-color: #555 !important;
+        }
+        .btn-group .btn.active:hover {
+            background-color: #b057c0 !important;
+        }
+
+        .mb-3 { margin-bottom: 20px; }
+        .mt-4 { margin-top: 30px; }
+
+        .modal.scene-select-modal .modal-content {
+            padding-bottom: 0;
+        }
+        .collection.scene-list {
+            border: none;
+            margin: 0;
+        }
+        .collection.scene-list .collection-item {
+            background-color: #212121 !important;
+            color: #e0e0e0 !important;
+            border-bottom: 1px solid #333 !important;
+            transition: background-color 0.2s ease;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+        }
+        .collection.scene-list .collection-item:last-child {
+            border-bottom: none !important;
+        }
+        .collection.scene-list .collection-item:hover {
+            background-color: rgba(156, 39, 176, 0.2) !important;
+        }
+        .collection.scene-list .collection-item.active {
+            background-color: #9c27b0 !important;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="grey darken-4">
+    <div id="app-container">
+        <canvas id="particleCanvas"></canvas>
+
+        <div id="hud" class="card-panel grey darken-3 white-text z-depth-2">
+            <p>Particles: <span id="currentParticleCount">0</span></p>
+            <p>FPS: <span id="fpsDisplay">0</span></p>
+            <p>Mode: <span id="currentInteractionMode">Attract</span></p>
+        </div>
+
+        <div class="fixed-action-btn horizontal click-to-toggle" style="bottom: 45px; right: 24px;">
+            <a class="btn-floating btn-large waves-effect waves-light purple darken-3">
+                <i class="material-icons">menu</i>
+            </a>
+            <ul>
+                <li><a class="btn-floating purple darken-1 modal-trigger tooltipped" data-position="left" data-tooltip="Settings" href="#settingsModal" id="settingsBtn"><i class="material-icons">settings</i></a></li>
+                <li><a class="btn-floating red darken-1 waves-effect waves-light tooltipped" data-position="left" data-tooltip="Reset Simulation" id="onScreenResetBtn"><i class="material-icons">refresh</i></a></li>
+                <li><a class="btn-floating orange darken-1 waves-effect waves-light tooltipped" data-position="left" data-tooltip="Clear Canvas" id="onScreenClearBtn"><i class="material-icons">clear_all</i></a></li>
+            </ul>
+        </div>
+
+        <div id="settingsModal" class="modal grey darken-3">
+            <div class="modal-content white-text">
+                <h4>Simulation Settings</h4>
+                <div class="row">
+                    <div class="col s12 mb-3">
+                        <label class="white-text active">Interaction Mode:</label>
+                        <div id="interactionModeButtons" class="btn-group z-depth-1">
+                            <a class="waves-effect waves-light btn grey darken-2 white-text mode-btn" data-mode="attract">Attract</a>
+                            <a class="waves-effect waves-light btn grey darken-2 white-text mode-btn" data-mode="repel">Repel</a>
+                            <a class="waves-effect waves-light btn grey darken-2 white-text mode-btn" data-mode="create">Create</a>
+                            <a class="waves-effect waves-light btn grey darken-2 white-text mode-btn" data-mode="erase">Erase</a>
+                        </div>
+                    </div>
+                    <div class="input-field col s12">
+                        <p class="range-field">
+                            <label for="interactionRadiusSlider" class="white-text">Interaction Radius: <span id="interactionRadiusValue"></span></label>
+                            <input type="range" id="interactionRadiusSlider" min="50" max="500" value="150" step="1">
+                        </p>
+                    </div>
+                    <div class="input-field col s12">
+                        <p class="range-field">
+                            <label for="particleCountSlider" class="white-text">Max Particles: <span id="particleCountValue"></span></label>
+                            <input type="range" id="particleCountSlider" min="100" max="10000" value="1000">
+                        </p>
+                    </div>
+                    <div class="input-field col s12">
+                        <p class="range-field">
+                            <label for="particleSizeSlider" class="white-text">Base Particle Size: <span id="particleSizeValue"></span></label>
+                            <input type="range" id="particleSizeSlider" min="0.5" max="20" value="3" step="0.1">
+                        </p>
+                    </div>
+                    <div class="input-field col s12">
+                        <p class="range-field">
+                            <label for="particleSizeVarianceSlider" class="white-text">Particle Size Variance: <span id="particleSizeVarianceValue"></span></label>
+                            <input type="range" id="particleSizeVarianceSlider" min="0" max="1" step="0.01" value="0.5">
+                        </p>
+                    </div>
+                    <div class="input-field col s12">
+                        <p class="range-field">
+                            <label for="forceStrengthSlider" class="white-text">Interaction Force Strength: <span id="forceStrengthValue"></span></label>
+                            <input type="range" id="forceStrengthSlider" min="0.1" max="50" step="0.1" value="1">
+                        </p>
+                    </div>
+                    <div class="input-field col s12">
+                        <p class="range-field">
+                            <label for="particleLifetimeSlider" class="white-text">Particle Lifetime (s): <span id="particleLifetimeValue"></span></label>
+                            <input type="range" id="particleLifetimeSlider" min="1" max="1200" step="1">
+                        </p>
+                    </div>
+                    <div class="input-field col s12">
+                        <p class="range-field">
+                            <label for="frictionSlider" class="white-text">Friction: <span id="frictionValue"></span></label>
+                            <input type="range" id="frictionSlider" min="0.9" max="0.9999" step="0.0001" value="0.98">
+                        </p>
+                    </div>
+                    <div class="input-field col s12">
+                        <p class="range-field">
+                            <label for="particleColorHueSlider" class="white-text">Particle Color Hue: <span id="particleColorHueValue"></span></label>
+                            <input type="range" id="particleColorHueSlider" min="0" max="360" value="200">
+                        </p>
+                    </div>
+                    <div class="col s12">
+                        <div class="switch">
+                            <label class="white-text">
+                                Fixed Hue
+                                <input type="checkbox" id="randomColorSpectrumToggle">
+                                <span class="lever"></span>
+                                Random Spectrum
+                            </label>
+                        </div>
+                    </div>
+                    <div class="input-field col s12">
+                        <p class="range-field">
+                            <label for="positiveParticleHueSlider" class="white-text">Positive Particle Hue: <span id="positiveParticleHueValue"></span></label>
+                            <input type="range" id="positiveParticleHueSlider" min="0" max="360" value="240">
+                        </p>
+                    </div>
+                    <div class="input-field col s12">
+                        <p class="range-field">
+                            <label for="negativeParticleHueSlider" class="white-text">Negative Particle Hue: <span id="negativeParticleHueValue"></span></label>
+                            <input type="range" id="negativeParticleHueSlider" min="0" max="360" value="0">
+                        </p>
+                    </div>
+                    <div class="col s12">
+                        <div class="switch">
+                            <label class="white-text">
+                                Electrostatics Off
+                                <input type="checkbox" id="electrostaticEffectsToggle">
+                                <span class="lever"></span>
+                                Electrostatics On
+                            </label>
+                        </div>
+                    </div>
+                    <div class="input-field col s12">
+                        <p class="range-field">
+                            <label for="electrostaticStrengthSlider" class="white-text">Electrostatic Strength: <span id="electrostaticStrengthValue"></span></label>
+                            <input type="range" id="electrostaticStrengthSlider" min="0.1" max="500" step="0.1" value="10">
+                        </p>
+                    </div>
+                    <div class="input-field col s12">
+                        <p class="range-field">
+                            <label for="maxElectrostaticDistanceSlider" class="white-text">Max Electrostatic Distance: <span id="maxElectrostaticDistanceValue"></span></label>
+                            <input type="range" id="maxElectrostaticDistanceSlider" min="50" max="800" step="10" value="150">
+                        </p>
+                    </div>
+                    <div class="col s12">
+                        <div class="switch">
+                            <label class="white-text">
+                                Fixed Charge
+                                <input type="checkbox" id="randomChargeToggle" checked>
+                                <span class="lever"></span>
+                                Random Charge (+/-)
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col s12">
+                        <div class="switch">
+                            <label class="white-text">
+                                Gravity Off
+                                <input type="checkbox" id="gravityToggle">
+                                <span class="lever"></span>
+                                Gravity On
+                            </label>
+                        </div>
+                    </div>
+                    <div class="input-field col s12">
+                        <p class="range-field">
+                            <label for="gravityStrengthSlider" class="white-text">Gravity Strength: <span id="gravityStrengthValue"></span></label>
+                            <input type="range" id="gravityStrengthSlider" min="0" max="1" step="0.01" value="0.05">
+                        </p>
+                    </div>
+                    <div class="col s12">
+                        <div class="switch">
+                            <label class="white-text">
+                                Mass Decay Off
+                                <input type="checkbox" id="massDecayToggle">
+                                <span class="lever"></span>
+                                Mass Decay On
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col s12">
+                        <div class="switch">
+                            <label class="white-text">
+                                Charge Decay Off
+                                <input type="checkbox" id="chargeDecayToggle">
+                                <span class="lever"></span>
+                                Charge Decay On
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col s12">
+                        <div class="switch">
+                            <label class="white-text">
+                                Trails Off
+                                <input type="checkbox" id="trailsToggle" checked>
+                                <span class="lever"></span>
+                                Trails On
+                            </label>
+                        </div>
+                    </div>
+                    <div class="input-field col s12">
+                        <p class="range-field">
+                            <label for="trailDecayRateSlider" class="white-text">Trail Decay Rate: <span id="trailDecayRateValue"></span></label>
+                            <input type="range" id="trailDecayRateSlider" min="0.001" max="0.5" step="0.001" value="0.1">
+                        </p>
+                    </div>
+                    <div class="col s12 mb-3">
+                        <label class="white-text active">Blending Mode:</label>
+                        <div id="blendingModeButtons" class="btn-group z-depth-1">
+                            <a class="waves-effect waves-light btn grey darken-2 white-text blending-btn" data-mode="source-over">Normal</a>
+                            <a class="waves-effect waves-light btn grey darken-2 white-text blending-btn" data-mode="lighter">Lighter (Glow)</a>
+                            <a class="waves-effect waves-light btn grey darken-2 white-text blending-btn" data-mode="screen">Screen</a>
+                            <a class="waves-effect waves-light btn grey darken-2 white-text blending-btn" data-mode="overlay">Overlay</a>
+                        </div>
+                    </div>
+                    <div class="col s12">
+                        <div class="switch">
+                            <label class="white-text">
+                                No Continuous Spawn
+                                <input type="checkbox" id="continuousSpawnToggle">
+                                <span class="lever"></span>
+                                Continuous Spawn
+                            </label>
+                        </div>
+                    </div>
+                    <div class="input-field col s12">
+                        <p class="range-field">
+                            <label for="continuousSpawnRateSlider" class="white-text">Continuous Spawn Rate: <span id="continuousSpawnRateValue"></span></label>
+                            <input type="range" id="continuousSpawnRateSlider" min="0.01" max="20" step="0.01" value="1">
+                        </p>
+                    </div>
+                    <div class="col s12">
+                        <div class="switch">
+                            <label class="white-text">
+                                Auto Reset Off
+                                <input type="checkbox" id="autoResetToggle">
+                                <span class="lever"></span>
+                                Auto Reset On
+                            </label>
+                        </div>
+                    </div>
+                    <div class="input-field col s12">
+                        <p class="range-field">
+                            <label for="autoResetIntervalSlider" class="white-text">Auto Reset Interval (s): <span id="autoResetIntervalValue"></span></label>
+                            <input type="range" id="autoResetIntervalSlider" min="5" max="600" step="1" value="30">
+                        </p>
+                    </div>
+                    <div class="col s12">
+                        <label class="white-text active">Pre-set Scene: <span id="currentSceneDisplay">Default (Random)</span></label>
+                        <a class="waves-effect waves-light btn purple darken-1 modal-trigger" href="#sceneSelectModal" id="sceneSelectBtn"><i class="material-icons left">palette</i>Select Scene</a>
+                    </div>
+                    <div class="col s12 mt-4">
+                        <a class="waves-effect waves-light btn red darken-1" id="resetDefaultsBtn"><i class="material-icons left">restore</i>Reset All Settings</a>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer grey darken-4">
+                <a href="#!" class="modal-close waves-effect waves-green btn-flat white-text">Close</a>
+            </div>
+        </div>
+
+        <div id="sceneSelectModal" class="modal grey darken-3 scene-select-modal">
+            <div class="modal-content white-text">
+                <h4>Select a Pre-set Scene</h4>
+                <ul class="collection grey darken-3 scene-list" id="sceneList">
+                    <a href="#!" class="collection-item grey darken-2 white-text scene-item" data-scene="default">Default (Random)</a>
+                    <a href="#!" class="collection-item grey darken-2 white-text scene-item" data-scene="galaxy">Galaxy Swirl</a>
+                    <a href="#!" class="collection-item grey darken-2 white-text scene-item" data-scene="plasma">Electric Plasma</a>
+                    <a href="#!" class="collection-item grey darken-2 white-text scene-item" data-scene="rain">Rainfall</a>
+                    <a href="#!" class="collection-item grey darken-2 white-text scene-item" data-scene="fireflies">Fireflies</a>
+                    <a href="#!" class="collection-item grey darken-2 white-text scene-item" data-scene="vortex">Vortex</a>
+                    <a href="#!" class="collection-item grey darken-2 white-text scene-item" data-scene="bubbles">Bubbles</a>
+                    <a href="#!" class="collection-item grey darken-2 white-text scene-item" data-scene="electrostaticDance">Electrostatic Dance</a>
+                </ul>
+            </div>
+            <div class="modal-footer grey darken-4">
+                <a href="#!" class="modal-close waves-effect waves-green btn-flat white-text">Close</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        const settings = {
+            interactionMode: 'attract',
+            interactionRadius: 150,
+            maxParticles: 1000,
+            particleSize: 3,
+            particleSizeVariance: 0.5,
+            forceStrength: 1,
+            particleLifetime: 5,
+            friction: 0.98,
+            trails: true,
+            trailDecayRate: 0.1,
+            blendingMode: 'lighter',
+            particleColorHue: 200,
+            randomColorSpectrumEnabled: false,
+            positiveParticleHue: 240,
+            negativeParticleHue: 0,
+            electrostaticEffectsEnabled: true,
+            electrostaticStrength: 10,
+            maxElectrostaticDistance: 150,
+            randomChargeEnabled: true,
+            continuousSpawnEnabled: false,
+            continuousSpawnRate: 1,
+            autoResetEnabled: false,
+            autoResetInterval: 30,
+            currentSceneName: 'default',
+            gravityEnabled: false,
+            gravityStrength: 0.05,
+            massDecayEnabled: false,
+            chargeDecayEnabled: false
+        };
+
+        class Particle {
+            constructor() {
+                this.isAlive = false;
+                this.x = 0;
+                this.y = 0;
+                this.vx = 0;
+                this.vy = 0;
+                this.ax = 0;
+                this.ay = 0;
+                this.size = 0;
+                this.mass = 0;
+                this.initialMass = 0;
+                this.colorHue = 0;
+                this.initialLifetime = 0;
+                this.lifetimeRemaining = 0;
+                this.alpha = 1;
+                this.charge = 0;
+                this.isColliding = false;
+            }
+
+            init(x, y, vx, vy, baseSize, baseColorHue, lifetime, charge = 0) {
+                this.x = x;
+                this.y = y;
+                this.vx = vx;
+                this.vy = vy;
+                this.ax = 0;
+                this.ay = 0;
+                this.initialLifetime = lifetime;
+                this.lifetimeRemaining = lifetime;
+                this.alpha = 1;
+                this.isAlive = true;
+                this.charge = charge;
+
+                this.size = baseSize;
+                if (settings.particleSizeVariance > 0) {
+                    this.size = baseSize * (1 + (Math.random() - 0.5) * settings.particleSizeVariance * 2);
+                    this.size = Math.max(0.5, this.size);
+                }
+                this.mass = this.size * this.size * 0.05;
+                if (this.mass < 0.001) this.mass = 0.001;
+                this.initialMass = this.mass;
+
+                if (settings.randomColorSpectrumEnabled) {
+                    this.colorHue = Math.random() * 360;
+                } else if (settings.electrostaticEffectsEnabled && this.charge === 1) {
+                    this.colorHue = (settings.positiveParticleHue + Math.random() * 20 - 10 + 360) % 360;
+                } else if (settings.electrostaticEffectsEnabled && this.charge === -1) {
+                    this.colorHue = (settings.negativeParticleHue + Math.random() * 20 - 10 + 360) % 360;
+                } else {
+                    this.colorHue = (baseColorHue + Math.random() * 60 - 30 + 360) % 360;
+                }
+                this.isColliding = false;
+            }
+
+            update(dt) {
+                if (!this.isAlive) return;
+
+                this.vx += this.ax * dt;
+                this.vy += this.ay * dt;
+
+                if (settings.gravityEnabled) {
+                    this.applyForce(0, settings.gravityStrength * this.mass);
+                }
+
+                this.vx *= settings.friction;
+                this.vy *= settings.friction;
+
+                this.x += this.vx * dt;
+                this.y += this.vy * dt;
+
+                this.ax = 0;
+                this.ay = 0;
+
+                this.lifetimeRemaining -= dt;
+                this.alpha = Math.max(0, this.lifetimeRemaining / this.initialLifetime);
+
+                if (settings.massDecayEnabled) {
+                    this.mass = this.initialMass * this.alpha;
+                    this.mass = Math.max(0.001, this.mass);
+                }
+
+                if (this.lifetimeRemaining <= 0) {
+                    this.isAlive = false;
+                }
+                if (this.isColliding) {
+                    this.isColliding = false;
+                }
+            }
+
+            applyForce(forceX, forceY) {
+                this.ax += forceX / this.mass;
+                this.ay += forceY / this.mass;
+            }
+
+            draw(ctx) {
+                if (!this.isAlive) return;
+                let saturation = 100;
+                let lightness = 70;
+                let alpha = this.alpha;
+
+                if (this.isColliding) {
+                    lightness = 90;
+                    alpha = Math.min(1, this.alpha + 0.2);
+                }
+
+                ctx.fillStyle = `hsla(${this.colorHue}, ${saturation}%, ${lightness}%, ${alpha})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        class InteractionPoint {
+            constructor(id, x, y, type) {
+                this.id = id;
+                this.x = x;
+                this.y = y;
+                this.type = type;
+            }
+
+            updatePosition(x, y) {
+                this.x = x;
+                this.y = y;
+            }
+
+            draw(ctx, currentTime) {
+                ctx.save();
+                let color;
+
+                if (settings.interactionMode === 'attract') {
+                    color = `hsla(240, 100%, 70%, 0.5)`;
+                } else if (settings.interactionMode === 'repel') {
+                    color = `hsla(0, 100%, 70%, 0.5)`;
+                } else if (settings.interactionMode === 'create') {
+                    color = `hsla(120, 100%, 70%, 0.5)`;
+                } else if (settings.interactionMode === 'erase') {
+                    color = `hsla(30, 100%, 70%, 0.5)`;
+                } else {
+                    color = `rgba(156, 39, 176, 0.5)`;
+                }
+
+                const pulseFactor = 1 + Math.sin(currentTime * 0.005) * 0.1;
+                const pulsatingRadius = settings.interactionRadius * pulseFactor;
+
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, pulsatingRadius, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+
+        class SimulationManager {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.particles = [];
+                this.particlePool = [];
+                this.interactionPoints = new Map();
+                this.lastTime = 0;
+                this.rafId = null;
+                this.spawnAccumulator = 0;
+                this.timeSinceLastReset = 0;
+                this.fps = 0;
+                this.frameCount = 0;
+                this.lastFpsUpdateTime = 0;
+                this.targetAspectRatio = 16 / 9;
+            }
+
+            init() {
+                this.resizeCanvas();
+                window.addEventListener('resize', this.resizeCanvas.bind(this));
+                this.canvas.addEventListener('mousedown', this.handlePointerDown.bind(this));
+                this.canvas.addEventListener('mousemove', this.handlePointerMove.bind(this));
+                this.canvas.addEventListener('mouseup', this.handlePointerUp.bind(this));
+                this.canvas.addEventListener('mouseleave', this.handlePointerUp.bind(this));
+
+                this.canvas.addEventListener('touchstart', this.handlePointerDown.bind(this), { passive: false });
+                this.canvas.addEventListener('touchmove', this.handlePointerMove.bind(this), { passive: false });
+                this.canvas.addEventListener('touchend', this.handlePointerUp.bind(this));
+                this.canvas.addEventListener('touchcancel', this.handlePointerUp.bind(this));
+
+                this.populateInitialParticles();
+                this.startLoop(0);
+            }
+
+            resizeCanvas() {
+                const windowWidth = window.innerWidth;
+                const windowHeight = window.innerHeight;
+                let newCanvasWidth;
+                let newCanvasHeight;
+
+                const currentAspectRatio = windowWidth / windowHeight;
+
+                if (currentAspectRatio > this.targetAspectRatio) {
+                    newCanvasHeight = windowHeight;
+                    newCanvasWidth = windowHeight * this.targetAspectRatio;
+                } else {
+                    newCanvasWidth = windowWidth;
+                    newCanvasHeight = windowWidth / this.targetAspectRatio;
+                }
+
+                this.canvas.width = newCanvasWidth;
+                this.canvas.height = newCanvasHeight;
+            }
+
+            startLoop(currentTime) {
+                try {
+                    if (!this.lastTime) this.lastTime = currentTime;
+                    const dt = (currentTime - this.lastTime) / 1000;
+                    this.lastTime = currentTime;
+
+                    this.update(dt);
+                    this.draw();
+
+                    this.frameCount++;
+                    if (currentTime - this.lastFpsUpdateTime >= 1000) {
+                        this.fps = this.frameCount;
+                        this.frameCount = 0;
+                        this.lastFpsUpdateTime = currentTime;
+                        UIManager.updateHUD(this.particles.length, this.fps, settings.interactionMode);
+                    }
+                } catch (error) {
+                    console.error('Simulation loop error:', error);
+                }
+                this.rafId = requestAnimationFrame(this.startLoop.bind(this));
+            }
+
+            update(dt) {
+                const aliveParticles = [];
+                const minDistanceSqForElectrostatics = 5 * 5;
+
+                if (settings.electrostaticEffectsEnabled) {
+                    for (let i = 0; i < this.particles.length; i++) {
+                        const p1 = this.particles[i];
+                        if (!p1.isAlive || p1.charge === 0) continue;
+
+                        for (let j = i + 1; j < this.particles.length; j++) {
+                            const p2 = this.particles[j];
+                            if (!p2.isAlive || p2.charge === 0) continue;
+
+                            const dx = p2.x - p1.x;
+                            const dy = p2.y - p1.y;
+                            const distanceSq = dx * dx + dy * dy;
+
+                            if (distanceSq > settings.maxElectrostaticDistance * settings.maxElectrostaticDistance) continue;
+
+                            const effectiveDistanceSq = Math.max(minDistanceSqForElectrostatics, distanceSq);
+                            const distance = Math.sqrt(effectiveDistanceSq);
+
+                            const effectiveP1Charge = settings.chargeDecayEnabled ? p1.charge * p1.alpha : p1.charge;
+                            const effectiveP2Charge = settings.chargeDecayEnabled ? p2.charge * p2.alpha : p2.charge;
+                            
+                            const forceMagnitude = settings.electrostaticStrength * (effectiveP1Charge * effectiveP2Charge) / effectiveDistanceSq;
+
+                            const forceX = forceMagnitude * (dx / distance);
+                            const forceY = forceMagnitude * (dy / distance);
+
+                            p1.applyForce(forceX, forceY);
+                            p2.applyForce(-forceX, -forceY);
+                        }
+                    }
+                }
+
+                for (let i = 0; i < this.particles.length; i++) {
+                    const p1 = this.particles[i];
+                    if (!p1.isAlive) continue;
+
+                    for (let j = i + 1; j < this.particles.length; j++) {
+                        const p2 = this.particles[j];
+                        if (!p2.isAlive) continue;
+
+                        const dx = p2.x - p1.x;
+                        const dy = p2.y - p1.y;
+                        const distanceSq = dx * dx + dy * dy;
+                        const combinedRadius = p1.size + p2.size;
+
+                        if (distanceSq < combinedRadius * combinedRadius) {
+                            p1.isColliding = true;
+                            p2.isColliding = true;
+
+                            const distance = Math.sqrt(distanceSq);
+                            const overlap = combinedRadius - distance;
+
+                            const normalX = dx / distance;
+                            const normalY = dy / distance;
+
+                            const totalMass = p1.mass + p2.mass;
+                            const p1_move = overlap * (p2.mass / totalMass);
+                            const p2_move = overlap * (p1.mass / totalMass);
+
+                            p1.x -= normalX * p1_move * 0.5;
+                            p1.y -= normalY * p1_move * 0.5;
+                            p2.x += normalX * p2_move * 0.5;
+                            p2.y += normalY * p2_move * 0.5;
+
+                            const rvX = p2.vx - p1.vx;
+                            const rvY = p2.vy - p1.vy;
+
+                            const velAlongNormal = rvX * normalX + rvY * normalY;
+
+                            if (velAlongNormal > 0) continue;
+
+                            const e = 1;
+                            const j = -(1 + e) * velAlongNormal / (1 / p1.mass + 1 / p2.mass);
+
+                            const impulseX = j * normalX;
+                            const impulseY = j * normalY;
+
+                            p1.vx -= impulseX / p1.mass;
+                            p1.vy -= impulseY / p1.mass;
+                            p2.vx += impulseX / p2.mass;
+                            p2.vy += impulseY / p2.mass;
+                        }
+                    }
+                }
+
+                for (let i = 0; i < this.particles.length; i++) {
+                    const particle = this.particles[i];
+                    if (!particle.isAlive) {
+                        this.particlePool.push(particle);
+                        continue;
+                    }
+
+                    this.interactionPoints.forEach(point => {
+                        const dx = point.x - particle.x;
+                        const dy = point.y - particle.y;
+                        const distanceSq = dx * dx + dy * dy;
+                        const distance = Math.sqrt(distanceSq);
+
+                        if (distance > settings.interactionRadius) return;
+
+                        const effectiveDistance = Math.max(1, distance);
+                        const normalizedDistance = effectiveDistance / settings.interactionRadius;
+                        const falloffFactor = (1 - normalizedDistance);
+                        
+                        const forceMagnitude = settings.forceStrength * falloffFactor * 5000;
+
+                        const forceX = forceMagnitude * (dx / effectiveDistance);
+                        const forceY = forceMagnitude * (dy / effectiveDistance);
+
+                        if (settings.interactionMode === 'attract') {
+                            particle.applyForce(forceX, forceY);
+                        } else if (settings.interactionMode === 'repel') {
+                            particle.applyForce(-forceX, -forceY);
+                        } else if (settings.interactionMode === 'erase') {
+                            particle.isAlive = false;
+                        }
+                    });
+
+                    particle.update(dt);
+                    
+                    const padding = particle.size;
+                    if (particle.x - padding < 0) {
+                        particle.x = padding;
+                        particle.vx *= -1;
+                    } else if (particle.x + padding > this.canvas.width) {
+                        particle.x = this.canvas.width - padding;
+                        particle.vx *= -1;
+                    }
+                    if (particle.y - padding < 0) {
+                        particle.y = padding;
+                        particle.vy *= -1;
+                    } else if (particle.y + padding > this.canvas.height) {
+                        particle.y = this.canvas.height - padding;
+                        particle.vy *= -1;
+                    }
+
+                    if (particle.isAlive) {
+                        aliveParticles.push(particle);
+                    } else {
+                        this.particlePool.push(particle);
+                    }
+                }
+                this.particles = aliveParticles;
+
+                if (settings.interactionMode === 'create' && this.interactionPoints.size > 0) {
+                    this.spawnAccumulator += settings.continuousSpawnRate * dt * 2;
+                    while (this.spawnAccumulator >= 1 && this.particles.length < settings.maxParticles) {
+                        const angle = Math.random() * Math.PI * 2;
+                        const spawnDist = Math.random() * settings.interactionRadius * 0.5;
+                        const firstInteractionPoint = this.interactionPoints.values().next().value;
+                        const spawnX = firstInteractionPoint.x + Math.cos(angle) * spawnDist;
+                        const spawnY = firstInteractionPoint.y + Math.sin(angle) * spawnDist;
+                        const initialVx = (Math.random() - 0.5) * 100;
+                        const initialVy = (Math.random() - 0.5) * 100;
+                        let charge = 0;
+                        if (settings.randomChargeEnabled && settings.electrostaticEffectsEnabled) {
+                            charge = Math.random() < 0.5 ? 1 : -1;
+                        }
+                        this.addParticle(spawnX, spawnY, initialVx, initialVy, charge);
+                        this.spawnAccumulator--;
+                    }
+                }
+
+                if (settings.continuousSpawnEnabled && this.particles.length < settings.maxParticles) {
+                    this.spawnAccumulator += settings.continuousSpawnRate * dt;
+                    while (this.spawnAccumulator >= 1 && this.particles.length < settings.maxParticles) {
+                        const x = Math.random() * this.canvas.width;
+                        const y = Math.random() * this.canvas.height;
+                        const vx = (Math.random() - 0.5) * 50;
+                        const vy = (Math.random() - 0.5) * 50;
+                        let charge = 0;
+                        if (settings.randomChargeEnabled && settings.electrostaticEffectsEnabled) {
+                            charge = Math.random() < 0.5 ? 1 : -1;
+                        }
+                        this.addParticle(x, y, vx, vy, charge);
+                        this.spawnAccumulator--;
+                    }
+                }
+
+                while (this.particles.length > settings.maxParticles) {
+                    const particleToRemove = this.particles.shift();
+                    particleToRemove.isAlive = false;
+                    this.particlePool.push(particleToRemove);
+                }
+
+                if (settings.autoResetEnabled) {
+                    this.timeSinceLastReset += dt;
+                    if (this.timeSinceLastReset >= settings.autoResetInterval) {
+                        this.resetSimulation();
+                        this.timeSinceLastReset = 0;
+                    }
+                }
+            }
+
+            draw() {
+                if (settings.trails) {
+                    this.ctx.fillStyle = `rgba(18, 18, 18, ${settings.trailDecayRate})`;
+                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                } else {
+                    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                }
+
+                this.ctx.globalCompositeOperation = settings.blendingMode;
+
+                for (let i = 0; i < this.particles.length; i++) {
+                    this.particles[i].draw(this.ctx);
+                }
+
+                this.interactionPoints.forEach(point => {
+                    point.draw(this.ctx, this.lastTime);
+                });
+            }
+
+            addParticle(x, y, vx, vy, charge = 0) {
+                let particle;
+                if (this.particlePool.length > 0) {
+                    particle = this.particlePool.pop();
+                } else {
+                    particle = new Particle();
+                }
+                particle.init(x, y, vx, vy, settings.particleSize, settings.particleColorHue, settings.particleLifetime, charge);
+                this.particles.push(particle);
+            }
+
+            populateInitialParticles() {
+                this.particles = [];
+                this.particlePool = [];
+                for (let i = 0; i < settings.maxParticles; i++) {
+                    const x = Math.random() * this.canvas.width;
+                    const y = Math.random() * this.canvas.height;
+                    const vx = (Math.random() - 0.5) * 50;
+                    const vy = (Math.random() - 0.5) * 50;
+                    let charge = 0;
+                    if (settings.randomChargeEnabled && settings.electrostaticEffectsEnabled) {
+                        charge = Math.random() < 0.5 ? 1 : -1;
+                    }
+                    this.addParticle(x, y, vx, vy, charge);
+                }
+                this.timeSinceLastReset = 0;
+            }
+
+            handlePointerDown(event) {
+                event.preventDefault();
+                if (event.touches) {
+                    Array.from(event.changedTouches).forEach(touch => {
+                        this.interactionPoints.set(touch.identifier, new InteractionPoint(touch.identifier, touch.clientX, touch.clientY, 'touch'));
+                    });
+                } else {
+                    this.interactionPoints.set('mouse', new InteractionPoint('mouse', event.clientX, event.clientY, 'mouse'));
+                }
+            }
+
+            handlePointerMove(event) {
+                event.preventDefault();
+                if (event.touches) {
+                    Array.from(event.changedTouches).forEach(touch => {
+                        const point = this.interactionPoints.get(touch.identifier);
+                        if (point) {
+                            point.updatePosition(touch.clientX, touch.clientY);
+                        }
+                    });
+                } else {
+                    const point = this.interactionPoints.get('mouse');
+                    if (point) {
+                        point.updatePosition(event.clientX, event.clientY);
+                    }
+                }
+            }
+
+            handlePointerUp(event) {
+                event.preventDefault();
+                if (event.touches) {
+                    Array.from(event.changedTouches).forEach(touch => {
+                        this.interactionPoints.delete(touch.identifier);
+                    });
+                } else {
+                    this.interactionPoints.delete('mouse');
+                }
+            }
+
+            applySettings() {
+                this.particles.forEach(p => {
+                    if (p.isAlive) {
+                        let newCharge = p.charge;
+                        if (settings.randomChargeEnabled && settings.electrostaticEffectsEnabled) {
+                            newCharge = Math.random() < 0.5 ? 1 : -1;
+                        } else if (!settings.electrostaticEffectsEnabled) {
+                            newCharge = 0;
+                        }
+                        p.init(p.x, p.y, p.vx, p.vy, settings.particleSize, settings.particleColorHue, settings.particleLifetime, newCharge);
+                    }
+                });
+                if (this.ctx) {
+                    this.ctx.globalCompositeOperation = settings.blendingMode;
+                }
+                UIManager.updateHUD(this.particles.length, this.fps, settings.interactionMode);
+            }
+
+            resetSimulation() {
+                this.particles = [];
+                this.particlePool = [];
+                this.interactionPoints.clear();
+                this.populateInitialParticles();
+                this.applySettings();
+                this.timeSinceLastReset = 0;
+            }
+
+            clearCanvas() {
+                this.particles = [];
+                this.particlePool = [];
+                this.interactionPoints.clear();
+                if (this.ctx) {
+                    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                }
+                UIManager.updateHUD(0, this.fps, settings.interactionMode);
+            }
+
+            loadScene(sceneName) {
+                switch (sceneName) {
+                    case 'default':
+                        settings.maxParticles = 1000;
+                        settings.particleSize = 3;
+                        settings.particleSizeVariance = 0.5;
+                        settings.forceStrength = 1;
+                        settings.particleLifetime = 5;
+                        settings.friction = 0.98;
+                        settings.trails = true;
+                        settings.trailDecayRate = 0.1;
+                        settings.blendingMode = 'lighter';
+                        settings.particleColorHue = 200;
+                        settings.randomColorSpectrumEnabled = false;
+                        settings.continuousSpawnEnabled = false;
+                        settings.continuousSpawnRate = 1;
+                        settings.autoResetEnabled = false;
+                        settings.autoResetInterval = 30;
+                        settings.interactionRadius = 150;
+                        settings.electrostaticEffectsEnabled = true;
+                        settings.electrostaticStrength = 10;
+                        settings.maxElectrostaticDistance = 150;
+                        settings.randomChargeEnabled = true;
+                        settings.positiveParticleHue = 240;
+                        settings.negativeParticleHue = 0;
+                        settings.gravityEnabled = false;
+                        settings.gravityStrength = 0.05;
+                        settings.massDecayEnabled = false;
+                        settings.chargeDecayEnabled = false;
+                        break;
+                    case 'galaxy':
+                        settings.maxParticles = 3000;
+                        settings.particleSize = 2;
+                        settings.particleSizeVariance = 0.8;
+                        settings.forceStrength = 0.5;
+                        settings.particleLifetime = 8;
+                        settings.friction = 0.995;
+                        settings.trails = true;
+                        settings.trailDecayRate = 0.08;
+                        settings.blendingMode = 'lighter';
+                        settings.particleColorHue = 280;
+                        settings.randomColorSpectrumEnabled = false;
+                        settings.continuousSpawnEnabled = false;
+                        settings.continuousSpawnRate = 1;
+                        settings.autoResetEnabled = false;
+                        settings.autoResetInterval = 30;
+                        settings.interactionRadius = 180;
+                        settings.electrostaticEffectsEnabled = false;
+                        settings.electrostaticStrength = 10;
+                        settings.maxElectrostaticDistance = 150;
+                        settings.randomChargeEnabled = true;
+                        settings.positiveParticleHue = 240;
+                        settings.negativeParticleHue = 0;
+                        settings.gravityEnabled = false;
+                        settings.gravityStrength = 0.05;
+                        settings.massDecayEnabled = false;
+                        settings.chargeDecayEnabled = false;
+                        break;
+                    case 'plasma':
+                        settings.maxParticles = 2000;
+                        settings.particleSize = 4;
+                        settings.particleSizeVariance = 0.3;
+                        settings.forceStrength = 1.5;
+                        settings.particleLifetime = 3;
+                        settings.friction = 0.95;
+                        settings.trails = true;
+                        settings.trailDecayRate = 0.15;
+                        settings.blendingMode = 'screen';
+                        settings.particleColorHue = 0;
+                        settings.randomColorSpectrumEnabled = true;
+                        settings.continuousSpawnEnabled = true;
+                        settings.continuousSpawnRate = 5;
+                        settings.autoResetEnabled = false;
+                        settings.autoResetInterval = 30;
+                        settings.interactionRadius = 100;
+                        settings.electrostaticEffectsEnabled = false;
+                        settings.electrostaticStrength = 10;
+                        settings.maxElectrostaticDistance = 150;
+                        settings.randomChargeEnabled = true;
+                        settings.positiveParticleHue = 240;
+                        settings.negativeParticleHue = 0;
+                        settings.gravityEnabled = false;
+                        settings.gravityStrength = 0.05;
+                        settings.massDecayEnabled = false;
+                        settings.chargeDecayEnabled = false;
+                        break;
+                    case 'rain':
+                        settings.maxParticles = 500;
+                        settings.particleSize = 1;
+                        settings.particleSizeVariance = 0.1;
+                        settings.forceStrength = 0.1;
+                        settings.particleLifetime = 2;
+                        settings.friction = 0.999;
+                        settings.trails = false;
+                        settings.trailDecayRate = 0.1;
+                        settings.blendingMode = 'source-over';
+                        settings.particleColorHue = 220;
+                        settings.randomColorSpectrumEnabled = false;
+                        settings.continuousSpawnEnabled = true;
+                        settings.continuousSpawnRate = 0.5;
+                        settings.autoResetEnabled = false;
+                        settings.autoResetInterval = 30;
+                        settings.interactionRadius = 70;
+                        settings.electrostaticEffectsEnabled = false;
+                        settings.electrostaticStrength = 10;
+                        settings.maxElectrostaticDistance = 150;
+                        settings.randomChargeEnabled = true;
+                        settings.positiveParticleHue = 240;
+                        settings.negativeParticleHue = 0;
+                        settings.gravityEnabled = false;
+                        settings.gravityStrength = 0.05;
+                        settings.massDecayEnabled = false;
+                        settings.chargeDecayEnabled = false;
+                        break;
+                    case 'fireflies':
+                        settings.maxParticles = 300;
+                        settings.particleSize = 6;
+                        settings.particleSizeVariance = 0.7;
+                        settings.forceStrength = 0.8;
+                        settings.particleLifetime = 10;
+                        settings.friction = 0.99;
+                        settings.trails = true;
+                        settings.trailDecayRate = 0.05;
+                        settings.blendingMode = 'lighter';
+                        settings.particleColorHue = 60;
+                        settings.randomColorSpectrumEnabled = false;
+                        settings.continuousSpawnEnabled = true;
+                        settings.continuousSpawnRate = 0.2;
+                        settings.autoResetEnabled = false;
+                        settings.autoResetInterval = 30;
+                        settings.interactionRadius = 120;
+                        settings.electrostaticEffectsEnabled = false;
+                        settings.electrostaticStrength = 10;
+                        settings.maxElectrostaticDistance = 150;
+                        settings.randomChargeEnabled = true;
+                        settings.positiveParticleHue = 240;
+                        settings.negativeParticleHue = 0;
+                        settings.gravityEnabled = false;
+                        settings.gravityStrength = 0.05;
+                        settings.massDecayEnabled = false;
+                        settings.chargeDecayEnabled = false;
+                        break;
+                    case 'vortex':
+                        settings.maxParticles = 4000;
+                        settings.particleSize = 1.5;
+                        settings.particleSizeVariance = 0.6;
+                        settings.forceStrength = 5;
+                        settings.particleLifetime = 15;
+                        settings.friction = 0.99;
+                        settings.trails = true;
+                        settings.trailDecayRate = 0.05;
+                        settings.blendingMode = 'lighter';
+                        settings.particleColorHue = 270;
+                        settings.randomColorSpectrumEnabled = true;
+                        settings.continuousSpawnEnabled = false;
+                        settings.continuousSpawnRate = 1;
+                        settings.autoResetEnabled = false;
+                        settings.autoResetInterval = 30;
+                        settings.interactionRadius = 200;
+                        settings.electrostaticEffectsEnabled = false;
+                        settings.electrostaticStrength = 10;
+                        settings.maxElectrostaticDistance = 150;
+                        settings.randomChargeEnabled = true;
+                        settings.positiveParticleHue = 240;
+                        settings.negativeParticleHue = 0;
+                        settings.gravityEnabled = false;
+                        settings.gravityStrength = 0.05;
+                        settings.massDecayEnabled = false;
+                        settings.chargeDecayEnabled = false;
+                        break;
+                    case 'bubbles':
+                        settings.maxParticles = 200;
+                        settings.particleSize = 8;
+                        settings.particleSizeVariance = 0.8;
+                        settings.forceStrength = 0.2;
+                        settings.particleLifetime = 20;
+                        settings.friction = 0.999;
+                        settings.trails = false;
+                        settings.trailDecayRate = 0.1;
+                        settings.blendingMode = 'source-over';
+                        settings.particleColorHue = 180;
+                        settings.randomColorSpectrumEnabled = true;
+                        settings.continuousSpawnEnabled = true;
+                        settings.continuousSpawnRate = 0.1;
+                        settings.autoResetEnabled = false;
+                        settings.autoResetInterval = 30;
+                        settings.interactionRadius = 100;
+                        settings.electrostaticEffectsEnabled = false;
+                        settings.electrostaticStrength = 10;
+                        settings.maxElectrostaticDistance = 150;
+                        settings.randomChargeEnabled = true;
+                        settings.positiveParticleHue = 240;
+                        settings.negativeParticleHue = 0;
+                        settings.gravityEnabled = false;
+                        settings.gravityStrength = 0.05;
+                        settings.massDecayEnabled = false;
+                        settings.chargeDecayEnabled = false;
+                        break;
+                    case 'electrostaticDance':
+                        settings.maxParticles = 1500;
+                        settings.particleSize = 4;
+                        settings.particleSizeVariance = 0.6;
+                        settings.forceStrength = 0.1; 
+                        settings.particleLifetime = 60; 
+                        settings.friction = 0.99;
+                        settings.trails = true;
+                        settings.trailDecayRate = 0.03;
+                        settings.blendingMode = 'lighter';
+                        settings.particleColorHue = 0; 
+                        settings.randomColorSpectrumEnabled = false; 
+                        settings.continuousSpawnEnabled = true;
+                        settings.continuousSpawnRate = 0.5;
+                        settings.autoResetEnabled = false;
+                        settings.autoResetInterval = 30;
+                        settings.interactionRadius = 250;
+                        settings.electrostaticEffectsEnabled = true;
+                        settings.electrostaticStrength = 20; 
+                        settings.maxElectrostaticDistance = 200; 
+                        settings.randomChargeEnabled = true;
+                        settings.positiveParticleHue = 220; 
+                        settings.negativeParticleHue = 340; 
+                        settings.gravityEnabled = false;
+                        settings.gravityStrength = 0.05;
+                        settings.massDecayEnabled = false;
+                        settings.chargeDecayEnabled = false;
+                        break;
+                }
+                settings.currentSceneName = sceneName;
+                UIManager.updateUIFromSettings();
+                this.resetSimulation();
+            }
+        }
+
+        const UIManager = {
+            dom: {},
+
+            init() {
+                this.cacheDomElements();
+                M.Modal.init(document.querySelectorAll('.modal'));
+                M.Tooltip.init(document.querySelectorAll('.tooltipped'));
+                M.FloatingActionButton.init(document.querySelectorAll('.fixed-action-btn'), {
+                    direction: 'left',
+                    hoverEnabled: false
+                });
+            },
+
+            cacheDomElements() {
+                this.dom.interactionModeButtonsContainer = document.getElementById('interactionModeButtons');
+                this.dom.modeButtons = document.querySelectorAll('#interactionModeButtons .mode-btn');
+                this.dom.interactionRadiusSlider = document.getElementById('interactionRadiusSlider');
+                this.dom.interactionRadiusValue = document.getElementById('interactionRadiusValue');
+                this.dom.particleCountSlider = document.getElementById('particleCountSlider');
+                this.dom.particleCountValue = document.getElementById('particleCountValue');
+                this.dom.particleSizeSlider = document.getElementById('particleSizeSlider');
+                this.dom.particleSizeValue = document.getElementById('particleSizeValue');
+                this.dom.particleSizeVarianceSlider = document.getElementById('particleSizeVarianceSlider');
+                this.dom.particleSizeVarianceValue = document.getElementById('particleSizeVarianceValue');
+                this.dom.forceStrengthSlider = document.getElementById('forceStrengthSlider');
+                this.dom.forceStrengthValue = document.getElementById('forceStrengthValue');
+                this.dom.particleLifetimeSlider = document.getElementById('particleLifetimeSlider');
+                this.dom.particleLifetimeValue = document.getElementById('particleLifetimeValue');
+                this.dom.frictionSlider = document.getElementById('frictionSlider');
+                this.dom.frictionValue = document.getElementById('frictionValue');
+                this.dom.particleColorHueSlider = document.getElementById('particleColorHueSlider');
+                this.dom.particleColorHueValue = document.getElementById('particleColorHueValue');
+                this.dom.randomColorSpectrumToggle = document.getElementById('randomColorSpectrumToggle');
+                this.dom.positiveParticleHueSlider = document.getElementById('positiveParticleHueSlider');
+                this.dom.positiveParticleHueValue = document.getElementById('positiveParticleHueValue');
+                this.dom.negativeParticleHueSlider = document.getElementById('negativeParticleHueSlider');
+                this.dom.negativeParticleHueValue = document.getElementById('negativeParticleHueValue');
+                this.dom.electrostaticEffectsToggle = document.getElementById('electrostaticEffectsToggle');
+                this.dom.electrostaticStrengthSlider = document.getElementById('electrostaticStrengthSlider');
+                this.dom.electrostaticStrengthValue = document.getElementById('electrostaticStrengthValue');
+                this.dom.maxElectrostaticDistanceSlider = document.getElementById('maxElectrostaticDistanceSlider');
+                this.dom.maxElectrostaticDistanceValue = document.getElementById('maxElectrostaticDistanceValue');
+                this.dom.randomChargeToggle = document.getElementById('randomChargeToggle');
+                this.dom.gravityToggle = document.getElementById('gravityToggle');
+                this.dom.gravityStrengthSlider = document.getElementById('gravityStrengthSlider');
+                this.dom.gravityStrengthValue = document.getElementById('gravityStrengthValue');
+                this.dom.massDecayToggle = document.getElementById('massDecayToggle');
+                this.dom.chargeDecayToggle = document.getElementById('chargeDecayToggle');
+                this.dom.trailsToggle = document.getElementById('trailsToggle');
+                this.dom.trailDecayRateSlider = document.getElementById('trailDecayRateSlider');
+                this.dom.trailDecayRateValue = document.getElementById('trailDecayRateValue');
+                this.dom.blendingModeButtonsContainer = document.getElementById('blendingModeButtons');
+                this.dom.blendingButtons = document.querySelectorAll('#blendingModeButtons .blending-btn');
+                this.dom.continuousSpawnToggle = document.getElementById('continuousSpawnToggle');
+                this.dom.continuousSpawnRateSlider = document.getElementById('continuousSpawnRateSlider');
+                this.dom.continuousSpawnRateValue = document.getElementById('continuousSpawnRateValue');
+                this.dom.autoResetToggle = document.getElementById('autoResetToggle');
+                this.dom.autoResetIntervalSlider = document.getElementById('autoResetIntervalSlider');
+                this.dom.autoResetIntervalValue = document.getElementById('autoResetIntervalValue');
+                this.dom.sceneSelectBtn = document.getElementById('sceneSelectBtn');
+                this.dom.currentSceneDisplay = document.getElementById('currentSceneDisplay');
+                this.dom.sceneSelectModal = document.getElementById('sceneSelectModal');
+                this.dom.sceneList = document.getElementById('sceneList');
+                this.dom.sceneItems = document.querySelectorAll('#sceneList .scene-item');
+                this.dom.resetDefaultsBtn = document.getElementById('resetDefaultsBtn');
+                
+                this.dom.onScreenResetBtn = document.getElementById('onScreenResetBtn');
+                this.dom.onScreenClearBtn = document.getElementById('onScreenClearBtn');
+
+                this.dom.currentParticleCountSpan = document.getElementById('currentParticleCount');
+                this.dom.fpsDisplaySpan = document.getElementById('fpsDisplay');
+                this.dom.currentInteractionModeSpan = document.getElementById('currentInteractionMode');
+            },
+
+            bindEventListeners(simulationManager) {
+                const settingsModalElem = document.getElementById('settingsModal');
+                const settingsModalInstance = M.Modal.getInstance(settingsModalElem);
+                if (settingsModalInstance) {
+                    settingsModalInstance.options.onCloseEnd = () => {
+                        simulationManager.resetSimulation();
+                        this.saveSettings();
+                    };
+                }
+
+                this.dom.interactionModeButtonsContainer.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('mode-btn')) {
+                        settings.interactionMode = e.target.dataset.mode;
+                        this.updateUIFromSettings();
+                        this.updateHUD(simulationManager.particles.length, simulationManager.fps, settings.interactionMode);
+                        this.saveSettings();
+                    }
+                });
+
+                this.dom.blendingModeButtonsContainer.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('blending-btn')) {
+                        settings.blendingMode = e.target.dataset.mode;
+                        simulationManager.applySettings();
+                        this.updateUIFromSettings();
+                        this.saveSettings();
+                    }
+                });
+
+                this.dom.sceneList.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('scene-item')) {
+                        const sceneName = e.target.dataset.scene;
+                        simulationManager.loadScene(sceneName);
+                        settings.currentSceneName = sceneName;
+                        this.updateUIFromSettings();
+                        M.Modal.getInstance(this.dom.sceneSelectModal).close();
+                        this.saveSettings();
+                    }
+                });
+
+                this.dom.resetDefaultsBtn.addEventListener('click', () => {
+                    this.resetToDefaultSettings(true);
+                    simulationManager.resetSimulation();
+                    M.toast({html: 'Settings reset to defaults!', classes: 'rounded'});
+                });
+
+                this.dom.interactionRadiusSlider.addEventListener('input', (e) => {
+                    settings.interactionRadius = parseFloat(e.target.value);
+                    this.updateSliderDisplay('interactionRadiusSlider', 'interactionRadiusValue', settings.interactionRadius);
+                    this.saveSettings();
+                });
+
+                this.dom.particleCountSlider.addEventListener('input', (e) => {
+                    const newMaxParticles = parseInt(e.target.value);
+                    if (newMaxParticles !== settings.maxParticles) {
+                        settings.maxParticles = newMaxParticles;
+                        this.updateSliderDisplay('particleCountSlider', 'particleCountValue', settings.maxParticles);
+                        simulationManager.resetSimulation();
+                        this.saveSettings();
+                    }
+                });
+
+                this.dom.particleSizeSlider.addEventListener('input', (e) => {
+                    settings.particleSize = parseFloat(e.target.value);
+                    this.updateSliderDisplay('particleSizeSlider', 'particleSizeValue', settings.particleSize);
+                    simulationManager.applySettings();
+                    this.saveSettings();
+                });
+
+                this.dom.particleSizeVarianceSlider.addEventListener('input', (e) => {
+                    settings.particleSizeVariance = parseFloat(e.target.value);
+                    this.updateSliderDisplay('particleSizeVarianceSlider', 'particleSizeVarianceValue', settings.particleSizeVariance);
+                    simulationManager.applySettings();
+                    this.saveSettings();
+                });
+
+                this.dom.forceStrengthSlider.addEventListener('input', (e) => {
+                    settings.forceStrength = parseFloat(e.target.value);
+                    this.updateSliderDisplay('forceStrengthSlider', 'forceStrengthValue', settings.forceStrength);
+                    this.saveSettings();
+                });
+
+                this.dom.particleLifetimeSlider.addEventListener('input', (e) => {
+                    settings.particleLifetime = parseFloat(e.target.value);
+                    this.updateSliderDisplay('particleLifetimeSlider', 'particleLifetimeValue', settings.particleLifetime);
+                    simulationManager.applySettings();
+                    this.saveSettings();
+                });
+
+                this.dom.frictionSlider.addEventListener('input', (e) => {
+                    settings.friction = parseFloat(e.target.value);
+                    this.updateSliderDisplay('frictionSlider', 'frictionValue', settings.friction);
+                    this.saveSettings();
+                });
+
+                this.dom.particleColorHueSlider.addEventListener('input', (e) => {
+                    settings.particleColorHue = parseInt(e.target.value);
+                    this.updateSliderDisplay('particleColorHueSlider', 'particleColorHueValue', settings.particleColorHue);
+                    simulationManager.applySettings();
+                    this.saveSettings();
+                });
+
+                this.dom.randomColorSpectrumToggle.addEventListener('change', (e) => {
+                    settings.randomColorSpectrumEnabled = e.target.checked;
+                    simulationManager.applySettings();
+                    this.saveSettings();
+                });
+
+                this.dom.positiveParticleHueSlider.addEventListener('input', (e) => {
+                    settings.positiveParticleHue = parseInt(e.target.value);
+                    this.updateSliderDisplay('positiveParticleHueSlider', 'positiveParticleHueValue', settings.positiveParticleHue);
+                    simulationManager.applySettings();
+                    this.saveSettings();
+                });
+
+                this.dom.negativeParticleHueSlider.addEventListener('input', (e) => {
+                    settings.negativeParticleHue = parseInt(e.target.value);
+                    this.updateSliderDisplay('negativeParticleHueSlider', 'negativeParticleHueValue', settings.negativeParticleHue);
+                    simulationManager.applySettings();
+                    this.saveSettings();
+                });
+
+                this.dom.electrostaticEffectsToggle.addEventListener('change', (e) => {
+                    settings.electrostaticEffectsEnabled = e.target.checked;
+                    simulationManager.applySettings();
+                    this.saveSettings();
+                });
+
+                this.dom.electrostaticStrengthSlider.addEventListener('input', (e) => {
+                    settings.electrostaticStrength = parseFloat(e.target.value);
+                    this.updateSliderDisplay('electrostaticStrengthSlider', 'electrostaticStrengthValue', settings.electrostaticStrength);
+                    this.saveSettings();
+                });
+
+                this.dom.maxElectrostaticDistanceSlider.addEventListener('input', (e) => {
+                    settings.maxElectrostaticDistance = parseFloat(e.target.value);
+                    this.updateSliderDisplay('maxElectrostaticDistanceSlider', 'maxElectrostaticDistanceValue', settings.maxElectrostaticDistance);
+                    this.saveSettings();
+                });
+
+                this.dom.randomChargeToggle.addEventListener('change', (e) => {
+                    settings.randomChargeEnabled = e.target.checked;
+                    simulationManager.applySettings();
+                    this.saveSettings();
+                });
+
+                this.dom.gravityToggle.addEventListener('change', (e) => {
+                    settings.gravityEnabled = e.target.checked;
+                    this.saveSettings();
+                });
+                this.dom.gravityStrengthSlider.addEventListener('input', (e) => {
+                    settings.gravityStrength = parseFloat(e.target.value);
+                    this.updateSliderDisplay('gravityStrengthSlider', 'gravityStrengthValue', settings.gravityStrength);
+                    this.saveSettings();
+                });
+                this.dom.massDecayToggle.addEventListener('change', (e) => {
+                    settings.massDecayEnabled = e.target.checked;
+                    this.saveSettings();
+                });
+                this.dom.chargeDecayToggle.addEventListener('change', (e) => {
+                    settings.chargeDecayEnabled = e.target.checked;
+                    this.saveSettings();
+                });
+
+                this.dom.trailsToggle.addEventListener('change', (e) => {
+                    settings.trails = e.target.checked;
+                    this.saveSettings();
+                });
+
+                this.dom.trailDecayRateSlider.addEventListener('input', (e) => {
+                    settings.trailDecayRate = parseFloat(e.target.value);
+                    this.updateSliderDisplay('trailDecayRateSlider', 'trailDecayRateValue', settings.trailDecayRate);
+                    this.saveSettings();
+                });
+
+                this.dom.continuousSpawnToggle.addEventListener('change', (e) => {
+                    settings.continuousSpawnEnabled = e.target.checked;
+                    this.saveSettings();
+                });
+
+                this.dom.continuousSpawnRateSlider.addEventListener('input', (e) => {
+                    settings.continuousSpawnRate = parseFloat(e.target.value);
+                    this.updateSliderDisplay('continuousSpawnRateSlider', 'continuousSpawnRateValue', settings.continuousSpawnRate);
+                    this.saveSettings();
+                });
+
+                this.dom.autoResetToggle.addEventListener('change', (e) => {
+                    settings.autoResetEnabled = e.target.checked;
+                    if (!settings.autoResetEnabled) {
+                        simulationManager.timeSinceLastReset = 0;
+                    }
+                    this.saveSettings();
+                });
+
+                this.dom.autoResetIntervalSlider.addEventListener('input', (e) => {
+                    settings.autoResetInterval = parseFloat(e.target.value);
+                    this.updateSliderDisplay('autoResetIntervalSlider', 'autoResetIntervalValue', settings.autoResetInterval);
+                    this.saveSettings();
+                });
+
+                this.dom.onScreenResetBtn.addEventListener('click', () => {
+                    simulationManager.resetSimulation();
+                    const tooltipInstance = M.Tooltip.getInstance(this.dom.onScreenResetBtn);
+                    if (tooltipInstance) tooltipInstance.close();
+                });
+
+                this.dom.onScreenClearBtn.addEventListener('click', () => {
+                    simulationManager.clearCanvas();
+                    const tooltipInstance = M.Tooltip.getInstance(this.dom.onScreenClearBtn);
+                    if (tooltipInstance) tooltipInstance.close();
+                });
+            },
+
+            updateSliderDisplay(sliderId, valueSpanId, value) {
+                const valueSpan = document.getElementById(valueSpanId);
+                if (valueSpan) {
+                    let fixedValue;
+                    if (sliderId === 'frictionSlider') {
+                        fixedValue = value.toFixed(4);
+                    } else if (sliderId === 'trailDecayRateSlider') {
+                        fixedValue = value.toFixed(3);
+                    } else if (sliderId === 'continuousSpawnRateSlider') {
+                        fixedValue = value.toFixed(2);
+                    } else if (sliderId.includes('Strength') || sliderId.includes('Variance')) {
+                        fixedValue = value.toFixed(2);
+                    } else if (sliderId.includes('Size')) {
+                        fixedValue = value.toFixed(1);
+                    } else {
+                        fixedValue = value.toFixed(0);
+                    }
+                    valueSpan.textContent = fixedValue;
+                }
+            },
+
+            updateUIFromSettings() {
+                this.dom.modeButtons.forEach(button => {
+                    if (button.dataset.mode === settings.interactionMode) {
+                        button.classList.add('active');
+                    } else {
+                        button.classList.remove('active');
+                    }
+                });
+
+                this.dom.blendingButtons.forEach(button => {
+                    if (button.dataset.mode === settings.blendingMode) {
+                        button.classList.add('active');
+                    } else {
+                        button.classList.remove('active');
+                    }
+                });
+
+                this.dom.sceneItems.forEach(item => {
+                    if (item.dataset.scene === settings.currentSceneName) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+                const selectedSceneElement = this.dom.sceneList.querySelector(`.scene-item[data-scene="${settings.currentSceneName}"]`);
+                if (selectedSceneElement) {
+                    this.dom.currentSceneDisplay.textContent = selectedSceneElement.textContent;
+                } else {
+                    this.dom.currentSceneDisplay.textContent = "Unknown Scene";
+                }
+
+                this.dom.interactionRadiusSlider.value = settings.interactionRadius;
+                this.updateSliderDisplay('interactionRadiusSlider', 'interactionRadiusValue', settings.interactionRadius);
+
+                this.dom.particleCountSlider.value = settings.maxParticles;
+                this.updateSliderDisplay('particleCountSlider', 'particleCountValue', settings.maxParticles);
+
+                this.dom.particleSizeSlider.value = settings.particleSize;
+                this.updateSliderDisplay('particleSizeSlider', 'particleSizeValue', settings.particleSize);
+
+                this.dom.particleSizeVarianceSlider.value = settings.particleSizeVariance;
+                this.updateSliderDisplay('particleSizeVarianceSlider', 'particleSizeVarianceValue', settings.particleSizeVariance);
+
+                this.dom.forceStrengthSlider.value = settings.forceStrength;
+                this.updateSliderDisplay('forceStrengthSlider', 'forceStrengthValue', settings.forceStrength);
+
+                this.dom.particleLifetimeSlider.value = settings.particleLifetime;
+                this.updateSliderDisplay('particleLifetimeSlider', 'particleLifetimeValue', settings.particleLifetime);
+
+                this.dom.frictionSlider.value = settings.friction;
+                this.updateSliderDisplay('frictionSlider', 'frictionValue', settings.friction);
+
+                this.dom.particleColorHueSlider.value = settings.particleColorHue;
+                this.updateSliderDisplay('particleColorHueSlider', 'particleColorHueValue', settings.particleColorHue);
+
+                this.dom.randomColorSpectrumToggle.checked = settings.randomColorSpectrumEnabled;
+                this.dom.trailsToggle.checked = settings.trails;
+
+                this.dom.trailDecayRateSlider.value = settings.trailDecayRate;
+                this.updateSliderDisplay('trailDecayRateSlider', 'trailDecayRateValue', settings.trailDecayRate);
+
+                this.dom.positiveParticleHueSlider.value = settings.positiveParticleHue;
+                this.updateSliderDisplay('positiveParticleHueSlider', 'positiveParticleHueValue', settings.positiveParticleHue);
+
+                this.dom.negativeParticleHueSlider.value = settings.negativeParticleHue;
+                this.updateSliderDisplay('negativeParticleHueSlider', 'negativeParticleHueValue', settings.negativeParticleHue);
+
+                this.dom.electrostaticEffectsToggle.checked = settings.electrostaticEffectsEnabled;
+                this.dom.electrostaticStrengthSlider.value = settings.electrostaticStrength;
+                this.updateSliderDisplay('electrostaticStrengthSlider', 'electrostaticStrengthValue', settings.electrostaticStrength);
+
+                this.dom.maxElectrostaticDistanceSlider.value = settings.maxElectrostaticDistance;
+                this.updateSliderDisplay('maxElectrostaticDistanceSlider', 'maxElectrostaticDistanceValue', settings.maxElectrostaticDistance);
+
+                this.dom.randomChargeToggle.checked = settings.randomChargeEnabled;
+
+                this.dom.gravityToggle.checked = settings.gravityEnabled;
+                this.dom.gravityStrengthSlider.value = settings.gravityStrength;
+                this.updateSliderDisplay('gravityStrengthSlider', 'gravityStrengthValue', settings.gravityStrength);
+
+                this.dom.massDecayToggle.checked = settings.massDecayEnabled;
+                this.dom.chargeDecayToggle.checked = settings.chargeDecayEnabled;
+
+                this.dom.continuousSpawnToggle.checked = settings.continuousSpawnEnabled;
+
+                this.dom.continuousSpawnRateSlider.value = settings.continuousSpawnRate;
+                this.updateSliderDisplay('continuousSpawnRateSlider', 'continuousSpawnRateValue', settings.continuousSpawnRate);
+
+                this.dom.autoResetToggle.checked = settings.autoResetEnabled;
+                this.dom.autoResetIntervalSlider.value = settings.autoResetInterval;
+                this.updateSliderDisplay('autoResetIntervalSlider', 'autoResetIntervalValue', settings.autoResetInterval);
+
+                this.updateHUD(0, 0, settings.interactionMode);
+            },
+
+            updateHUD(particleCount, fps, interactionMode) {
+                if (this.dom.currentParticleCountSpan) {
+                    this.dom.currentParticleCountSpan.textContent = particleCount;
+                }
+                if (this.dom.fpsDisplaySpan) {
+                    this.dom.fpsDisplaySpan.textContent = fps;
+                }
+                if (this.dom.currentInteractionModeSpan) {
+                    this.dom.currentInteractionModeSpan.textContent = interactionMode.charAt(0).toUpperCase() + interactionMode.slice(1);
+                }
+            },
+
+            saveSettings() {
+                try {
+                    localStorage.setItem('particleSimSettings', JSON.stringify(settings));
+                } catch (e) {
+                    console.error("Failed to save settings to local storage:", e);
+                    M.toast({html: 'Failed to save settings!', classes: 'red rounded'});
+                }
+            },
+
+            loadSettings() {
+                try {
+                    const savedSettings = localStorage.getItem('particleSimSettings');
+                    if (savedSettings) {
+                        const parsedSettings = JSON.parse(savedSettings);
+                        Object.assign(settings, this.getDefaultSettings(), parsedSettings);
+                        if (!settings.currentSceneName) {
+                            settings.currentSceneName = 'default';
+                        }
+                    } else {
+                        Object.assign(settings, this.getDefaultSettings());
+                    }
+                } catch (e) {
+                    console.error("Failed to load settings from local storage:", e);
+                    M.toast({html: 'Failed to load saved settings. Using defaults.', classes: 'red rounded'});
+                    Object.assign(settings, this.getDefaultSettings());
+                }
+            },
+
+            getDefaultSettings() {
+                return {
+                    interactionMode: 'attract',
+                    interactionRadius: 150,
+                    maxParticles: 1000,
+                    particleSize: 3,
+                    particleSizeVariance: 0.5,
+                    forceStrength: 1,
+                    particleLifetime: 5,
+                    friction: 0.98,
+                    trails: true,
+                    trailDecayRate: 0.1,
+                    blendingMode: 'lighter',
+                    particleColorHue: 200,
+                    randomColorSpectrumEnabled: false,
+                    positiveParticleHue: 240,
+                    negativeParticleHue: 0,
+                    electrostaticEffectsEnabled: true,
+                    electrostaticStrength: 10,
+                    maxElectrostaticDistance: 150,
+                    randomChargeEnabled: true,
+                    continuousSpawnEnabled: false,
+                    continuousSpawnRate: 1,
+                    autoResetEnabled: false,
+                    autoResetInterval: 30,
+                    currentSceneName: 'default',
+                    gravityEnabled: false,
+                    gravityStrength: 0.05,
+                    massDecayEnabled: false,
+                    chargeDecayEnabled: false
+                };
+            },
+
+            resetToDefaultSettings(saveAfterReset = true) {
+                Object.assign(settings, this.getDefaultSettings());
+                this.updateUIFromSettings();
+                if (saveAfterReset) {
+                    localStorage.removeItem('particleSimSettings');
+                }
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.getElementById('particleCanvas');
+            const simulationManager = new SimulationManager(canvas);
+
+            UIManager.init();
+            UIManager.loadSettings();
+            UIManager.bindEventListeners(simulationManager);
+            simulationManager.init();
+            simulationManager.loadScene(settings.currentSceneName);
+            UIManager.updateUIFromSettings();
+        });
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

@@ -1,0 +1,32 @@
+{
+  "projectId": "6a83b228-d191-4518-9f8c-9c20e72bb311",
+  "revisionString": "2",
+  "projectNameDisplay": "Beekeeping idle clicker game",
+  "projectType": "webapp",
+  "userPromptForThisRevision": "Need deep tech/upgrade trees and some humour. Make sure everything works",
+  "basedOnRevisionString": "1",
+  "savedAt": "2025-05-29T18:09:36.804Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/imagen3_1a434d1d-39f.png",
+      "url": "/generated_images/imagen3_1a434d1d-39f.png",
+      "description": "A stylized, isometric illustration of a simple, initial beehive. It should be dark-themed, with subtle amber or gold accents, showing a basic wooden structure with a few hexagonal honeycombs visible. The overall mood should be calm and inviting. Digital art style.",
+      "purpose": "Initial beehive visual for the main game area.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_8d3dc55d-bd8.png",
+      "url": "/generated_images/imagen3_8d3dc55d-bd8.png",
+      "description": "A stylized, isometric illustration of an expanded beehive. It should be dark-themed, with more intricate details, possibly showing multiple levels or extensions, and more visible honeycombs. Subtle amber or gold accents. Digital art style, consistent with the initial beehive.",
+      "purpose": "First expanded beehive visual for the main game area, unlocked via upgrade.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_7397e9ce-ca8.png",
+      "url": "/generated_images/imagen3_7397e9ce-ca8.png",
+      "description": "A stylized, isometric illustration of a fully upgraded, advanced beehive. It should be dark-themed, highly detailed, perhaps with glowing elements, advanced structures, and a sense of prosperity and high production. Subtle amber or gold accents. Digital art style, consistent with previous beehives.",
+      "purpose": "Second expanded beehive visual for the main game area, representing a high-tier upgrade.",
+      "isNewlyGenerated": true
+    }
+  ]
+}
