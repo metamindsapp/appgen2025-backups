@@ -1,0 +1,46 @@
+{
+  "projectId": "bf944104-8832-41c3-b8b7-304bc07e2ab4",
+  "revisionString": "1",
+  "projectNameDisplay": "Trends dashboard",
+  "projectType": "webapp",
+  "userPromptForThisRevision": "pull internet trends from reddit, github, google trends, wikipedia, and build a dashboard around that information. ",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-05-29T06:45:33.355Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/dalle3_4407d5f2-7d1.png",
+      "url": "/generated_images/dalle3_4407d5f2-7d1.png",
+      "description": "Abstract, dark-themed background image for a data trends dashboard. Subtle, flowing lines of light (like fiber optics or data streams) in shades of deep blue, teal, and hints of purple, on a very dark gray or near-black background (#0A0E12). Evokes technology, data flow, and sophistication. Not too busy, should allow text and cards to be easily readable on top. Maybe a faint grid or constellation-like pattern in the deep background.",
+      "purpose": "Main background for the entire dashboard (body tag). Filename suggestion: 'dashboard_background.png'",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_938e3dc2-e25.png",
+      "url": "/generated_images/dalle3_938e3dc2-e25.png",
+      "description": "Monochromatic icon for Reddit. Stylized Reddit Snoo alien head, simple and clean. Color: light gray (#ADB5BD) or white, suitable for dark theme. Flat design, no gradients.",
+      "purpose": "Icon for Reddit trends card header. Filename suggestion: 'icon_reddit.png'",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_bfa17fce-b13.png",
+      "url": "/generated_images/dalle3_bfa17fce-b13.png",
+      "description": "Monochromatic icon for GitHub. Stylized GitHub Octocat silhouette, simple and recognizable. Color: light gray (#ADB5BD) or white. Flat design.",
+      "purpose": "Icon for GitHub trends card header. Filename suggestion: 'icon_github.png'",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_0faeda1a-0b7.png",
+      "url": "/generated_images/dalle3_0faeda1a-0b7.png",
+      "description": "Monochromatic icon for Wikipedia. Stylized 'W' from the Wikipedia logo, or a simplified puzzle globe piece. Color: light gray (#ADB5BD) or white. Flat design.",
+      "purpose": "Icon for Wikipedia trends card header. Filename suggestion: 'icon_wikipedia.png'",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_f192bbf2-1fc.png",
+      "url": "/generated_images/dalle3_f192bbf2-1fc.png",
+      "description": "Monochromatic icon for Google Trends. Abstract representation of an upward trending line graph. Color: light gray (#ADB5BD) or white. Flat design.",
+      "purpose": "Icon for Google Trends (simulated) card header. Filename suggestion: 'icon_google_trends.png'",
+      "isNewlyGenerated": true
+    }
+  ]
+}
