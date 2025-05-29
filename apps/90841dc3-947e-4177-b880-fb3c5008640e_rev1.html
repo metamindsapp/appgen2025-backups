@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Awesome Theremin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            overflow: hidden;
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+
+        #theremin-container {
+            background-color: #ffffff;
+        }
+
+        #thereminCanvas {
+            background-color: #e0f2f7;
+        }
+
+        #analyserCanvas {
+            background-color: #343a40;
+        }
+
+        .form-range:focus {
+            outline: none;
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body class="bg-light text-dark d-flex flex-column min-vh-100">
+    <header class="bg-primary text-white py-3 shadow-sm">
+        <div class="container-fluid">
+            <h1 class="text-center mb-0">Awesome Theremin</h1>
+        </div>
+    </header>
+
+    <main class="container-fluid flex-grow-1 py-4">
+        <div class="row h-100">
+            <div class="col-lg-8 d-flex flex-column justify-content-center align-items-center mb-3 mb-lg-0">
+                <div id="theremin-container" class="border border-primary rounded shadow-lg p-2 d-flex flex-column" style="width: 100%; max-width: 900px; aspect-ratio: 16/9;">
+                    <canvas id="thereminCanvas" class="flex-grow-1" style="cursor: crosshair;"></canvas>
+                    <div class="d-flex justify-content-between mt-2 px-2">
+                        <span id="freqDisplay" class="badge bg-secondary text-white fs-6">Freq: 0.00 Hz</span>
+                        <span id="volDisplay" class="badge bg-secondary text-white fs-6">Vol: -∞ dB</span>
+                    </div>
+                    <div id="waveformVisualizer" class="mt-2" style="height: 50px; border-radius: 5px; overflow: hidden;">
+                        <canvas id="analyserCanvas" width="800" height="50" style="display: block;"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 d-flex flex-column">
+                <div class="card shadow-sm mb-3">
+                    <div class="card-header bg-primary text-white">Audio Controls</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Waveform</label>
+                            <div class="d-flex justify-content-around">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="waveform" id="sineWave" value="sine" checked>
+                                    <label class="form-check-label" for="sineWave">Sine</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="waveform" id="squareWave" value="square">
+                                    <label class="form-check-label" for="squareWave">Square</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="waveform" id="sawtoothWave" value="sawtooth">
+                                    <label class="form-check-label" for="sawtoothWave">Sawtooth</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="waveform" id="triangleWave" value="triangle">
+                                    <label class="form-check-label" for="triangleWave">Triangle</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="minFreq" class="form-label">Min Frequency (<span id="minFreqVal">50</span> Hz)</label>
+                            <input type="range" class="form-range" id="minFreq" min="20" max="500" value="50">
+                        </div>
+                        <div class="mb-3">
+                            <label for="maxFreq" class="form-label">Max Frequency (<span id="maxFreqVal">2000</span> Hz)</label>
+                            <input type="range" class="form-range" id="maxFreq" min="500" max="5000" value="2000">
+                        </div>
+                        <div class="mb-3">
+                            <label for="minVol" class="form-label">Min Volume (<span id="minVolVal">0.00</span>)</label>
+                            <input type="range" class="form-range" id="minVol" min="0" max="0.5" step="0.01" value="0">
+                        </div>
+                        <div class="mb-3">
+                            <label for="maxVol" class="form-label">Max Volume (<span id="maxVolVal">1.00</span>)</label>
+                            <input type="range" class="form-range" id="maxVol" min="0.5" max="1" step="0.01" value="1">
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <button id="octaveDownBtn" class="btn btn-outline-secondary btn-sm"><i class="bi bi-chevron-down"></i> Octave Down</button>
+                            <span class="align-self-center mx-2">Octave: <span id="octaveDisplay">0</span></span>
+                            <button id="octaveUpBtn" class="btn btn-outline-secondary btn-sm">Octave Up <i class="bi bi-chevron-up"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-3">
+                    <div class="card-header bg-primary text-white">Effects</div>
+                    <div class="card-body">
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="reverbToggle">
+                            <label class="form-check-label" for="reverbToggle">Reverb</label>
+                        </div>
+                        <div id="reverbControls" class="ms-4" style="display: none;">
+                            <label for="reverbMix" class="form-label">Mix (<span id="reverbMixVal">0.50</span>)</label>
+                            <input type="range" class="form-range" id="reverbMix" min="0" max="1" step="0.01" value="0.5">
+                        </div>
+
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="delayToggle">
+                            <label class="form-check-label" for="delayToggle">Delay</label>
+                        </div>
+                        <div id="delayControls" class="ms-4" style="display: none;">
+                            <div class="mb-3">
+                                <label for="delayTime" class="form-label">Time (<span id="delayTimeVal">0.50</span> s)</label>
+                                <input type="range" class="form-range" id="delayTime" min="0.1" max="2" step="0.01" value="0.5">
+                            </div>
+                            <div class="mb-3">
+                                <label for="delayFeedback" class="form-label">Feedback (<span id="delayFeedbackVal">0.50</span>)</label>
+                                <input type="range" class="form-range" id="delayFeedback" min="0" max="0.9" step="0.01" value="0.5">
+                            </div>
+                            <div class="mb-3">
+                                <label for="delayMix" class="form-label">Mix (<span id="delayMixVal">0.50</span>)</label>
+                                <input type="range" class="form-range" id="delayMix" min="0" max="1" step="0.01" value="0.5">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-3">
+                    <div class="card-header bg-primary text-white">Recording & Presets</div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-around mb-3">
+                            <button id="recordBtn" class="btn btn-outline-success">Record</button>
+                            <button id="playRecordBtn" class="btn btn-outline-info" disabled>Play</button>
+                            <button id="clearRecordBtn" class="btn btn-outline-danger" disabled>Clear</button>
+                        </div>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" id="presetNameInput" placeholder="Preset Name">
+                            <button class="btn btn-primary" type="button" id="savePresetBtn">Save</button>
+                        </div>
+                        <div class="d-grid gap-2" id="presetButtonsContainer">
+                            <button class="btn btn-outline-secondary btn-sm" disabled>No presets saved</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-3">
+                    <div class="card-header bg-primary text-white">Keyboard Mode</div>
+                    <div class="card-body">
+                        <p class="card-text">Use QWERTY for white keys, 12345 for black keys. Spacebar to toggle sound. Shift/Ctrl for octave up/down.</p>
+                        <p class="card-text text-muted small">Q: C, W: C#, E: D, R: D#, T: E, Y: F, U: F#, I: G, O: G#, P: A, [: A#, ]: B</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-dark text-white text-center py-3 mt-auto">
+        <div class="container-fluid">
+            <p class="mb-0">Powered by Web Audio API & Bootstrap</p>
+            <button id="startAudioBtn" class="btn btn-success mt-2 d-none">Start Audio</button>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        class App {
+            constructor() {
+                this.audioManager = null;
+                this.thereminController = null;
+                this.uiManager = null;
+                this.isAudioStarted = false;
+                this.startAudioBtn = document.getElementById('startAudioBtn');
+            }
+
+            async init() {
+                if (window.AudioContext) {
+                    const tempContext = new (window.AudioContext || window.webkitAudioContext)();
+                    if (tempContext.state === 'suspended') {
+                        this.startAudioBtn.classList.remove('d-none');
+                        this.startAudioBtn.addEventListener('click', async () => {
+                            await tempContext.resume();
+                            tempContext.close();
+                            this.startAudioBtn.classList.add('d-none');
+                            this.initializeThereminComponents();
+                        }, { once: true });
+                    } else {
+                        this.initializeThereminComponents();
+                    }
+                } else {
+                    alert('Web Audio API is not supported in this browser.');
+                    document.body.innerHTML = '<p class="text-danger text-center mt-5">Web Audio API not supported.</p>';
+                }
+            }
+
+            initializeThereminComponents() {
+                this.audioManager = new AudioManager();
+                this.thereminController = new ThereminController(this.audioManager);
+                this.uiManager = new UIManager(this.audioManager, this.thereminController);
+
+                this.audioManager.init();
+                this.thereminController.init();
+                this.uiManager.init();
+                this.isAudioStarted = true;
+            }
+        }
+
+        class AudioManager {
+            constructor() {
+                this.audioContext = null;
+                this.oscillator = null;
+                this.gainNode = null;
+                this.analyser = null;
+                this.reverbNode = null;
+                this.reverbMixNode = null;
+                this.delayNode = null;
+                this.delayFeedbackNode = null;
+                this.delayMixNode = null;
+
+                this.currentWaveform = 'sine';
+                this.minFrequency = 50;
+                this.maxFrequency = 2000;
+                this.minVolume = 0;
+                this.maxVolume = 1;
+                this.octaveShift = 0;
+
+                this.isReverbEnabled = false;
+                this.reverbMix = 0.5;
+                this.isDelayEnabled = false;
+                this.delayTime = 0.5;
+                this.delayFeedback = 0.5;
+                this.delayMix = 0.5;
+
+                this.impulseResponseBuffer = null;
+            }
+
+            async init() {
+                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                this.oscillator = this.audioContext.createOscillator();
+                this.gainNode = this.audioContext.createGain();
+                this.analyser = this.audioContext.createAnalyser();
+                this.analyser.fftSize = 2048;
+
+                this.reverbNode = this.audioContext.createConvolver();
+                this.reverbMixNode = this.audioContext.createGain();
+                this.reverbMixNode.gain.value = 0;
+
+                this.delayNode = this.audioContext.createDelay(2.0);
+                this.delayFeedbackNode = this.audioContext.createGain();
+                this.delayMixNode = this.audioContext.createGain();
+                this.delayMixNode.gain.value = 0;
+
+                this.oscillator.connect(this.gainNode);
+                this.gainNode.connect(this.analyser);
+
+                this.analyser.connect(this.audioContext.destination);
+
+                this.analyser.connect(this.reverbNode);
+                this.reverbNode.connect(this.reverbMixNode);
+                this.reverbMixNode.connect(this.audioContext.destination);
+
+                this.analyser.connect(this.delayNode);
+                this.delayNode.connect(this.delayFeedbackNode);
+                this.delayFeedbackNode.connect(this.delayNode);
+                this.delayFeedbackNode.connect(this.delayMixNode);
+                this.delayMixNode.connect(this.audioContext.destination);
+
+                this.oscillator.type = this.currentWaveform;
+                this.oscillator.start();
+                this.gainNode.gain.value = 0;
+
+                await this.loadImpulseResponse('https://webaudio.github.io/web-audio-api/samples/audio/impulse-responses/small-room-3.wav');
+                this.updateEffects();
+            }
+
+            async loadImpulseResponse(url) {
+                try {
+                    const response = await fetch(url);
+                    const arrayBuffer = await response.arrayBuffer();
+                    this.impulseResponseBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+                    this.reverbNode.buffer = this.impulseResponseBuffer;
+                } catch (error) {
+                    console.error('Error loading impulse response:', error);
+                    alert('Failed to load reverb impulse response. Reverb may not work.');
+                    this.isReverbEnabled = false;
+                }
+            }
+
+            startPlaying(frequency, volume) {
+                if (!this.audioContext || this.audioContext.state === 'suspended') return;
+                this.updatePlaying(frequency, volume);
+            }
+
+            updatePlaying(frequency, volume) {
+                if (!this.audioContext || this.audioContext.state === 'suspended') return;
+                const shiftedFrequency = frequency * Math.pow(2, this.octaveShift);
+                this.oscillator.frequency.setValueAtTime(shiftedFrequency, this.audioContext.currentTime);
+                this.gainNode.gain.setValueAtTime(volume, this.audioContext.currentTime);
+            }
+
+            stopPlaying() {
+                if (!this.audioContext || this.audioContext.state === 'suspended') return;
+                this.gainNode.gain.setValueAtTime(0, this.audioContext.currentTime + 0.05);
+            }
+
+            setWaveform(waveform) {
+                this.currentWaveform = waveform;
+                if (this.oscillator) {
+                    this.oscillator.type = waveform;
+                }
+            }
+
+            setFrequencyRange(min, max) {
+                this.minFrequency = min;
+                this.maxFrequency = max;
+            }
+
+            setVolumeRange(min, max) {
+                this.minVolume = min;
+                this.maxVolume = max;
+            }
+
+            setOctaveShift(shift) {
+                this.octaveShift = shift;
+            }
+
+            toggleReverb(enabled) {
+                this.isReverbEnabled = enabled;
+                this.updateEffects();
+            }
+
+            setReverbMix(mix) {
+                this.reverbMix = mix;
+                this.updateEffects();
+            }
+
+            toggleDelay(enabled) {
+                this.isDelayEnabled = enabled;
+                this.updateEffects();
+            }
+
+            setDelayTime(time) {
+                this.delayTime = time;
+                this.updateEffects();
+            }
+
+            setDelayFeedback(feedback) {
+                this.delayFeedback = feedback;
+                this.updateEffects();
+            }
+
+            setDelayMix(mix) {
+                this.delayMix = mix;
+                this.updateEffects();
+            }
+
+            updateEffects() {
+                if (this.reverbMixNode) {
+                    this.reverbMixNode.gain.setValueAtTime(this.isReverbEnabled ? this.reverbMix : 0, this.audioContext.currentTime);
+                }
+                if (this.delayNode && this.delayFeedbackNode && this.delayMixNode) {
+                    this.delayNode.delayTime.setValueAtTime(this.delayTime, this.audioContext.currentTime);
+                    this.delayFeedbackNode.gain.setValueAtTime(this.delayFeedback, this.audioContext.currentTime);
+                    this.delayMixNode.gain.setValueAtTime(this.isDelayEnabled ? this.delayMix : 0, this.audioContext.currentTime);
+                }
+            }
+
+            getAnalyserData() {
+                if (!this.analyser) return null;
+                const data = new Uint8Array(this.analyser.frequencyBinCount);
+                this.analyser.getByteTimeDomainData(data);
+                return data;
+            }
+        }
+
+        class ThereminController {
+            constructor(audioManager) {
+                this.audioManager = audioManager;
+                this.thereminCanvas = document.getElementById('thereminCanvas');
+                this.thereminContainer = document.getElementById('theremin-container');
+                this.ctx = this.thereminCanvas.getContext('2d');
+                this.isPlaying = false;
+                this.isKeyboardPlaying = false;
+                this.currentKeyboardFreq = 0;
+
+                this.recordedSequence = [];
+                this.isRecording = false;
+                this.recordStartTime = 0;
+                this.playbackInterval = null;
+
+                this.keyboardMap = {
+                    'q': 261.63,
+                    'w': 277.18,
+                    'e': 293.66,
+                    'r': 311.13,
+                    't': 329.63,
+                    'y': 349.23,
+                    'u': 369.99,
+                    'i': 392.00,
+                    'o': 415.30,
+                    'p': 440.00,
+                    '[': 466.16,
+                    ']': 493.88
+                };
+                this.activeKeyboardKeys = new Set();
+            }
+
+            init() {
+                this.resizeCanvas();
+                window.addEventListener('resize', this.resizeCanvas.bind(this));
+
+                this.thereminCanvas.addEventListener('mousedown', this.handleInteractionStart.bind(this));
+                this.thereminCanvas.addEventListener('mousemove', this.handleInteractionMove.bind(this));
+                this.thereminCanvas.addEventListener('mouseup', this.handleInteractionEnd.bind(this));
+                this.thereminCanvas.addEventListener('mouseleave', this.handleInteractionEnd.bind(this));
+
+                this.thereminCanvas.addEventListener('touchstart', this.handleInteractionStart.bind(this), { passive: false });
+                this.thereminCanvas.addEventListener('touchmove', this.handleInteractionMove.bind(this), { passive: false });
+                this.thereminCanvas.addEventListener('touchend', this.handleInteractionEnd.bind(this));
+                this.thereminCanvas.addEventListener('touchcancel', this.handleInteractionEnd.bind(this));
+
+                document.addEventListener('keydown', this.handleKeyDown.bind(this));
+                document.addEventListener('keyup', this.handleKeyUp.bind(this));
+
+                this.animateVisuals();
+            }
+
+            resizeCanvas() {
+                this.thereminCanvas.width = this.thereminCanvas.clientWidth;
+                this.thereminCanvas.height = this.thereminCanvas.clientHeight;
+                this.animateVisuals();
+            }
+
+            getCoordinates(event) {
+                const rect = this.thereminCanvas.getBoundingClientRect();
+                let clientX, clientY;
+
+                if (event.touches && event.touches.length > 0) {
+                    clientX = event.touches[0].clientX;
+                    clientY = event.touches[0].clientY;
+                } else {
+                    clientX = event.clientX;
+                    clientY = event.clientY;
+                }
+
+                const x = clientX - rect.left;
+                const y = clientY - rect.top;
+                return { x, y };
+            }
+
+            mapToAudioParams(x, y) {
+                const width = this.thereminCanvas.width;
+                const height = this.thereminCanvas.height;
+
+                const freqRange = this.audioManager.maxFrequency - this.audioManager.minFrequency;
+                let frequency = this.audioManager.minFrequency + (x / width) * freqRange;
+                frequency = Math.max(this.audioManager.minFrequency, Math.min(this.audioManager.maxFrequency, frequency));
+
+                const volRange = this.audioManager.maxVolume - this.audioManager.minVolume;
+                let volume = this.audioManager.maxVolume - (y / height) * volRange;
+                volume = Math.max(this.audioManager.minVolume, Math.min(this.audioManager.maxVolume, volume));
+
+                return { frequency, volume };
+            }
+
+            handleInteractionStart(event) {
+                event.preventDefault();
+                if (this.audioManager.audioContext.state === 'suspended') {
+                    this.audioManager.audioContext.resume();
+                }
+                this.isPlaying = true;
+                const { x, y } = this.getCoordinates(event);
+                const { frequency, volume } = this.mapToAudioParams(x, y);
+                this.audioManager.startPlaying(frequency, volume);
+                if (this.isRecording) {
+                    this.recordStartTime = this.audioManager.audioContext.currentTime;
+                    this.recordedSequence = [];
+                    this.recordedSequence.push({
+                        time: 0,
+                        frequency,
+                        volume
+                    });
+                }
+                this.drawThereminDot(x, y, frequency, volume);
+            }
+
+            handleInteractionMove(event) {
+                event.preventDefault();
+                if (this.isPlaying) {
+                    const { x, y } = this.getCoordinates(event);
+                    const { frequency, volume } = this.mapToAudioParams(x, y);
+                    this.audioManager.updatePlaying(frequency, volume);
+                    if (this.isRecording) {
+                        this.recordedSequence.push({
+                            time: this.audioManager.audioContext.currentTime - this.recordStartTime,
+                            frequency,
+                            volume
+                        });
+                    }
+                    this.drawThereminDot(x, y, frequency, volume);
+                }
+            }
+
+            handleInteractionEnd(event) {
+                event.preventDefault();
+                if (this.isPlaying) {
+                    this.isPlaying = false;
+                    this.audioManager.stopPlaying();
+                    if (this.isRecording) {
+                        this.isRecording = false;
+                        this.recordedSequence.push({
+                            time: this.audioManager.audioContext.currentTime - this.recordStartTime,
+                            frequency: 0,
+                            volume: 0
+                        });
+                        document.getElementById('playRecordBtn').disabled = false;
+                        document.getElementById('clearRecordBtn').disabled = false;
+                    }
+                    this.drawThereminDot(0, 0, 0, 0, true);
+                }
+            }
+
+            handleKeyDown(event) {
+                if (!this.audioManager.audioContext || this.audioManager.audioContext.state === 'suspended') return;
+                const key = event.key.toLowerCase();
+
+                if (key === 'shift' && !event.repeat) {
+                    this.audioManager.setOctaveShift(Math.min(2, this.audioManager.octaveShift + 1));
+                    uiManager.updateOctaveDisplay();
+                    event.preventDefault();
+                } else if (key === 'control' && !event.repeat) {
+                    this.audioManager.setOctaveShift(Math.max(-2, this.audioManager.octaveShift - 1));
+                    uiManager.updateOctaveDisplay();
+                    event.preventDefault();
+                }
+
+                if (key === ' ' && !event.repeat) {
+                    if (this.isKeyboardPlaying) {
+                        this.audioManager.stopPlaying();
+                        this.isKeyboardPlaying = false;
+                        this.currentKeyboardFreq = 0;
+                        this.drawThereminDot(0, 0, 0, 0, true);
+                    } else {
+                        if (this.activeKeyboardKeys.size === 0) {
+                            this.audioManager.startPlaying(this.audioManager.minFrequency, this.audioManager.maxVolume * 0.5);
+                        } else {
+                            const freqs = Array.from(this.activeKeyboardKeys).map(k => this.keyboardMap[k]);
+                            if (freqs.length > 0) {
+                                const avgFreq = freqs.reduce((a, b) => a + b, 0) / freqs.length;
+                                this.audioManager.startPlaying(avgFreq, this.audioManager.maxVolume);
+                                this.currentKeyboardFreq = avgFreq;
+                            }
+                        }
+                        this.isKeyboardPlaying = true;
+                        this.drawThereminDot(0, 0, this.currentKeyboardFreq, this.audioManager.maxVolume, false, true);
+                    }
+                    event.preventDefault();
+                    return;
+                }
+
+                if (this.keyboardMap[key] && !this.activeKeyboardKeys.has(key)) {
+                    this.activeKeyboardKeys.add(key);
+                    const freqs = Array.from(this.activeKeyboardKeys).map(k => this.keyboardMap[k]);
+                    const avgFreq = freqs.reduce((a, b) => a + b, 0) / freqs.length;
+                    this.currentKeyboardFreq = avgFreq;
+                    this.audioManager.updatePlaying(this.currentKeyboardFreq, this.audioManager.maxVolume);
+                    if (!this.isKeyboardPlaying) {
+                        this.audioManager.startPlaying(this.currentKeyboardFreq, this.audioManager.maxVolume);
+                        this.isKeyboardPlaying = true;
+                    }
+                    this.drawThereminDot(0, 0, this.currentKeyboardFreq, this.audioManager.maxVolume, false, true);
+                }
+            }
+
+            handleKeyUp(event) {
+                const key = event.key.toLowerCase();
+
+                if (key === 'shift' && this.audioManager.octaveShift > 0) {
+                    this.audioManager.setOctaveShift(this.audioManager.octaveShift - 1);
+                    uiManager.updateOctaveDisplay();
+                } else if (key === 'control' && this.audioManager.octaveShift < 0) {
+                    this.audioManager.setOctaveShift(this.audioManager.octaveShift + 1);
+                    uiManager.updateOctaveDisplay();
+                }
+
+                if (this.keyboardMap[key]) {
+                    this.activeKeyboardKeys.delete(key);
+                    if (this.activeKeyboardKeys.size === 0) {
+                        if (this.isKeyboardPlaying) {
+                            this.audioManager.stopPlaying();
+                            this.isKeyboardPlaying = false;
+                            this.currentKeyboardFreq = 0;
+                            this.drawThereminDot(0, 0, 0, 0, true);
+                        }
+                    } else {
+                        const freqs = Array.from(this.activeKeyboardKeys).map(k => this.keyboardMap[k]);
+                        const avgFreq = freqs.reduce((a, b) => a + b, 0) / freqs.length;
+                        this.currentKeyboardFreq = avgFreq;
+                        this.audioManager.updatePlaying(this.currentKeyboardFreq, this.audioManager.maxVolume);
+                        this.drawThereminDot(0, 0, this.currentKeyboardFreq, this.audioManager.maxVolume, false, true);
+                    }
+                }
+            }
+
+            startRecording() {
+                this.isRecording = true;
+                this.recordedSequence = [];
+                this.recordStartTime = 0;
+                document.getElementById('playRecordBtn').disabled = true;
+                document.getElementById('clearRecordBtn').disabled = true;
+            }
+
+            playRecording() {
+                if (this.recordedSequence.length === 0) return;
+
+                let currentIndex = 0;
+                let startTime = this.audioManager.audioContext.currentTime;
+                const sequenceDuration = this.recordedSequence[this.recordedSequence.length - 1].time;
+
+                if (this.playbackInterval) clearInterval(this.playbackInterval);
+
+                this.playbackInterval = setInterval(() => {
+                    if (!this.audioManager.audioContext || this.audioManager.audioContext.state === 'suspended') {
+                        clearInterval(this.playbackInterval);
+                        return;
+                    }
+
+                    const currentTime = this.audioManager.audioContext.currentTime - startTime;
+
+                    if (currentTime > sequenceDuration) {
+                        currentIndex = 0;
+                        startTime = this.audioManager.audioContext.currentTime;
+                    }
+
+                    while (currentIndex < this.recordedSequence.length - 1 &&
+                           this.recordedSequence[currentIndex + 1].time <= currentTime) {
+                        currentIndex++;
+                    }
+
+                    const { frequency, volume } = this.recordedSequence[currentIndex];
+                    this.audioManager.updatePlaying(frequency, volume);
+                    this.drawThereminDot(0, 0, frequency, volume);
+                }, 10);
+            }
+
+            stopRecordingPlayback() {
+                if (this.playbackInterval) {
+                    clearInterval(this.playbackInterval);
+                    this.playbackInterval = null;
+                }
+                this.audioManager.stopPlaying();
+                this.drawThereminDot(0, 0, 0, 0, true);
+            }
+
+            clearRecording() {
+                this.stopRecordingPlayback();
+                this.recordedSequence = [];
+                document.getElementById('playRecordBtn').disabled = true;
+                document.getElementById('clearRecordBtn').disabled = true;
+            }
+
+            drawThereminDot(x, y, frequency, volume, clear = false, isKeyboard = false) {
+                this.ctx.clearRect(0, 0, this.thereminCanvas.width, this.thereminCanvas.height);
+
+                if (clear || (frequency === 0 && volume === 0 && !isKeyboard && !this.playbackInterval)) {
+                    uiManager.updateDisplay(0, 0);
+                    return;
+                }
+
+                if (isKeyboard || this.playbackInterval) {
+                    x = this.thereminCanvas.width / 2;
+                    y = this.thereminCanvas.height / 2;
+                }
+
+                this.ctx.beginPath();
+                this.ctx.arc(x, y, 15, 0, 2 * Math.PI);
+                this.ctx.fillStyle = 'rgba(255, 99, 71, 0.7)';
+                this.ctx.fill();
+                this.ctx.strokeStyle = 'rgba(255, 99, 71, 1)';
+                this.ctx.lineWidth = 3;
+                this.ctx.stroke();
+
+                uiManager.updateDisplay(frequency, volume);
+            }
+
+            animateVisuals() {
+                requestAnimationFrame(this.animateVisuals.bind(this));
+                this.drawWaveform();
+            }
+
+            drawWaveform() {
+                const analyserCanvas = document.getElementById('analyserCanvas');
+                const analyserCtx = analyserCanvas.getContext('2d');
+                const data = this.audioManager.getAnalyserData();
+
+                if (!data) return;
+
+                analyserCtx.clearRect(0, 0, analyserCanvas.width, analyserCanvas.height);
+                analyserCtx.lineWidth = 2;
+                analyserCtx.strokeStyle = 'rgb(0, 255, 255)';
+                analyserCtx.beginPath();
+
+                const sliceWidth = analyserCanvas.width * 1.0 / data.length;
+                let x = 0;
+
+                for (let i = 0; i < data.length; i++) {
+                    const v = data[i] / 128.0;
+                    const y = v * analyserCanvas.height / 2;
+
+                    if (i === 0) {
+                        analyserCtx.moveTo(x, y);
+                    } else {
+                        analyserCtx.lineTo(x, y);
+                    }
+
+                    x += sliceWidth;
+                }
+
+                analyserCtx.lineTo(analyserCanvas.width, analyserCanvas.height / 2);
+                analyserCtx.stroke();
+            }
+        }
+
+        class UIManager {
+            constructor(audioManager, thereminController) {
+                this.audioManager = audioManager;
+                this.thereminController = thereminController;
+
+                this.freqDisplay = document.getElementById('freqDisplay');
+                this.volDisplay = document.getElementById('volDisplay');
+                this.octaveDisplay = document.getElementById('octaveDisplay');
+
+                this.waveformRadios = document.querySelectorAll('input[name="waveform"]');
+                this.minFreqSlider = document.getElementById('minFreq');
+                this.maxFreqSlider = document.getElementById('maxFreq');
+                this.minVolSlider = document.getElementById('minVol');
+                this.maxVolSlider = document.getElementById('maxVol');
+                this.minFreqVal = document.getElementById('minFreqVal');
+                this.maxFreqVal = document.getElementById('maxFreqVal');
+                this.minVolVal = document.getElementById('minVolVal');
+                this.maxVolVal = document.getElementById('maxVolVal');
+                this.octaveDownBtn = document.getElementById('octaveDownBtn');
+                this.octaveUpBtn = document.getElementById('octaveUpBtn');
+
+                this.reverbToggle = document.getElementById('reverbToggle');
+                this.reverbControls = document.getElementById('reverbControls');
+                this.reverbMixSlider = document.getElementById('reverbMix');
+                this.reverbMixVal = document.getElementById('reverbMixVal');
+
+                this.delayToggle = document.getElementById('delayToggle');
+                this.delayControls = document.getElementById('delayControls');
+                this.delayTimeSlider = document.getElementById('delayTime');
+                this.delayTimeVal = document.getElementById('delayTimeVal');
+                this.delayFeedbackSlider = document.getElementById('delayFeedback');
+                this.delayFeedbackVal = document.getElementById('delayFeedbackVal');
+                this.delayMixSlider = document.getElementById('delayMix');
+                this.delayMixVal = document.getElementById('delayMixVal');
+
+                this.recordBtn = document.getElementById('recordBtn');
+                this.playRecordBtn = document.getElementById('playRecordBtn');
+                this.clearRecordBtn = document.getElementById('clearRecordBtn');
+                this.presetNameInput = document.getElementById('presetNameInput');
+                this.savePresetBtn = document.getElementById('savePresetBtn');
+                this.presetButtonsContainer = document.getElementById('presetButtonsContainer');
+
+                this.presets = JSON.parse(localStorage.getItem('thereminPresets')) || {};
+            }
+
+            init() {
+                this.attachEventListeners();
+                this.loadInitialSettings();
+                this.renderPresets();
+                this.updateOctaveDisplay();
+            }
+
+            attachEventListeners() {
+                this.waveformRadios.forEach(radio => {
+                    radio.addEventListener('change', (e) => {
+                        this.audioManager.setWaveform(e.target.value);
+                    });
+                });
+
+                this.minFreqSlider.addEventListener('input', (e) => {
+                    const val = parseFloat(e.target.value);
+                    if (val > this.audioManager.maxFrequency) {
+                        this.maxFreqSlider.value = val;
+                        this.audioManager.maxFrequency = val;
+                        this.maxFreqVal.textContent = val;
+                    }
+                    this.audioManager.setFrequencyRange(val, this.audioManager.maxFrequency);
+                    this.minFreqVal.textContent = val;
+                });
+                this.maxFreqSlider.addEventListener('input', (e) => {
+                    const val = parseFloat(e.target.value);
+                    if (val < this.audioManager.minFrequency) {
+                        this.minFreqSlider.value = val;
+                        this.audioManager.minFrequency = val;
+                        this.minFreqVal.textContent = val;
+                    }
+                    this.audioManager.setFrequencyRange(this.audioManager.minFrequency, val);
+                    this.maxFreqVal.textContent = val;
+                });
+
+                this.minVolSlider.addEventListener('input', (e) => {
+                    const val = parseFloat(e.target.value);
+                    if (val > this.audioManager.maxVolume) {
+                        this.maxVolSlider.value = val;
+                        this.audioManager.maxVolume = val;
+                        this.maxVolVal.textContent = val.toFixed(2);
+                    }
+                    this.audioManager.setVolumeRange(val, this.audioManager.maxVolume);
+                    this.minVolVal.textContent = val.toFixed(2);
+                });
+                this.maxVolSlider.addEventListener('input', (e) => {
+                    const val = parseFloat(e.target.value);
+                    if (val < this.audioManager.minVolume) {
+                        this.minVolSlider.value = val;
+                        this.audioManager.minVolume = val;
+                        this.minVolVal.textContent = val.toFixed(2);
+                    }
+                    this.audioManager.setVolumeRange(this.audioManager.minVolume, val);
+                    this.maxVolVal.textContent = val.toFixed(2);
+                });
+
+                this.octaveDownBtn.addEventListener('click', () => {
+                    this.audioManager.setOctaveShift(Math.max(-2, this.audioManager.octaveShift - 1));
+                    this.updateOctaveDisplay();
+                });
+                this.octaveUpBtn.addEventListener('click', () => {
+                    this.audioManager.setOctaveShift(Math.min(2, this.audioManager.octaveShift + 1));
+                    this.updateOctaveDisplay();
+                });
+
+                this.reverbToggle.addEventListener('change', (e) => {
+                    this.audioManager.toggleReverb(e.target.checked);
+                    this.reverbControls.style.display = e.target.checked ? 'block' : 'none';
+                });
+                this.reverbMixSlider.addEventListener('input', (e) => {
+                    this.audioManager.setReverbMix(parseFloat(e.target.value));
+                    this.reverbMixVal.textContent = parseFloat(e.target.value).toFixed(2);
+                });
+
+                this.delayToggle.addEventListener('change', (e) => {
+                    this.audioManager.toggleDelay(e.target.checked);
+                    this.delayControls.style.display = e.target.checked ? 'block' : 'none';
+                });
+                this.delayTimeSlider.addEventListener('input', (e) => {
+                    this.audioManager.setDelayTime(parseFloat(e.target.value));
+                    this.delayTimeVal.textContent = parseFloat(e.target.value).toFixed(2);
+                });
+                this.delayFeedbackSlider.addEventListener('input', (e) => {
+                    this.audioManager.setDelayFeedback(parseFloat(e.target.value));
+                    this.delayFeedbackVal.textContent = parseFloat(e.target.value).toFixed(2);
+                });
+                this.delayMixSlider.addEventListener('input', (e) => {
+                    this.audioManager.setDelayMix(parseFloat(e.target.value));
+                    this.delayMixVal.textContent = parseFloat(e.target.value).toFixed(2);
+                });
+
+                this.recordBtn.addEventListener('click', () => {
+                    if (!this.thereminController.isRecording) {
+                        this.thereminController.startRecording();
+                        this.recordBtn.classList.remove('btn-outline-success');
+                        this.recordBtn.classList.add('btn-danger');
+                        this.recordBtn.textContent = 'Recording...';
+                    } else {
+                        this.thereminController.isRecording = false;
+                        this.recordBtn.classList.remove('btn-danger');
+                        this.recordBtn.classList.add('btn-outline-success');
+                        this.recordBtn.textContent = 'Record';
+                    }
+                });
+                this.playRecordBtn.addEventListener('click', () => {
+                    if (this.thereminController.playbackInterval) {
+                        this.thereminController.stopRecordingPlayback();
+                        this.playRecordBtn.classList.remove('btn-warning');
+                        this.playRecordBtn.classList.add('btn-outline-info');
+                        this.playRecordBtn.textContent = 'Play';
+                    } else {
+                        this.thereminController.playRecording();
+                        this.playRecordBtn.classList.remove('btn-outline-info');
+                        this.playRecordBtn.classList.add('btn-warning');
+                        this.playRecordBtn.textContent = 'Playing...';
+                    }
+                });
+                this.clearRecordBtn.addEventListener('click', () => {
+                    this.thereminController.clearRecording();
+                    this.recordBtn.classList.remove('btn-danger');
+                    this.recordBtn.classList.add('btn-outline-success');
+                    this.recordBtn.textContent = 'Record';
+                    this.playRecordBtn.classList.remove('btn-warning');
+                    this.playRecordBtn.classList.add('btn-outline-info');
+                    this.playRecordBtn.textContent = 'Play';
+                });
+
+                this.savePresetBtn.addEventListener('click', () => this.savePreset());
+                this.presetNameInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.savePreset();
+                });
+            }
+
+            loadInitialSettings() {
+                this.waveformRadios.forEach(radio => {
+                    if (radio.value === this.audioManager.currentWaveform) {
+                        radio.checked = true;
+                    }
+                });
+                this.minFreqSlider.value = this.audioManager.minFrequency;
+                this.minFreqVal.textContent = this.audioManager.minFrequency;
+                this.maxFreqSlider.value = this.audioManager.maxFrequency;
+                this.maxFreqVal.textContent = this.audioManager.maxFrequency;
+                this.minVolSlider.value = this.audioManager.minVolume;
+                this.minVolVal.textContent = this.audioManager.minVolume.toFixed(2);
+                this.maxVolSlider.value = this.audioManager.maxVolume;
+                this.maxVolVal.textContent = this.audioManager.maxVolume.toFixed(2);
+
+                this.reverbToggle.checked = this.audioManager.isReverbEnabled;
+                this.reverbControls.style.display = this.audioManager.isReverbEnabled ? 'block' : 'none';
+                this.reverbMixSlider.value = this.audioManager.reverbMix;
+                this.reverbMixVal.textContent = this.audioManager.reverbMix.toFixed(2);
+
+                this.delayToggle.checked = this.audioManager.isDelayEnabled;
+                this.delayControls.style.display = this.audioManager.isDelayEnabled ? 'block' : 'none';
+                this.delayTimeSlider.value = this.audioManager.delayTime;
+                this.delayTimeVal.textContent = this.audioManager.delayTime.toFixed(2);
+                this.delayFeedbackSlider.value = this.audioManager.delayFeedback;
+                this.delayFeedbackVal.textContent = this.audioManager.delayFeedback.toFixed(2);
+                this.delayMixSlider.value = this.audioManager.delayMix;
+                this.delayMixVal.textContent = this.audioManager.delayMix.toFixed(2);
+            }
+
+            updateDisplay(frequency, volume) {
+                this.freqDisplay.textContent = `Freq: ${frequency.toFixed(2)} Hz`;
+                const volumeDb = volume > 0.001 ? (20 * Math.log10(volume)).toFixed(2) : '-∞';
+                this.volDisplay.textContent = `Vol: ${volumeDb} dB`;
+            }
+
+            updateOctaveDisplay() {
+                this.octaveDisplay.textContent = this.audioManager.octaveShift;
+            }
+
+            savePreset() {
+                const name = this.presetNameInput.value.trim();
+                if (!name) {
+                    alert('Please enter a preset name.');
+                    return;
+                }
+
+                this.presets[name] = {
+                    waveform: this.audioManager.currentWaveform,
+                    minFrequency: this.audioManager.minFrequency,
+                    maxFrequency: this.audioManager.maxFrequency,
+                    minVolume: this.audioManager.minVolume,
+                    maxVolume: this.audioManager.maxVolume,
+                    octaveShift: this.audioManager.octaveShift,
+                    isReverbEnabled: this.audioManager.isReverbEnabled,
+                    reverbMix: this.audioManager.reverbMix,
+                    isDelayEnabled: this.audioManager.isDelayEnabled,
+                    delayTime: this.audioManager.delayTime,
+                    delayFeedback: this.audioManager.delayFeedback,
+                    delayMix: this.audioManager.delayMix
+                };
+
+                localStorage.setItem('thereminPresets', JSON.stringify(this.presets));
+                this.presetNameInput.value = '';
+                this.renderPresets();
+                alert(`Preset "${name}" saved!`);
+            }
+
+            loadPreset(name) {
+                const preset = this.presets[name];
+                if (!preset) return;
+
+                this.audioManager.setWaveform(preset.waveform);
+                this.audioManager.setFrequencyRange(preset.minFrequency, preset.maxFrequency);
+                this.audioManager.setVolumeRange(preset.minVolume, preset.maxVolume);
+                this.audioManager.setOctaveShift(preset.octaveShift);
+                this.audioManager.toggleReverb(preset.isReverbEnabled);
+                this.audioManager.setReverbMix(preset.reverbMix);
+                this.audioManager.toggleDelay(preset.isDelayEnabled);
+                this.audioManager.setDelayTime(preset.delayTime);
+                this.audioManager.setDelayFeedback(preset.delayFeedback);
+                this.audioManager.setDelayMix(preset.delayMix);
+
+                this.waveformRadios.forEach(radio => {
+                    radio.checked = (radio.value === preset.waveform);
+                });
+                this.minFreqSlider.value = preset.minFrequency;
+                this.minFreqVal.textContent = preset.minFrequency;
+                this.maxFreqSlider.value = preset.maxFrequency;
+                this.maxFreqVal.textContent = preset.maxFrequency;
+                this.minVolSlider.value = preset.minVolume;
+                this.minVolVal.textContent = preset.minVolume.toFixed(2);
+                this.maxVolSlider.value = preset.maxVolume;
+                this.maxVolVal.textContent = preset.maxVolume.toFixed(2);
+                this.updateOctaveDisplay();
+
+                this.reverbToggle.checked = preset.isReverbEnabled;
+                this.reverbControls.style.display = preset.isReverbEnabled ? 'block' : 'none';
+                this.reverbMixSlider.value = preset.reverbMix;
+                this.reverbMixVal.textContent = preset.reverbMix.toFixed(2);
+
+                this.delayToggle.checked = preset.isDelayEnabled;
+                this.delayControls.style.display = preset.isDelayEnabled ? 'block' : 'none';
+                this.delayTimeSlider.value = preset.delayTime;
+                this.delayTimeVal.textContent = preset.delayTime.toFixed(2);
+                this.delayFeedbackSlider.value = preset.delayFeedback;
+                this.delayFeedbackVal.textContent = preset.delayFeedback.toFixed(2);
+                this.delayMixSlider.value = preset.delayMix;
+                this.delayMixVal.textContent = preset.delayMix.toFixed(2);
+
+                alert(`Preset "${name}" loaded!`);
+            }
+
+            deletePreset(name) {
+                if (confirm(`Are you sure you want to delete preset "${name}"?`)) {
+                    delete this.presets[name];
+                    localStorage.setItem('thereminPresets', JSON.stringify(this.presets));
+                    this.renderPresets();
+                    alert(`Preset "${name}" deleted.`);
+                }
+            }
+
+            renderPresets() {
+                this.presetButtonsContainer.innerHTML = '';
+                const presetNames = Object.keys(this.presets);
+
+                if (presetNames.length === 0) {
+                    this.presetButtonsContainer.innerHTML = '<button class="btn btn-outline-secondary btn-sm" disabled>No presets saved</button>';
+                    return;
+                }
+
+                presetNames.forEach(name => {
+                    const presetDiv = document.createElement('div');
+                    presetDiv.classList.add('d-flex', 'justify-content-between', 'align-items-center', 'mb-2');
+
+                    const loadBtn = document.createElement('button');
+                    loadBtn.classList.add('btn', 'btn-outline-primary', 'btn-sm', 'flex-grow-1', 'me-2');
+                    loadBtn.textContent = name;
+                    loadBtn.addEventListener('click', () => this.loadPreset(name));
+
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.classList.add('btn', 'btn-outline-danger', 'btn-sm');
+                    deleteBtn.innerHTML = '<i class="bi bi-x-lg"></i>';
+                    deleteBtn.addEventListener('click', () => this.deletePreset(name));
+
+                    presetDiv.appendChild(loadBtn);
+                    presetDiv.appendChild(deleteBtn);
+                    this.presetButtonsContainer.appendChild(presetDiv);
+                });
+            }
+        }
+
+        let app;
+        let audioManager;
+        let thereminController;
+        let uiManager;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            app = new App();
+            app.init().then(() => {
+                audioManager = app.audioManager;
+                thereminController = app.thereminController;
+                uiManager = app.uiManager;
+            });
+        });
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

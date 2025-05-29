@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Theremin Deluxe</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        }
+        .waveform-icon {
+            height: 1.1em;
+            width: auto;
+            vertical-align: text-bottom;
+            margin-right: 0.3em;
+            display: inline-block;
+            background-color: #e9ecef;
+            color: #6c757d;
+            text-align: center;
+            font-size: 0.8em;
+            line-height: 1.1em;
+            border: 1px dashed #ced4da;
+        }
+        #thereminZone {
+            background-image: url('/generated_images/imagen3_bd0f3da4-9ff.png');
+            background-size: cover;
+            background-position: center;
+            border: 1px solid #dee2e6;
+            transition: box-shadow 0.2s ease-in-out;
+        }
+        #thereminZone:hover, #thereminZone:focus-within {
+             box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+        #thereminPointer {
+            border: 2px solid rgba(255,255,255,0.8);
+            box-shadow: 0 0 8px rgba(13, 110, 253, 0.6);
+            background-color: var(--bs-primary);
+        }
+        .card-header.fw-bold {
+            font-weight: 500 !important;
+        }
+        .form-range::-webkit-slider-thumb { background-color: #0d6efd; }
+        .form-range::-moz-range-thumb { background-color: #0d6efd; }
+        .form-range::-ms-thumb { background-color: #0d6efd; }
+
+        #oscilloscopeCanvas, #spectrumCanvas {
+            background-color: #ffffff;
+            border-radius: var(--bs-card-inner-border-radius);
+        }
+        #delayControls, #filterControls {
+            padding: 0.5rem;
+            background-color: #f8f9fa;
+            border-radius: 0.25rem;
+            margin-top: 0.5rem;
+        }
+        #quantizeToggle.active, #noteHoldToggle.active {
+            background-color: #0d6efd;
+            color: white;
+            border-color: #0d6efd;
+        }
+        .btn-check:checked+.btn-outline-primary, .btn-outline-primary.active {
+            background-color: #0d6efd;
+            color: #fff;
+        }
+        .form-range-sm { height: 0.8rem; }
+        .form-range-sm::-webkit-slider-thumb { height: 1rem; width: 1rem; margin-top: -0.3rem;}
+        .form-range-sm::-moz-range-thumb { height: 1rem; width: 1rem; }
+        .form-range-sm::-ms-thumb { height: 1rem; width: 1rem; margin-top: 0; }
+
+    </style>
+</head>
+<body class="bg-light text-dark d-flex flex-column min-vh-100">
+
+    <header class="container-fluid py-3 bg-white shadow-sm">
+        <div class="container d-flex justify-content-between align-items-center">
+            <h1 class="h3 mb-0 text-primary">Web Theremin Deluxe</h1>
+            <button id="masterSoundToggle" class="btn btn-success" title="Toggle Sound On/Off (Spacebar)">
+                <i id="masterSoundIcon" class="bi bi-play-fill"></i> <span id="masterSoundText">Sound ON</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="container-fluid flex-grow-1 d-flex flex-column p-3">
+        <div class="row flex-grow-1 g-3">
+            <div class="col-lg-3 col-md-4 d-flex flex-column">
+                <div class="card h-100">
+                    <div class="card-header fw-bold">Controls</div>
+                    <div class="card-body overflow-auto">
+                        <div class="mb-3">
+                            <label for="masterVolume" class="form-label">Master Volume: <span id="masterVolumeValueText" class="fw-normal">50</span>%</label>
+                            <input type="range" class="form-range" id="masterVolume" min="0" max="100" value="50" title="Adjust Master Volume">
+                        </div>
+                        <hr>
+                        <div class="mb-3">
+                            <label class="form-label">Waveform (Keys 1-4)</label>
+                            <div id="waveformSelector" class="btn-group w-100" role="group">
+                                <button type="button" class="btn btn-outline-primary active" data-wave="sine" title="Sine Wave"><img src="/generated_images/imagen3_dc54ddde-6b7.png" alt="Sine waveform icon" class="waveform-icon"> Sine</button>
+                                <button type="button" class="btn btn-outline-primary" data-wave="square" title="Square Wave"><img src="/generated_images/imagen3_2fe77ef0-5d5.png" alt="Square waveform icon" class="waveform-icon"> Square</button>
+                                <button type="button" class="btn btn-outline-primary" data-wave="sawtooth" title="Sawtooth Wave"><img src="/generated_images/imagen3_be245015-3c5.png" alt="Sawtooth waveform icon" class="waveform-icon"> Saw</button>
+                                <button type="button" class="btn btn-outline-primary" data-wave="triangle" title="Triangle Wave"><img src="/generated_images/imagen3_cbe76ae5-681.png" alt="Triangle waveform icon" class="waveform-icon"> Triangle</button>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="mb-3">
+                            <label class="form-label">Octave: <span id="currentOctaveDisplay" class="fw-normal">0</span> (Keys: - / +)</label>
+                            <div class="btn-group w-100">
+                                <button id="octaveDown" class="btn btn-outline-secondary" title="Octave Down">-</button>
+                                <button id="octaveReset" class="btn btn-outline-secondary" title="Reset Octave">Reset</button>
+                                <button id="octaveUp" class="btn btn-outline-secondary" title="Octave Up">+</button>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="mb-3">
+                            <label for="scaleSelector" class="form-label">Scale Quantization (Q)</label>
+                            <div class="input-group">
+                                <select id="scaleSelector" class="form-select" title="Select Musical Scale">
+                                    <option value="chromatic">Chromatic</option>
+                                    <option value="major">Major</option>
+                                    <option value="minor">Minor</option>
+                                    <option value="pentatonic_major">Pent. Major</option>
+                                    <option value="pentatonic_minor">Pent. Minor</option>
+                                </select>
+                                <button id="quantizeToggle" class="btn btn-outline-secondary" data-bs-toggle="button" title="Toggle Scale Quantization (Q)">OFF</button>
+                            </div>
+                        </div>
+                        <hr>
+                        <h5 class="mt-2">Effects</h5>
+                        <div class="mb-2 p-2 border rounded bg-white">
+                            <div class="form-check form-switch mb-1">
+                                <input class="form-check-input" type="checkbox" role="switch" id="delayToggle" title="Toggle Delay Effect">
+                                <label class="form-check-label" for="delayToggle">Delay</label>
+                            </div>
+                            <div id="delayControls" class="d-none mt-2">
+                                <label for="delayTime" class="form-label small">Time: <span id="delayTimeValueText">0.50</span>s</label>
+                                <input type="range" class="form-range form-range-sm" id="delayTime" min="0.01" max="1" step="0.01" value="0.50">
+                                <label for="delayFeedback" class="form-label small">Feedback: <span id="delayFeedbackValueText">0.30</span></label>
+                                <input type="range" class="form-range form-range-sm" id="delayFeedback" min="0" max="0.8" step="0.01" value="0.30">
+                            </div>
+                        </div>
+                        <div class="mb-2 p-2 border rounded bg-white">
+                            <div class="form-check form-switch mb-1">
+                                <input class="form-check-input" type="checkbox" role="switch" id="filterToggle" title="Toggle Low-pass Filter">
+                                <label class="form-check-label" for="filterToggle">Low-pass Filter</label>
+                            </div>
+                            <div id="filterControls" class="d-none mt-2">
+                                <label for="filterCutoff" class="form-label small">Cutoff: <span id="filterCutoffValueText">5000</span>Hz</label>
+                                <input type="range" class="form-range form-range-sm" id="filterCutoff" min="20" max="20000" step="10" value="5000">
+                                <label for="filterQ" class="form-label small">Resonance (Q): <span id="filterQValueText">1.00</span></label>
+                                <input type="range" class="form-range form-range-sm" id="filterQ" min="0.01" max="20" step="0.01" value="1.00">
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="d-grid gap-2">
+                            <button id="noteHoldToggle" class="btn btn-outline-info" data-bs-toggle="button" title="Hold Current Note (H)">Hold Note</button>
+                            <button id="playA440" class="btn btn-outline-warning" title="Play A4 (440Hz) Reference Tone">Play A4 (440Hz)</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-9 col-md-8 d-flex flex-column">
+                <div class="row mb-3 g-3">
+                    <div class="col-sm-4">
+                        <div class="card text-center h-100">
+                            <div class="card-body d-flex flex-column justify-content-center">
+                                <h6 class="card-subtitle mb-2 text-muted">Pitch</h6>
+                                <p id="pitchDisplay" class="card-text fs-4 fw-light mb-0">--- Hz</p>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="col-sm-4">
+                        <div class="card text-center h-100">
+                            <div class="card-body d-flex flex-column justify-content-center">
+                                <h6 class="card-subtitle mb-2 text-muted">Note</h6>
+                                <p id="noteDisplay" class="card-text fs-4 fw-light mb-0">--</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="card text-center h-100">
+                            <div class="card-body d-flex flex-column justify-content-center">
+                                <h6 class="card-subtitle mb-2 text-muted">Volume</h6>
+                                <p id="volumeDisplay" class="card-text fs-4 fw-light mb-0">--- %</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="thereminZone" class="card flex-grow-1 position-relative" style="min-height: 300px; cursor: crosshair; user-select: none; touch-action: none;">
+                    <div id="thereminPointer" class="position-absolute rounded-circle" style="width: 20px; height: 20px; transform: translate(-50%, -50%); display: none; pointer-events: none;"></div>
+                </div>
+
+                <div class="row mt-3 g-3">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header small">Oscilloscope</div>
+                            <div class="card-body p-1"><canvas id="oscilloscopeCanvas" class="w-100" height="100"></canvas></div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header small">Frequency Spectrum</div>
+                            <div class="card-body p-1"><canvas id="spectrumCanvas" class="w-100" height="100"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="container-fluid py-3 mt-auto bg-white text-center border-top">
+        <p class="mb-0 small text-muted">Web Theremin Deluxe - Crafted with Web Audio & Bootstrap. Current UTC: <span id="footerTime"></span></p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    (function() {
+        const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+        const SCALES = {
+            chromatic: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+            major: [0, 2, 4, 5, 7, 9, 11],
+            minor: [0, 2, 3, 5, 7, 8, 10],
+            pentatonic_major: [0, 2, 4, 7, 9],
+            pentatonic_minor: [0, 3, 5, 7, 10]
+        };
+        const MIN_FREQ = 50;
+        const MAX_FREQ = 2500;
+
+        const domElements = {
+            masterSoundToggle: document.getElementById('masterSoundToggle'),
+            masterSoundIcon: document.getElementById('masterSoundIcon'),
+            masterSoundText: document.getElementById('masterSoundText'),
+            masterVolume: document.getElementById('masterVolume'),
+            masterVolumeValueText: document.getElementById('masterVolumeValueText'),
+            waveformSelector: document.getElementById('waveformSelector'),
+            currentOctaveDisplay: document.getElementById('currentOctaveDisplay'),
+            octaveDown: document.getElementById('octaveDown'),
+            octaveReset: document.getElementById('octaveReset'),
+            octaveUp: document.getElementById('octaveUp'),
+            scaleSelector: document.getElementById('scaleSelector'),
+            quantizeToggle: document.getElementById('quantizeToggle'),
+            delayToggle: document.getElementById('delayToggle'),
+            delayControls: document.getElementById('delayControls'),
+            delayTime: document.getElementById('delayTime'),
+            delayTimeValueText: document.getElementById('delayTimeValueText'),
+            delayFeedback: document.getElementById('delayFeedback'),
+            delayFeedbackValueText: document.getElementById('delayFeedbackValueText'),
+            filterToggle: document.getElementById('filterToggle'),
+            filterControls: document.getElementById('filterControls'),
+            filterCutoff: document.getElementById('filterCutoff'),
+            filterCutoffValueText: document.getElementById('filterCutoffValueText'),
+            filterQ: document.getElementById('filterQ'),
+            filterQValueText: document.getElementById('filterQValueText'),
+            noteHoldToggle: document.getElementById('noteHoldToggle'),
+            playA440: document.getElementById('playA440'),
+            pitchDisplay: document.getElementById('pitchDisplay'),
+            noteDisplay: document.getElementById('noteDisplay'),
+            volumeDisplay: document.getElementById('volumeDisplay'),
+            thereminZone: document.getElementById('thereminZone'),
+            thereminPointer: document.getElementById('thereminPointer'),
+            oscilloscopeCanvas: document.getElementById('oscilloscopeCanvas'),
+            spectrumCanvas: document.getElementById('spectrumCanvas'),
+            footerTime: document.getElementById('footerTime')
+        };
+
+        const thereminState = {
+            audioContext: null,
+            audioNodes: {
+                oscillator: null,
+                thereminGain: null,
+                filterNode: null,
+                delayNode: null,
+                feedbackDelayNode: null,
+                analyserTime: null,
+                analyserFreq: null,
+                masterGain: null
+            },
+            isSoundOn: false,
+            isThereminPlaying: false,
+            isNoteHeld: false,
+            heldPitch: null,
+            heldVolume: null,
+            currentWaveform: 'sine',
+            currentOctave: 0,
+            maxOctave: 3,
+            minOctave: -3,
+            currentPitchHz: 0,
+            currentVolumePercent: 0,
+            scaleQuantization: {
+                enabled: false,
+                scale: 'chromatic'
+            },
+            effects: {
+                delay: { enabled: false, time: 0.50, feedback: 0.30 },
+                filter: { enabled: false, cutoff: 5000, q: 1.00 }
+            },
+            masterVolumeValue: 0.5,
+            visualizer: {
+                animationFrameId: null,
+                oscCtx: null,
+                specCtx: null,
+                timeDataArray: null,
+                freqDataArray: null,
+            }
+        };
+
+        const AudioHandler = {
+            async initAudioContext() {
+                if (thereminState.audioContext) return;
+                try {
+                    thereminState.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    await thereminState.audioContext.resume();
+                    this.createAudioGraph();
+                    this.updateMasterVolume(thereminState.masterVolumeValue * 100);
+                    this.updateDelayParams(thereminState.effects.delay.time, thereminState.effects.delay.feedback);
+                    this.updateFilterParams(thereminState.effects.filter.cutoff, thereminState.effects.filter.q);
+                    this.rebuildEffectChain();
+                } catch (e) {
+                    console.error("Error initializing AudioContext:", e);
+                    alert("Web Audio API is not supported or could not be initialized in this browser. Some features may not work.");
+                }
+            },
+
+            createAudioGraph() {
+                const ac = thereminState.audioContext;
+                thereminState.audioNodes.thereminGain = ac.createGain();
+                thereminState.audioNodes.thereminGain.gain.setValueAtTime(0, ac.currentTime);
+
+                thereminState.audioNodes.filterNode = ac.createBiquadFilter();
+                thereminState.audioNodes.filterNode.type = 'lowpass';
+
+                thereminState.audioNodes.delayNode = ac.createDelay(1.0); 
+                thereminState.audioNodes.feedbackDelayNode = ac.createGain();
+
+                thereminState.audioNodes.analyserTime = ac.createAnalyser();
+                thereminState.audioNodes.analyserTime.fftSize = 2048;
+                thereminState.visualizer.timeDataArray = new Uint8Array(thereminState.audioNodes.analyserTime.frequencyBinCount);
+
+                thereminState.audioNodes.analyserFreq = ac.createAnalyser();
+                thereminState.audioNodes.analyserFreq.fftSize = 512;
+                thereminState.visualizer.freqDataArray = new Uint8Array(thereminState.audioNodes.analyserFreq.frequencyBinCount);
+
+                thereminState.audioNodes.masterGain = ac.createGain();
+                thereminState.audioNodes.masterGain.connect(ac.destination);
+            },
+
+            rebuildEffectChain() {
+                const ac = thereminState.audioContext;
+                if (!ac || !thereminState.audioNodes.thereminGain) return;
+
+                const nodes = thereminState.audioNodes;
+                
+                nodes.thereminGain.disconnect();
+                if (nodes.filterNode) nodes.filterNode.disconnect();
+                if (nodes.delayNode) nodes.delayNode.disconnect();
+                if (nodes.feedbackDelayNode) nodes.feedbackDelayNode.disconnect();
+                if (nodes.analyserTime) nodes.analyserTime.disconnect();
+                if (nodes.analyserFreq) nodes.analyserFreq.disconnect();
+
+
+                let source = nodes.thereminGain;
+
+                if (thereminState.effects.filter.enabled && nodes.filterNode) {
+                    source.connect(nodes.filterNode);
+                    source = nodes.filterNode;
+                }
+
+                if (thereminState.effects.delay.enabled && nodes.delayNode && nodes.feedbackDelayNode) {
+                    source.connect(nodes.delayNode);
+                    nodes.delayNode.connect(nodes.feedbackDelayNode);
+                    nodes.feedbackDelayNode.connect(nodes.delayNode); 
+                    source = nodes.delayNode; 
+                }
+                
+                if(nodes.analyserTime && nodes.analyserFreq && nodes.masterGain) {
+                    source.connect(nodes.analyserTime);
+                    nodes.analyserTime.connect(nodes.analyserFreq);
+                    nodes.analyserFreq.connect(nodes.masterGain);
+                }
+            },
+
+            startThereminSound() {
+                if (!thereminState.audioContext || !thereminState.isSoundOn) return;
+                const ac = thereminState.audioContext;
+                if (!thereminState.audioNodes.oscillator) {
+                    thereminState.audioNodes.oscillator = ac.createOscillator();
+                    thereminState.audioNodes.oscillator.type = thereminState.currentWaveform;
+                    thereminState.audioNodes.oscillator.connect(thereminState.audioNodes.thereminGain);
+                    thereminState.audioNodes.oscillator.start();
+                }
+                thereminState.isThereminPlaying = true;
+                VisualizerHandler.startVisualization();
+            },
+
+            stopThereminSound() {
+                const ac = thereminState.audioContext;
+                if (!ac) return;
+
+                if (thereminState.audioNodes.thereminGain) {
+                     thereminState.audioNodes.thereminGain.gain.setValueAtTime(thereminState.audioNodes.thereminGain.gain.value, ac.currentTime);
+                     thereminState.audioNodes.thereminGain.gain.linearRampToValueAtTime(0, ac.currentTime + 0.05);
+                }
+                
+                if (thereminState.audioNodes.oscillator) {
+                    const oscToStop = thereminState.audioNodes.oscillator;
+                    thereminState.audioNodes.oscillator = null; 
+                    
+                    setTimeout(() => {
+                        if (oscToStop && ac.state !== 'closed') {
+                             try {
+                                 oscToStop.stop(ac.currentTime); 
+                                 oscToStop.disconnect();
+                             } catch(e) {
+                                 console.error("Error stopping/disconnecting oscillator:", e);
+                             }
+                        }
+                    }, 60); 
+                }
+                thereminState.isThereminPlaying = false;
+                if (!thereminState.isNoteHeld) {
+                    UIHandler.hidePointer();
+                    UIHandler.updatePitchDisplay(0, '--');
+                    UIHandler.updateVolumeDisplay(0);
+                }
+            },
+            
+            updatePitch(freq) {
+                if (thereminState.audioNodes.oscillator && thereminState.isSoundOn && thereminState.audioContext) {
+                    thereminState.audioNodes.oscillator.frequency.setValueAtTime(freq, thereminState.audioContext.currentTime);
+                }
+            },
+
+            updateVolume(vol) {
+                if (thereminState.audioNodes.thereminGain && thereminState.isSoundOn && thereminState.audioContext) {
+                    thereminState.audioNodes.thereminGain.gain.setValueAtTime(vol, thereminState.audioContext.currentTime);
+                }
+            },
+
+            setWaveform(type) {
+                thereminState.currentWaveform = type;
+                if (thereminState.audioNodes.oscillator) {
+                    thereminState.audioNodes.oscillator.type = type;
+                }
+                UIHandler.updateWaveformButtons(type);
+            },
+
+            updateMasterVolume(volPercent) {
+                thereminState.masterVolumeValue = volPercent / 100;
+                if (thereminState.audioNodes.masterGain && thereminState.audioContext) {
+                    thereminState.audioNodes.masterGain.gain.setValueAtTime(thereminState.masterVolumeValue, thereminState.audioContext.currentTime);
+                }
+                UIHandler.updateMasterVolumeDisplay(volPercent);
+            },
+            
+            toggleDelay(enable) {
+                thereminState.effects.delay.enabled = enable;
+                domElements.delayControls.classList.toggle('d-none', !enable);
+                this.rebuildEffectChain();
+            },
+            updateDelayParams(time, feedback) {
+                thereminState.effects.delay.time = parseFloat(time);
+                thereminState.effects.delay.feedback = parseFloat(feedback);
+                if (thereminState.audioNodes.delayNode && thereminState.audioContext) {
+                    thereminState.audioNodes.delayNode.delayTime.setValueAtTime(thereminState.effects.delay.time, thereminState.audioContext.currentTime);
+                }
+                if (thereminState.audioNodes.feedbackDelayNode && thereminState.audioContext) {
+                    thereminState.audioNodes.feedbackDelayNode.gain.setValueAtTime(thereminState.effects.delay.feedback, thereminState.audioContext.currentTime);
+                }
+                UIHandler.updateEffectParamDisplay('delay', 'time', thereminState.effects.delay.time.toFixed(2));
+                UIHandler.updateEffectParamDisplay('delay', 'feedback', thereminState.effects.delay.feedback.toFixed(2));
+            },
+
+            toggleFilter(enable) {
+                thereminState.effects.filter.enabled = enable;
+                domElements.filterControls.classList.toggle('d-none', !enable);
+                this.rebuildEffectChain();
+            },
+            updateFilterParams(cutoff, q) {
+                thereminState.effects.filter.cutoff = parseFloat(cutoff);
+                thereminState.effects.filter.q = parseFloat(q);
+                if (thereminState.audioNodes.filterNode && thereminState.audioContext) {
+                    thereminState.audioNodes.filterNode.frequency.setValueAtTime(thereminState.effects.filter.cutoff, thereminState.audioContext.currentTime);
+                    thereminState.audioNodes.filterNode.Q.setValueAtTime(thereminState.effects.filter.q, thereminState.audioContext.currentTime);
+                }
+                UIHandler.updateEffectParamDisplay('filter', 'cutoff', thereminState.effects.filter.cutoff.toFixed(0));
+                UIHandler.updateEffectParamDisplay('filter', 'q', thereminState.effects.filter.q.toFixed(2));
+            },
+
+            playReferenceTone() {
+                if (!thereminState.audioContext || !thereminState.isSoundOn) {
+                    AudioHandler.initAudioContext().then(() => {
+                        if(thereminState.isSoundOn && thereminState.audioContext) this._executePlayReferenceTone();
+                    });
+                    return;
+                }
+                this._executePlayReferenceTone();
+            },
+            _executePlayReferenceTone() {
+                const ac = thereminState.audioContext;
+                const osc = ac.createOscillator();
+                const gain = ac.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(440, ac.currentTime);
+                gain.gain.setValueAtTime(0, ac.currentTime);
+                gain.gain.linearRampToValueAtTime(thereminState.masterVolumeValue * 0.7, ac.currentTime + 0.05);
+                gain.gain.linearRampToValueAtTime(0, ac.currentTime + 1.0);
+                osc.connect(gain);
+                gain.connect(thereminState.audioNodes.masterGain);
+                osc.start();
+                osc.stop(ac.currentTime + 1.0);
+            }
+        };
+
+        const InteractionHandler = {
+            async handleInteractionStart(event) {
+                event.preventDefault();
+                if (!thereminState.audioContext) {
+                    await AudioHandler.initAudioContext();
+                }
+                if (!thereminState.audioContext || !thereminState.isSoundOn) return;
+
+                thereminState.isNoteHeld = domElements.noteHoldToggle.classList.contains('active');
+                AudioHandler.startThereminSound();
+                this.updateSoundFromEvent(event);
+                domElements.thereminZone.addEventListener('mousemove', this.handleInteractionMoveBound);
+                domElements.thereminZone.addEventListener('touchmove', this.handleInteractionMoveBound, { passive: false });
+                document.addEventListener('mouseup', this.handleInteractionEndBound); 
+                document.addEventListener('touchend', this.handleInteractionEndBound);
+            },
+
+            handleInteractionMove(event) {
+                event.preventDefault();
+                if (thereminState.isThereminPlaying && thereminState.isSoundOn) {
+                    this.updateSoundFromEvent(event);
+                }
+            },
+
+            handleInteractionEnd(event) {
+                if (!thereminState.isThereminPlaying) return; 
+                event.preventDefault();
+                if (!thereminState.isNoteHeld) {
+                    AudioHandler.stopThereminSound();
+                } else {
+                    thereminState.heldPitch = thereminState.currentPitchHz;
+                    thereminState.heldVolume = thereminState.currentVolumePercent / 100;
+                }
+                domElements.thereminZone.removeEventListener('mousemove', this.handleInteractionMoveBound);
+                domElements.thereminZone.removeEventListener('touchmove', this.handleInteractionMoveBound);
+                document.removeEventListener('mouseup', this.handleInteractionEndBound);
+                document.removeEventListener('touchend', this.handleInteractionEndBound);
+            },
+
+            updateSoundFromEvent(event) {
+                const rect = domElements.thereminZone.getBoundingClientRect();
+                let x, y;
+                if (event.touches && event.touches.length > 0) {
+                    x = event.touches[0].clientX - rect.left;
+                    y = event.touches[0].clientY - rect.top;
+                } else if (event.clientX !== undefined) {
+                    x = event.clientX - rect.left;
+                    y = event.clientY - rect.top;
+                } else {
+                    return; 
+                }
+                this.calculateSoundParams(x, y, rect.width, rect.height);
+                UIHandler.showPointer(x,y);
+            },
+
+            calculateSoundParams(x, y, zoneWidth, zoneHeight) {
+                let pitchRatio = Math.max(0, Math.min(1, x / zoneWidth));
+                let volumeRatio = 1 - Math.max(0, Math.min(1, y / zoneHeight));
+
+                let freqRange = MAX_FREQ - MIN_FREQ;
+                let rawFreq = MIN_FREQ + pitchRatio * freqRange;
+                
+                let actualFreq = rawFreq * Math.pow(2, thereminState.currentOctave);
+                actualFreq = Math.max(20, Math.min(20000, actualFreq));
+
+                if (thereminState.scaleQuantization.enabled) {
+                    actualFreq = this.quantizeFrequency(actualFreq, thereminState.scaleQuantization.scale);
+                }
+                
+                thereminState.currentPitchHz = actualFreq;
+                thereminState.currentVolumePercent = Math.round(volumeRatio * 100);
+
+                AudioHandler.updatePitch(actualFreq);
+                AudioHandler.updateVolume(volumeRatio);
+                
+                const noteName = this.getNoteNameFromFrequency(actualFreq);
+                UIHandler.updatePitchDisplay(actualFreq, noteName);
+                UIHandler.updateVolumeDisplay(thereminState.currentVolumePercent);
+            },
+
+            getNoteNameFromFrequency(freq) {
+                if (freq <= 0) return '--';
+                const midiNum = 69 + 12 * Math.log2(freq / 440);
+                const noteIndex = Math.round(midiNum) % 12;
+                const octave = Math.floor(Math.round(midiNum) / 12) - 1;
+                return NOTE_NAMES[noteIndex] + octave;
+            },
+
+            quantizeFrequency(targetFreq, scaleName) {
+                const scaleIntervals = SCALES[scaleName];
+                if (!scaleIntervals) return targetFreq;
+
+                let closestFreq = targetFreq;
+                let minDiff = Infinity;
+                
+                const A4_MIDI = 69;
+                const C0_MIDI = A4_MIDI - (4*12 + 9);
+
+
+                for (let octave = 0; octave < 9; octave++) {
+                    for (const interval of scaleIntervals) {
+                        const currentMidiNote = C0_MIDI + octave * 12 + interval;
+                        if (currentMidiNote > 127) continue;
+
+                        const freqOfNote = 440 * Math.pow(2, (currentMidiNote - A4_MIDI) / 12);
+                        const diff = Math.abs(freqOfNote - targetFreq);
+
+                        if (diff < minDiff) {
+                            minDiff = diff;
+                            closestFreq = freqOfNote;
+                        } else if (diff === minDiff && freqOfNote > closestFreq && targetFreq > closestFreq) {
+                             closestFreq = freqOfNote;
+                        }
+                    }
+                }
+                 if (minDiff === Infinity) return targetFreq;
+                return closestFreq;
+            },
+            
+            adjustPitchFine(percentageDelta) { 
+                if (!thereminState.isThereminPlaying || !thereminState.isSoundOn) return;
+                let factor = 1 + percentageDelta;
+                let newFreq = thereminState.currentPitchHz * factor;
+                newFreq = Math.max(20, Math.min(20000, newFreq)); 
+
+                if (thereminState.scaleQuantization.enabled) {
+                    newFreq = this.quantizeFrequency(newFreq, thereminState.scaleQuantization.scale);
+                }
+                thereminState.currentPitchHz = newFreq; 
+                AudioHandler.updatePitch(newFreq);
+                const noteName = this.getNoteNameFromFrequency(newFreq);
+                UIHandler.updatePitchDisplay(newFreq, noteName);
+            },
+
+            adjustVolumeFine(absoluteDeltaPercent) { 
+                if (!thereminState.isThereminPlaying || !thereminState.isSoundOn) return;
+                let newVolPercent = thereminState.currentVolumePercent + absoluteDeltaPercent;
+                newVolPercent = Math.max(0, Math.min(100, newVolPercent));
+                
+                thereminState.currentVolumePercent = newVolPercent;
+                AudioHandler.updateVolume(newVolPercent / 100);
+                UIHandler.updateVolumeDisplay(newVolPercent);
+            }
+        };
+        InteractionHandler.handleInteractionMoveBound = InteractionHandler.handleInteractionMove.bind(InteractionHandler);
+        InteractionHandler.handleInteractionEndBound = InteractionHandler.handleInteractionEnd.bind(InteractionHandler);
+
+
+        const UIHandler = {
+            updatePitchDisplay(freq, noteName) {
+                domElements.pitchDisplay.textContent = `${freq.toFixed(1)} Hz`;
+                domElements.noteDisplay.textContent = noteName;
+            },
+            updateVolumeDisplay(volPercent) {
+                domElements.volumeDisplay.textContent = `${volPercent.toFixed(0)} %`;
+            },
+            updateOctaveDisplay() {
+                domElements.currentOctaveDisplay.textContent = thereminState.currentOctave;
+            },
+            updateMasterVolumeDisplay(val) {
+                domElements.masterVolumeValueText.textContent = val;
+            },
+            updateWaveformButtons(activeWave) {
+                domElements.waveformSelector.querySelectorAll('button').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.wave === activeWave);
+                });
+            },
+            updateEffectParamDisplay(effectName, paramName, value) {
+                if (effectName === 'delay') {
+                    if (paramName === 'time') domElements.delayTimeValueText.textContent = value;
+                    if (paramName === 'feedback') domElements.delayFeedbackValueText.textContent = value;
+                } else if (effectName === 'filter') {
+                    if (paramName === 'cutoff') domElements.filterCutoffValueText.textContent = value;
+                    if (paramName === 'q') domElements.filterQValueText.textContent = value;
+                }
+            },
+            toggleMasterSoundButton() {
+                const isOn = thereminState.isSoundOn;
+                domElements.masterSoundIcon.className = isOn ? 'bi bi-pause-fill' : 'bi bi-play-fill';
+                domElements.masterSoundText.textContent = isOn ? 'Sound OFF' : 'Sound ON';
+                domElements.masterSoundToggle.classList.toggle('btn-danger', isOn);
+                domElements.masterSoundToggle.classList.toggle('btn-success', !isOn);
+            },
+            showPointer(x,y) {
+                domElements.thereminPointer.style.left = `${x}px`;
+                domElements.thereminPointer.style.top = `${y}px`;
+                domElements.thereminPointer.style.display = 'block';
+            },
+            hidePointer() {
+                domElements.thereminPointer.style.display = 'none';
+            },
+            updateFooterTime() {
+                domElements.footerTime.textContent = new Date().toUTCString();
+                setInterval(() => {
+                     domElements.footerTime.textContent = new Date().toUTCString();
+                }, 60000);
+            }
+        };
+
+        const KeyboardHandler = {
+            init() {
+                document.addEventListener('keydown', this.handleKeyDown.bind(this));
+            },
+            handleKeyDown(event) {
+                if (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT' || event.target.tagName === 'TEXTAREA') {
+                     if(event.key === 'Escape') event.target.blur();
+                     else return;
+                }
+                 if (document.activeElement && document.activeElement.closest('.btn-group') && (event.key === 'ArrowLeft' || event.key === 'ArrowRight' || event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
+                    return; 
+                }
+
+
+                switch (event.key) {
+                    case ' ':
+                        event.preventDefault();
+                        domElements.masterSoundToggle.click();
+                        break;
+                    case 'ArrowLeft':
+                        event.preventDefault();
+                        InteractionHandler.adjustPitchFine(-0.02);
+                        break;
+                    case 'ArrowRight':
+                        event.preventDefault();
+                        InteractionHandler.adjustPitchFine(0.02);
+                        break;
+                    case 'ArrowUp':
+                        event.preventDefault();
+                        InteractionHandler.adjustVolumeFine(5);
+                        break;
+                    case 'ArrowDown':
+                        event.preventDefault();
+                        InteractionHandler.adjustVolumeFine(-5);
+                        break;
+                    case '-': case '_':
+                        event.preventDefault(); domElements.octaveDown.click();
+                        break;
+                    case '=': case '+':
+                        event.preventDefault(); domElements.octaveUp.click();
+                        break;
+                    case '1': event.preventDefault(); AudioHandler.setWaveform('sine'); break;
+                    case '2': event.preventDefault(); AudioHandler.setWaveform('square'); break;
+                    case '3': event.preventDefault(); AudioHandler.setWaveform('sawtooth'); break;
+                    case '4': event.preventDefault(); AudioHandler.setWaveform('triangle'); break;
+                    case 'h': case 'H':
+                        event.preventDefault(); domElements.noteHoldToggle.click();
+                        break;
+                    case 'q': case 'Q':
+                        event.preventDefault();
+                        domElements.quantizeToggle.click();
+                        break;
+                }
+            }
+        };
+
+        const VisualizerHandler = {
+            initCanvases() {
+                thereminState.visualizer.oscCtx = domElements.oscilloscopeCanvas.getContext('2d');
+                thereminState.visualizer.specCtx = domElements.spectrumCanvas.getContext('2d');
+                this.resizeCanvases();
+                window.addEventListener('resize', this.resizeCanvases.bind(this));
+            },
+            resizeCanvases() {
+                const oscCanvas = domElements.oscilloscopeCanvas;
+                const specCanvas = domElements.spectrumCanvas;
+                
+                const setCanvasSize = (canvas) => {
+                    const displayWidth  = canvas.clientWidth;
+                    const displayHeight = canvas.clientHeight;
+                    if (canvas.width  !== displayWidth || canvas.height !== displayHeight) {
+                        canvas.width  = displayWidth;
+                        canvas.height = displayHeight;
+                    }
+                };
+                setCanvasSize(oscCanvas);
+                setCanvasSize(specCanvas);
+            },
+            drawOscilloscope() {
+                const ctx = thereminState.visualizer.oscCtx;
+                const dataArray = thereminState.visualizer.timeDataArray;
+                const analyser = thereminState.audioNodes.analyserTime;
+                if (!ctx || !analyser || !dataArray || ctx.canvas.width === 0 || ctx.canvas.height === 0) return;
+
+                analyser.getByteTimeDomainData(dataArray);
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#0d6efd';
+                ctx.beginPath();
+                const bufferLength = analyser.frequencyBinCount;
+                const sliceWidth = ctx.canvas.width * 1.0 / bufferLength;
+                let x = 0;
+                for (let i = 0; i < bufferLength; i++) {
+                    const v = dataArray[i] / 128.0;
+                    const y = v * ctx.canvas.height / 2;
+                    if (i === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                    x += sliceWidth;
+                }
+                ctx.lineTo(ctx.canvas.width, ctx.canvas.height / 2);
+                ctx.stroke();
+            },
+            drawSpectrum() {
+                const ctx = thereminState.visualizer.specCtx;
+                const dataArray = thereminState.visualizer.freqDataArray;
+                const analyser = thereminState.audioNodes.analyserFreq;
+                if (!ctx || !analyser || !dataArray || ctx.canvas.width === 0 || ctx.canvas.height === 0) return;
+
+                analyser.getByteFrequencyData(dataArray);
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                const bufferLength = analyser.frequencyBinCount;
+                const barWidth = (ctx.canvas.width / bufferLength) * 1.25;
+                let x = 0;
+                for (let i = 0; i < bufferLength; i++) {
+                    const barHeight = dataArray[i] * (ctx.canvas.height / 256.0) ;
+                    const hue = i / bufferLength * 360;
+                    ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
+                    ctx.fillRect(x, ctx.canvas.height - barHeight, barWidth, barHeight);
+                    x += barWidth + 1;
+                }
+            },
+            visualizationLoop() {
+                if (!thereminState.isSoundOn && !thereminState.isNoteHeld) {
+                     if (thereminState.visualizer.animationFrameId) {
+                        cancelAnimationFrame(thereminState.visualizer.animationFrameId);
+                        thereminState.visualizer.animationFrameId = null;
+                     }
+                     this.clearCanvases();
+                     return;
+                }
+                if(thereminState.isThereminPlaying || (thereminState.isNoteHeld && thereminState.isSoundOn)) {
+                    this.drawOscilloscope();
+                    this.drawSpectrum();
+                } else {
+                   this.clearCanvases();
+                }
+                thereminState.visualizer.animationFrameId = requestAnimationFrame(this.visualizationLoop.bind(this));
+            },
+            clearCanvases() {
+                if (thereminState.visualizer.oscCtx) {
+                     thereminState.visualizer.oscCtx.fillStyle = '#FFFFFF';
+                     thereminState.visualizer.oscCtx.fillRect(0, 0, thereminState.visualizer.oscCtx.canvas.width, thereminState.visualizer.oscCtx.canvas.height);
+                }
+                 if (thereminState.visualizer.specCtx) {
+                     thereminState.visualizer.specCtx.fillStyle = '#FFFFFF';
+                     thereminState.visualizer.specCtx.fillRect(0, 0, thereminState.visualizer.specCtx.canvas.width, thereminState.visualizer.specCtx.canvas.height);
+                }
+            },
+            startVisualization() {
+                if (!thereminState.visualizer.animationFrameId) {
+                    this.visualizationLoop();
+                }
+            },
+            stopVisualization() {
+                 if (thereminState.visualizer.animationFrameId) {
+                    cancelAnimationFrame(thereminState.visualizer.animationFrameId);
+                    thereminState.visualizer.animationFrameId = null;
+                 }
+                 this.clearCanvases();
+            }
+        };
+
+        function initApp() {
+            UIHandler.updateFooterTime();
+            UIHandler.updateMasterVolumeDisplay(domElements.masterVolume.value);
+            AudioHandler.updateMasterVolume(parseInt(domElements.masterVolume.value));
+            UIHandler.updateOctaveDisplay();
+            AudioHandler.updateDelayParams(domElements.delayTime.value, domElements.delayFeedback.value);
+            AudioHandler.updateFilterParams(domElements.filterCutoff.value, domElements.filterQ.value);
+            VisualizerHandler.initCanvases();
+            KeyboardHandler.init();
+            
+            UIHandler.toggleMasterSoundButton(); 
+
+            domElements.masterSoundToggle.addEventListener('click', async () => {
+                if (!thereminState.audioContext) {
+                    await AudioHandler.initAudioContext();
+                }
+                if (!thereminState.audioContext) return;
+
+                thereminState.isSoundOn = !thereminState.isSoundOn;
+                UIHandler.toggleMasterSoundButton();
+
+                if (thereminState.isSoundOn) {
+                    VisualizerHandler.startVisualization();
+                    if (thereminState.isNoteHeld && thereminState.heldPitch !== null && thereminState.heldVolume !== null) {
+                        AudioHandler.startThereminSound();
+                        AudioHandler.updatePitch(thereminState.heldPitch);
+                        AudioHandler.updateVolume(thereminState.heldVolume);
+                    }
+                } else {
+                    if (thereminState.audioNodes.oscillator) {
+                        AudioHandler.stopThereminSound();
+                    }
+                    VisualizerHandler.stopVisualization();
+                }
+            });
+
+            domElements.masterVolume.addEventListener('input', (e) => AudioHandler.updateMasterVolume(parseInt(e.target.value)));
+
+            domElements.waveformSelector.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('click', () => AudioHandler.setWaveform(btn.dataset.wave));
+            });
+
+            domElements.octaveUp.addEventListener('click', () => {
+                if (thereminState.currentOctave < thereminState.maxOctave) thereminState.currentOctave++;
+                UIHandler.updateOctaveDisplay();
+            });
+            domElements.octaveDown.addEventListener('click', () => {
+                if (thereminState.currentOctave > thereminState.minOctave) thereminState.currentOctave--;
+                UIHandler.updateOctaveDisplay();
+            });
+            domElements.octaveReset.addEventListener('click', () => {
+                thereminState.currentOctave = 0;
+                UIHandler.updateOctaveDisplay();
+            });
+
+            domElements.scaleSelector.addEventListener('change', (e) => {
+                thereminState.scaleQuantization.scale = e.target.value;
+            });
+            domElements.quantizeToggle.addEventListener('click', (e) => {
+                thereminState.scaleQuantization.enabled = e.target.classList.contains('active');
+                e.target.textContent = thereminState.scaleQuantization.enabled ? 'ON' : 'OFF';
+            });
+
+            domElements.delayToggle.addEventListener('change', (e) => AudioHandler.toggleDelay(e.target.checked));
+            domElements.delayTime.addEventListener('input', (e) => AudioHandler.updateDelayParams(e.target.value, thereminState.effects.delay.feedback));
+            domElements.delayFeedback.addEventListener('input', (e) => AudioHandler.updateDelayParams(thereminState.effects.delay.time, e.target.value));
+
+            domElements.filterToggle.addEventListener('change', (e) => AudioHandler.toggleFilter(e.target.checked));
+            domElements.filterCutoff.addEventListener('input', (e) => AudioHandler.updateFilterParams(e.target.value, thereminState.effects.filter.q));
+            domElements.filterQ.addEventListener('input', (e) => AudioHandler.updateFilterParams(thereminState.effects.filter.cutoff, e.target.value));
+            
+            domElements.noteHoldToggle.addEventListener('click', (e) => {
+                thereminState.isNoteHeld = e.target.classList.contains('active');
+                if (!thereminState.isNoteHeld && thereminState.isThereminPlaying) { 
+                    AudioHandler.stopThereminSound();
+                } else if (thereminState.isNoteHeld && thereminState.isThereminPlaying) {
+                    thereminState.heldPitch = thereminState.currentPitchHz;
+                    thereminState.heldVolume = thereminState.currentVolumePercent / 100;
+                }
+                
+                if(thereminState.isNoteHeld && thereminState.isSoundOn) VisualizerHandler.startVisualization();
+                else if (!thereminState.isThereminPlaying && !thereminState.isSoundOn) VisualizerHandler.stopVisualization();
+                else if (!thereminState.isThereminPlaying && thereminState.isSoundOn && !thereminState.isNoteHeld) VisualizerHandler.stopVisualization();
+
+
+            });
+
+            domElements.playA440.addEventListener('click', () => AudioHandler.playReferenceTone());
+
+            domElements.thereminZone.addEventListener('mousedown', InteractionHandler.handleInteractionStart.bind(InteractionHandler));
+            domElements.thereminZone.addEventListener('touchstart', InteractionHandler.handleInteractionStart.bind(InteractionHandler), { passive: false });
+            
+            AudioHandler.initAudioContext().then(() => {
+                 VisualizerHandler.startVisualization(); 
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', initApp);
+    })();
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

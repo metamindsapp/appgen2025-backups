@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Greg's Fences - Quality Fence Installation in Sooke, BC</title>
+    <meta name="description" content="Greg's Fences offers professional installation of all kinds of fences in Sooke, BC. Get a free quote for wood, vinyl, chain link, ornamental, and custom fences. Explore our gallery and use our fence style recommender.">
+    <meta name="keywords" content="Greg's Fences, fence installation, Sooke BC, wood fence, vinyl fence, chain link fence, ornamental fence, custom fence, fence repair, Sooke contractor, BC fences, fence styles, before after fence">
+    <meta name="author" content="Greg's Fences">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+    <style>
+        :root {
+            --gf-primary: #28a745;
+            --gf-secondary: #6c757d;
+            --gf-light: #f8f9fa;
+            --gf-dark: #212529;
+            --gf-text-light: #343a40;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            color: var(--gf-text-light);
+            background-color: var(--gf-light);
+            overflow-x: hidden;
+        }
+
+        .navbar-brand .bi-fence-fill {
+            color: var(--gf-primary);
+        }
+
+        .navbar-brand .fw-bold {
+            color: var(--gf-dark);
+        }
+
+        .hero-section {
+            background: linear-gradient(rgba(248, 249, 250, 0.9), rgba(248, 249, 250, 0.9)), url('data:image/svg+xml;charset=UTF-8,%3Csvg width="100%25" height="100%25" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"%3E%3Cpattern id="pattern-zigzag" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse"%3E%3Cpath d="M 0 5 L 5 0 L 10 5 L 5 10 Z" fill="none" stroke="%23e9ecef" stroke-width="1"%3E%3C/path%3E%3C/pattern%3E%3Crect x="0" y="0" width="100%25" height="100%25" fill="url(%23pattern-zigzag)"%3E%3C/rect%3E%3C/svg%3E') repeat;
+            background-size: 10px 10px;
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            padding: 100px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .hero-content {
+            max-width: 900px;
+            z-index: 1;
+        }
+
+        .section-padding {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 40px;
+            color: var(--gf-primary);
+        }
+
+        .service-card .card-body {
+            min-height: 150px;
+        }
+
+        .service-icon {
+            font-size: 3rem;
+            color: var(--gf-primary);
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .about-img-container {
+            width: 100%;
+            height: 350px;
+            overflow: hidden;
+            border-radius: 0.375rem;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+        }
+
+        .about-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .gallery-thumbnail {
+            cursor: pointer;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            overflow: hidden;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #e9ecef;
+            color: var(--gf-secondary);
+            font-size: 0.8rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .gallery-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .gallery-thumbnail-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+            z-index: 1;
+        }
+
+        .gallery-thumbnail:hover .gallery-thumbnail-overlay {
+            opacity: 1;
+        }
+
+        .gallery-thumbnail:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+
+        #map {
+            height: 400px;
+            width: 100%;
+            border-radius: 0.375rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+
+        .footer {
+            background-color: var(--gf-dark);
+            color: var(--gf-light);
+            padding: 40px 0;
+        }
+
+        .footer a {
+            color: var(--gf-light);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            color: var(--gf-primary);
+        }
+
+        .card {
+            background-color: #ffffff;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+
+        .modal-content {
+            background-color: #ffffff;
+            color: var(--gf-dark);
+        }
+
+        .modal-body img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.375rem;
+        }
+
+        .btn-primary {
+            background-color: var(--gf-primary);
+            border-color: var(--gf-primary);
+            transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+        }
+
+        .btn-primary:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+
+        .btn-outline-primary {
+            color: var(--gf-primary);
+            border-color: var(--gf-primary);
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--gf-primary);
+            color: #fff;
+        }
+
+        .form-control {
+            border: 1px solid #ced4da;
+            color: var(--gf-text-light);
+            background-color: #fff;
+        }
+
+        .form-control:focus {
+            border-color: var(--gf-primary);
+            box-shadow: 0 0 0 0.25rem rgba(40, 167, 69, 0.25);
+        }
+
+        .form-control.is-invalid {
+            border-color: #dc3545;
+            padding-right: calc(1.5em + 0.75rem);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+
+        .form-control.is-valid {
+            border-color: #28a745;
+            padding-right: calc(1.5em + 0.75rem);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='M2.3 6.73L.6 4.53c-.4-1.04.1-1.4 1.1-.4l1.1 1.4L6.1.6c.3-.4.8-.5 1.2-.2.4.3.5.8.2 1.2L3.2 6.93c-.3.3-.6.4-.9.4-.3 0-.6-.1-.8-.3z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+
+        .text-primary {
+            color: var(--gf-primary) !important;
+        }
+
+        .bg-light {
+            background-color: var(--gf-light) !important;
+        }
+
+        .bg-dark {
+            background-color: var(--gf-dark) !important;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        .before-after-slider {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%;
+            overflow: hidden;
+            border-radius: 0.375rem;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+        .before-after-slider img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+        .before-after-slider .after-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 50%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+        .before-after-slider .slider-handle {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 4px;
+            height: 100%;
+            background-color: #fff;
+            cursor: ew-resize;
+            transform: translateX(-50%);
+            z-index: 2;
+        }
+        .before-after-slider .slider-handle::before {
+            content: '↔';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            background-color: var(--gf-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #fff;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.15);
+        }
+
+        #backToTopBtn {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 99;
+            font-size: 1.5rem;
+            border: none;
+            outline: none;
+            background-color: var(--gf-primary);
+            color: white;
+            cursor: pointer;
+            padding: 10px 15px;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        #backToTopBtn:hover {
+            background-color: #218838;
+            transform: translateY(-3px);
+        }
+
+        .recommender-quiz-step {
+            display: none;
+        }
+        .recommender-quiz-step.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="sticky-top shadow-sm bg-light">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light py-3">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center" href="#hero">
+                    <i class="bi bi-fence-fill text-primary fs-3 me-2"></i>
+                    <span class="fw-bold fs-4 text-dark">Greg's Fences</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark fw-semibold px-3" href="#about">About Us</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark fw-semibold px-3" href="#services">Services</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark fw-semibold px-3" href="#recommender">Recommender</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark fw-semibold px-3" href="#before-after">Before & After</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark fw-semibold px-3" href="#gallery">Gallery</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark fw-semibold px-3" href="#testimonials">Testimonials</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark fw-semibold px-3" href="#contact">Contact</a>
+                        </li>
+                        <li class="nav-item ms-lg-3">
+                            <a class="btn btn-primary btn-sm px-4 py-2" href="#contact">Get a Free Quote</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="hero" class="hero-section text-dark">
+            <div class="container hero-content" data-aos="fade-up" data-aos-duration="1000">
+                <h1 class="display-3 fw-bolder mb-4 text-primary">Your Trusted Fence Experts in Sooke, BC</h1>
+                <p class="lead mb-5">
+                    <strong>Greg's Fences</strong> specializes in professional installation of all kinds of fences,
+                    tailored to enhance the beauty, privacy, and security of your property in Sooke and surrounding areas.
+                </p>
+                <a class="btn btn-primary btn-lg me-3" href="#services">Explore Our Fences</a>
+                <a class="btn btn-outline-primary btn-lg" href="#contact">Get a Free Quote</a>
+            </div>
+        </section>
+
+        <section id="about" class="section-padding bg-light">
+            <div class="container" data-aos="fade-up" data-aos-duration="1000">
+                <div class="row align-items-center">
+                    <div class="col-md-6 order-md-2">
+                        <h2 class="section-title">About Greg's Fences</h2>
+                        <p class="lead mb-4">
+                            With years of experience serving the beautiful community of Sooke, BC, Greg's Fences is dedicated to providing top-quality fence solutions.
+                            We believe in craftsmanship, reliability, and customer satisfaction above all else.
+                        </p>
+                        <p class="mb-4">
+                            From robust privacy fences to elegant ornamental designs, our team works closely with you to understand your vision and deliver a fence that not only meets your needs but exceeds your expectations. We use durable materials and proven techniques to ensure your fence stands strong for years to come.
+                        </p>
+                        <p class="mb-0">
+                            Our commitment to the Sooke community drives us to offer personalized service and build lasting relationships with our clients. Let us help you define your space with a perfect fence.
+                        </p>
+                    </div>
+                    <div class="col-md-6 order-md-1 mt-4 mt-md-0">
+                        <div class="about-img-container shadow-sm">
+                            <img src="/generated_images/imagen3_a1bdc3d9-ff4.png" alt="Greg and his team working on a wooden privacy fence installation in a sunny Sooke backyard" class="img-fluid rounded" width="700" height="350">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="services" class="section-padding bg-white">
+            <div class="container" data-aos="fade-up" data-aos-duration="1000">
+                <h2 class="section-title text-center">Our Fence Services</h2>
+                <p class="text-center lead mb-5">
+                    We install all kinds of fences, ensuring the perfect fit for your property and lifestyle.
+                </p>
+                <div class="row g-4">
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card h-100 shadow-sm" data-aos="zoom-in" data-aos-delay="100">
+                            <div class="card-body text-center">
+                                <i class="bi bi-tree service-icon"></i>
+                                <h3 class="card-title text-primary fs-5 fw-bold">Wood Fences</h3>
+                                <p class="card-text">
+                                    Classic and versatile, wood fences offer natural beauty and excellent privacy. We build custom wood fences, including picket, privacy, and post-and-rail styles, using high-quality, weather-resistant timber.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card h-100 shadow-sm" data-aos="zoom-in" data-aos-delay="200">
+                            <div class="card-body text-center">
+                                <i class="bi bi-house-door service-icon"></i>
+                                <h3 class="card-title text-primary fs-5 fw-bold">Vinyl Fences</h3>
+                                <p class="card-text">
+                                    Low maintenance and incredibly durable, vinyl fences are a popular choice for their clean look and longevity. Available in various styles and colors, they won't rot, warp, or splinter.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card h-100 shadow-sm" data-aos="zoom-in" data-aos-delay="300">
+                            <div class="card-body text-center">
+                                <i class="bi bi-link-45deg service-icon"></i>
+                                <h3 class="card-title text-primary fs-5 fw-bold">Chain Link Fences</h3>
+                                <p class="card-text">
+                                    An economical and robust solution for security and containment. Ideal for backyards, sports fields, and commercial properties, chain link fences are practical and long-lasting.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card h-100 shadow-sm" data-aos="zoom-in" data-aos-delay="400">
+                            <div class="card-body text-center">
+                                <i class="bi bi-gem service-icon"></i>
+                                <h3 class="card-title text-primary fs-5 fw-bold">Ornamental Fences</h3>
+                                <p class="card-text">
+                                    Add elegance and curb appeal with an ornamental fence. These decorative fences, often made from aluminum or steel, provide a sophisticated look while maintaining security.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card h-100 shadow-sm" data-aos="zoom-in" data-aos-delay="500">
+                            <div class="card-body text-center">
+                                <i class="bi bi-tools service-icon"></i>
+                                <h3 class="card-title text-primary fs-5 fw-bold">Custom Fence Solutions</h3>
+                                <p class="card-text">
+                                    Have a unique vision or a challenging property? We offer custom fence design and installation services to bring your specific ideas to life, ensuring a perfect fit and finish.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card h-100 shadow-sm" data-aos="zoom-in" data-aos-delay="600">
+                            <div class="card-body text-center">
+                                <i class="bi bi-gear service-icon"></i>
+                                <h3 class="card-title text-primary fs-5 fw-bold">Fence Repair & Maintenance</h3>
+                                <p class="card-text">
+                                    Beyond installation, we also provide repair and maintenance services to keep your existing fence in top condition, extending its lifespan and preserving its appearance.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-5">
+                    <a class="btn btn-primary btn-lg" href="#contact">Ready for a New Fence? Get a Quote!</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="recommender" class="section-padding bg-light">
+            <div class="container" data-aos="fade-up" data-aos-duration="1000">
+                <h2 class="section-title text-center">Find Your Perfect Fence Style</h2>
+                <p class="text-center lead mb-5">
+                    Answer a few questions to get a personalized recommendation for your property.
+                </p>
+                <div class="card p-4 shadow-sm mx-auto" style="max-width: 800px;">
+                    <div class="card-body">
+                        <div id="recommenderQuiz">
+                            <div class="recommender-quiz-step active" data-step="1">
+                                <h4 class="mb-4 text-dark">1. What is the primary goal for your new fence?</h4>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="goal" id="goalPrivacy" value="privacy">
+                                    <label class="form-check-label" for="goalPrivacy">
+                                        Privacy and seclusion
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="goal" id="goalSecurity" value="security">
+                                    <label class="form-check-label" for="goalSecurity">
+                                        Security and property protection
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="goal" id="goalAesthetics" value="aesthetics">
+                                    <label class="form-check-label" for="goalAesthetics">
+                                        Enhance curb appeal and aesthetics
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="goal" id="goalPets" value="pets">
+                                    <label class="form-check-label" for="goalPets">
+                                        Pet containment
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="goal" id="goalBoundary" value="boundary">
+                                    <label class="form-check-label" for="goalBoundary">
+                                        Define property boundaries
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="recommender-quiz-step" data-step="2">
+                                <h4 class="mb-4 text-dark">2. What is your preference for fence maintenance?</h4>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="maintenance" id="maintLow" value="low">
+                                    <label class="form-check-label" for="maintLow">
+                                        Very low (minimal cleaning)
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="maintenance" id="maintMedium" value="medium">
+                                    <label class="form-check-label" for="maintMedium">
+                                        Medium (occasional cleaning/staining)
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="maintenance" id="maintHigh" value="high">
+                                    <label class="form-check-label" for="maintHigh">
+                                        Doesn't matter (willing to maintain for desired look)
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="recommender-quiz-step" data-step="3">
+                                <h4 class="mb-4 text-dark">3. What is your approximate budget range?</h4>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="budget" id="budgetBudget" value="budget">
+                                    <label class="form-check-label" for="budgetBudget">
+                                        Budget-friendly
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="budget" id="budgetMid" value="mid">
+                                    <label class="form-check-label" for="budgetMid">
+                                        Mid-range
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="budget" id="budgetPremium" value="premium">
+                                    <label class="form-check-label" for="budgetPremium">
+                                        Premium / Highest quality
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="recommender-quiz-step" data-step="4">
+                                <h4 class="mb-4 text-dark">4. What style best describes your property or desired look?</h4>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="style" id="styleTraditional" value="traditional">
+                                    <label class="form-check-label" for="styleTraditional">
+                                        Traditional / Classic
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="style" id="styleModern" value="modern">
+                                    <label class="form-check-label" for="styleModern">
+                                        Modern / Contemporary
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="style" id="styleRustic" value="rustic">
+                                    <label class="form-check-label" for="styleRustic">
+                                        Rustic / Natural
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="style" id="styleFunctional" value="functional">
+                                    <label class="form-check-label" for="styleFunctional">
+                                        Doesn't matter, purely functional
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="recommender-quiz-step" data-step="result">
+                                <h4 class="mb-4 text-dark">Your Recommended Fence Style:</h4>
+                                <div id="recommendationResult" class="alert alert-success fs-5 p-4" role="alert">
+                                    <p class="mb-0">Based on your preferences, we recommend a <strong id="recommendedFenceType"></strong>.</p>
+                                    <p class="mt-2 mb-0" id="recommendationDescription"></p>
+                                </div>
+                                <div class="d-flex justify-content-center mt-4">
+                                    <a class="btn btn-primary btn-lg me-3" href="#contact">Get a Quote for This Fence!</a>
+                                    <button type="button" class="btn btn-outline-primary btn-lg" id="recommenderStartOverBtn">Start Over</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4" id="quizNavButtons">
+                            <button type="button" class="btn btn-secondary" id="recommenderPrevBtn" style="display: none;">Previous</button>
+                            <button type="button" class="btn btn-primary ms-auto" id="recommenderNextBtn">Next</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="before-after" class="section-padding bg-white">
+            <div class="container" data-aos="fade-up" data-aos-duration="1000">
+                <h2 class="section-title text-center">See the Transformation: Before & After</h2>
+                <p class="text-center lead mb-5">
+                    Witness the dramatic difference a professional fence installation can make to your property.
+                </p>
+                <div class="row g-4">
+                    <div class="col-lg-6">
+                        <h3 class="text-center text-primary mb-3">Old Wood Fence to New Privacy Fence</h3>
+                        <div class="before-after-slider">
+                            <img src="/generated_images/imagen3_d16bb9ed-fdd.png" alt="Before: Dilapidated wooden fence in a Sooke backyard" class="before-image" width="800" height="450">
+                            <div class="after-image">
+                                <img src="/generated_images/imagen3_3575a7a9-1b7.png" alt="After: Newly installed modern wooden privacy fence in the same Sooke backyard" width="800" height="450">
+                            </div>
+                            <div class="slider-handle"></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <h3 class="text-center text-primary mb-3">Rusty Chain Link to Sleek Vinyl Fence</h3>
+                        <div class="before-after-slider">
+                            <img src="/generated_images/imagen3_ec1c6be1-dec.png" alt="Before: Old, rusty chain link fence at a residential property in Sooke" class="before-image" width="800" height="450">
+                            <div class="after-image">
+                                <img src="/generated_images/imagen3_986326de-bee.png" alt="After: New, sleek black vinyl fence at the same residential property in Sooke" width="800" height="450">
+                            </div>
+                            <div class="slider-handle"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="gallery" class="section-padding bg-light">
+            <div class="container" data-aos="fade-up" data-aos-duration="1000">
+                <h2 class="section-title text-center">Our Recent Projects</h2>
+                <p class="text-center lead mb-5">
+                    See the quality and variety of fences we've installed for happy clients across Sooke, BC.
+                </p>
+                <div class="row g-4">
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                        <div class="gallery-thumbnail shadow-sm" data-bs-toggle="modal" data-bs-target="#galleryModal" data-prompt="A beautiful, tall wooden privacy fence in a modern suburban backyard, sunny day, Sooke BC style, professional photography, high detail" data-alt="Recently installed wooden privacy fence">
+                            <div class="gallery-thumbnail-overlay">
+                                <span>Wood Privacy Fence</span>
+                            </div>
+                            <img src="/generated_images/imagen3_f1cf8143-658.png" alt="Thumbnail for a newly installed wooden privacy fence" width="300" height="200">
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                        <div class="gallery-thumbnail shadow-sm" data-bs-toggle="modal" data-bs-target="#galleryModal" data-prompt="Elegant white vinyl fence around a family backyard, low maintenance, clean lines, sunny day, Sooke BC scenery, professional photography" data-alt="Elegant white vinyl fence around a backyard">
+                            <div class="gallery-thumbnail-overlay">
+                                <span>White Vinyl Fence</span>
+                            </div>
+                            <img src="/generated_images/imagen3_dae28dfc-12b.png" alt="Thumbnail for a pristine white vinyl fence" width="300" height="200">
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                        <div class="gallery-thumbnail shadow-sm" data-bs-toggle="modal" data-bs-target="#galleryModal" data-prompt="Durable chain link fence for property security, green landscape, practical solution, Sooke BC, professional photography" data-alt="Durable chain link fence for property security">
+                            <div class="gallery-thumbnail-overlay">
+                                <span>Chain Link Fence</span>
+                            </div>
+                            <img src="/generated_images/imagen3_f608cbce-b99.png" alt="Thumbnail for a durable chain link fence" width="300" height="200">
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                        <div class="gallery-thumbnail shadow-sm" data-bs-toggle="modal" data-bs-target="#galleryModal" data-prompt="Decorative black ornamental iron fence with an elegant gate, adding curb appeal, Sooke BC home exterior, professional photography" data-alt="Decorative black ornamental fence with gate">
+                            <div class="gallery-thumbnail-overlay">
+                                <span>Ornamental Fence</span>
+                            </div>
+                            <img src="/generated_images/imagen3_a9c760de-f69.png" alt="Thumbnail for an elegant ornamental iron fence" width="300" height="200">
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                        <div class="gallery-thumbnail shadow-sm" data-bs-toggle="modal" data-bs-target="#galleryModal" data-prompt="Unique custom-built artistic fence combining wood and metal, modern design, personalized property boundary, Sooke BC, professional photography" data-alt="Unique custom-built artistic fence">
+                            <div class="gallery-thumbnail-overlay">
+                                <span>Custom Fence</span>
+                            </div>
+                            <img src="/generated_images/imagen3_963ccba4-f35.png" alt="Thumbnail for a unique custom-built fence" width="300" height="200">
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                        <div class="gallery-thumbnail shadow-sm" data-bs-toggle="modal" data-bs-target="#galleryModal" data-prompt="Charming white picket fence installation around a front yard, classic American style, sunny day, Sooke BC, professional photography" data-alt="Charming white picket fence installation">
+                            <div class="gallery-thumbnail-overlay">
+                                <span>Picket Fence</span>
+                            </div>
+                            <img src="/generated_images/imagen3_ed6816c7-9fb.png" alt="Thumbnail for a charming white picket fence" width="300" height="200">
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                        <div class="gallery-thumbnail shadow-sm" data-bs-toggle="modal" data-bs-target="#galleryModal" data-prompt="Rustic farm style fence for acreage, wooden posts and wire, rural Sooke BC landscape, professional photography" data-alt="Rustic farm style fence for acreage">
+                            <div class="gallery-thumbnail-overlay">
+                                <span>Farm Fence</span>
+                            </div>
+                            <img src="/generated_images/imagen3_3213be8d-9d5.png" alt="Thumbnail for a rustic farm style fence" width="300" height="200">
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                        <div class="gallery-thumbnail shadow-sm" data-bs-toggle="modal" data-bs-target="#galleryModal" data-prompt="Modern composite fence matching a contemporary deck, low maintenance, sleek design, Sooke BC, professional photography" data-alt="Composite fence matching a modern deck">
+                            <div class="gallery-thumbnail-overlay">
+                                <span>Composite Fence</span>
+                            </div>
+                            <img src="/generated_images/imagen3_584e769c-864.png" alt="Thumbnail for a modern composite fence" width="300" height="200">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="modal fade" id="galleryModal" tabindex="-1" aria-labelledby="galleryModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-light border-bottom-0">
+                        <h5 class="modal-title text-dark" id="galleryModalLabel">Project Image</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <div id="modalImageContainer" class="d-flex justify-content-center align-items-center" style="min-height: 300px;">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                        <p id="modalImageCaption" class="mt-3 text-dark"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section id="testimonials" class="section-padding bg-white">
+            <div class="container" data-aos="fade-up" data-aos-duration="1000">
+                <h2 class="section-title text-center">What Our Clients Say</h2>
+                <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-indicators">
+                        <button type="button" data-bs-target="#testimonialCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                        <button type="button" data-bs-target="#testimonialCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                        <button type="button" data-bs-target="#testimonialCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+                    </div>
+                    <div class="carousel-inner pb-5">
+                        <div class="carousel-item active">
+                            <div class="d-flex justify-content-center">
+                                <div class="card p-4 text-center mx-3 shadow-sm" style="max-width: 700px;">
+                                    <i class="bi bi-quote fs-1 text-primary"></i>
+                                    <p class="lead fst-italic mb-3">
+                                        "Greg and his team did an outstanding job on our new cedar fence. The craftsmanship is impeccable, and they were a pleasure to work with from start to finish. Highly recommend for anyone in Sooke!"
+                                    </p>
+                                    <footer class="blockquote-footer text-dark">
+                                        <cite title="Source Title">Sarah L., Sooke, BC</cite>
+                                    </footer>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <div class="d-flex justify-content-center">
+                                <div class="card p-4 text-center mx-3 shadow-sm" style="max-width: 700px;">
+                                    <i class="bi bi-quote fs-1 text-primary"></i>
+                                    <p class="lead fst-italic mb-3">
+                                        "We needed a custom solution for our sloped yard, and Greg delivered beyond our expectations. The vinyl fence looks fantastic and is exactly what we wanted. Professional, efficient, and friendly service."
+                                    </p>
+                                    <footer class="blockquote-footer text-dark">
+                                        <cite title="Source Title">Mark T., East Sooke, BC</cite>
+                                    </footer>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <div class="d-flex justify-content-center">
+                                <div class="card p-4 text-center mx-3 shadow-sm" style="max-width: 700px;">
+                                    <i class="bi bi-quote fs-1 text-primary"></i>
+                                    <p class="lead fst-italic mb-3">
+                                        "From the initial quote to the final installation, Greg's Fences was truly exceptional. Our new ornamental fence adds so much curb appeal. They are the go-to fence company in the area!"
+                                    </p>
+                                    <footer class="blockquote-footer text-dark">
+                                        <cite title="Source Title">Emily R., Sooke Core, BC</cite>
+                                    </footer>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="section-padding bg-light">
+            <div class="container" data-aos="fade-up" data-aos-duration="1000">
+                <h2 class="section-title text-center">Get Your Free Fence Quote Today!</h2>
+                <div class="row g-5">
+                    <div class="col-lg-6">
+                        <h3 class="text-primary mb-4">Contact Information</h3>
+                        <p class="mb-3 fs-5">
+                            <i class="bi bi-telephone-fill me-2 text-primary"></i> Phone: <a href="tel:+12505550199" class="text-dark text-decoration-none">(250) 555-0199</a>
+                        </p>
+                        <p class="mb-3 fs-5">
+                            <i class="bi bi-envelope-fill me-2 text-primary"></i> Email: <a href="mailto:info@gregsfences.ca?subject=Website Inquiry - Free Quote" class="text-dark text-decoration-none">info@gregsfences.ca</a>
+                        </p>
+                        <p class="mb-4 fs-5">
+                            <i class="bi bi-geo-alt-fill me-2 text-primary"></i> Service Area: Sooke, BC and Surrounding Communities
+                        </p>
+                        <div id="map" class="shadow-sm"></div>
+                        <p class="small text-muted mt-2">Map data &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors</p>
+                    </div>
+                    <div class="col-lg-6">
+                        <h3 class="text-primary mb-4">Send Us a Message</h3>
+                        <form id="contactForm" class="p-4 border rounded shadow-sm bg-white" novalidate>
+                            <div class="mb-3">
+                                <label for="name" class="form-label text-dark" id="nameLabel">Your Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="name" required aria-required="true" aria-labelledby="nameLabel">
+                                <div class="invalid-feedback">
+                                    Please enter your name.
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label text-dark" id="emailLabel">Your Email <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" id="email" required aria-required="true" aria-labelledby="emailLabel">
+                                <div class="invalid-feedback">
+                                    Please enter a valid email address.
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="phone" class="form-label text-dark" id="phoneLabel">Phone Number (Optional)</label>
+                                <input type="tel" class="form-control" id="phone" aria-labelledby="phoneLabel">
+                            </div>
+                            <div class="mb-3">
+                                <label for="fenceType" class="form-label text-dark" id="fenceTypeLabel">Interested Fence Type</label>
+                                <select class="form-select" id="fenceType" aria-labelledby="fenceTypeLabel">
+                                    <option value="">Select a type...</option>
+                                    <option value="wood">Wood Fence</option>
+                                    <option value="vinyl">Vinyl Fence</option>
+                                    <option value="chainlink">Chain Link Fence</option>
+                                    <option value="ornamental">Ornamental Fence</option>
+                                    <option value="custom">Custom Fence</option>
+                                    <option value="repair">Fence Repair/Maintenance</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="message" class="form-label text-dark" id="messageLabel">Your Message <span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="message" rows="5" required aria-required="true" aria-labelledby="messageLabel"></textarea>
+                                <div class="invalid-feedback">
+                                    Please enter your message.
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-lg w-100">Send Message</button>
+                            <div id="formMessage" class="mt-3 text-center d-none" role="alert"></div>
+                            <p class="small text-muted mt-3 text-center">Note: This is a client-side only form. For a real website, backend processing is required.</p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container text-center">
+            <div class="row align-items-center">
+                <div class="col-md-4 text-md-start mb-3 mb-md-0">
+                    <p class="mb-0">&copy; 2025 Greg's Fences. All rights reserved.</p>
+                </div>
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <a href="#hero" class="text-decoration-none text-primary fw-bold fs-5">Greg's Fences</a>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <a href="https://www.facebook.com/gregsfences" target="_blank" aria-label="Facebook" class="text-light fs-4 mx-2"><i class="bi bi-facebook"></i></a>
+                    <a href="https://www.instagram.com/gregsfences" target="_blank" aria-label="Instagram" class="text-light fs-4 mx-2"><i class="bi bi-instagram"></i></a>
+                    <a href="mailto:info@gregsfences.ca" aria-label="Email" class="text-light fs-4 mx-2"><i class="bi bi-envelope-fill"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <a href="#" id="backToTopBtn" class="btn btn-primary rounded-circle shadow" aria-label="Back to top">
+        <i class="bi bi-arrow-up"></i>
+    </a>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            AOS.init({
+                once: true,
+                mirror: false,
+                duration: 800,
+                easing: 'ease-out-cubic',
+            });
+
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+
+                    if (targetElement) {
+                        const navbarHeight = document.querySelector('.navbar').offsetHeight;
+                        const offsetPosition = targetElement.offsetTop - navbarHeight - 20;
+
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: 'smooth'
+                        });
+
+                        const navbarCollapse = document.getElementById('navbarNav');
+                        if (navbarCollapse && navbarCollapse.classList.contains('show')) {
+                            const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                            if (bsCollapse) {
+                                bsCollapse.hide();
+                            }
+                        }
+                    }
+                });
+            });
+
+            const galleryModal = document.getElementById('galleryModal');
+            const modalImageContainer = document.getElementById('modalImageContainer');
+            const modalImageCaption = document.getElementById('modalImageCaption');
+
+            if (galleryModal) {
+                galleryModal.addEventListener('show.bs.modal', async event => {
+                    const button = event.relatedTarget;
+                    const prompt = button.getAttribute('data-prompt');
+                    const alt = button.getAttribute('data-alt');
+
+                    modalImageCaption.textContent = alt;
+                    modalImageContainer.innerHTML = `
+                        <div class="d-flex flex-column align-items-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading image...</span>
+                            </div>
+                            <p class="mt-2 text-muted">Generating image...</p>
+                        </div>
+                    `;
+
+                    try {
+                        const response = await fetch('/api/generate-image-on-demand', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                prompt: prompt,
+                                aspectRatio: "16:9",
+                                seed: Math.floor(Math.random() * 100000)
+                            }),
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success && data.imageUrl) {
+                            const img = document.createElement('img');
+                            img.src = data.imageUrl;
+                            img.alt = alt;
+                            img.classList.add('img-fluid', 'rounded');
+                            img.onload = () => {
+                                modalImageContainer.innerHTML = '';
+                                modalImageContainer.appendChild(img);
+                            };
+                            img.onerror = () => {
+                                modalImageContainer.innerHTML = `
+                                    <i class="bi bi-exclamation-triangle-fill text-danger fs-1"></i>
+                                    <p class="text-danger mt-2">Failed to load image.</p>
+                                `;
+                            };
+                        } else {
+                            modalImageContainer.innerHTML = `
+                                <i class="bi bi-exclamation-triangle-fill text-danger fs-1"></i>
+                                <p class="text-danger mt-2">Error generating image: ${data.error || 'Unknown error'}</p>
+                            `;
+                        }
+                    } catch (error) {
+                        modalImageContainer.innerHTML = `
+                            <i class="bi bi-exclamation-triangle-fill text-danger fs-1"></i>
+                            <p class="text-danger mt-2">Network error or API call failed. Please try again.</p>
+                        `;
+                    }
+                });
+                galleryModal.addEventListener('hide.bs.modal', () => {
+                    modalImageContainer.innerHTML = '';
+                    modalImageCaption.textContent = '';
+                });
+            }
+
+            const contactForm = document.getElementById('contactForm');
+            const formMessage = document.getElementById('formMessage');
+
+            if (contactForm) {
+                contactForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    let isValid = true;
+                    const inputs = [
+                        document.getElementById('name'),
+                        document.getElementById('email'),
+                        document.getElementById('message')
+                    ];
+
+                    inputs.forEach(input => {
+                        if (input.hasAttribute('required') && !input.value.trim()) {
+                            input.classList.add('is-invalid');
+                            input.classList.remove('is-valid');
+                            isValid = false;
+                        } else if (input.type === 'email' && !input.value.includes('@') && input.value.trim() !== '') {
+                            input.classList.add('is-invalid');
+                            input.classList.remove('is-valid');
+                            isValid = false;
+                        } else {
+                            input.classList.remove('is-invalid');
+                            if (input.value.trim() !== '') {
+                                input.classList.add('is-valid');
+                            } else {
+                                input.classList.remove('is-valid');
+                            }
+                        }
+                    });
+
+                    if (isValid) {
+                        formMessage.classList.remove('d-none', 'text-danger');
+                        formMessage.classList.add('d-block', 'text-success');
+                        formMessage.textContent = 'Thank you for your message! Greg will get back to you shortly.';
+                        contactForm.reset();
+                        inputs.forEach(input => {
+                            input.classList.remove('is-valid', 'is-invalid');
+                        });
+                        setTimeout(() => {
+                            formMessage.classList.add('d-none');
+                        }, 5000);
+                    } else {
+                        formMessage.classList.remove('d-none', 'text-success');
+                        formMessage.classList.add('d-block', 'text-danger');
+                        formMessage.textContent = 'Please fill in all required fields correctly.';
+                    }
+                });
+            }
+
+            const mapElement = document.getElementById('map');
+            if (mapElement) {
+                const sookeLat = 48.3792;
+                const sookeLng = -123.7317;
+                const zoomLevel = 12;
+
+                const map = L.map('map').setView([sookeLat, sookeLng], zoomLevel);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors'
+                }).addTo(map);
+
+                L.marker([sookeLat, sookeLng]).addTo(map)
+                    .bindPopup("Greg's Fences<br>Serving Sooke, BC!")
+                    .openPopup();
+            }
+
+            const recommenderQuiz = document.getElementById('recommenderQuiz');
+            const recommenderNextBtn = document.getElementById('recommenderNextBtn');
+            const recommenderPrevBtn = document.getElementById('recommenderPrevBtn');
+            const recommenderStartOverBtn = document.getElementById('recommenderStartOverBtn');
+            const recommendedFenceType = document.getElementById('recommendedFenceType');
+            const recommendationDescription = document.getElementById('recommendationDescription');
+            let currentQuizStep = 1;
+            let quizAnswers = {};
+
+            const quizSteps = [
+                { name: 'goal' },
+                { name: 'maintenance' },
+                { name: 'budget' },
+                { name: 'style' }
+            ];
+
+            function displayStep(stepNum) {
+                document.querySelectorAll('.recommender-quiz-step').forEach(step => {
+                    step.classList.remove('active');
+                    step.setAttribute('aria-hidden', 'true');
+                });
+                const targetStep = recommenderQuiz.querySelector(`[data-step="${stepNum}"]`);
+                if (targetStep) {
+                    targetStep.classList.add('active');
+                    targetStep.setAttribute('aria-hidden', 'false');
+                }
+
+                recommenderPrevBtn.style.display = stepNum > 1 && stepNum <= quizSteps.length ? 'block' : 'none';
+                recommenderNextBtn.style.display = stepNum <= quizSteps.length ? 'block' : 'none';
+                recommenderStartOverBtn.style.display = stepNum === 'result' ? 'inline-block' : 'none';
+            }
+
+            function getSelectedRadioValue(name) {
+                const radios = document.querySelectorAll(`input[name="${name}"]:checked`);
+                return radios.length > 0 ? radios[0].value : null;
+            }
+
+            function validateCurrentStep() {
+                const currentStepName = quizSteps[currentQuizStep - 1].name;
+                const selectedValue = getSelectedRadioValue(currentStepName);
+                if (!selectedValue) {
+                    alert('Please select an option to proceed.');
+                    return false;
+                }
+                quizAnswers[currentStepName] = selectedValue;
+                return true;
+            }
+
+            function displayRecommendation() {
+                let fenceType = "Custom Fence";
+                let description = "Given your unique needs, a custom-designed fence will best suit your property. We excel at creating bespoke solutions. Let's discuss your vision!";
+
+                const goal = quizAnswers.goal;
+                const maintenance = quizAnswers.maintenance;
+                const budget = quizAnswers.budget;
+                const style = quizAnswers.style;
+
+                if (goal === 'privacy' && maintenance === 'low') {
+                    fenceType = "Vinyl Fence";
+                    description = "Vinyl fences offer excellent privacy with virtually no maintenance, perfect for a busy lifestyle. They are durable and come in various styles.";
+                } else if (goal === 'privacy' && budget === 'budget') {
+                    fenceType = "Wood Privacy Fence";
+                    description = "A classic wood privacy fence provides natural beauty and seclusion at a cost-effective price point. Regular maintenance can keep it looking great.";
+                } else if (goal === 'security' && budget === 'budget') {
+                    fenceType = "Chain Link Fence";
+                    description = "Chain link fences are a practical and economical choice for reliable security and containment, often used for pet enclosures or property boundaries.";
+                } else if (goal === 'security' && budget === 'premium') {
+                    fenceType = "Ornamental Fence";
+                    description = "An ornamental fence provides robust security with a sophisticated and elegant aesthetic, enhancing your property's curb appeal.";
+                } else if (goal === 'aesthetics' && style === 'traditional') {
+                    fenceType = "Picket Fence";
+                    description = "A charming picket fence adds classic curb appeal and defines your property with timeless style, perfect for a traditional home.";
+                } else if (goal === 'aesthetics' && style === 'modern' && maintenance === 'low') {
+                    fenceType = "Composite Fence";
+                    description = "Composite fences offer a sleek, modern look with minimal maintenance, blending seamlessly with contemporary designs and offering great durability.";
+                } else if (goal === 'pets' && budget === 'budget') {
+                    fenceType = "Chain Link Fence";
+                    description = "A durable chain link fence is an excellent, budget-friendly option for safely containing pets while allowing visibility.";
+                } else if (goal === 'pets' && budget === 'mid') {
+                    fenceType = "Wood Picket or Privacy Fence";
+                    description = "Depending on your privacy needs, a wood picket or privacy fence can offer secure pet containment with natural beauty and charm.";
+                } else if (goal === 'boundary' && budget === 'budget') {
+                    fenceType = "Chain Link Fence";
+                    description = "For defining property boundaries economically, a chain link fence is a straightforward and durable choice, providing clear demarcation.";
+                } else if (goal === 'boundary' && budget === 'mid' && style === 'rustic') {
+                    fenceType = "Farm Fence";
+                    description = "A rustic farm-style fence is perfect for defining larger properties with a natural, sturdy look, ideal for acreage or rural settings.";
+                } else if (goal === 'aesthetics' && style === 'rustic') {
+                    fenceType = "Wood Fence (Rustic Style)";
+                    description = "A rustic wood fence, such as a split-rail or post-and-rail, can enhance the natural beauty of your property and blend with the landscape.";
+                } else if (maintenance === 'low' && budget === 'mid') {
+                    fenceType = "Composite or Vinyl Fence";
+                    description = "For a balance of low maintenance and mid-range budget, composite or vinyl fences are excellent choices, offering durability and good looks.";
+                }
+
+                recommendedFenceType.textContent = fenceType;
+                recommendationDescription.textContent = description;
+                displayStep('result');
+            }
+
+            recommenderNextBtn.addEventListener('click', () => {
+                if (currentQuizStep <= quizSteps.length && validateCurrentStep()) {
+                    currentQuizStep++;
+                    if (currentQuizStep > quizSteps.length) {
+                        displayRecommendation();
+                    } else {
+                        displayStep(currentQuizStep);
+                    }
+                }
+            });
+
+            recommenderPrevBtn.addEventListener('click', () => {
+                if (currentQuizStep > 1) {
+                    currentQuizStep--;
+                    displayStep(currentQuizStep);
+                }
+            });
+
+            recommenderStartOverBtn.addEventListener('click', () => {
+                currentQuizStep = 1;
+                quizAnswers = {};
+                document.querySelectorAll('input[type="radio"]').forEach(radio => radio.checked = false);
+                displayStep(currentQuizStep);
+            });
+
+            displayStep(currentQuizStep);
+
+            function initImageSliders() {
+                document.querySelectorAll('.before-after-slider').forEach(sliderContainer => {
+                    const beforeImage = sliderContainer.querySelector('.before-image');
+                    const afterImageContainer = sliderContainer.querySelector('.after-image');
+                    const sliderHandle = sliderContainer.querySelector('.slider-handle');
+                    let isDragging = false;
+
+                    function updateSliderPosition(clientX) {
+                        const containerRect = sliderContainer.getBoundingClientRect();
+                        let x = clientX - containerRect.left;
+                        x = Math.max(0, Math.min(x, containerRect.width));
+
+                        afterImageContainer.style.width = `${x}px`;
+                        sliderHandle.style.left = `${x}px`;
+                    }
+
+                    sliderHandle.addEventListener('mousedown', (e) => {
+                        e.preventDefault();
+                        isDragging = true;
+                        document.addEventListener('mousemove', onMouseMove);
+                        document.addEventListener('mouseup', onMouseUp);
+                    });
+
+                    sliderHandle.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        isDragging = true;
+                        document.addEventListener('touchmove', onTouchMove);
+                        document.addEventListener('touchend', onTouchEnd);
+                    }, { passive: false });
+
+                    function onMouseMove(e) {
+                        if (isDragging) {
+                            updateSliderPosition(e.clientX);
+                        }
+                    }
+
+                    function onMouseUp() {
+                        isDragging = false;
+                        document.removeEventListener('mousemove', onMouseMove);
+                        document.removeEventListener('mouseup', onMouseUp);
+                    }
+
+                    function onTouchMove(e) {
+                        if (isDragging && e.touches.length > 0) {
+                            updateSliderPosition(e.touches[0].clientX);
+                        }
+                    }
+
+                    function onTouchEnd() {
+                        isDragging = false;
+                        document.removeEventListener('touchmove', onTouchMove);
+                        document.removeEventListener('touchend', onTouchEnd);
+                    }
+
+                    function resetSliderOnResize() {
+                        const initialWidth = sliderContainer.offsetWidth / 2;
+                        afterImageContainer.style.width = `${initialWidth}px`;
+                        sliderHandle.style.left = `${initialWidth}px`;
+                    }
+
+                    window.addEventListener('resize', resetSliderOnResize);
+                    resetSliderOnResize();
+                });
+            }
+
+            initImageSliders();
+
+            const backToTopBtn = document.getElementById('backToTopBtn');
+
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 300) {
+                    backToTopBtn.style.display = 'block';
+                } else {
+                    backToTopBtn.style.display = 'none';
+                }
+            });
+
+            backToTopBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

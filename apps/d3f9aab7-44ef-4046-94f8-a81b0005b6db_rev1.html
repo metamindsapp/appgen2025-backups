@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard to the Internet</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: #eef2f7;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        main {
+            flex: 1;
+        }
+        .card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 .25rem .75rem rgba(0,0,0,.1) !important;
+        }
+        .card-header {
+            background-color: #fff;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .refresh-widget-btn i {
+            pointer-events: none;
+        }
+        #imageOfDayContainer img {
+            max-width: 100%;
+            max-height: 100%;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: .25rem;
+        }
+        .overflow-auto::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .overflow-auto::-webkit-scrollbar-thumb {
+            background-color: #adb5bd;
+            border-radius: 3px;
+        }
+        .overflow-auto::-webkit-scrollbar-track {
+            background-color: #f1f1f1;
+        }
+        .list-group-item {
+            font-size: 0.875rem;
+            padding: 0.5rem 0.75rem;
+        }
+        .list-group-item a {
+            text-decoration: none;
+            color: inherit;
+        }
+        .list-group-item a:hover {
+            color: var(--bs-primary);
+            text-decoration: underline;
+        }
+        #alertsContainer .alert {
+            min-width: 300px;
+        }
+        .form-label-sm { font-size: .8rem; }
+        .fs-4 { font-size: 1.75rem !important; }
+        .fs-6 { font-size: 1rem !important; }
+        .shadow-sm { box-shadow: 0 .125rem .25rem rgba(0,0,0,.075) !important; }
+    </style>
+</head>
+<body>
+    <header class="bg-light border-bottom mb-4 sticky-top">
+        <div class="container-fluid py-2 px-3 d-flex justify-content-between align-items-center">
+            <h1 class="h4 mb-0 d-flex align-items-center">
+                <img src="/generated_images/imagen3_17cb29ee-9aa.png" alt="Dashboard Logo" id="dashboardLogo" style="height: 32px; margin-right: 12px;">
+                Dashboard to the Internet
+            </h1>
+            <div>
+                <button id="refreshAllBtn" class="btn btn-sm btn-primary">
+                    <i class="bi bi-arrow-clockwise"></i> Refresh All
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container-fluid mb-4">
+        <div id="alertsContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1056;">
+        </div>
+
+        <div class="row g-4" id="widgetRow">
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span class="fw-semibold"><i class="bi bi-clock-fill me-2"></i>Welcome & Time</span>
+                        <button class="btn btn-sm btn-outline-secondary refresh-widget-btn" data-widget="time" aria-label="Refresh Time"><i class="bi bi-arrow-clockwise"></i></button>
+                    </div>
+                    <div class="card-body">
+                        <h5 id="greeting" class="card-title">Loading...</h5>
+                        <p class="card-text fs-4" id="currentTime">--:--:-- --</p>
+                        <p class="card-text text-muted" id="currentDate">---------- --, ----</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span class="fw-semibold"><i class="bi bi-thermometer-half me-2"></i>Weather</span>
+                        <button class="btn btn-sm btn-outline-secondary refresh-widget-btn" data-widget="weather" aria-label="Refresh Weather"><i class="bi bi-arrow-clockwise"></i></button>
+                    </div>
+                    <div class="card-body">
+                        <div class="input-group input-group-sm mb-2">
+                            <input type="text" id="cityInput" class="form-control" placeholder="Enter city name">
+                            <button id="setCityBtn" class="btn btn-outline-primary">Set</button>
+                        </div>
+                        <div id="weatherInfo"><p class="text-muted">Enter a city to see the weather.</p></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span class="fw-semibold"><i class="bi bi-chat-left-quote-fill me-2"></i>Quote of the Day</span>
+                        <button class="btn btn-sm btn-outline-secondary refresh-widget-btn" data-widget="quote" aria-label="Refresh Quote"><i class="bi bi-arrow-clockwise"></i></button>
+                    </div>
+                    <div class="card-body">
+                        <blockquote class="blockquote mb-0" id="quoteDisplay">
+                            <p class="fs-6">Loading quote...</p>
+                            <footer class="blockquote-footer" id="quoteAuthor" style="font-size: 0.85em;"></footer>
+                        </blockquote>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                         <span class="fw-semibold"><i class="bi bi-image-fill me-2"></i>Image of the Day</span>
+                    </div>
+                    <div class="card-body text-center d-flex flex-column justify-content-between">
+                        <div id="imageOfDayContainer" class="mb-2 bg-light rounded d-flex align-items-center justify-content-center" style="min-height: 180px; max-height: 220px; overflow:hidden;">
+                             <span id="imageOfDayPlaceholder" class="text-muted small">Click below to generate an image.</span>
+                        </div>
+                        <div id="imageOfDaySpinner" class="spinner-border text-primary d-none mx-auto my-2" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p id="imageOfDayError" class="text-danger small mb-1"></p>
+                        <button id="generateImageBtn" class="btn btn-sm btn-success w-100"><i class="bi bi-magic me-1"></i>Generate Image</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12 mb-4">
+                <div class="card h-100 shadow-sm d-flex flex-column">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span class="fw-semibold"><i class="bi bi-newspaper me-2"></i>News Headlines</span>
+                        <button class="btn btn-sm btn-outline-secondary refresh-widget-btn" data-widget="news" aria-label="Refresh News"><i class="bi bi-arrow-clockwise"></i></button>
+                    </div>
+                    <div class="card-body d-flex flex-column flex-grow-1">
+                        <div class="input-group input-group-sm mb-2">
+                             <span class="input-group-text"><small>RSS URL:</small></span>
+                             <input type="url" id="newsSourceInput" class="form-control" placeholder="Enter RSS feed URL">
+                             <button id="setNewsSourceBtn" class="btn btn-outline-primary">Load</button>
+                        </div>
+                        <div id="newsListWrapper" class="overflow-auto flex-grow-1" style="max-height: 250px;">
+                            <div id="newsList" class="list-group list-group-flush"><p class="text-muted list-group-item">Loading news...</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12 mb-4">
+                <div class="card h-100 shadow-sm d-flex flex-column">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span class="fw-semibold"><i class="bi bi-github me-2"></i>Trending Repos</span>
+                        <button class="btn btn-sm btn-outline-secondary refresh-widget-btn" data-widget="github" aria-label="Refresh Repos"><i class="bi bi-arrow-clockwise"></i></button>
+                    </div>
+                    <div class="card-body overflow-auto flex-grow-1" style="max-height: 300px;">
+                        <div id="githubList" class="list-group list-group-flush"><p class="text-muted list-group-item">Loading trending repos...</p></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-4 col-lg-12 col-md-12 col-sm-12 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span class="fw-semibold"><i class="bi bi-journal-text me-2"></i>My Notes</span>
+                    </div>
+                    <div class="card-body">
+                        <textarea id="notesTextArea" class="form-control" rows="10" placeholder="Type your notes here... They will be saved locally as you type."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span class="fw-semibold"><i class="bi bi-graph-up-arrow me-2"></i>Market Snapshot (Simulated)</span>
+                        <button class="btn btn-sm btn-outline-secondary refresh-widget-btn" data-widget="stocks" aria-label="Refresh Stocks"><i class="bi bi-arrow-clockwise"></i></button>
+                    </div>
+                    <div class="card-body">
+                        <div id="stockInfo"><p class="text-muted">Loading simulated data...</p></div>
+                        <small class="text-muted d-block mt-2" style="font-size: 0.75em;">Data from DummyJSON for illustrative purposes.</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span class="fw-semibold"><i class="bi bi-currency-exchange me-2"></i>Currency Converter</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-2">
+                            <label for="amountToConvert" class="form-label form-label-sm visually-hidden">Amount:</label>
+                            <input type="number" id="amountToConvert" class="form-control form-control-sm" value="1" placeholder="Amount">
+                        </div>
+                        <div class="row gx-2 mb-2">
+                            <div class="col">
+                                <label for="fromCurrency" class="form-label form-label-sm visually-hidden">From:</label>
+                                <select id="fromCurrency" class="form-select form-select-sm" aria-label="From Currency"></select>
+                            </div>
+                            <div class="col">
+                                <label for="toCurrency" class="form-label form-label-sm visually-hidden">To:</label>
+                                <select id="toCurrency" class="form-select form-select-sm" aria-label="To Currency"></select>
+                            </div>
+                        </div>
+                        <button id="convertCurrencyBtn" class="btn btn-sm btn-primary w-100 mb-2">Convert</button>
+                        <div id="conversionResult" class="text-center fw-bold fs-5 p-2 bg-light rounded">
+                            ---
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-lg-4 col-md-12 col-sm-12 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span class="fw-semibold"><i class="bi bi-lightbulb-fill me-2"></i>Did You Know?</span>
+                        <button class="btn btn-sm btn-outline-secondary refresh-widget-btn" data-widget="fact" aria-label="Refresh Fact"><i class="bi bi-arrow-clockwise"></i></button>
+                    </div>
+                    <div class="card-body">
+                        <p id="interestingFactDisplay" class="fst-italic">Loading an interesting fact...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-light text-center text-muted py-3 mt-auto border-top">
+        <div class="container-fluid">
+            <p class="mb-0 small">&copy; <span id="currentYear"></span> Dashboard to the Internet. AI Enhanced.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const userSettings = {
+            weatherCity: '',
+            weatherLat: null,
+            weatherLon: null,
+            newsFeedUrl: 'https://www.nasa.gov/rss/dyn/breaking_news.rss',
+            notes: ''
+        };
+
+        const DOM = {}; 
+
+        function cacheDOMElements() {
+            DOM.greeting = document.getElementById('greeting');
+            DOM.currentTime = document.getElementById('currentTime');
+            DOM.currentDate = document.getElementById('currentDate');
+            DOM.cityInput = document.getElementById('cityInput');
+            DOM.setCityBtn = document.getElementById('setCityBtn');
+            DOM.weatherInfo = document.getElementById('weatherInfo');
+            DOM.quoteDisplay = document.getElementById('quoteDisplay');
+            DOM.quoteAuthor = document.getElementById('quoteAuthor');
+            DOM.imageOfDayContainer = document.getElementById('imageOfDayContainer');
+            DOM.imageOfDayPlaceholder = document.getElementById('imageOfDayPlaceholder');
+            DOM.imageOfDaySpinner = document.getElementById('imageOfDaySpinner');
+            DOM.imageOfDayError = document.getElementById('imageOfDayError');
+            DOM.generateImageBtn = document.getElementById('generateImageBtn');
+            DOM.newsSourceInput = document.getElementById('newsSourceInput');
+            DOM.setNewsSourceBtn = document.getElementById('setNewsSourceBtn');
+            DOM.newsList = document.getElementById('newsList');
+            DOM.githubList = document.getElementById('githubList');
+            DOM.notesTextArea = document.getElementById('notesTextArea');
+            DOM.stockInfo = document.getElementById('stockInfo');
+            DOM.amountToConvert = document.getElementById('amountToConvert');
+            DOM.fromCurrency = document.getElementById('fromCurrency');
+            DOM.toCurrency = document.getElementById('toCurrency');
+            DOM.convertCurrencyBtn = document.getElementById('convertCurrencyBtn');
+            DOM.conversionResult = document.getElementById('conversionResult');
+            DOM.interestingFactDisplay = document.getElementById('interestingFactDisplay');
+            DOM.refreshAllBtn = document.getElementById('refreshAllBtn');
+            DOM.currentYear = document.getElementById('currentYear');
+            DOM.alertsContainer = document.getElementById('alertsContainer');
+            DOM.widgetRow = document.getElementById('widgetRow');
+        }
+
+        function saveSettings() {
+            localStorage.setItem('dashboardUserSettings', JSON.stringify(userSettings));
+        }
+
+        function loadSettings() {
+            const storedSettings = localStorage.getItem('dashboardUserSettings');
+            if (storedSettings) {
+                Object.assign(userSettings, JSON.parse(storedSettings));
+            }
+            DOM.cityInput.value = userSettings.weatherCity || '';
+            DOM.newsSourceInput.value = userSettings.newsFeedUrl;
+            DOM.notesTextArea.value = userSettings.notes;
+        }
+
+        async function fetchData(url, options = {}) {
+            try {
+                const response = await fetch(url, options);
+                if (!response.ok) {
+                    const errorData = await response.text(); 
+                    throw new Error(`HTTP error! Status: ${response.status}. Message: ${errorData.substring(0,100)}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error(`Fetch error for ${url}:`, error);
+                throw error;
+            }
+        }
+
+        function showGlobalAlert(message, type = 'info', duration = 5000) {
+            const alertEl = document.createElement('div');
+            alertEl.className = `alert alert-${type} alert-dismissible fade show`;
+            alertEl.role = 'alert';
+            alertEl.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            DOM.alertsContainer.appendChild(alertEl);
+            
+            const bsAlert = new bootstrap.Alert(alertEl);
+            const alertTimeout = setTimeout(() => {
+                if (alertEl.isConnected) {
+                     bsAlert.close();
+                }
+            }, duration);
+
+            alertEl.addEventListener('closed.bs.alert', () => {
+                clearTimeout(alertTimeout);
+            });
+        }
+        
+        function truncateText(text, maxLength) {
+            if (!text) return '';
+            return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+        }
+
+        function setButtonLoadingState(button, isLoading, loadingText = 'Loading...', originalText = null) {
+            if (!button) return;
+            if (isLoading) {
+                button.dataset.originalText = originalText || button.innerHTML;
+                button.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> ${loadingText}`;
+                button.disabled = true;
+            } else {
+                button.innerHTML = button.dataset.originalText || 'Submit';
+                button.disabled = false;
+            }
+        }
+
+        function updateTimeAndGreeting() {
+            const now = new Date();
+            const hours = now.getHours();
+            let greetingText;
+            if (hours < 12) greetingText = 'Good Morning!';
+            else if (hours < 18) greetingText = 'Good Afternoon!';
+            else greetingText = 'Good Evening!';
+            
+            DOM.greeting.textContent = greetingText;
+            DOM.currentTime.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            DOM.currentDate.textContent = now.toLocaleDateString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        }
+
+        function getWeatherDescription(code) {
+            const wmoMap = {
+                0: 'Clear sky', 1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
+                45: 'Fog', 48: 'Depositing rime fog',
+                51: 'Light drizzle', 53: 'Moderate drizzle', 55: 'Dense drizzle',
+                56: 'Light freezing drizzle', 57: 'Dense freezing drizzle',
+                61: 'Slight rain', 63: 'Moderate rain', 65: 'Heavy rain',
+                66: 'Light freezing rain', 67: 'Heavy freezing rain',
+                71: 'Slight snow fall', 73: 'Moderate snow fall', 75: 'Heavy snow fall',
+                77: 'Snow grains',
+                80: 'Slight rain showers', 81: 'Moderate rain showers', 82: 'Violent rain showers',
+                85: 'Slight snow showers', 86: 'Heavy snow showers',
+                95: 'Thunderstorm', 96: 'Thunderstorm with slight hail', 99: 'Thunderstorm with heavy hail'
+            };
+            return wmoMap[code] || 'Unknown';
+        }
+
+        async function loadWeatherWidget() {
+            if (!userSettings.weatherLat || !userSettings.weatherLon) {
+                DOM.weatherInfo.innerHTML = `<p class="text-muted small">Set a city to view weather.</p>`;
+                if (!userSettings.weatherCity && !localStorage.getItem('dashboardUserHasSetCity')) {
+                    DOM.cityInput.value = 'London'; 
+                    await handleSetCity(false); 
+                }
+                return;
+            }
+            DOM.weatherInfo.innerHTML = `<div class="d-flex align-items-center text-muted small"><div class="spinner-border spinner-border-sm me-2" role="status"></div><span>Loading weather...</span></div>`;
+            try {
+                const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${userSettings.weatherLat}&longitude=${userSettings.weatherLon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto`;
+                const data = await fetchData(weatherUrl);
+                const current = data.current;
+                DOM.weatherInfo.innerHTML = `
+                    <h6 class="mb-1">${userSettings.weatherCity || 'Current Location'}</h6>
+                    <p class="mb-1 fs-5 fw-bold">${Math.round(current.temperature_2m)}°C <small class="text-muted fw-normal">(${getWeatherDescription(current.weather_code)})</small></p>
+                    <p class="mb-0 small text-muted">Feels like: ${Math.round(current.apparent_temperature)}°C</p>
+                    <p class="mb-0 small text-muted">Humidity: ${current.relative_humidity_2m}%</p>
+                    <p class="mb-0 small text-muted">Wind: ${Math.round(current.wind_speed_10m * 3.6)} km/h</p>
+                `;
+            } catch (error) {
+                DOM.weatherInfo.innerHTML = `<p class="text-danger small">Failed to load weather. ${error.message}</p>`;
+            }
+        }
+
+        async function handleSetCity(showAlert = true) {
+            const city = DOM.cityInput.value.trim();
+            if (!city) {
+                if (showAlert) showGlobalAlert('Please enter a city name.', 'warning');
+                return;
+            }
+            
+            setButtonLoadingState(DOM.setCityBtn, true, 'Setting...', 'Set');
+            DOM.cityInput.disabled = true;
+            DOM.weatherInfo.innerHTML = `<div class="d-flex align-items-center text-muted small"><div class="spinner-border spinner-border-sm me-2" role="status"></div><span>Finding location...</span></div>`;
+            
+            try {
+                const geocodeUrl = `https://nominatim.openstreetmap.org/search?format=json&limit=1&addressdetails=1&q=${encodeURIComponent(city)}`;
+                const geoDataArray = await fetchData(geocodeUrl, { headers: { 'Accept': 'application/json' } });
+
+                if (geoDataArray && geoDataArray.length > 0) {
+                    const geoData = geoDataArray[0];
+                    userSettings.weatherCity = geoData.address?.city || geoData.address?.town || geoData.address?.village || city;
+                    userSettings.weatherLat = parseFloat(geoData.lat);
+                    userSettings.weatherLon = parseFloat(geoData.lon);
+                    DOM.cityInput.value = userSettings.weatherCity;
+                    saveSettings();
+                    localStorage.setItem('dashboardUserHasSetCity', 'true');
+                    await loadWeatherWidget();
+                    if (showAlert) showGlobalAlert(`Weather location updated to ${userSettings.weatherCity}.`, 'success');
+                } else {
+                    DOM.weatherInfo.innerHTML = `<p class="text-danger small">Could not find location data for "${city}". Try a more specific name.</p>`;
+                    if (showAlert) showGlobalAlert(`Could not find location data for "${city}".`, 'danger');
+                }
+            } catch (error) {
+                DOM.weatherInfo.innerHTML = `<p class="text-danger small">Error finding location. ${error.message}</p>`;
+                if (showAlert) showGlobalAlert(`Error finding location for "${city}": ${error.message}`, 'danger');
+            } finally {
+                setButtonLoadingState(DOM.setCityBtn, false, '', 'Set');
+                DOM.cityInput.disabled = false;
+            }
+        }
+
+        async function loadQuoteWidget() {
+            DOM.quoteDisplay.querySelector('p').textContent = 'Loading quote...';
+            DOM.quoteAuthor.textContent = '';
+            try {
+                const data = await fetchData('https://api.quotable.io/random');
+                DOM.quoteDisplay.querySelector('p').textContent = data.content;
+                DOM.quoteAuthor.textContent = data.author;
+            } catch (error) {
+                DOM.quoteDisplay.querySelector('p').textContent = 'Failed to load quote.';
+                DOM.quoteAuthor.textContent = error.message;
+            }
+        }
+
+        async function generateAndDisplayImage() {
+            DOM.imageOfDayPlaceholder.classList.add('d-none');
+            DOM.imageOfDayContainer.innerHTML = ''; 
+            DOM.imageOfDaySpinner.classList.remove('d-none');
+            DOM.imageOfDayError.textContent = '';
+            DOM.generateImageBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/generate-image-on-demand', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        prompt: "ethereal digital painting of a futuristic utopia, serene and hopeful, cinematic lighting, highly detailed",
+                        aspectRatio: "16:9" 
+                    })
+                });
+                const data = await response.json();
+
+                if (data.success && data.imageUrl) {
+                    const img = document.createElement('img');
+                    img.src = data.imageUrl;
+                    img.alt = "AI Generated Image of the Day";
+                    img.onload = () => {
+                        DOM.imageOfDayContainer.appendChild(img);
+                    };
+                    img.onerror = () => {
+                         throw new Error('Failed to load generated image from URL.');
+                    }
+                } else {
+                    throw new Error(data.error || 'Unknown error generating image.');
+                }
+            } catch (error) {
+                console.error("Image generation error:", error);
+                DOM.imageOfDayError.textContent = `Failed: ${error.message}`;
+                DOM.imageOfDayPlaceholder.classList.remove('d-none');
+                DOM.imageOfDayPlaceholder.textContent = 'Error generating image. Try again.';
+            } finally {
+                DOM.imageOfDaySpinner.classList.add('d-none');
+                DOM.generateImageBtn.disabled = false;
+            }
+        }
+        
+        async function loadNewsWidget() {
+            DOM.newsList.innerHTML = `<p class="text-muted list-group-item">Loading news...</p>`;
+            if (!userSettings.newsFeedUrl) {
+                DOM.newsList.innerHTML = `<p class="text-muted list-group-item">Please set an RSS feed URL.</p>`;
+                return;
+            }
+            try {
+                const newsUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(userSettings.newsFeedUrl)}`;
+                const data = await fetchData(newsUrl);
+                if (data.status === 'ok' && data.items) {
+                    if (data.items.length > 0) {
+                        DOM.newsList.innerHTML = data.items.slice(0, 10).map(item => `
+                            <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1 small">${truncateText(item.title, 80)}</h6>
+                                </div>
+                                <small class="text-muted">${new Date(item.pubDate).toLocaleDateString()}</small>
+                            </a>
+                        `).join('');
+                    } else {
+                        DOM.newsList.innerHTML = `<p class="text-muted list-group-item">No news items found in this feed.</p>`;
+                    }
+                } else {
+                     throw new Error(data.message || 'Invalid feed or API error.');
+                }
+            } catch (error) {
+                DOM.newsList.innerHTML = `<p class="text-danger list-group-item">Failed to load news: ${error.message}</p>`;
+            }
+        }
+
+        async function handleSetNewsSource() {
+            const newUrl = DOM.newsSourceInput.value.trim();
+            if (newUrl) {
+                setButtonLoadingState(DOM.setNewsSourceBtn, true, 'Loading...', 'Load');
+                DOM.newsSourceInput.disabled = true;
+                try {
+                    userSettings.newsFeedUrl = newUrl;
+                    saveSettings();
+                    await loadNewsWidget();
+                    showGlobalAlert('News source updated.', 'success');
+                } catch (error) {
+                    showGlobalAlert(`Failed to update news source: ${error.message}`, 'danger');
+                } finally {
+                    setButtonLoadingState(DOM.setNewsSourceBtn, false, '', 'Load');
+                    DOM.newsSourceInput.disabled = false;
+                }
+            } else {
+                showGlobalAlert('Please enter a valid RSS feed URL.', 'warning');
+            }
+        }
+
+        async function loadGitHubWidget() {
+            DOM.githubList.innerHTML = `<p class="text-muted list-group-item">Loading trending repos...</p>`;
+            try {
+                const githubUrl = 'https://api.github.com/search/repositories?q=stars:>5000&sort=stars&order=desc&per_page=7';
+                const data = await fetchData(githubUrl);
+                if (data.items && data.items.length > 0) {
+                    DOM.githubList.innerHTML = data.items.map(repo => `
+                        <a href="${repo.html_url}" target="_blank" rel="noopener noreferrer" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1 small">${repo.name}</h6>
+                                <small><i class="bi bi-star-fill text-warning"></i> ${repo.stargazers_count}</small>
+                            </div>
+                            <p class="mb-1 small text-muted">${truncateText(repo.description, 100)}</p>
+                        </a>
+                    `).join('');
+                } else {
+                    DOM.githubList.innerHTML = `<p class="text-muted list-group-item">No trending repositories found.</p>`;
+                }
+            } catch (error) {
+                DOM.githubList.innerHTML = `<p class="text-danger list-group-item">Failed to load GitHub trends: ${error.message}</p>`;
+            }
+        }
+
+        function loadNotesWidget() {
+            DOM.notesTextArea.value = userSettings.notes;
+        }
+        function handleNotesInput() {
+            userSettings.notes = DOM.notesTextArea.value;
+            saveSettings();
+        }
+
+        async function loadStocksWidget() {
+            DOM.stockInfo.innerHTML = `<p class="text-muted">Loading simulated data...</p>`;
+            try {
+                const stocksUrl = 'https://dummyjson.com/products?limit=5&select=title,price,discountPercentage';
+                const data = await fetchData(stocksUrl);
+                if (data.products && data.products.length > 0) {
+                    DOM.stockInfo.innerHTML = `
+                        <ul class="list-group list-group-flush">
+                            ${data.products.map(product => `
+                                <li class="list-group-item d-flex justify-content-between align-items-center p-1">
+                                    <span class="small">${truncateText(product.title, 20)}</span>
+                                    <span class="small fw-bold">$${product.price.toFixed(2)} 
+                                        <span class="${product.discountPercentage > 10 ? 'text-success' : (product.discountPercentage > 0 ? 'text-warning' : 'text-danger')}">
+                                            (${product.discountPercentage > 0 ? '+' : ''}${product.discountPercentage.toFixed(2)}%)
+                                        </span>
+                                    </span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    `;
+                } else {
+                    DOM.stockInfo.innerHTML = `<p class="text-muted">No simulated stock data available.</p>`;
+                }
+            } catch (error) {
+                DOM.stockInfo.innerHTML = `<p class="text-danger small">Failed to load stock data: ${error.message}</p>`;
+            }
+        }
+        
+        function populateCurrencyDropdowns() {
+            const currencies = ['USD', 'EUR', 'GBP', 'JPY', 'CAD', 'AUD', 'CHF', 'CNY', 'INR', 'BRL', 'NZD', 'SGD', 'HKD', 'KRW', 'MXN', 'NOK', 'SEK', 'ZAR'];
+            currencies.sort().forEach(currency => {
+                const optionFrom = document.createElement('option');
+                optionFrom.value = currency;
+                optionFrom.textContent = currency;
+                DOM.fromCurrency.appendChild(optionFrom);
+
+                const optionTo = document.createElement('option');
+                optionTo.value = currency;
+                optionTo.textContent = currency;
+                DOM.toCurrency.appendChild(optionTo);
+            });
+            DOM.fromCurrency.value = 'USD';
+            DOM.toCurrency.value = 'EUR';
+        }
+
+        async function handleConvertCurrency() {
+            const amount = parseFloat(DOM.amountToConvert.value);
+            const from = DOM.fromCurrency.value;
+            const to = DOM.toCurrency.value;
+
+            if (isNaN(amount) || amount <= 0) {
+                showGlobalAlert('Please enter a valid amount.', 'warning');
+                return;
+            }
+            if (from === to) {
+                DOM.conversionResult.textContent = `${amount.toFixed(2)} ${to}`;
+                return;
+            }
+
+            setButtonLoadingState(DOM.convertCurrencyBtn, true, 'Converting...', 'Convert');
+            DOM.conversionResult.innerHTML = `<div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div>`;
+            
+            try {
+                const ratesUrl = `https://api.frankfurter.app/latest?amount=${amount}&from=${from}&to=${to}`;
+                const data = await fetchData(ratesUrl);
+                if (data.rates && data.rates[to]) {
+                    DOM.conversionResult.textContent = `${data.rates[to].toFixed(2)} ${to}`;
+                } else {
+                    throw new Error('Could not retrieve conversion rate.');
+                }
+            } catch (error) {
+                DOM.conversionResult.textContent = 'Error';
+                showGlobalAlert(`Currency conversion failed: ${error.message}`, 'danger');
+            } finally {
+                setButtonLoadingState(DOM.convertCurrencyBtn, false, '', 'Convert');
+            }
+        }
+
+        async function loadFactWidget() {
+            DOM.interestingFactDisplay.textContent = 'Loading an interesting fact...';
+            try {
+                const data = await fetchData('https://uselessfacts.jsph.pl/api/v2/facts/random?language=en');
+                DOM.interestingFactDisplay.textContent = data.text;
+            } catch (error) {
+                DOM.interestingFactDisplay.textContent = `Failed to load fact: ${error.message}`;
+            }
+        }
+
+        function refreshAllWidgets() {
+            updateTimeAndGreeting(); 
+            loadWeatherWidget();
+            loadQuoteWidget();
+            loadNewsWidget();
+            loadGitHubWidget();
+            loadStocksWidget();
+            loadFactWidget();
+            showGlobalAlert('All widgets refreshed!', 'info', 2000);
+        }
+        
+        function handleWidgetRefresh(event) {
+            const button = event.target.closest('.refresh-widget-btn');
+            if (!button) return;
+            
+            const widgetType = button.dataset.widget;
+            let widgetName = widgetType.charAt(0).toUpperCase() + widgetType.slice(1);
+            button.disabled = true; 
+            const originalIcon = button.innerHTML;
+            button.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>`;
+
+            let promise;
+            switch(widgetType) {
+                case 'time': updateTimeAndGreeting(); promise = Promise.resolve(); widgetName = "Time & Greeting"; break;
+                case 'weather': promise = loadWeatherWidget(); break;
+                case 'quote': promise = loadQuoteWidget(); widgetName = "Quote"; break;
+                case 'news': promise = loadNewsWidget(); widgetName = "News"; break;
+                case 'github': promise = loadGitHubWidget(); widgetName = "GitHub Repos"; break;
+                case 'stocks': promise = loadStocksWidget(); widgetName = "Market Snapshot"; break;
+                case 'fact': promise = loadFactWidget(); widgetName = "Fact"; break;
+                default: promise = Promise.resolve();
+            }
+            
+            if (widgetType) {
+                promise.finally(() => {
+                    button.disabled = false;
+                    button.innerHTML = originalIcon;
+                    showGlobalAlert(`${widgetName} widget refreshed.`, 'info', 1500);
+                });
+            } else {
+                button.disabled = false;
+                button.innerHTML = originalIcon;
+            }
+        }
+
+        function initializeApp() {
+            cacheDOMElements();
+            DOM.currentYear.textContent = new Date().getFullYear();
+            loadSettings();
+            
+            updateTimeAndGreeting();
+            setInterval(updateTimeAndGreeting, 1000);
+
+            populateCurrencyDropdowns();
+
+            loadWeatherWidget();
+            loadQuoteWidget();
+            loadNewsWidget();
+            loadGitHubWidget();
+            loadNotesWidget();
+            loadStocksWidget();
+            loadFactWidget();
+            
+            DOM.setCityBtn.addEventListener('click', () => handleSetCity(true));
+            DOM.cityInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSetCity(true); });
+            DOM.generateImageBtn.addEventListener('click', generateAndDisplayImage);
+            DOM.setNewsSourceBtn.addEventListener('click', handleSetNewsSource);
+            DOM.newsSourceInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSetNewsSource(); });
+            DOM.notesTextArea.addEventListener('input', handleNotesInput);
+            DOM.convertCurrencyBtn.addEventListener('click', handleConvertCurrency);
+            DOM.refreshAllBtn.addEventListener('click', refreshAllWidgets);
+            DOM.widgetRow.addEventListener('click', handleWidgetRefresh);
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

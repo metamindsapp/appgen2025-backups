@@ -1,0 +1,10 @@
+{
+  "projectId": "90841dc3-947e-4177-b880-fb3c5008640e",
+  "revisionString": "2",
+  "projectNameDisplay": "  Awesome theremin with lots of features, touchscreen and mouse and keyboard support",
+  "projectType": "webapp",
+  "userPromptForThisRevision": "An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.",
+  "basedOnRevisionString": "1",
+  "savedAt": "2025-05-29T15:43:16.694Z",
+  "imageAssets": []
+}
