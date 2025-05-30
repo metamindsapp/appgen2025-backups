@@ -1,0 +1,10 @@
+{
+  "projectId": "b452c80a-dcda-4c73-84d0-6bf6847cfc97",
+  "revisionString": "3",
+  "projectNameDisplay": "Breakout , but with spelling",
+  "projectType": "webapp",
+  "userPromptForThisRevision": "Make sure there is a ball on the paddle at game start and that it starts moving when the screen is touched",
+  "basedOnRevisionString": "1",
+  "savedAt": "2025-05-30T14:14:33.541Z",
+  "imageAssets": []
+}

@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Breaker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧱</text></svg>">
+    <style>
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        #app-container {
+            background-color: #121212;
+        }
+
+        #game-hud {
+            padding-top: env(safe-area-inset-top, 0px);
+            z-index: 1050;
+            color: #f8f9fa;
+        }
+        
+        #game-hud #current-word-display {
+            min-width: 150px; 
+            max-width: 250px;
+            text-align: center;
+            padding: 0.2rem 0.75rem;
+            border-radius: 0.25rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-family: 'Courier New', Courier, monospace;
+            letter-spacing: 0.1em;
+            font-size: 1rem;
+            height: 38px; 
+            line-height: 1.8;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+         #game-hud .hud-item {
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        #game-hud .hud-item .fw-bold {
+            margin-left: 0.3rem;
+        }
+
+        #game-area-wrapper {
+            background-color: #000000;
+            flex-grow: 1;
+        }
+
+        #gameCanvas {
+            display: block;
+            background-color: #1a1d20;
+            touch-action: none;
+            box-shadow: 0 0 25px rgba(0, 150, 255, 0.3);
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -webkit-crisp-edges;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        .modal-content {
+            background-color: #2c3034; 
+            color: #f8f9fa;
+            border: 1px solid #495057; 
+        }
+        .modal-header, .modal-footer {
+            border-color: #495057;
+        }
+        .btn-close-white {
+            filter: invert(1) grayscale(100%) brightness(200%);
+        }
+
+        .btn-primary {
+            background-color: #0d6efd; 
+            border-color: #0d6efd;
+            transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, transform 0.1s ease-out;
+        }
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+        }
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-info {
+            background-color: #0dcaf0;
+            border-color: #0dcaf0;
+            color: #000;
+             transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, transform 0.1s ease-out;
+        }
+        .btn-info:hover {
+            background-color: #31d2f2;
+            border-color: #25cff2;
+            color: #000;
+        }
+         .btn-info:active {
+            transform: scale(0.98);
+        }
+        
+        #powerup-instructions-list li {
+            margin-bottom: 0.5rem;
+        }
+        #powerup-instructions-list strong {
+            color: #0dcaf0; 
+        }
+        .list-unstyled::-webkit-scrollbar {
+            width: 8px;
+        }
+        .list-unstyled::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+        }
+        .list-unstyled::-webkit-scrollbar-thumb {
+            background: rgba(0, 191, 255, 0.5);
+            border-radius: 4px;
+        }
+        .list-unstyled::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 191, 255, 0.7);
+        }
+
+    </style>
+</head>
+<body data-bs-theme="dark">
+    <div class="container-fluid min-vh-100 d-flex flex-column p-0" id="app-container">
+        <header class="py-2 fixed-top bg-dark shadow-sm" id="game-hud">
+            <div class="container d-flex justify-content-between align-items-center px-md-3 px-2">
+                <div class="text-light hud-item">Score:<span id="score-display" class="fw-bold">0</span></div>
+                <div class="text-info hud-item mx-2">Word:<span id="current-word-display" class="fw-bold"></span></div>
+                <div class="text-light hud-item">Lives:<span id="lives-display" class="fw-bold">3</span></div>
+                <button class="btn btn-sm btn-outline-light ms-2" id="sound-toggle-button">
+                    <i class="bi bi-volume-up-fill" id="sound-icon"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-light ms-2" id="pause-button" style="visibility: hidden;">Pause</button>
+            </div>
+        </header>
+
+        <main class="flex-grow-1 d-flex justify-content-center align-items-center position-relative" id="game-area-wrapper" style="padding-top: 60px;">
+            <canvas id="gameCanvas"></canvas>
+
+            <div class="modal fade" id="startModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="startModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="startModalLabel">Word Breaker!</h5>
+                        </div>
+                        <div class="modal-body text-center">
+                            <p>Break bricks by spelling words. Only valid letter sequences destroy bricks!</p>
+                            <img src="" id="startModalImage" class="img-fluid mb-3 rounded" alt="Thematic game image" style="display:none; max-height: 200px; border: 1px solid #495057;">
+                            <div id="startModalImageLoading" class="text-muted small mb-2" style="display:none;">Loading image...</div>
+                            <button class="btn btn-primary w-100 mb-2" id="start-game-button">Start Game</button>
+                            <button class="btn btn-info w-100" id="instructions-button-menu" data-bs-toggle="modal" data-bs-target="#instructionsModal">Instructions</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="instructionsModal" tabindex="-1" aria-labelledby="instructionsModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="instructionsModalLabel">How to Play Word Breaker</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Use your <strong>mouse</strong> or <strong>left/right arrow keys</strong> to control the paddle at the bottom.</p>
+                            <p>Hit the ball into the bricks. Each brick has a letter.</p>
+                            <p><strong>Click/Tap the screen</strong> or press the <strong>Spacebar</strong> to launch the ball or fire lasers.</p>
+                            <ul>
+                                <li>If the sequence of letters from hit bricks forms a <strong>valid start of a word</strong> (e.g., "BR" if "BRICK" is possible), the brick breaks.</li>
+                                <li>If the sequence completes a <strong>full word</strong>, the brick breaks, you score bonus points, and the word attempt resets!</li>
+                                <li>If the sequence is <strong>invalid</strong> (e.g., "XQZ"), the brick does NOT break, the ball bounces, and your current word attempt resets.</li>
+                            </ul>
+                            <p>You have <strong id="initial-lives-info">3</strong> lives. Don't let the ball pass your paddle!</p>
+                            <p>Clear all bricks to complete the level.</p>
+                            <h6>Power-ups (collect these by hitting them with your paddle):</h6>
+                            <ul id="powerup-instructions-list" class="list-unstyled small" style="max-height: 150px; overflow-y: auto;"></ul>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Got it!</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="gameOverModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="gameOverModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="gameOverModalLabel">Game Over!</h5>
+                        </div>
+                        <div class="modal-body">
+                            <p>Your final score: <strong id="final-score-display">0</strong></p>
+                            <p>High Score: <strong id="high-score-display">0</strong></p>
+                            <h6>Words Found:</h6>
+                            <ul id="words-found-list-gameover" class="list-unstyled small" style="max-height: 100px; overflow-y: auto;"></ul>
+                            <button class="btn btn-primary w-100 mt-3" id="restart-game-button">Play Again</button>
+                            <button class="btn btn-secondary w-100 mt-2" id="main-menu-button-gameover">Main Menu</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="levelCompleteModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="levelCompleteModalLabel" aria-hidden="true">
+                 <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="levelCompleteModalLabel">Level Complete!</h5>
+                        </div>
+                        <div class="modal-body">
+                            <p>Level Score: <strong id="level-score-display">0</strong></p>
+                            <p>Total Score: <strong id="total-score-levelcomplete-display">0</strong></p>
+                             <h6>Words Found This Level:</h6>
+                            <ul id="words-found-list-levelcomplete" class="list-unstyled small" style="max-height: 100px; overflow-y: auto;"></ul>
+                            <button class="btn btn-primary w-100 mt-3" id="next-level-button">Next Level</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal fade" id="pauseModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="pauseModalLabel" aria-hidden="true">
+                 <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="pauseModalLabel">Game Paused</h5>
+                        </div>
+                        <div class="modal-body">
+                            <button class="btn btn-primary w-100 mb-2" id="resume-game-button">Resume Game</button>
+                            <button class="btn btn-secondary w-100" id="quit-to-menu-button">Quit to Main Menu</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
+    <script>
+        const GameManager = (function() {
+            const GAME_CONFIG = {
+                NATIVE_WIDTH: 800,
+                NATIVE_HEIGHT: 600,
+                PADDLE_WIDTH: 120,
+                PADDLE_HEIGHT: 18,
+                BALL_RADIUS: 9,
+                BALL_SPEED: 320,
+                BRICK_HEIGHT: 22,
+                BRICK_PADDING: 6,
+                BRICK_OFFSET_TOP: 60,
+                BRICK_OFFSET_LEFT: 40,
+                INITIAL_LIVES: 3,
+                POINTS_BRICK_BREAK: 10,
+                POINTS_WORD_COMPLETE: 50,
+                POWERUP_SIZE: 25,
+                POWERUP_SPEED: 120,
+                POWERUP_DROP_CHANCE: 0.15, 
+                MAX_DELTA_TIME: 0.1,
+                BALL_LAUNCH_PROMPT_FONT_SIZE: 24,
+                BALL_LAUNCH_PROMPT_COLOR: '#E0E0E0',
+                LASER_WIDTH: 8,
+                LASER_HEIGHT: 30,
+                LASER_SPEED: 400,
+                LASER_COOLDOWN: 500,
+            };
+
+            const WORD_LIST_SOURCE = ["ACE", "ACT", "ART", "ASK", "BALL", "BANK", "BEAM", "BELT", "BEST", "BIRD", "BLOW", "BLUE", "BOAT", "BODY", "BOLD", "BOMB", "BONE", "BOOK", "BOSS", "BOTH", "BRAG", "BREAK", "BRICK", "BURN", "CALL", "CALM", "CAMP", "CARD", "CARE", "CASE", "CASH", "CAST", "CAVE", "CELL", "CHAT", "CHIP", "CITY", "CLAY", "CLIP", "CLUB", "COAL", "COAT", "CODE", "COLD", "COME", "COOK", "COOL", "COPY", "CORE", "CORN", "COST", "CREW", "CROP", "DARK", "DATA", "DATE", "DEAL", "DEAR", "DECK", "DEEP", "DESK", "DICE", "DIRT", "DISK", "DOLL", "DOOR", "DOWN", "DRAW", "DREAM", "DRESS", "DRINK", "DRIVE", "DROP", "DUCK", "DUST", "DUTY", "EACH", "EARN", "EAST", "EASY", "EDGE", "ELSE", "EVEN", "EXIT", "FACE", "FACT", "FAIL", "FAIR", "FALL", "FAME", "FARM", "FAST", "FEAR", "FEED", "FEEL", "FILE", "FILL", "FILM", "FIND", "FINE", "FIRE", "FISH", "FIVE", "FLAG", "FLAT", "FLOW", "FOOD", "FOOT", "FOUR", "FREE", "FRESH", "FUEL", "FULL", "GAIN", "GAME", "GATE", "GEAR", "GIFT", "GIRL", "GIVE", "GLAD", "GLASS", "GLOW", "GOAL", "GOLD", "GOOD", "GRAY", "GREAT", "GREEN", "GREY", "GRID", "GROW", "HAIR", "HALF", "HALL", "HAND", "HANG", "HARD", "HATE", "HEAD", "HEAL", "HEAR", "HEAT", "HELP", "HERE", "HIGH", "HILL", "HOLD", "HOLE", "HOME", "HOPE", "HOUR", "HUGE", "HUNT", "HURT", "IDEA", "IRON", "ITEM", "JOIN", "JOKE", "JUDGE", "JUMP", "JUST", "KEEP", "KICK", "KILL", "KIND", "KING", "KNEE", "KNOW", "LACK", "LADY", "LAKE", "LAND", "LARGE", "LAST", "LATE", "LAUGH", "LEAD", "LEAF", "LEAN", "LEARN", "LEAVE", "LEFT", "LEND", "LESS", "LEVEL", "LIFE", "LIFT", "LIGHT", "LIKE", "LINE", "LINK", "LIST", "LIVE", "LOAD", "LOAN", "LOCK", "LONG", "LOOK", "LOSE", "LOUD", "LOVE", "LUCK", "MADE", "MAIL", "MAIN", "MAKE", "MANY", "MAPS", "MARK", "MASK", "MASS", "MEAL", "MEAN", "MEAT", "MEET", "MENU", "MILD", "MILE", "MILK", "MIND", "MINE", "MISS", "MOOD", "MOON", "MORE", "MOVE", "MUCH", "MUST", "NAME", "NAVY", "NEAR", "NECK", "NEED", "NEWS", "NEXT", "NICE", "NIGHT", "NINE", "NOON", "NOSE", "NOTE", "NOUN", "OPEN", "PAGE", "PAIN", "PAINT", "PAIR", "PALE", "PALM", "PANE", "PARK", "PART", "PASS", "PAST", "PATH", "PAUSE", "PEACE", "PICK", "PILE", "PINK", "PIPE", "PLAN", "PLAY", "PLOT", "PLUS", "POEM", "POINT", "POLE", "POND", "POOL", "POOR", "POST", "PULL", "PURE", "PUSH", "QUAD", "QUIET", "QUIT", "QUIZ", "RACE", "RAIN", "RANK", "RARE", "RATE", "READ", "REAL", "REAR", "RENT", "REST", "RICE", "RICH", "RIDE", "RING", "RISE", "RISK", "ROAD", "ROCK", "ROLE", "ROLL", "ROOF", "ROOM", "ROOT", "ROPE", "ROSE", "ROUGH", "ROUND", "RULE", "RUSH", "RUST", "SAFE", "SAIL", "SALT", "SAME", "SAND", "SAVE", "SAY", "SCALE", "SCAN", "SCORE", "SEAL", "SEAT", "SEED", "SEEK", "SEEM", "SELL", "SEND", "SENSE", "SENT", "SETS", "SEVEN", "SHADE", "SHAKE", "SHAPE", "SHARE", "SHARP", "SHELF", "SHIP", "SHOE", "SHOP", "SHOT", "SHOW", "SICK", "SIDE", "SIGN", "SILK", "SING", "SIZE", "SKIN", "SKY", "SLEEP", "SLIP", "SLOW", "SMALL", "SMART", "SMILE", "SMOKE", "SNOW", "SOFT", "SOIL", "SOLD", "SOME", "SONG", "SOON", "SORT", "SOUL", "SOUND", "SOUTH", "SPACE", "SPEAK", "SPEED", "SPELL", "SPIN", "SPOT", "STAR", "STAY", "STEP", "STICK", "STILL", "STONE", "STOP", "STORE", "STORY", "STUDY", "SUCH", "SUIT", "SURE", "TAKE", "TALK", "TALL", "TANK", "TAPE", "TASK", "TASTE", "TEAM", "TEAR", "TELL", "TERM", "TEST", "TEXT", "THAN", "THAT", "THEM", "THEN", "THIN", "THIS", "TIDE", "TIDY", "TIED", "TIME", "TINY", "TIRE", "TONE", "TOOL", "TOPIC", "TOTAL", "TOUCH", "TOUGH", "TOUR", "TOWN", "TRACK", "TRADE", "TRAIL", "TRAIN", "TRAP", "TREE", "TRIP", "TRUE", "TRUNK", "TRUST", "TRY", "TUBE", "TURN", "TWIN", "TYPE", "UNIT", "UNTIL", "UPON", "USED", "USER", "VALID", "VALUE", "VAST", "VERY", "VIEW", "VOICE", "VOID", "WAIT", "WAKE", "WALK", "WALL", "WANT", "WARD", "WARM", "WARN", "WASH", "WASTE", "WATCH", "WATER", "WAVE", "WEAK", "WEAR", "WEEK", "WELL", "WEST", "WHAT", "WHEAT", "WHEEL", "WHEN", "WIDE", "WIFE", "WILD", "WILL", "WIND", "WINE", "WING", "WIRE", "WISE", "WISH", "WITH", "WOOD", "WORD", "WORK", "WORLD", "WORRY", "WORSE", "WORTH", "WRAP", "YARD", "YEAR", "ZERO", "ZONE", "ACTION", "AGENT", "APPLE", "AWARD", "BASIC", "BEACH", "BLACK", "BLOCK", "BOARD", "BRAIN", "BREAD", "BUILD", "CHECK", "CHILD", "CLASS", "CLEAN", "CLEAR", "CLOCK", "CLOSE", "CLOUD", "COAST", "COLOR", "COUNT", "COVER", "CRAFT", "CRASH", "CREAM", "DANCE", "DEATH", "DREAM", "DRIVE", "EARTH", "ENEMY", "ERROR", "EVENT", "EXIST", "EXTRA", "FIELD", "FIGHT", "FINAL", "FIRST", "FLOAT", "FLOOR", "FOCUS", "FORCE", "FRAME", "FRESH", "FRONT", "FRUIT", "FUNNY", "GHOST", "GIANT", "GLASS", "GRASS", "GREEN", "GROUP", "GUARD", "GUEST", "GUIDE", "HEART", "HEAVY", "HORSE", "HOTEL", "HOUSE", "HUMAN", "IMAGE", "INPUT", "ISSUE", "JOINT", "JUDGE", "JUICE", "LARGE", "LASER", "LAYER", "LEGAL", "LIGHT", "LIMIT", "LOCAL", "LOGIC", "MAGIC", "MAJOR", "METAL", "MODEL", "MONEY", "MONTH", "MOTOR", "MOUSE", "MUSIC", "NIGHT", "NOISE", "NORTH", "NOVEL", "NURSE", "OCEAN", "OFFER", "ORDER", "OTHER", "OWNER", "PAINT", "PAPER", "PARTY", "PEACE", "PHONE", "PHOTO", "PIANO", "PIECE", "PILOT", "PLACE", "PLANE", "PLANT", "PLATE", "POINT", "POWER", "PRESS", "PRICE", "PRIDE", "PRINT", "PRIZE", "PROXY", "PUPIL", "QUERY", "QUEST", "QUICK", "QUIET", "RADIO", "RANGE", "RATIO", "REACH", "REACT", "REPLY", "RIGHT", "RIVER", "ROBOT", "ROUND", "ROUTE", "ROYAL", "SCALE", "SCENE", "SCOPE", "SENSE", "SHAPE", "SHARE", "SHARK", "SHEET", "SHIFT", "SHINE", "SHIRT", "SHOCK", "SHORT", "SKILL", "SLEEP", "SLIDE", "SMALL", "SMART", "SMILE", "SMOKE", "SOLID", "SOLVE", "SOUND", "SOUTH", "SPACE", "SPEED", "SPELL", "SPEND", "SPOON", "SPORT", "STAFF", "STAGE", "STAMP", "STAND", "START", "STATE", "STEAM", "STEEL", "STICK", "STILL", "STOCK", "STONE", "STORE", "STORM", "STORY", "STUDY", "STYLE", "SUGAR", "TABLE", "TASTE", "TEACH", "THANK", "THEME", "THING", "THINK", "TITLE", "TOTAL", "TOUCH", "TOWER", "TRACK", "TRADE", "TRAIN", "TREND", "TRIAL", "TRICK", "TRUST", "TRUTH", "TWIST", "UNDER", "UNION", "UNITY", "UNTIL", "UPSET", "URBAN", "USAGE", "USUAL", "VALID", "VALUE", "VIDEO", "VIRUS", "VISIT", "VITAL", "VOICE", "WASTE", "WATCH", "WATER", "WHITE", "WHOLE", "WOMAN", "WORLD", "WORRY", "WRITE", "WRONG", "YOUNG", "YOUTH", "ZEBRA", "ZENITH"];
+            const WORD_SET = new Set(WORD_LIST_SOURCE);
+            const COMMON_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; 
+
+            const POWERUP_TYPES = {
+                WIDE_PADDLE: { id: 'WIDE_PADDLE', symbol: 'W', color: '#0dcaf0', duration: 10000, description: "Wider paddle for 10s." },
+                SLOW_BALL: { id: 'SLOW_BALL', symbol: 'S', color: '#6f42c1', duration: 8000, description: "Slower ball for 8s." },
+                MULTI_BALL: { id: 'MULTI_BALL', symbol: 'M', color: '#ffc107', description: "Spawns 2 extra balls." },
+                STICKY_PADDLE: { id: 'STICKY_PADDLE', symbol: 'T', color: '#6f42c1', duration: 10000, description: "Ball sticks to paddle for 10s. Click/Spacebar to unstick." },
+                LASER_PADDLE: { id: 'LASER_PADDLE', symbol: 'L', color: '#FF4500', duration: 10000, description: "Paddle shoots lasers for 10s. (L key / Click)" },
+            };
+            
+            const LEVEL_DESIGNS = [
+                { rows: 4, cols: 8, words: ["BREAK", "WORD", "GAME", "CODE", "PLAY"] },
+                { rows: 5, cols: 10, words: ["SPELL", "VALID", "POINT", "LEVEL", "SCORE", "BRICK"] },
+                { rows: 6, cols: 10, words: ["PADDLE", "PLAYER", "MOUSE", "CLICK", "BRICKS", "POWER", "ACTION"] },
+                { rows: 7, cols: 11, words: ["ABILITY", "ACTIVE", "AGENCY", "AWESOME", "CHOICE", "QUEST"] },
+                { rows: 8, cols: 12, words: ["CHALLENGE", "COMPLETE", "VICTORY", "WINNER", "PUZZLE", "MASTER", "FLAWLESS"] }
+            ];
+
+            let canvas, ctx;
+            let paddle, balls = [], bricks = [], activePowerUps = [], particles = [], floatingTexts = [], lasers = [];
+            let score, lives, currentLevelIndex, gameState, currentWordAttempt, wordsFoundThisLevel, totalWordsFound, highScore, scoreAtLevelStart;
+            let lastTime = 0, animationFrameId;
+            let mouseX = GAME_CONFIG.NATIVE_WIDTH / 2;
+            let ballIsStationary = true;
+            let paddleHasSticky = false;
+            let paddleHasLaser = false;
+            let lastLaserTime = 0;
+            let stickyPaddleTimeoutId = null;
+            let laserPaddleTimeoutId = null;
+            let leftPressed = false;
+            let rightPressed = false;
+
+            let domElements = {};
+            let bootstrapModals = {};
+            let soundManager;
+
+            class Paddle {
+                constructor(x, y, width, height, color) {
+                    this.x = x;
+                    this.y = y;
+                    this.width = width;
+                    this.originalWidth = width;
+                    this.height = height;
+                    this.color = color;
+                    this.cornerRadius = 5;
+                    this.laserColor = '#FF4500';
+                }
+                draw(ctx) {
+                    if (paddleHasSticky) {
+                        ctx.fillStyle = POWERUP_TYPES.STICKY_PADDLE.color;
+                    } else if (paddleHasLaser) {
+                        ctx.fillStyle = POWERUP_TYPES.LASER_PADDLE.color;
+                    } else {
+                        ctx.fillStyle = this.color;
+                    }
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(this.x + this.cornerRadius, this.y);
+                    ctx.lineTo(this.x + this.width - this.cornerRadius, this.y);
+                    ctx.quadraticCurveTo(this.x + this.width, this.y, this.x + this.width, this.y + this.cornerRadius);
+                    ctx.lineTo(this.x + this.width, this.y + this.height - this.cornerRadius);
+                    ctx.quadraticCurveTo(this.x + this.width, this.y + this.height, this.x + this.width - this.cornerRadius, this.y + this.height);
+                    ctx.lineTo(this.x + this.cornerRadius, this.y + this.height);
+                    ctx.quadraticCurveTo(this.x, this.y + this.height, this.x, this.y + this.height - this.cornerRadius);
+                    ctx.lineTo(this.x, this.y + this.cornerRadius);
+                    ctx.quadraticCurveTo(this.x, this.y, this.x + this.cornerRadius, this.y);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+                update(mouseX) {
+                    this.x = mouseX - this.width / 2;
+                    if (this.x < 0) this.x = 0;
+                    if (this.x + this.width > GAME_CONFIG.NATIVE_WIDTH) this.x = GAME_CONFIG.NATIVE_WIDTH - this.width;
+                }
+                shootLaser() {
+                    if (!paddleHasLaser || performance.now() - lastLaserTime < GAME_CONFIG.LASER_COOLDOWN) {
+                        return;
+                    }
+                    lastLaserTime = performance.now();
+                    lasers.push(new Laser(this.x + this.width * 0.1, this.y, GAME_CONFIG.LASER_WIDTH, GAME_CONFIG.LASER_HEIGHT, GAME_CONFIG.LASER_SPEED, this.laserColor));
+                    lasers.push(new Laser(this.x + this.width * 0.9 - GAME_CONFIG.LASER_WIDTH, this.y, GAME_CONFIG.LASER_WIDTH, GAME_CONFIG.LASER_HEIGHT, GAME_CONFIG.LASER_SPEED, this.laserColor));
+                    soundManager.play('laser_shoot');
+                }
+            }
+
+            class Ball {
+                constructor(x, y, radius, speed, color) {
+                    this.x = x;
+                    this.y = y;
+                    this.radius = radius;
+                    this.dx = 0;
+                    this.dy = 0;
+                    this.speed = speed;
+                    this.originalSpeed = speed;
+                    this.color = color;
+                    this.isStuck = false;
+                    this.stuckPaddleXOffset = 0;
+                }
+                draw(ctx) {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = this.color;
+                    ctx.fill();
+                    ctx.closePath();
+                }
+                update(dt) {
+                    if (this.isStuck) {
+                        this.x = paddle.x + paddle.width / 2 + this.stuckPaddleXOffset;
+                        this.y = paddle.y - this.radius - 2;
+                        return;
+                    }
+                    if (ballIsStationary) {
+                         this.x = paddle.x + paddle.width / 2;
+                         this.y = paddle.y - this.radius - 2;
+                         return;
+                    }
+
+                    this.x += this.dx * this.speed * dt;
+                    this.y += this.dy * this.speed * dt;
+
+                    if (this.x - this.radius < 0 || this.x + this.radius > GAME_CONFIG.NATIVE_WIDTH) {
+                        this.dx *= -1;
+                        this.x = Math.max(this.radius, Math.min(this.x, GAME_CONFIG.NATIVE_WIDTH - this.radius));
+                        soundManager.play('bounce_wall');
+                    }
+                    if (this.y - this.radius < 0) {
+                        this.dy *= -1;
+                        this.y = this.radius;
+                        soundManager.play('bounce_wall');
+                    }
+                }
+                launch() {
+                    this.isStuck = false;
+                    let angle = (Math.PI / 3) + (Math.random() * Math.PI / 3);
+                    this.dx = Math.cos(angle);
+                    this.dy = -Math.sin(angle); 
+                    soundManager.play('launch_ball');
+                }
+                reset() {
+                    this.x = paddle.x + paddle.width / 2;
+                    this.y = paddle.y - this.radius - 2;
+                    this.dx = 0;
+                    this.dy = 0;
+                    this.speed = this.originalSpeed;
+                    this.isStuck = false;
+                    this.stuckPaddleXOffset = 0;
+                }
+            }
+
+            class Brick {
+                constructor(x, y, width, height, letter, color, points) {
+                    this.x = x;
+                    this.y = y;
+                    this.width = width;
+                    this.height = height;
+                    this.letter = letter.toUpperCase();
+                    this.color = color;
+                    this.points = points;
+                    this.isAlive = true;
+                    this.flashTime = 0;
+                    this.cornerRadius = 3;
+                }
+                draw(ctx) {
+                    if (!this.isAlive) return;
+                    ctx.fillStyle = this.flashTime > 0 ? 'rgba(255, 85, 85, 0.8)' : this.color;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(this.x + this.cornerRadius, this.y);
+                    ctx.lineTo(this.x + this.width - this.cornerRadius, this.y);
+                    ctx.quadraticCurveTo(this.x + this.width, this.y, this.x + this.width, this.y + this.cornerRadius);
+                    ctx.lineTo(this.x + this.width, this.y + this.height - this.cornerRadius);
+                    ctx.quadraticCurveTo(this.x + this.width, this.y + this.height, this.x + this.width - this.cornerRadius, this.y + this.height);
+                    ctx.lineTo(this.x + this.cornerRadius, this.y + this.height);
+                    ctx.quadraticCurveTo(this.x, this.y + this.height, this.x, this.y + this.height - this.cornerRadius);
+                    ctx.lineTo(this.x, this.y + this.cornerRadius);
+                    ctx.quadraticCurveTo(this.x, this.y, this.x + this.cornerRadius, this.y);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.font = `bold ${this.height * 0.6}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(this.letter, this.x + this.width / 2, this.y + this.height / 2 + 1);
+
+                    if (this.flashTime > 0) this.flashTime -= 16.67; 
+                }
+                flash() {
+                    this.flashTime = 300; 
+                }
+            }
+            
+            class PowerUp {
+                constructor(x, y, type) {
+                    this.x = x;
+                    this.y = y;
+                    this.type = type;
+                    this.size = GAME_CONFIG.POWERUP_SIZE;
+                    this.isAlive = true;
+                }
+                draw(ctx) {
+                    if (!this.isAlive) return;
+                    ctx.fillStyle = this.type.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x + this.size / 2, this.y + this.size / 2, this.size / 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.shadowColor = 'black';
+                    ctx.shadowBlur = 2;
+                    ctx.fillStyle = '#FFF';
+                    ctx.font = `bold ${this.size * 0.6}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(this.type.symbol, this.x + this.size / 2, this.y + this.size / 2 + 1);
+                    ctx.shadowBlur = 0;
+                }
+                update(dt) {
+                    if (!this.isAlive) return;
+                    this.y += GAME_CONFIG.POWERUP_SPEED * dt;
+                    if (this.y > GAME_CONFIG.NATIVE_HEIGHT) {
+                        this.isAlive = false;
+                    }
+                }
+                applyEffect() {
+                    soundManager.play('powerup_collect');
+                    if (this.type.id === 'WIDE_PADDLE') {
+                        paddle.width = paddle.originalWidth * 1.5;
+                        setTimeout(() => { paddle.width = paddle.originalWidth; }, this.type.duration);
+                    } else if (this.type.id === 'SLOW_BALL') {
+                        balls.forEach(b => b.speed = b.originalSpeed * 0.65);
+                        setTimeout(() => { balls.forEach(b => b.speed = b.originalSpeed); }, this.type.duration);
+                    } else if (this.type.id === 'MULTI_BALL') {
+                        for (let i = 0; i < 2; i++) {
+                            const newBall = new Ball(
+                                paddle.x + paddle.width / 2 + (i % 2 === 0 ? -20 : 20),
+                                paddle.y - GAME_CONFIG.BALL_RADIUS - 2,
+                                GAME_CONFIG.BALL_RADIUS,
+                                GAME_CONFIG.BALL_SPEED,
+                                '#ffc107'
+                            );
+                            balls.push(newBall);
+                            newBall.launch();
+                        }
+                    } else if (this.type.id === 'STICKY_PADDLE') {
+                        paddleHasSticky = true;
+                        if (stickyPaddleTimeoutId) clearTimeout(stickyPaddleTimeoutId);
+                        stickyPaddleTimeoutId = setTimeout(() => { 
+                            paddleHasSticky = false; 
+                            balls.filter(b => b.isStuck).forEach(b => b.launch());
+                        }, this.type.duration);
+                    } else if (this.type.id === 'LASER_PADDLE') {
+                        paddleHasLaser = true;
+                        if (laserPaddleTimeoutId) clearTimeout(laserPaddleTimeoutId);
+                        laserPaddleTimeoutId = setTimeout(() => { 
+                            paddleHasLaser = false; 
+                        }, this.type.duration);
+                    }
+                }
+            }
+
+            class Particle {
+                constructor(x, y, color) {
+                    this.x = x;
+                    this.y = y;
+                    this.size = Math.random() * 6 + 3;
+                    this.speedX = (Math.random() - 0.5) * 4;
+                    this.speedY = (Math.random() - 0.5) * 4 - 1.5; 
+                    this.life = Math.random() * 60 + 40; 
+                    this.initialLife = this.life;
+                    this.color = color;
+                }
+                draw(ctx) {
+                    ctx.fillStyle = this.color;
+                    ctx.globalAlpha = Math.max(0, (this.life / this.initialLife) * 0.8);
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                }
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    this.speedY += 0.05;
+                    this.life--;
+                }
+            }
+
+            class FloatingText {
+                constructor(text, x, y, color, duration = 1200) {
+                    this.text = text;
+                    this.x = x;
+                    this.y = y;
+                    this.color = color;
+                    this.duration = duration;
+                    this.opacity = 1;
+                    this.startTime = performance.now();
+                }
+                draw(ctx) {
+                    const elapsed = performance.now() - this.startTime;
+                    const progress = Math.min(1, elapsed / this.duration);
+                    
+                    this.opacity = 1 - Math.pow(progress, 2);
+                    const currentY = this.y - progress * 40;
+
+                    ctx.font = 'bold 20px Arial';
+                    ctx.fillStyle = this.color;
+                    ctx.globalAlpha = this.opacity;
+                    ctx.textAlign = 'center';
+                    ctx.shadowColor = 'rgba(0,0,0,0.7)';
+                    ctx.shadowBlur = 3;
+                    ctx.shadowOffsetX = 1;
+                    ctx.shadowOffsetY = 1;
+                    ctx.fillText(this.text, this.x, currentY);
+                    ctx.globalAlpha = 1;
+                    ctx.shadowBlur = 0;
+                    ctx.shadowOffsetX = 0;
+                    ctx.shadowOffsetY = 0;
+                }
+                isAlive() {
+                    return performance.now() - this.startTime < this.duration;
+                }
+            }
+
+            class Laser {
+                constructor(x, y, width, height, speed, color) {
+                    this.x = x;
+                    this.y = y;
+                    this.width = width;
+                    this.height = height;
+                    this.speed = speed;
+                    this.color = color;
+                    this.isAlive = true;
+                }
+                draw(ctx) {
+                    if (!this.isAlive) return;
+                    ctx.fillStyle = this.color;
+                    ctx.shadowColor = this.color;
+                    ctx.shadowBlur = 10;
+                    ctx.fillRect(this.x, this.y, this.width, this.height);
+                    ctx.shadowBlur = 0;
+                }
+                update(dt) {
+                    this.y -= this.speed * dt;
+                    if (this.y < -this.height) {
+                        this.isAlive = false;
+                    }
+                }
+            }
+
+            class SoundManager {
+                constructor() {
+                    this.sounds = {};
+                    this.soundFiles = {
+                        'bounce_wall': 'https://cdn.jsdelivr.net/gh/GasparVardanyan/SoundEffects/game-sounds/bounce.wav',
+                        'bounce_paddle': 'https://cdn.jsdelivr.net/gh/GasparVardanyan/SoundEffects/game-sounds/paddle-hit.wav',
+                        'bounce_brick_valid': 'https://cdn.jsdelivr.net/gh/GasparVardanyan/SoundEffects/game-sounds/brick-hit-1.wav',
+                        'bounce_brick_invalid': 'https://cdn.jsdelivr.net/gh/GasparVardanyan/SoundEffects/game-sounds/error.wav',
+                        'word_complete': 'https://cdn.jsdelivr.net/gh/GasparVardanyan/SoundEffects/game-sounds/success-1.wav',
+                        'life_lost': 'https://cdn.jsdelivr.net/gh/GasparVardanyan/SoundEffects/game-sounds/negative-beep.wav',
+                        'game_over': 'https://cdn.jsdelivr.net/gh/GasparVardanyan/SoundEffects/game-sounds/game-over-arcade.wav',
+                        'level_complete': 'https://cdn.jsdelivr.net/gh/GasparVardanyan/SoundEffects/game-sounds/level-up.wav',
+                        'powerup_collect': 'https://cdn.jsdelivr.net/gh/GasparVardanyan/SoundEffects/game-sounds/powerup.wav',
+                        'start_game': 'https://cdn.jsdelivr.net/gh/GasparVardanyan/SoundEffects/game-sounds/menu-select.wav',
+                        'launch_ball': 'https://cdn.jsdelivr.net/gh/GasparVardanyan/SoundEffects/game-sounds/woosh.wav',
+                        'laser_shoot': 'https://cdn.jsdelivr.net/gh/GasparVardanyan/SoundEffects/game-sounds/laser-shoot.wav',
+                    };
+                    this.isMuted = false; 
+                    this.loadSounds();
+                }
+
+                loadSounds() {
+                    if (typeof Howl === 'undefined') {
+                        console.error("Howler.js not loaded. Sound effects will be unavailable.");
+                        return;
+                    }
+                    for (const key in this.soundFiles) {
+                        this.sounds[key] = new Howl({
+                            src: [this.soundFiles[key]],
+                            volume: 0.3,
+                            onloaderror: (id, err) => { console.error(`Error loading sound ${key}:`, err); },
+                            onplayerror: (id, err) => { console.error(`Error playing sound ${key}:`, err); }
+                        });
+                    }
+                }
+                play(soundName) {
+                    if (this.isMuted || !this.sounds[soundName] || !this.sounds[soundName].play) return;
+                    try {
+                         this.sounds[soundName].play();
+                    } catch (e) {
+                        console.error(`Could not play sound ${soundName}:`, e);
+                    }
+                }
+                toggleMute() {
+                    this.isMuted = !this.isMuted;
+                    Howler.mute(this.isMuted);
+                }
+            }
+            
+            function init() {
+                canvas = document.getElementById('gameCanvas');
+                try {
+                    ctx = canvas.getContext('2d');
+                } catch (e) {
+                    console.error("Could not get 2D context for canvas.", e);
+                    alert("Error: Could not initialize the game canvas. Your browser might not support it.");
+                    return;
+                }
+                canvas.width = GAME_CONFIG.NATIVE_WIDTH;
+                canvas.height = GAME_CONFIG.NATIVE_HEIGHT;
+                ctx.imageSmoothingEnabled = false;
+
+                domElements = {
+                    scoreDisplay: document.getElementById('score-display'),
+                    currentWordDisplay: document.getElementById('current-word-display'),
+                    livesDisplay: document.getElementById('lives-display'),
+                    pauseButton: document.getElementById('pause-button'),
+                    startModal: document.getElementById('startModal'),
+                    instructionsModal: document.getElementById('instructionsModal'),
+                    gameOverModal: document.getElementById('gameOverModal'),
+                    levelCompleteModal: document.getElementById('levelCompleteModal'),
+                    pauseModal: document.getElementById('pauseModal'),
+                    startGameButton: document.getElementById('start-game-button'),
+                    instructionsButtonMenu: document.getElementById('instructions-button-menu'),
+                    finalScoreDisplay: document.getElementById('final-score-display'),
+                    highScoreDisplay: document.getElementById('high-score-display'),
+                    wordsFoundListGameOver: document.getElementById('words-found-list-gameover'),
+                    restartGameButton: document.getElementById('restart-game-button'),
+                    mainMenuButtonGameOver: document.getElementById('main-menu-button-gameover'),
+                    levelScoreDisplay: document.getElementById('level-score-display'),
+                    totalScoreLevelCompleteDisplay: document.getElementById('total-score-levelcomplete-display'),
+                    wordsFoundListLevelComplete: document.getElementById('words-found-list-levelcomplete'),
+                    nextLevelButton: document.getElementById('next-level-button'),
+                    resumeGameButton: document.getElementById('resume-game-button'),
+                    quitToMenuButton: document.getElementById('quit-to-menu-button'),
+                    startModalImage: document.getElementById('startModalImage'),
+                    startModalImageLoading: document.getElementById('startModalImageLoading'),
+                    initialLivesInfo: document.getElementById('initial-lives-info'),
+                    powerupInstructionsList: document.getElementById('powerup-instructions-list'),
+                    soundToggleButton: document.getElementById('sound-toggle-button'),
+                    soundIcon: document.getElementById('sound-icon')
+                };
+
+                bootstrapModals = {
+                    start: new bootstrap.Modal(domElements.startModal),
+                    instructions: new bootstrap.Modal(domElements.instructionsModal),
+                    gameOver: new bootstrap.Modal(domElements.gameOverModal),
+                    levelComplete: new bootstrap.Modal(domElements.levelCompleteModal),
+                    pause: new bootstrap.Modal(domElements.pauseModal)
+                };
+
+                soundManager = new SoundManager();
+                
+                paddle = new Paddle(
+                    GAME_CONFIG.NATIVE_WIDTH / 2 - GAME_CONFIG.PADDLE_WIDTH / 2,
+                    GAME_CONFIG.NATIVE_HEIGHT - GAME_CONFIG.PADDLE_HEIGHT - 30,
+                    GAME_CONFIG.PADDLE_WIDTH,
+                    GAME_CONFIG.PADDLE_HEIGHT,
+                    '#0dcaf0' 
+                );
+                balls.push(new Ball(
+                    GAME_CONFIG.NATIVE_WIDTH / 2,
+                    paddle.y - GAME_CONFIG.BALL_RADIUS,
+                    GAME_CONFIG.BALL_RADIUS,
+                    GAME_CONFIG.BALL_SPEED,
+                    '#ffc107' 
+                ));
+                balls[0].reset();
+                
+                domElements.initialLivesInfo.textContent = GAME_CONFIG.INITIAL_LIVES;
+                populatePowerupInstructions();
+                
+                setupEventListeners();
+                resizeCanvas();
+                window.addEventListener('resize', resizeCanvas);
+                updateSoundButtonIcon();
+                
+                highScore = parseInt(localStorage.getItem('wordBreakerHighScore_v1')) || 0;
+                showStartMenu();
+            }
+
+            function populatePowerupInstructions() {
+                const listEl = domElements.powerupInstructionsList;
+                listEl.innerHTML = '';
+                Object.values(POWERUP_TYPES).forEach(pt => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<strong style="color:${pt.color}; background-color: rgba(0,0,0,0.3); padding: 2px 5px; border-radius: 3px; font-family: monospace;">${pt.symbol}</strong> (${pt.id.replace(/_/g, ' ').toLowerCase()}): ${pt.description}`;
+                    listEl.appendChild(li);
+                });
+            }
+
+            function updateSoundButtonIcon() {
+                if (soundManager.isMuted) {
+                    domElements.soundIcon.classList.remove('bi-volume-up-fill');
+                    domElements.soundIcon.classList.add('bi-volume-mute-fill');
+                } else {
+                    domElements.soundIcon.classList.remove('bi-volume-mute-fill');
+                    domElements.soundIcon.classList.add('bi-volume-up-fill');
+                }
+            }
+
+            function setupEventListeners() {
+                canvas.addEventListener('mousemove', e => {
+                    if (gameState === 'PLAYING' || gameState === 'PAUSED') {
+                        const rect = canvas.getBoundingClientRect();
+                        const scaleX = canvas.width / rect.width;
+                        mouseX = (e.clientX - rect.left) * scaleX;
+                    }
+                });
+                canvas.addEventListener('touchmove', e => {
+                    e.preventDefault();
+                    if (gameState === 'PLAYING' || gameState === 'PAUSED') {
+                        if (e.touches.length > 0) {
+                            const rect = canvas.getBoundingClientRect();
+                            const scaleX = canvas.width / rect.width;
+                            mouseX = (e.touches[0].clientX - rect.left) * scaleX;
+                        }
+                    }
+                }, { passive: false });
+
+                canvas.addEventListener('mousedown', handleGameInteraction);
+                canvas.addEventListener('touchstart', handleGameInteraction, { passive: false });
+
+                domElements.startGameButton.addEventListener('click', () => {
+                    soundManager.play('start_game');
+                    bootstrapModals.start.hide();
+                    startGame(0);
+                });
+                domElements.restartGameButton.addEventListener('click', () => {
+                    soundManager.play('start_game');
+                    bootstrapModals.gameOver.hide();
+                    startGame(0); 
+                });
+                domElements.mainMenuButtonGameOver.addEventListener('click', () => {
+                    soundManager.play('start_game');
+                    bootstrapModals.gameOver.hide();
+                    showStartMenu();
+                });
+                domElements.nextLevelButton.addEventListener('click', () => {
+                    soundManager.play('start_game');
+                    bootstrapModals.levelComplete.hide();
+                    startGame(currentLevelIndex + 1);
+                });
+                domElements.pauseButton.addEventListener('click', pauseGame);
+                domElements.resumeGameButton.addEventListener('click', resumeGame);
+                domElements.quitToMenuButton.addEventListener('click', () => {
+                    soundManager.play('start_game');
+                    bootstrapModals.pause.hide();
+                    if (animationFrameId) cancelAnimationFrame(animationFrameId);
+                    animationFrameId = null;
+                    showStartMenu();
+                });
+                
+                document.addEventListener('keydown', handleKeyDown);
+                document.addEventListener('keyup', handleKeyUp);
+
+                domElements.soundToggleButton.addEventListener('click', () => {
+                    soundManager.toggleMute();
+                    updateSoundButtonIcon();
+                });
+
+                document.addEventListener('keydown', e => {
+                    if (e.key.toLowerCase() === 'p' || e.key === 'Escape') {
+                        if (gameState === 'PLAYING') pauseGame();
+                        else if (gameState === 'PAUSED') resumeGame();
+                    }
+                });
+            }
+
+            function handleKeyDown(e) {
+                if (gameState !== 'PLAYING') return;
+                e.preventDefault();
+
+                if (e.key === 'ArrowLeft') {
+                    leftPressed = true;
+                } else if (e.key === 'ArrowRight') {
+                    rightPressed = true;
+                } else if (e.key === ' ' || e.key === 'Spacebar') {
+                    if (ballIsStationary) {
+                        ballIsStationary = false;
+                        balls.forEach(b => b.launch());
+                    } else if (paddleHasSticky) {
+                        balls.filter(b => b.isStuck).forEach(b => b.launch());
+                    }
+                } else if (e.key.toLowerCase() === 'l') {
+                    paddle.shootLaser();
+                }
+            }
+
+            function handleKeyUp(e) {
+                if (e.key === 'ArrowLeft') {
+                    leftPressed = false;
+                } else if (e.key === 'ArrowRight') {
+                    rightPressed = false;
+                }
+            }
+
+            function handleGameInteraction(e) {
+                if (gameState !== 'PLAYING') return;
+                e.preventDefault();
+
+                if (ballIsStationary) {
+                    ballIsStationary = false;
+                    balls.forEach(b => b.launch());
+                } else if (paddleHasSticky) {
+                    balls.filter(b => b.isStuck).forEach(b => b.launch());
+                } else if (paddleHasLaser) {
+                    paddle.shootLaser();
+                }
+            }
+
+            function resizeCanvas() {
+                const nativeAspectRatio = GAME_CONFIG.NATIVE_WIDTH / GAME_CONFIG.NATIVE_HEIGHT;
+                const gameArea = document.getElementById('game-area-wrapper');
+                let windowWidth = gameArea.clientWidth;
+                let windowHeight = gameArea.clientHeight;
+                
+                const windowAspectRatio = windowWidth / windowHeight;
+                let scaledWidth, scaledHeight;
+
+                if (windowAspectRatio > nativeAspectRatio) {
+                    scaledHeight = windowHeight;
+                    scaledWidth = scaledHeight * nativeAspectRatio;
+                } else {
+                    scaledWidth = windowWidth;
+                    scaledHeight = scaledWidth / nativeAspectRatio;
+                }
+                canvas.style.width = Math.floor(scaledWidth) + 'px';
+                canvas.style.height = Math.floor(scaledHeight) + 'px';
+            }
+
+            async function fetchAIStartImage() {
+                domElements.startModalImage.style.display = 'none';
+                domElements.startModalImageLoading.textContent = 'Generating AI image...';
+                domElements.startModalImageLoading.style.display = 'block';
+                try {
+                    const response = await fetch('/api/generate-image-on-demand', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            prompt: "Abstract digital art, geometric shapes forming letter-like patterns, bright neon blue and purple colors on a dark background, dynamic explosion effect, high energy, futuristic, minimal text, Breakout game theme",
+                            aspectRatio: '4:3'
+                        })
+                    });
+                    if (!response.ok) throw new Error(`API request failed with status ${response.status}`);
+                    const data = await response.json();
+                    if (data.success && data.imageUrl) {
+                        domElements.startModalImage.src = data.imageUrl;
+                        domElements.startModalImage.alt = "AI generated game theme image";
+                        domElements.startModalImage.onload = () => {
+                            domElements.startModalImage.style.display = 'block';
+                            domElements.startModalImageLoading.style.display = 'none';
+                        };
+                        domElements.startModalImage.onerror = () => {
+                            console.error("Failed to load AI generated image.");
+                            domElements.startModalImage.style.display = 'none';
+                            domElements.startModalImageLoading.textContent = 'Failed to load image.';
+                        };
+                    } else {
+                        throw new Error(data.error || 'Unknown error during image generation.');
+                    }
+                } catch (error) {
+                    console.error("Error generating AI image:", error);
+                    domElements.startModalImage.style.display = 'none';
+                    domElements.startModalImageLoading.textContent = 'Failed to generate image. Try again later.';
+                }
+            }
+
+            function showStartMenu() {
+                gameState = 'MENU';
+                domElements.pauseButton.style.visibility = 'hidden';
+                domElements.currentWordDisplay.textContent = '';
+                updateHUD();
+                fetchAIStartImage();
+                bootstrapModals.start.show();
+            }
+
+            function startGame(levelIdx) {
+                if (levelIdx === 0) { 
+                    score = 0;
+                    lives = GAME_CONFIG.INITIAL_LIVES;
+                    totalWordsFound = [];
+                    highScore = parseInt(localStorage.getItem('wordBreakerHighScore_v1')) || 0;
+                    scoreAtLevelStart = 0;
+                } else {
+                    scoreAtLevelStart = score;
+                }
+                currentLevelIndex = levelIdx;
+                gameState = 'PLAYING';
+                currentWordAttempt = "";
+                wordsFoundThisLevel = [];
+                particles = [];
+                floatingTexts = [];
+                activePowerUps = [];
+                lasers = [];
+                ballIsStationary = true;
+                paddleHasSticky = false;
+                paddleHasLaser = false;
+                if (stickyPaddleTimeoutId) clearTimeout(stickyPaddleTimeoutId);
+                if (laserPaddleTimeoutId) clearTimeout(laserPaddleTimeoutId);
+
+                domElements.pauseButton.style.visibility = 'visible';
+                domElements.pauseButton.textContent = 'Pause';
+                
+                loadLevel(currentLevelIndex);
+                resetBallAndPaddle();
+                updateHUD();
+
+                if (animationFrameId) cancelAnimationFrame(animationFrameId);
+                lastTime = performance.now();
+                gameLoop();
+            }
+            
+            function loadLevel(levelIndex) {
+                bricks = [];
+                const levelData = LEVEL_DESIGNS[levelIndex % LEVEL_DESIGNS.length]; 
+                const { rows, cols, words: seedWords } = levelData;
+                
+                const totalBrickWidthSpace = GAME_CONFIG.NATIVE_WIDTH - 2 * GAME_CONFIG.BRICK_OFFSET_LEFT - (cols - 1) * GAME_CONFIG.BRICK_PADDING;
+                const brickWidth = totalBrickWidthSpace / cols;
+                const brickHeight = GAME_CONFIG.BRICK_HEIGHT;
+
+                let availableLetters = [];
+                seedWords.forEach(word => {
+                    availableLetters.push(...word.toUpperCase().split(''));
+                });
+                
+                for (let i = availableLetters.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [availableLetters[i], availableLetters[j]] = [availableLetters[j], availableLetters[i]];
+                }
+
+                let letterIndex = 0;
+                const totalBricks = rows * cols;
+                const requiredLetters = Math.min(totalBricks, availableLetters.length);
+
+                for (let r = 0; r < rows; r++) {
+                    for (let c = 0; c < cols; c++) {
+                        const x = GAME_CONFIG.BRICK_OFFSET_LEFT + c * (brickWidth + GAME_CONFIG.BRICK_PADDING);
+                        const y = GAME_CONFIG.BRICK_OFFSET_TOP + r * (brickHeight + GAME_CONFIG.BRICK_PADDING);
+                        
+                        let letter;
+                        if (letterIndex < requiredLetters) {
+                            letter = availableLetters[letterIndex++];
+                        } else {
+                            letter = COMMON_LETTERS.charAt(Math.floor(Math.random() * COMMON_LETTERS.length));
+                        }
+                        
+                        const hue = (r / rows * 120 + c / cols * 60 + levelIndex * 30) % 360;
+                        const color = `hsl(${hue}, 70%, 55%)`;
+                        bricks.push(new Brick(x, y, brickWidth, brickHeight, letter, color, GAME_CONFIG.POINTS_BRICK_BREAK));
+                    }
+                }
+            }
+
+            function resetBallAndPaddle() {
+                paddle.x = GAME_CONFIG.NATIVE_WIDTH / 2 - paddle.width / 2;
+                paddle.width = paddle.originalWidth;
+                balls = [new Ball(GAME_CONFIG.NATIVE_WIDTH / 2, paddle.y - GAME_CONFIG.BALL_RADIUS, GAME_CONFIG.BALL_RADIUS, GAME_CONFIG.BALL_SPEED, '#ffc107')];
+                balls[0].reset();
+            }
+
+            function gameLoop(currentTime) {
+                animationFrameId = requestAnimationFrame(gameLoop);
+                try {
+                    const deltaTime = Math.min(GAME_CONFIG.MAX_DELTA_TIME, (currentTime - lastTime) / 1000);
+                    lastTime = currentTime;
+
+                    if (gameState === 'PLAYING') {
+                        processInput(deltaTime);
+                        updateGame(deltaTime);
+                        renderGame();
+                    }
+                } catch (e) {
+                    console.error("Error in game loop:", e);
+                    pauseGame();
+                    alert("A critical error occurred in the game. The game has been paused. Please check console for details.");
+                }
+            }
+
+            function processInput(dt) {
+                if (leftPressed) {
+                    mouseX = Math.max(0, mouseX - paddle.originalWidth * 0.8 * dt);
+                } else if (rightPressed) {
+                    mouseX = Math.min(GAME_CONFIG.NATIVE_WIDTH, mouseX + paddle.originalWidth * 0.8 * dt);
+                }
+                paddle.update(mouseX);
+            }
+
+            function updateGame(dt) {
+                balls.forEach(b => b.update(dt));
+                
+                activePowerUps.forEach(p => p.update(dt));
+                activePowerUps = activePowerUps.filter(p => p.isAlive);
+
+                lasers.forEach(l => l.update(dt));
+                lasers = lasers.filter(l => l.isAlive);
+
+                particles.forEach(p => p.update());
+                particles = particles.filter(p => p.life > 0);
+
+                floatingTexts = floatingTexts.filter(ft => ft.isAlive());
+
+                handleCollisions();
+
+                balls = balls.filter(b => b.y + b.radius > 0); 
+                if (balls.length === 0) {
+                    loseLife();
+                }
+                
+                if (bricks.filter(b => b.isAlive).length === 0 && bricks.length > 0) {
+                     triggerLevelComplete();
+                }
+            }
+            
+            function handleCollisions() {
+                balls.forEach(ball => {
+                    if (ball.isStuck) return;
+
+                    if (ball.dy > 0 &&
+                        ball.y + ball.radius >= paddle.y && 
+                        ball.y - ball.radius <= paddle.y + paddle.height &&
+                        ball.x + ball.radius >= paddle.x &&
+                        ball.x - ball.radius <= paddle.x + paddle.width) {
+                        
+                        if (paddleHasSticky) {
+                            ball.isStuck = true;
+                            ball.dx = 0;
+                            ball.dy = 0;
+                            ball.stuckPaddleXOffset = ball.x - (paddle.x + paddle.width / 2);
+                            soundManager.play('powerup_collect');
+                            return;
+                        }
+
+                        ball.y = paddle.y - ball.radius;
+
+                        let collidePoint = ball.x - (paddle.x + paddle.width / 2);
+                        collidePoint = collidePoint / (paddle.width / 2); 
+                        let angle = collidePoint * (Math.PI / 2.8);
+                        
+                        ball.dx = Math.sin(angle) * 1.1;
+                        ball.dy = -Math.abs(Math.cos(angle));
+
+                        const currentSpeedFactor = Math.sqrt(ball.dx*ball.dx + ball.dy*ball.dy);
+                        ball.dx = ball.dx / currentSpeedFactor;
+                        ball.dy = ball.dy / currentSpeedFactor;
+
+                        soundManager.play('bounce_paddle');
+                    }
+                });
+
+                for (let i = bricks.length - 1; i >= 0; i--) {
+                    const brick = bricks[i];
+                    if (!brick.isAlive) continue;
+
+                    balls.forEach(ball => {
+                        if (ball.isStuck) return;
+
+                        if (ball.x + ball.radius > brick.x &&
+                            ball.x - ball.radius < brick.x + brick.width &&
+                            ball.y + ball.radius > brick.y &&
+                            ball.y - ball.radius < brick.y + brick.height) {
+                            
+                            handleBrickHit(brick);
+                            
+                            const overlapX = (ball.radius + brick.width / 2) - Math.abs(ball.x - (brick.x + brick.width / 2));
+                            const overlapY = (ball.radius + brick.height / 2) - Math.abs(ball.y - (brick.y + brick.height / 2));
+
+                            if (overlapX < overlapY) {
+                                ball.dx *= -1;
+                                ball.x += ball.dx > 0 ? overlapX : -overlapX;
+                            } else {
+                                ball.dy *= -1;
+                                ball.y += ball.dy > 0 ? overlapY : -overlapY;
+                            }
+                        }
+                    });
+                }
+                
+                activePowerUps.forEach(p => {
+                    if (p.isAlive &&
+                        p.x < paddle.x + paddle.width &&
+                        p.x + p.size > paddle.x &&
+                        p.y < paddle.y + paddle.height &&
+                        p.y + p.size > paddle.y) {
+                        p.isAlive = false;
+                        p.applyEffect();
+                    }
+                });
+
+                for (let i = lasers.length - 1; i >= 0; i--) {
+                    const laser = lasers[i];
+                    if (!laser.isAlive) continue;
+
+                    for (let j = bricks.length - 1; j >= 0; j--) {
+                        const brick = bricks[j];
+                        if (!brick.isAlive) continue;
+
+                        if (laser.x < brick.x + brick.width &&
+                            laser.x + laser.width > brick.x &&
+                            laser.y < brick.y + brick.height &&
+                            laser.y + laser.height > brick.y) {
+                            
+                            laser.isAlive = false;
+                            brick.isAlive = false;
+                            score += brick.points;
+                            soundManager.play('bounce_brick_valid');
+                            createParticles(brick.x + brick.width / 2, brick.y + brick.height / 2, brick.color);
+                            floatingTexts.push(new FloatingText(`+${brick.points}`, brick.x + brick.width/2, brick.y + brick.height/2, '#0dcaf0'));
+
+                            if (Math.random() < GAME_CONFIG.POWERUP_DROP_CHANCE) {
+                                spawnPowerUp(brick.x + brick.width / 2, brick.y + brick.height / 2);
+                            }
+                            updateHUD();
+                            break;
+                        }
+                    }
+                }
+            }
+
+            function handleBrickHit(brick) {
+                const potentialWord = currentWordAttempt + brick.letter;
+                
+                if (isValidPrefix(potentialWord)) {
+                    brick.isAlive = false;
+                    score += brick.points;
+                    currentWordAttempt = potentialWord;
+                    soundManager.play('bounce_brick_valid');
+                    createParticles(brick.x + brick.width / 2, brick.y + brick.height / 2, brick.color);
+
+                    if (isWord(currentWordAttempt)) {
+                        score += GAME_CONFIG.POINTS_WORD_COMPLETE;
+                        wordsFoundThisLevel.push(currentWordAttempt);
+                        if (!totalWordsFound.includes(currentWordAttempt)) {
+                           totalWordsFound.push(currentWordAttempt);
+                        }
+                        floatingTexts.push(new FloatingText(currentWordAttempt, brick.x + brick.width/2, brick.y + brick.height/2, '#33FF77'));
+                        currentWordAttempt = "";
+                        soundManager.play('word_complete');
+
+                        if (Math.random() < GAME_CONFIG.POWERUP_DROP_CHANCE) {
+                            spawnPowerUp(brick.x + brick.width / 2, brick.y + brick.height / 2);
+                        }
+                    }
+                } else {
+                    currentWordAttempt = "";
+                    soundManager.play('bounce_brick_invalid');
+                    brick.flash();
+                }
+                updateHUD();
+            }
+
+            function spawnPowerUp(x, y) {
+                const powerUpKeys = Object.keys(POWERUP_TYPES);
+                const randomKey = powerUpKeys[Math.floor(Math.random() * powerUpKeys.length)];
+                activePowerUps.push(new PowerUp(x - GAME_CONFIG.POWERUP_SIZE/2, y, POWERUP_TYPES[randomKey]));
+            }
+
+            function createParticles(x, y, color) {
+                for (let i = 0; i < 15; i++) {
+                    particles.push(new Particle(x, y, color));
+                }
+            }
+
+            function isValidPrefix(prefix) {
+                if (!prefix) return true; 
+                const p = prefix.toUpperCase();
+                return WORD_LIST_SOURCE.some(word => word.startsWith(p));
+            }
+
+            function isWord(word) {
+                return WORD_SET.has(word.toUpperCase());
+            }
+
+            function loseLife() {
+                lives--;
+                soundManager.play('life_lost');
+                if (lives <= 0) {
+                    triggerGameOver();
+                } else {
+                    balls = [new Ball(GAME_CONFIG.NATIVE_WIDTH / 2, paddle.y - GAME_CONFIG.BALL_RADIUS, GAME_CONFIG.BALL_RADIUS, GAME_CONFIG.BALL_SPEED, '#ffc107')];
+                    balls[0].reset();
+                    ballIsStationary = true;
+                    paddleHasSticky = false;
+                    paddleHasLaser = false;
+                    lasers = [];
+                    activePowerUps = [];
+                    if (stickyPaddleTimeoutId) clearTimeout(stickyPaddleTimeoutId);
+                    if (laserPaddleTimeoutId) clearTimeout(laserPaddleTimeoutId);
+                    paddle.width = paddle.originalWidth;
+                }
+                updateHUD();
+            }
+
+            function triggerLevelComplete() {
+                gameState = 'LEVEL_COMPLETE';
+                soundManager.play('level_complete');
+                domElements.pauseButton.style.visibility = 'hidden';
+                
+                const currentLevelScore = score - scoreAtLevelStart;
+                domElements.levelScoreDisplay.textContent = currentLevelScore;
+                domElements.totalScoreLevelCompleteDisplay.textContent = score;
+                
+                const listEl = domElements.wordsFoundListLevelComplete;
+                listEl.innerHTML = '';
+                wordsFoundThisLevel.forEach(word => {
+                    const li = document.createElement('li');
+                    li.textContent = word;
+                    listEl.appendChild(li);
+                });
+                if (wordsFoundThisLevel.length === 0) listEl.innerHTML = '<li>None this level.</li>';
+
+                if (animationFrameId) cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+                bootstrapModals.levelComplete.show();
+            }
+
+            function triggerGameOver() {
+                gameState = 'GAME_OVER';
+                soundManager.play('game_over');
+                domElements.pauseButton.style.visibility = 'hidden';
+                domElements.finalScoreDisplay.textContent = score;
+                if (score > highScore) {
+                    highScore = score;
+                    localStorage.setItem('wordBreakerHighScore_v1', highScore);
+                }
+                domElements.highScoreDisplay.textContent = highScore;
+                
+                const listEl = domElements.wordsFoundListGameOver;
+                listEl.innerHTML = '';
+                totalWordsFound.sort().forEach(word => {
+                    const li = document.createElement('li');
+                    li.textContent = word;
+                    listEl.appendChild(li);
+                });
+                if (totalWordsFound.length === 0) listEl.innerHTML = '<li>No words found.</li>';
+
+                if (animationFrameId) cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+                bootstrapModals.gameOver.show();
+            }
+
+            function pauseGame() {
+                if (gameState !== 'PLAYING') return;
+                gameState = 'PAUSED';
+                domElements.pauseButton.textContent = 'Resume';
+                if (animationFrameId) cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+                bootstrapModals.pause.show();
+            }
+
+            function resumeGame() {
+                if (gameState !== 'PAUSED') return;
+                gameState = 'PLAYING';
+                domElements.pauseButton.textContent = 'Pause';
+                bootstrapModals.pause.hide();
+                lastTime = performance.now();
+                gameLoop();
+            }
+            
+            function updateHUD() {
+                domElements.scoreDisplay.textContent = score !== undefined ? score : 0;
+                domElements.livesDisplay.textContent = lives !== undefined ? lives : GAME_CONFIG.INITIAL_LIVES;
+                domElements.currentWordDisplay.textContent = currentWordAttempt || "";
+            }
+
+            function renderGame() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                paddle.draw(ctx);
+                bricks.forEach(brick => brick.draw(ctx));
+                activePowerUps.forEach(p => p.draw(ctx));
+                particles.forEach(p => p.draw(ctx));
+                lasers.forEach(l => l.draw(ctx));
+                balls.forEach(ball => ball.draw(ctx));
+                floatingTexts.forEach(ft => ft.draw(ctx));
+
+                if (gameState === 'PLAYING' && ballIsStationary) {
+                    ctx.font = `bold ${GAME_CONFIG.BALL_LAUNCH_PROMPT_FONT_SIZE}px 'Segoe UI', Arial`;
+                    ctx.fillStyle = GAME_CONFIG.BALL_LAUNCH_PROMPT_COLOR;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.shadowColor = 'rgba(0,0,0,0.7)';
+                    ctx.shadowBlur = 5;
+                    ctx.fillText('Click or Tap to Launch Ball', GAME_CONFIG.NATIVE_WIDTH / 2, GAME_CONFIG.NATIVE_HEIGHT * 0.7);
+                    ctx.fillText('or use Spacebar', GAME_CONFIG.NATIVE_WIDTH / 2, GAME_CONFIG.NATIVE_HEIGHT * 0.7 + GAME_CONFIG.BALL_LAUNCH_PROMPT_FONT_SIZE * 1.2);
+                    ctx.shadowBlur = 0;
+                }
+            }
+
+            return { init };
+        })();
+
+        document.addEventListener('DOMContentLoaded', GameManager.init);
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>
