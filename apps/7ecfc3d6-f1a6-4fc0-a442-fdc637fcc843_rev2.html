@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newscomic - Your News, Your Comic</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body {
+            background-color: #1A202C;
+            color: #E2E8F0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-family: 'Roboto', sans-serif;
+        }
+        .navbar-fixed {
+            margin-bottom: 20px;
+        }
+        nav {
+            background-color: #311B92;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+        }
+        nav .brand-logo {
+            font-weight: 500;
+            color: #E2E8F0;
+        }
+        nav ul a {
+            color: #E2E8F0;
+            transition: color 0.3s ease;
+        }
+        nav ul a:hover {
+            color: #E040FB;
+        }
+        main {
+            flex: 1;
+            padding-bottom: 40px;
+        }
+        .card {
+            background-color: #2D3748;
+            color: #E2E8F0;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            transition: transform 0.2s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        .card .card-content {
+            padding-bottom: 16px;
+        }
+        .card .card-title {
+            color: #E040FB;
+            font-weight: 500;
+            border-bottom: 1px solid rgba(224, 64, 251, 0.3);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .flow-text.grey-text {
+            color: #A0AEC0 !important;
+        }
+        .btn, .btn-large {
+            background-color: #673AB7;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .btn:hover, .btn-large:hover {
+            background-color: #512DA8;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+        .btn:disabled, .btn-large:disabled {
+            background-color: #5A5A5A !important;
+            color: #B0B0B0 !important;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .input-field input[type=text]:not(.browser-default),
+        .input-field textarea.materialize-textarea {
+            color: #E2E8F0;
+            border-bottom-color: #9C27B0;
+        }
+        .input-field input[type=text]:not(.browser-default):focus,
+        .input-field textarea.materialize-textarea:focus {
+            border-bottom-color: #E040FB !important;
+            box-shadow: 0 1px 0 0 #E040FB !important;
+        }
+        .input-field label {
+            color: #A0AEC0;
+        }
+        .input-field label.active {
+            color: #E040FB !important;
+        }
+        .news-list .collection {
+            border: none;
+            box-shadow: none;
+            margin-top: 20px;
+        }
+        .news-list .collection-item {
+            background-color: #2D3748;
+            color: #E2E8F0;
+            border-bottom: 1px solid #4A5568;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .news-list .collection-item:hover {
+            background-color: #3B455C;
+        }
+        .news-list .collection-item span.title {
+            font-weight: 500;
+            color: #E2E8F0;
+        }
+        .news-list .collection-item p {
+            color: #A0AEC0;
+        }
+        .news-list .collection-item .secondary-content label span {
+            color: #E2E8F0;
+            padding-left: 28px;
+        }
+        .news-list .collection-item .secondary-content [type="checkbox"]+span:not(.lever):before,
+        .news-list .collection-item .secondary-content [type="checkbox"]+span:not(.lever):after {
+            border-color: #E040FB;
+        }
+        .news-list .collection-item .secondary-content [type="checkbox"]:checked+span:not(.lever):before {
+            border-right-color: #E040FB;
+            border-bottom-color: #E040FB;
+        }
+        .news-list .collection-item .secondary-content [type="checkbox"]:checked+span:not(.lever):after {
+            background-color: #E040FB;
+        }
+        .news-list .collection-item i.circle {
+            background-color: #9C27B0;
+        }
+        .selected-articles-summary .collection-header {
+            background-color: #311B92;
+            border-bottom: 1px solid rgba(224, 64, 251, 0.3);
+        }
+        .selected-articles-summary .collection-item {
+            background-color: #4A5568;
+            border-bottom: 1px solid #2D3748;
+        }
+        .selected-articles-summary .collection-item:last-child {
+            border-bottom: none;
+        }
+        .comic-panel {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .comic-panel img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+            transition: transform 0.2s ease-in-out;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            background-color: #4A5568;
+        }
+        .comic-panel img:hover {
+            transform: scale(1.02);
+        }
+        .comic-panel p {
+            margin-top: 10px;
+            font-style: italic;
+            color: #A0AEC0;
+            font-size: 0.9em;
+        }
+        .preloader-wrapper {
+            margin: 20px auto;
+            display: block;
+        }
+        .spinner-layer.spinner-purple-only {
+            border-color: #E040FB;
+        }
+        footer {
+            margin-top: auto;
+            background-color: #311B92;
+            padding: 20px 0;
+            color: #E2E8F0;
+            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.4);
+        }
+        footer a {
+            color: #A0AEC0;
+            transition: color 0.3s ease;
+        }
+        footer a:hover {
+            color: #E040FB;
+        }
+        select.browser-default {
+            background-color: #4A5568;
+            border: 1px solid #616161;
+            border-radius: 4px;
+            color: #E2E8F0;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            display: block;
+            width: 100%;
+            height: auto;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23E2E8F0%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13.2-6.4H18.8c-7.7%200-13.5%206.4-13.2%2013.2%200%204%201.2%207.2%203.6%2010.4l128%20127.9c3.6%203.6%207.6%205.6%2011.6%205.6s8.1-2%2011.6-5.6l128-127.9c3.6-3.6%205.6-7.6%205.6-11.6z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 12px;
+        }
+        select.browser-default option {
+            background-color: #2D3748;
+            color: #E2E8F0;
+        }
+        select.browser-default:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px #E040FB;
+            border-color: #E040FB;
+        }
+        .select-label-fix {
+            position: relative;
+            top: -25px;
+            left: 0;
+            font-size: 0.8rem;
+            color: #A0AEC0;
+        }
+        ol.collection.grey-text.text-lighten-2 {
+            border: none;
+            box-shadow: none;
+        }
+        ol.collection li.collection-item {
+            background-color: #2D3748;
+            border-bottom: 1px solid #4A5568;
+            color: #E2E8F0;
+            padding: 15px 20px;
+        }
+        ol.collection li.collection-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="navbar-fixed">
+            <nav>
+                <div class="nav-wrapper container">
+                    <a href="#" class="brand-logo">Newscomic</a>
+                    <ul id="nav-mobile" class="right hide-on-med-and-down">
+                        <li><a href="#how-it-works">How It Works</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+
+        <main class="container">
+            <section class="row" v-if="currentStep === 1">
+                <div class="col s12 m10 offset-m1">
+                    <div class="card z-depth-2">
+                        <div class="card-content">
+                            <h5 class="card-title">Step 1: Select News Articles</h5>
+                            <p class="flow-text grey-text text-lighten-2">Choose articles to form the basis of your comic. Select one or more.</p>
+
+                            <div class="row" style="margin-top: 20px;">
+                                <div class="col s12">
+                                    <button class="btn waves-effect waves-light deep-purple" @click="fetchMockNews">
+                                        Refresh News <i class="material-icons right">refresh</i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <ul class="collection news-list" v-if="mockNewsArticles.length > 0">
+                                <li class="collection-item avatar"
+                                    v-for="article in mockNewsArticles"
+                                    :key="article.id">
+                                    <i class="material-icons circle deep-purple accent-2">article</i>
+                                    <span class="title">{{ article.title }}</span>
+                                    <p class="grey-text text-lighten-1">{{ truncateText(article.summary, 120) }}<br><span class="light-blue-text text-lighten-3">{{ article.source }}</span></p>
+                                    <a href="#!" class="secondary-content">
+                                        <label>
+                                            <input type="checkbox" :value="article.id" v-model="selectedArticleIds" />
+                                            <span></span>
+                                        </label>
+                                    </a>
+                                </li>
+                            </ul>
+                            <p v-else class="center-align grey-text text-lighten-1">No articles available. Click "Refresh News" to load some!</p>
+
+                            <div v-if="selectedArticleIds.length > 0" class="selected-articles-summary" style="margin-top: 30px;">
+                                <h6 class="grey-text text-lighten-1">Selected:</h6>
+                                <ul class="collection with-header">
+                                    <li class="collection-header deep-purple darken-3"><h6 class="white-text">Your Chosen Articles</h6></li>
+                                    <li class="collection-item deep-purple darken-4" v-for="title in selectedNewsTitles" :key="title">
+                                        <span class="white-text">{{ title }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="card-action right-align">
+                            <button class="btn waves-effect waves-light deep-purple" :disabled="selectedArticleIds.length === 0" @click="goToStep(2)">
+                                Proceed to Story Curation <i class="material-icons right">arrow_forward</i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="row" v-if="currentStep === 2">
+                <div class="col s12 m10 offset-m1">
+                    <div class="card z-depth-2">
+                        <div class="card-content">
+                            <h5 class="card-title">Step 2: Curate Your Story</h5>
+                            <p class="flow-text grey-text text-lighten-2">Review and refine the AI-generated story outline and panel descriptions.</p>
+
+                            <div class="input-field" style="margin-top: 20px;">
+                                <textarea id="extra_prompt_step2" class="materialize-textarea" v-model="extraPrompt"></textarea>
+                                <label for="extra_prompt_step2" :class="{ active: extraPrompt }">Overall Creative Guidance (e.g., "Make it funny, include a cat")</label>
+                            </div>
+
+                            <div class="input-field">
+                                <select v-model.number="numberOfPanels" class="browser-default">
+                                    <option value="" disabled>Choose Number of Panels</option>
+                                    <option value="3">3 Panels</option>
+                                    <option value="4">4 Panels</option>
+                                    <option value="5">5 Panels</option>
+                                </select>
+                                <label class="active select-label-fix">Number of Panels</label>
+                            </div>
+
+                            <div class="center-align" style="margin-bottom: 20px;">
+                                <button class="btn waves-effect waves-light deep-purple btn-large"
+                                        :disabled="isGenerateStoryDisabled"
+                                        @click="generateStoryOutline">
+                                    Generate Story Outline <i class="material-icons right">edit_note</i>
+                                </button>
+                            </div>
+
+                            <div v-if="isLoading" class="preloader-wrapper big active">
+                                <div class="spinner-layer spinner-purple-only">
+                                    <div class="circle-clipper left">
+                                        <div class="circle"></div>
+                                    </div><div class="gap-patch">
+                                        <div class="circle"></div>
+                                    </div><div class="circle-clipper right">
+                                        <div class="circle"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <p v-if="isLoading" class="flow-text grey-text text-lighten-1 center-align">Generating story outline... please wait.</p>
+                            <p v-if="errorMessage" class="red-text text-lighten-2 center-align">{{ errorMessage }}</p>
+
+                            <div v-if="storyOutline" class="story-outline-section">
+                                <h6 class="card-title">Story Outline:</h6>
+                                <div class="input-field">
+                                    <textarea id="story_outline_text" class="materialize-textarea" v-model="storyOutline"></textarea>
+                                    <label for="story_outline_text" :class="{ active: storyOutline }">Edit Story Outline</label>
+                                </div>
+
+                                <h6 class="card-title" style="margin-top: 30px;">Comic Panels:</h6>
+                                <div class="row">
+                                    <div class="col s12 m6 l4" v-for="(panel, index) in panelDescriptions" :key="index">
+                                        <div class="card deep-purple darken-4 z-depth-1">
+                                            <div class="card-content white-text">
+                                                <span class="card-title">Panel {{ index + 1 }}</span>
+                                                <div class="input-field">
+                                                    <textarea :id="'panel_visual_' + index" class="materialize-textarea" v-model="panel.visual"></textarea>
+                                                    <label :for="'panel_visual_' + index" :class="{ active: panel.visual }">Visual Description</label>
+                                                </div>
+                                                <div class="input-field">
+                                                    <textarea :id="'panel_caption_' + index" class="materialize-textarea" v-model="panel.caption"></textarea>
+                                                    <label :for="'panel_caption_' + index" :class="{ active: panel.caption }">Caption</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="center-align" style="margin-top: 20px;">
+                                    <button class="btn waves-effect waves-light deep-purple lighten-1"
+                                            :disabled="isLoading"
+                                            @click="refineStory">
+                                        Refine Story & Panels <i class="material-icons right">autorenew</i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-action">
+                            <button class="btn waves-effect waves-light deep-purple" @click="goToStep(1)">
+                                <i class="material-icons left">arrow_back</i> Back to News Selection
+                            </button>
+                            <button class="btn waves-effect waves-light deep-purple right" :disabled="!storyOutline || isLoading" @click="goToStep(3)">
+                                Proceed to Comic Generation <i class="material-icons right">arrow_forward</i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="row" v-if="currentStep === 3">
+                <div class="col s12 m10 offset-m1">
+                    <div class="card z-depth-2">
+                        <div class="card-content center-align">
+                            <h5 class="card-title">Step 3: Generate & View Comic</h5>
+                            <p class="flow-text grey-text text-lighten-2">Finalize your comic with style choices and generate the visuals!</p>
+
+                            <div class="input-field" style="margin-top: 20px;">
+                                <select v-model="comicStyle" class="browser-default">
+                                    <option value="" disabled>Choose a Comic Style</option>
+                                    <option v-for="style in availableComicStyles" :value="style.value" :key="style.value">{{ style.text }}</option>
+                                </select>
+                                <label class="active select-label-fix">Comic Style</label>
+                            </div>
+
+                            <div class="card-action center-align">
+                                <button class="btn waves-effect waves-light btn-large deep-purple"
+                                        :disabled="isGenerateComicDisabled"
+                                        @click="generateComic">
+                                    Generate Newscomic <i class="material-icons right">auto_stories</i>
+                                </button>
+                            </div>
+
+                            <div v-if="isLoading" class="preloader-wrapper big active">
+                                <div class="spinner-layer spinner-purple-only">
+                                    <div class="circle-clipper left">
+                                        <div class="circle"></div>
+                                    </div><div class="gap-patch">
+                                        <div class="circle"></div>
+                                    </div><div class="circle-clipper right">
+                                        <div class="circle"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <p v-if="isLoading" class="flow-text grey-text text-lighten-1">Generating comic panels... this may take a moment.</p>
+                            <p v-if="errorMessage" class="red-text text-lighten-2">{{ errorMessage }}</p>
+
+                            <div class="row" v-if="generatedComicPanels.length > 0 && !isLoading">
+                                <div class="col s12 m6 l4 comic-panel" v-for="(panel, index) in generatedComicPanels" :key="index">
+                                    <img :src="panel.imageUrl" :alt="'Comic panel ' + (index + 1) + ': ' + panel.caption">
+                                    <p>{{ panel.caption }}</p>
+                                </div>
+                            </div>
+                            <p v-else-if="!isLoading && !errorMessage" class="flow-text grey-text text-lighten-1">Your comic will appear here after generation.</p>
+                        </div>
+                        <div class="card-action">
+                            <button class="btn waves-effect waves-light deep-purple" @click="goToStep(2)">
+                                <i class="material-icons left">arrow_back</i> Back to Story Curation
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="row" id="how-it-works" style="margin-top: 40px;">
+                <div class="col s12 m10 offset-m1">
+                    <div class="card z-depth-2">
+                        <div class="card-content">
+                            <h5 class="card-title">How It Works</h5>
+                            <p class="flow-text grey-text text-lighten-2">
+                                Welcome to Newscomic! We transform the day's articles into engaging, multi-panel comic strips.
+                                Here's how it works:
+                            </p>
+                            <ol class="collection grey-text text-lighten-2">
+                                <li class="collection-item">1. <strong>Select News Articles:</strong> Choose from our curated list of mock news articles. You can select multiple to create a richer narrative.</li>
+                                <li class="collection-item">2. <strong>Curate Your Story:</strong> Our AI will generate an initial story outline and panel descriptions based on your selected articles and optional guidance. You can then edit and refine this narrative before generating images. Choose how many panels you want (3-5).</li>
+                                <li class="collection-item">3. <strong>Generate & View Comic:</strong> Pick a comic art style, and our AI will create unique images for each panel of your refined story.</li>
+                                <li class="collection-item">4. <strong>Enjoy & Iterate:</strong> View your unique newscomic! If you want to change it, simply adjust your story, prompts, or style and regenerate.</li>
+                            </ol>
+                            <p class="flow-text grey-text text-lighten-2">
+                                Perfect for a fresh, visual perspective on current events!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="page-footer deep-purple darken-4">
+            <div class="container">
+                <div class="row">
+                    <div class="col l6 s12">
+                        <h5 class="white-text">Newscomic</h5>
+                        <p class="grey-text text-lighten-4">Bringing news to life, one panel at a time.</p>
+                    </div>
+                    <div class="col l4 offset-l2 s12">
+                        <h5 class="white-text">Links</h5>
+                        <ul>
+                            <li><a class="grey-text text-lighten-3" href="#how-it-works">How It Works</a></li>
+                            <li><a class="grey-text text-lighten-3" href="#">Privacy Policy (Conceptual)</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-copyright">
+                <div class="container">
+                    © 2025 Newscomic. All rights reserved.
+                    <a class="grey-text text-lighten-4 right" href="https://materializecss.com/">Powered by MaterializeCSS</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script>
+        const app = Vue.createApp({
+            data() {
+                return {
+                    currentStep: 1,
+                    mockNewsArticles: [],
+                    selectedArticleIds: [],
+                    extraPrompt: '',
+                    numberOfPanels: 3,
+                    comicStyle: 'classic_cartoon',
+                    availableComicStyles: [
+                        { text: 'Classic Cartoon', value: 'classic_cartoon' },
+                        { text: 'Gritty Graphic Novel', value: 'gritty_graphic_novel' },
+                        { text: 'Minimalist Line Art', value: 'minimalist_line_art' },
+                        { text: 'Pixel Art', value: 'pixel_art' },
+                        { text: 'Watercolor Illustration', value: 'watercolor_illustration' }
+                    ],
+                    storyOutline: '',
+                    panelDescriptions: [],
+                    generatedComicPanels: [],
+                    isLoading: false,
+                    errorMessage: '',
+                    allMockArticlesData: [
+                        { id: 1, title: "Global Leaders Announce Historic Climate Pact", source: "World News Daily", summary: "After weeks of intense negotiations, leaders from over 190 nations have signed a landmark agreement to combat climate change, setting ambitious new targets for emissions reduction and renewable energy investment.", fullContent: "The 'Kyoto-Paris-Glasgow-Future' Accord, hailed as a monumental step forward, was finalized in a dramatic overnight session. Key provisions include a phased-out of fossil fuel subsidies, a global carbon pricing mechanism, and the establishment of a 'Green Future Fund' to aid vulnerable nations. Environmental activists lauded the agreement as a crucial, albeit belated, response to the climate crisis, while some industry groups expressed concerns over economic impacts. The agreement's success now hinges on its implementation, with regular reviews planned to ensure compliance and adaptation to new scientific findings. Protests outside the summit venue were largely peaceful, with demonstrators calling for even more urgent action." },
+                        { id: 2, title: "AI Advances Spark Debate on Future of Work", source: "Tech Today", summary: "New breakthroughs in artificial intelligence, particularly in generative models, are raising questions about job displacement and the need for new economic policies to adapt to a rapidly changing workforce.", fullContent: "Recent releases of highly capable AI models have demonstrated unprecedented abilities in creative tasks, coding, and complex problem-solving. This has ignited a global debate among economists, policymakers, and labor unions. While proponents argue that AI will create new industries and roles, critics warn of mass unemployment and widening inequality if proactive measures aren't taken. Discussions are focusing on universal basic income, retraining programs, and ethical guidelines for AI deployment. Companies are grappling with how to integrate AI without alienating their human workforce, leading to hybrid models of collaboration." },
+                        { id: 3, title: "Archaeologists Unearth Ancient City in Amazon", source: "History Channel News", summary: "An international team of archaeologists has discovered the remains of a vast, previously unknown ancient city deep within the Amazon rainforest, challenging long-held beliefs about pre-Columbian civilizations.", fullContent: "Using LiDAR technology, researchers identified intricate urban planning, including residential areas, ceremonial plazas, and extensive agricultural terraces, hidden beneath the dense jungle canopy. Initial findings suggest the city was inhabited by a complex society centuries before European contact, with evidence of advanced irrigation systems and sophisticated social structures. This discovery provides crucial insights into the ecological knowledge and engineering prowess of indigenous Amazonian populations, suggesting a much larger and more interconnected pre-colonial history than previously understood. Conservationists are now working to protect the site from illegal mining and deforestation." },
+                        { id: 4, title: "SpaceX Successfully Launches Crewed Mission to Lunar Orbit", source: "Space.com", summary: "SpaceX's Starship rocket has completed its first successful crewed mission to lunar orbit, carrying four astronauts on a historic journey around the Moon and back, marking a new era in private space exploration.", fullContent: "The 'Artemis Pathfinder' mission, a collaboration between SpaceX and international space agencies, orbited the Moon for five days, testing critical life support systems and communication protocols. The crew, comprising astronauts from the US, Japan, and the UAE, performed several scientific experiments and captured stunning images of the lunar surface. This successful flight is a major milestone towards establishing a permanent human presence on the Moon and eventually Mars. The mission's flawless execution has boosted confidence in the commercial space sector's ability to undertake complex deep-space endeavors." },
+                        { id: 5, title: "Economic Indicators Show Unexpected Resilience Amidst Challenges", source: "Financial Times", summary: "Despite ongoing geopolitical tensions and inflationary pressures, recent economic data reveals a surprising degree of resilience in global markets, with strong consumer spending and stable employment figures.", fullContent: "Analysts are cautiously optimistic, attributing the resilience to robust technological innovation, adaptive monetary policies, and diversified supply chains. While certain sectors continue to face headwinds, overall growth projections have been revised upwards for several major economies. However, experts warn that potential risks, such as persistent inflation or unforeseen global events, could still derail the recovery. Investors are closely watching central bank decisions and geopolitical developments for further clues on market direction. The labor market, in particular, has shown unexpected strength, defying predictions of a significant slowdown." },
+                        { id: 6, title: "Breakthrough in Medical Research Offers Hope for Rare Disease", source: "Science Daily", summary: "Scientists at the Global Health Institute have announced a significant breakthrough in gene therapy, offering a potential cure for a previously untreatable rare genetic disorder affecting millions worldwide.", fullContent: "The experimental therapy, which involves correcting a specific gene mutation, has shown remarkable results in early clinical trials, leading to complete remission in a majority of patients. This advancement, built upon decades of research into CRISPR technology, opens new avenues for treating a wide range of genetic conditions. While regulatory approval is still some time away, the findings have generated immense excitement within the medical community and among patient advocacy groups. The researchers emphasize the need for continued funding and collaboration to bring this life-changing treatment to those who need it most." },
+                        { id: 7, title: "Popular Sports Team Wins Championship in Thrilling Overtime", source: "Sports Illustrated", summary: "The 'City Titans' clinched the national championship in a nail-biting overtime victory against their long-standing rivals, sparking city-wide celebrations and cementing their place in sports history.", fullContent: "The final game was a spectacle of athletic prowess and strategic brilliance, with both teams exchanging leads throughout regulation. The Titans' star player scored the winning goal in the dying seconds of overtime, sending the crowd into a frenzy. Fans poured onto the streets, celebrating late into the night, with parades and civic receptions planned for the coming week. The victory marks the team's first championship in over two decades, ending a long drought and fulfilling the dreams of generations of supporters. The coach praised the team's resilience and dedication, promising more success in the seasons to come." },
+                        { id: 8, title: "Community Celebrates Opening of New Public Park and Arts Center", source: "Local Gazette", summary: "A vibrant new public park and multi-purpose arts center has officially opened in the heart of downtown, offering green spaces, performance venues, and creative workshops for residents of all ages.", fullContent: "The 'Green Canvas' project, a collaborative effort between the city council, local businesses, and community groups, transformed a previously derelict industrial site into a thriving cultural hub. The park features innovative sustainable landscaping, walking trails, and a children's play area, while the arts center boasts galleries, studios, and a state-of-the-art theater. The grand opening weekend saw thousands of visitors enjoying live music, art installations, and family-friendly activities. City officials hope the new facility will become a cornerstone of community life, fostering creativity and promoting well-being." },
+                        { id: 9, title: "Revolutionary Battery Technology Promises Greener Future", source: "Clean Energy News", summary: "A startup has unveiled a groundbreaking new battery technology that boasts significantly higher energy density and faster charging times than current lithium-ion batteries, with potential to revolutionize electric vehicles and renewable energy storage.", fullContent: "The new solid-state battery, named 'EvoCharge,' uses novel materials that eliminate the risk of thermal runaway, making it safer and more durable. Its rapid charging capabilities could reduce EV charging times to minutes, comparable to refueling gasoline cars. This innovation could address key barriers to widespread adoption of electric vehicles and enable more efficient integration of intermittent renewable energy sources like solar and wind into the grid. Investors are flocking to the company, recognizing the immense potential for a paradigm shift in energy storage solutions globally." },
+                        { id: 10, title: "Cybersecurity Breach Affects Millions of User Accounts", source: "Data Security Alert", summary: "A major tech company has disclosed a significant cybersecurity breach, compromising the personal data of millions of users. Investigations are underway to determine the extent of the damage and identify the perpetrators.", fullContent: "The breach, which was discovered by internal security teams, involved unauthorized access to user databases, potentially exposing names, email addresses, and encrypted passwords. The company has initiated a mandatory password reset for all affected users and is collaborating with law enforcement agencies. Experts are advising users to enable two-factor authentication and be vigilant against phishing attempts. This incident highlights the ongoing challenges in protecting digital assets in an increasingly interconnected world and underscores the need for robust security protocols and user awareness." },
+                        { id: 11, title: "Art Exhibition Blends Traditional Techniques with Digital Media", source: "Art & Culture Magazine", summary: "A new exhibition at the Contemporary Art Museum explores the fascinating intersection of traditional art forms like painting and sculpture with cutting-edge digital technologies, offering a unique sensory experience.", fullContent: "The 'Digital Canvas' exhibition features works by renowned and emerging artists who push the boundaries of artistic expression. Visitors can interact with augmented reality sculptures, immerse themselves in virtual reality paintings, and witness algorithms generating evolving digital masterpieces. The exhibition aims to provoke thought on the evolving definition of art in the digital age and the potential for technology to enhance rather than replace human creativity. Critics have praised its innovative approach and its ability to engage audiences with diverse artistic preferences." },
+                        { id: 12, title: "Urban Farming Initiative Transforms City Rooftops", source: "Sustainable Living Blog", summary: "A new community-led urban farming project is converting unused city rooftops into productive green spaces, providing fresh produce to local residents and fostering a stronger sense of community.", fullContent: "The 'SkyHarvest' initiative has launched its first rooftop farm, a sprawling organic garden atop a downtown commercial building. Volunteers manage the crops, which include a variety of vegetables, herbs, and fruits. The produce is sold at affordable prices to local residents and donated to food banks, addressing food insecurity in urban areas. Beyond food production, the project aims to improve air quality, reduce the urban heat island effect, and create vibrant green oases in concrete jungles. Educational workshops are also offered to teach residents about sustainable agriculture and healthy eating." }
+                    ]
+                };
+            },
+            computed: {
+                selectedArticlesContent() {
+                    return this.selectedArticleIds.map(id => {
+                        const article = this.allMockArticlesData.find(a => a.id === id);
+                        return article ? `Title: ${article.title}\nSource: ${article.source}\nSummary: ${article.summary}\nFull Content: ${article.fullContent}` : '';
+                    }).join('\n\n---\n\n');
+                },
+                selectedNewsTitles() {
+                    return this.selectedArticleIds.map(id => {
+                        const article = this.allMockArticlesData.find(a => a.id === id);
+                        return article ? article.title : 'Unknown Article';
+                    });
+                },
+                isGenerateStoryDisabled() {
+                    return this.selectedArticleIds.length === 0 || this.isLoading;
+                },
+                isGenerateComicDisabled() {
+                    return this.panelDescriptions.length === 0 || this.isLoading;
+                }
+            },
+            methods: {
+                goToStep(stepNum) {
+                    this.currentStep = stepNum;
+                    this.errorMessage = '';
+                    this.$nextTick(() => {
+                        M.updateTextFields();
+                        M.AutoInit();
+                        const selects = document.querySelectorAll('select');
+                        M.FormSelect.init(selects);
+                    });
+                },
+                fetchMockNews() {
+                    const shuffled = [...this.allMockArticlesData].sort(() => 0.5 - Math.random());
+                    this.mockNewsArticles = shuffled.slice(0, 5);
+                    this.selectedArticleIds = [];
+                    this.storyOutline = '';
+                    this.panelDescriptions = [];
+                    this.generatedComicPanels = [];
+                    this.errorMessage = '';
+                },
+                async generateStoryOutline() {
+                    this.isLoading = true;
+                    this.errorMessage = '';
+                    this.storyOutline = '';
+                    this.panelDescriptions = [];
+
+                    if (this.selectedArticleIds.length === 0) {
+                        this.errorMessage = 'Please select at least one news article to generate a story.';
+                        this.isLoading = false;
+                        return;
+                    }
+
+                    try {
+                        const textPrompt = `You are a professional comic book scriptwriter and storyteller. Your task is to synthesize information from provided news articles into a coherent and engaging story outline, and then break that story into ${this.numberOfPanels} distinct comic panel descriptions. The descriptions should be vivid, visually rich, and suitable for direct image generation. Each panel should contribute to the narrative flow.
+
+Selected News Articles (titles, summaries, and full content):
+${this.selectedArticlesContent}
+
+User's additional context/creative guidance: ${this.extraPrompt || 'None'}
+
+Output format:
+STORY OUTLINE: [Concise, 3-5 sentence summary of the comic's narrative, integrating the news. Max 100 words.]
+PANEL 1: [Visual description for panel 1. Focus on scene, characters, action. Max 80 words.]
+CAPTION 1: [Short, engaging caption for panel 1. Max 20 words.]
+PANEL 2: [Visual description for panel 2. Max 80 words.]
+CAPTION 2: [Short, engaging caption for panel 2. Max 20 words.]
+... (up to ${this.numberOfPanels} panels/captions)
+`;
+
+                        const aiResponse = await fetch('/api/ai', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ msgforai: textPrompt })
+                        });
+
+                        if (!aiResponse.ok) {
+                            throw new Error(`AI text generation failed: ${aiResponse.statusText}`);
+                        }
+                        const aiData = await aiResponse.json();
+                        if (!aiData.success) {
+                            throw new Error(`AI text generation API error: ${aiData.error}`);
+                        }
+                        const parsedResult = this.parseAiStoryResponse(aiData.response);
+
+                        if (!parsedResult.storyOutline || parsedResult.panelDescriptions.length !== this.numberOfPanels) {
+                            throw new Error(`AI failed to generate a complete story outline and ${this.numberOfPanels} distinct comic panel descriptions. Please try again or refine your prompt. Raw AI response: ${aiData.response}`);
+                        }
+
+                        this.storyOutline = parsedResult.storyOutline;
+                        this.panelDescriptions = parsedResult.panelDescriptions;
+
+                    } catch (error) {
+                        console.error('Error during story outline generation:', error);
+                        this.errorMessage = `Failed to generate story outline: ${error.message}. Please try again.`;
+                        this.storyOutline = '';
+                        this.panelDescriptions = [];
+                    } finally {
+                        this.isLoading = false;
+                        this.$nextTick(() => { M.updateTextFields(); });
+                    }
+                },
+                async refineStory() {
+                    this.isLoading = true;
+                    this.errorMessage = '';
+
+                    try {
+                        const textPrompt = `You are refining a comic book script. Based on the original news context and the user's current story outline and panel descriptions (which might have been edited), generate new, improved visual descriptions and captions for ${this.numberOfPanels} panels. Ensure the story remains coherent and visually engaging.
+
+Original News Context: ${this.selectedArticlesContent}
+Current Story Outline (possibly edited by user): ${this.storyOutline}
+Current Panel Descriptions (possibly edited by user): ${JSON.stringify(this.panelDescriptions)}
+User's additional context/creative guidance: ${this.extraPrompt || 'None'}
+
+Output format:
+STORY OUTLINE: [Updated concise, 3-5 sentence summary of the comic's narrative. Max 100 words.]
+PANEL 1: [Updated visual description for panel 1. Max 80 words.]
+CAPTION 1: [Updated short, engaging caption for panel 1. Max 20 words.]
+PANEL 2: [Updated visual description for panel 2. Max 80 words.]
+CAPTION 2: [Updated short, engaging caption for panel 2. Max 20 words.]
+... (up to ${this.numberOfPanels} panels/captions)
+`;
+
+                        const aiResponse = await fetch('/api/ai', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ msgforai: textPrompt })
+                        });
+
+                        if (!aiResponse.ok) {
+                            throw new Error(`AI text generation failed: ${aiResponse.statusText}`);
+                        }
+                        const aiData = await aiResponse.json();
+                        if (!aiData.success) {
+                            throw new Error(`AI text generation API error: ${aiData.error}`);
+                        }
+                        const parsedResult = this.parseAiStoryResponse(aiData.response);
+
+                        if (!parsedResult.storyOutline || parsedResult.panelDescriptions.length !== this.numberOfPanels) {
+                            throw new Error(`AI failed to refine the story outline and ${this.numberOfPanels} comic panel descriptions. Please try again. Raw AI response: ${aiData.response}`);
+                        }
+
+                        this.storyOutline = parsedResult.storyOutline;
+                        this.panelDescriptions = parsedResult.panelDescriptions;
+
+                    } catch (error) {
+                        console.error('Error during story refinement:', error);
+                        this.errorMessage = `Failed to refine story: ${error.message}. Please try again.`;
+                    } finally {
+                        this.isLoading = false;
+                        this.$nextTick(() => { M.updateTextFields(); });
+                    }
+                },
+                async generateComic() {
+                    this.isLoading = true;
+                    this.errorMessage = '';
+                    this.generatedComicPanels = [];
+
+                    if (this.panelDescriptions.length === 0) {
+                        this.errorMessage = 'Please generate a story outline first.';
+                        this.isLoading = false;
+                        return;
+                    }
+
+                    try {
+                        const panelPromises = this.panelDescriptions.map(async (panel, index) => {
+                            const imagePrompt = `${panel.visual}, ${this.comicStyle} comic art, dark theme, dramatic lighting, detailed, professional, no text bubbles, no speech, no words, comic strip panel, clean lines, high contrast, visually striking, isolated elements`;
+                            try {
+                                const imageResponse = await fetch('/api/generate-image-on-demand', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ prompt: imagePrompt, aspectRatio: "1:1" })
+                                });
+
+                                if (!imageResponse.ok) {
+                                    throw new Error(`Image generation failed for panel ${index + 1}: ${imageResponse.statusText}`);
+                                }
+                                const imageData = await imageResponse.json();
+                                if (!imageData.success) {
+                                    throw new Error(`Image generation API error for panel ${index + 1}: ${imageData.error}`);
+                                }
+                                return { imageUrl: imageData.imageUrl, caption: panel.caption || `Panel ${index + 1}` };
+                            } catch (imgErr) {
+                                console.error(`Error generating image for panel ${index + 1}:`, imgErr);
+                                const svgPlaceholder = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="200" height="200" fill="%234A5568"/><text x="50%" y="50%" font-family="Arial" font-size="16" fill="%23E2E8F0" text-anchor="middle" dominant-baseline="middle">Failed to load panel ${index + 1}</text></svg>`;
+                                return { imageUrl: svgPlaceholder, caption: panel.caption || `Error loading panel ${index + 1}.` };
+                            }
+                        });
+
+                        this.generatedComicPanels = await Promise.all(panelPromises);
+
+                    } catch (error) {
+                        console.error('Error during comic generation:', error);
+                        this.errorMessage = `Failed to generate comic: ${error.message}. Please try again.`;
+                        this.generatedComicPanels = [];
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+                parseAiStoryResponse(text) {
+                    const result = { storyOutline: '', panelDescriptions: [] };
+                    const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+                    let currentSection = '';
+                    let panelIndex = 0;
+                    const tempPanels = [];
+
+                    lines.forEach(line => {
+                        if (line.startsWith('STORY OUTLINE:')) {
+                            currentSection = 'STORY OUTLINE';
+                            result.storyOutline = line.substring('STORY OUTLINE:'.length).trim();
+                        } else if (line.match(/^PANEL \d+:/)) {
+                            currentSection = 'PANEL';
+                            panelIndex = parseInt(line.match(/^PANEL (\d+):/)[1]) - 1;
+                            if (!tempPanels[panelIndex]) {
+                                tempPanels[panelIndex] = { visual: '', caption: '' };
+                            }
+                            tempPanels[panelIndex].visual = line.substring(line.indexOf(':') + 1).trim();
+                        } else if (line.match(/^CAPTION \d+:/)) {
+                            currentSection = 'CAPTION';
+                            panelIndex = parseInt(line.match(/^CAPTION (\d+):/)[1]) - 1;
+                            if (!tempPanels[panelIndex]) {
+                                tempPanels[panelIndex] = { visual: '', caption: '' };
+                            }
+                            tempPanels[panelIndex].caption = line.substring(line.indexOf(':') + 1).trim();
+                        } else if (currentSection === 'STORY OUTLINE' && result.storyOutline) {
+                            result.storyOutline += ' ' + line;
+                        } else if (currentSection === 'PANEL' && tempPanels[panelIndex] && tempPanels[panelIndex].visual) {
+                            tempPanels[panelIndex].visual += ' ' + line;
+                        } else if (currentSection === 'CAPTION' && tempPanels[panelIndex] && tempPanels[panelIndex].caption) {
+                            tempPanels[panelIndex].caption += ' ' + line;
+                        }
+                    });
+                    result.panelDescriptions = tempPanels.filter(p => p && p.visual && p.caption);
+                    return result;
+                },
+                truncateText(text, maxLength) {
+                    if (text.length > maxLength) {
+                        return text.substring(0, maxLength) + '...';
+                    }
+                    return text;
+                },
+                initializeMaterialize() {
+                    M.AutoInit();
+                    const selects = document.querySelectorAll('select');
+                    M.FormSelect.init(selects);
+                }
+            },
+            mounted() {
+                this.fetchMockNews();
+                this.initializeMaterialize();
+            }
+        });
+
+        app.mount('#app');
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

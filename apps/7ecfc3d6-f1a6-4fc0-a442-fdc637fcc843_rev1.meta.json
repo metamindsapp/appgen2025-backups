@@ -1,0 +1,10 @@
+{
+  "projectId": "7ecfc3d6-f1a6-4fc0-a442-fdc637fcc843",
+  "revisionString": "1",
+  "projectNameDisplay": "Newscomic",
+  "projectType": "website",
+  "userPromptForThisRevision": "Get the news headlines and make a comic about them when the user clicks a button. Allow for ending.curation and picking of headlines and optional adding u]extra prompts",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-06-04T17:35:10.159Z",
+  "imageAssets": []
+}

@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newscomic - Your News, Your Comic</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body {
+            background-color: #212121;
+            color: #E0E0E0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .navbar-fixed {
+            margin-bottom: 20px;
+        }
+        nav {
+            background-color: #311B92;
+        }
+        .card {
+            background-color: #424242;
+            color: #E0E0E0;
+        }
+        .card .card-content {
+            padding-bottom: 16px;
+        }
+        .btn {
+            background-color: #673AB7;
+        }
+        .btn:hover {
+            background-color: #512DA8;
+        }
+        .input-field input[type=text]:not(.browser-default),
+        .input-field textarea.materialize-textarea {
+            color: #E0E0E0;
+            border-bottom-color: #9C27B0;
+        }
+        .input-field input[type=text]:not(.browser-default):focus,
+        .input-field textarea.materialize-textarea:focus {
+            border-bottom-color: #E040FB !important;
+            box-shadow: 0 1px 0 0 #E040FB !important;
+        }
+        .input-field label {
+            color: #BDBDBD;
+        }
+        .input-field label.active {
+            color: #E040FB !important;
+        }
+        .news-list .collection-item {
+            background-color: #424242;
+            color: #E0E0E0;
+            border-bottom: 1px solid #616161;
+        }
+        .news-list .collection-item.active {
+            background-color: #673AB7 !important;
+            color: #FFFFFF !important;
+        }
+        .news-list .collection-item span {
+            cursor: pointer;
+            display: block;
+            padding: 10px 0;
+        }
+        .comic-panel {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .comic-panel img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+            transition: transform 0.2s ease-in-out;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+        }
+        .comic-panel img:hover {
+            transform: scale(1.02);
+        }
+        .comic-panel p {
+            margin-top: 10px;
+            font-style: italic;
+            color: #BDBDBD;
+        }
+        .preloader-wrapper {
+            margin: 20px auto;
+            display: block;
+        }
+        footer {
+            margin-top: auto;
+            background-color: #311B92;
+            padding: 20px 0;
+            color: #E0E0E0;
+            text-align: center;
+        }
+        select.browser-default {
+            background-color: #616161;
+            border: none;
+            border-radius: 4px;
+            color: #E0E0E0;
+            padding: 5px 10px;
+            margin-bottom: 20px;
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        select.browser-default option {
+            background-color: #424242;
+            color: #E0E0E0;
+        }
+        select.browser-default:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px #E040FB;
+        }
+        .select-label-fix {
+            position: relative;
+            top: -25px;
+            left: 0;
+            font-size: 0.8rem;
+            color: #BDBDBD;
+        }
+        ol.collection.grey-text.text-lighten-2 {
+            border: none;
+        }
+        ol.collection li.collection-item {
+            padding: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="navbar-fixed">
+            <nav>
+                <div class="nav-wrapper container">
+                    <a href="#" class="brand-logo">Newscomic</a>
+                    <ul id="nav-mobile" class="right hide-on-med-and-down">
+                        <li><a href="#how-it-works">How It Works</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+
+        <main class="container">
+            <section class="row">
+                <div class="col s12 m8 offset-m2">
+                    <div class="card z-depth-2">
+                        <div class="card-content">
+                            <h5 class="card-title">Select a News Headline</h5>
+                            <p class="flow-text grey-text text-lighten-2">Choose a headline to transform it into a comic strip.</p>
+                            <div class="row" style="margin-top: 20px;">
+                                <div class="col s12">
+                                    <button class="btn waves-effect waves-light" @click="fetchNews">
+                                        Refresh News <i class="material-icons right">refresh</i>
+                                    </button>
+                                </div>
+                            </div>
+                            <ul class="collection news-list" v-if="headlines.length > 0">
+                                <li class="collection-item"
+                                    v-for="(headline, index) in headlines"
+                                    :key="index"
+                                    :class="{ active: selectedHeadline === headline }"
+                                    @click="selectHeadline(headline)">
+                                    <span class="truncate">{{ headline }}</span>
+                                </li>
+                            </ul>
+                            <p v-else class="center-align grey-text text-lighten-1">No headlines available. Click "Refresh News" to load some!</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="row">
+                <div class="col s12 m8 offset-m2">
+                    <div class="card z-depth-2">
+                        <div class="card-content">
+                            <h5 class="card-title">Generate Your Newscomic</h5>
+                            <p class="flow-text grey-text text-lighten-2">Refine your comic with extra prompts and style choices.</p>
+                            <div class="input-field" style="margin-top: 20px;">
+                                <input id="selected_headline_display" type="text" v-model="selectedHeadline" readonly class="validate">
+                                <label for="selected_headline_display" :class="{ active: selectedHeadline }">Selected Headline</label>
+                            </div>
+
+                            <div class="input-field">
+                                <textarea id="extra_prompt" class="materialize-textarea" v-model="extraPrompt"></textarea>
+                                <label for="extra_prompt">Optional: Add Extra Prompt (e.g., "Make it funny, include a cat")</label>
+                            </div>
+
+                            <div class="input-field">
+                                <select v-model="comicStyle" class="browser-default">
+                                    <option value="" disabled>Choose a Comic Style</option>
+                                    <option v-for="style in availableComicStyles" :value="style.value" :key="style.value">{{ style.text }}</option>
+                                </select>
+                                <label class="active select-label-fix">Comic Style</label>
+                            </div>
+
+                            <div class="card-action center-align">
+                                <button class="btn waves-effect waves-light btn-large"
+                                        :disabled="isGenerateDisabled"
+                                        @click="generateComic">
+                                    Generate Newscomic <i class="material-icons right">auto_stories</i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="row">
+                <div class="col s12 m8 offset-m2">
+                    <div class="card z-depth-2">
+                        <div class="card-content center-align">
+                            <h5 class="card-title">Your Newscomic</h5>
+                            <div v-if="isLoading" class="preloader-wrapper big active">
+                                <div class="spinner-layer spinner-purple-only">
+                                    <div class="circle-clipper left">
+                                        <div class="circle"></div>
+                                    </div><div class="gap-patch">
+                                        <div class="circle"></div>
+                                    </div><div class="circle-clipper right">
+                                        <div class="circle"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <p v-if="isLoading" class="flow-text grey-text text-lighten-1">Generating comic panels... this may take a moment.</p>
+                            <p v-if="errorMessage" class="red-text text-lighten-2">{{ errorMessage }}</p>
+
+                            <div class="row" v-if="generatedComicPanels.length > 0 && !isLoading">
+                                <div class="col s12 m4 comic-panel" v-for="(panel, index) in generatedComicPanels" :key="index">
+                                    <img :src="panel.imageUrl" :alt="'Comic panel ' + (index + 1) + ': ' + panel.caption">
+                                    <p>{{ panel.caption }}</p>
+                                </div>
+                            </div>
+                            <p v-else-if="!isLoading && !errorMessage" class="flow-text grey-text text-lighten-1">Your comic will appear here after generation.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="row" id="how-it-works">
+                <div class="col s12 m8 offset-m2">
+                    <div class="card z-depth-2">
+                        <div class="card-content">
+                            <h5 class="card-title">How It Works</h5>
+                            <p class="flow-text grey-text text-lighten-2">
+                                Welcome to Newscomic! We transform the day's headlines into engaging, multi-panel comic strips.
+                                Here's how it works:
+                            </p>
+                            <ol class="collection grey-text text-lighten-2">
+                                <li class="collection-item grey darken-3">1. <strong>Select a Headline:</strong> Choose from our curated list of mock news headlines.</li>
+                                <li class="collection-item grey darken-3">2. <strong>Add Your Flair:</strong> Optionally, provide extra prompts to guide the AI, like "make it funny" or "include a robot."</li>
+                                <li class="collection-item grey darken-3">3. <strong>Pick a Style:</strong> Select a comic art style that suits your vision.</li>
+                                <li class="collection-item grey darken-3">4. <strong>Generate:</strong> Click the button, and our AI will first craft a 3-panel story from your input, then generate unique images for each panel.</li>
+                                <li class="collection-item grey darken-3">5. <strong>Enjoy & Iterate:</strong> View your unique newscomic! If you want to change it, simply adjust your prompts or style and regenerate.</li>
+                            </ol>
+                            <p class="flow-text grey-text text-lighten-2">
+                                Perfect for a fresh, visual perspective on current events!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="page-footer deep-purple darken-4">
+            <div class="container">
+                <div class="row">
+                    <div class="col l6 s12">
+                        <h5 class="white-text">Newscomic</h5>
+                        <p class="grey-text text-lighten-4">Bringing news to life, one panel at a time.</p>
+                    </div>
+                    <div class="col l4 offset-l2 s12">
+                        <h5 class="white-text">Links</h5>
+                        <ul>
+                            <li><a class="grey-text text-lighten-3" href="#how-it-works">How It Works</a></li>
+                            <li><a class="grey-text text-lighten-3" href="#">Privacy Policy (Conceptual)</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-copyright">
+                <div class="container">
+                    © 2025 Newscomic. All rights reserved.
+                    <a class="grey-text text-lighten-4 right" href="https://materializecss.com/">Powered by MaterializeCSS</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script>
+        const app = Vue.createApp({
+            data() {
+                return {
+                    headlines: [],
+                    allMockHeadlines: [
+                        "Global Summit Concludes with Landmark Climate Agreement",
+                        "AI Advances Spark Debate on Future of Work",
+                        "New Archaeological Discovery Sheds Light on Ancient Civilization",
+                        "SpaceX Successfully Launches Crewed Mission to Lunar Orbit",
+                        "Economic Indicators Show Unexpected Resilience Amidst Challenges",
+                        "Breakthrough in Medical Research Offers Hope for Rare Disease",
+                        "Popular Sports Team Wins Championship in Thrilling Overtime",
+                        "Community Celebrates Opening of New Public Park and Arts Center",
+                        "Revolutionary Battery Technology Promises Greener Future",
+                        "Cybersecurity Breach Affects Millions of User Accounts",
+                        "Art Exhibition Blends Traditional Techniques with Digital Media",
+                        "Urban Farming Initiative Transforms City Rooftops"
+                    ],
+                    selectedHeadline: '',
+                    extraPrompt: '',
+                    comicStyle: 'classic_cartoon',
+                    availableComicStyles: [
+                        { text: 'Classic Cartoon', value: 'classic_cartoon' },
+                        { text: 'Gritty Graphic Novel', value: 'gritty_graphic_novel' },
+                        { text: 'Minimalist Line Art', value: 'minimalist_line_art' },
+                        { text: 'Pixel Art', value: 'pixel_art' },
+                        { text: 'Watercolor Illustration', value: 'watercolor_illustration' }
+                    ],
+                    generatedComicPanels: [],
+                    isLoading: false,
+                    errorMessage: ''
+                };
+            },
+            computed: {
+                isGenerateDisabled() {
+                    return !this.selectedHeadline || this.isLoading;
+                }
+            },
+            methods: {
+                fetchNews() {
+                    const shuffled = [...this.allMockHeadlines].sort(() => 0.5 - Math.random());
+                    this.headlines = shuffled.slice(0, 5);
+                    this.selectedHeadline = '';
+                },
+                selectHeadline(headline) {
+                    this.selectedHeadline = headline;
+                    this.$nextTick(() => {
+                        M.updateTextFields();
+                    });
+                },
+                async generateComic() {
+                    this.isLoading = true;
+                    this.errorMessage = '';
+                    this.generatedComicPanels = [];
+
+                    if (!this.selectedHeadline) {
+                        this.errorMessage = 'Please select a news headline first.';
+                        this.isLoading = false;
+                        return;
+                    }
+
+                    try {
+                        const textPrompt = `You are a comic book scriptwriter. Based on the following news headline and additional context, create a concise 3-panel comic strip description. Each panel description should be vivid and suitable for image generation, focusing on a clear visual scene and action. Use the specified comic style.
+
+News Headline: ${this.selectedHeadline}
+Extra Context: ${this.extraPrompt}
+Comic Style: ${this.comicStyle}
+
+Output format:
+Panel 1: [Visual description for panel 1]
+Panel 2: [Visual description for panel 2]
+Panel 3: [Visual description for panel 3]`;
+
+                        const aiResponse = await fetch('/api/ai', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ msgforai: textPrompt })
+                        });
+
+                        if (!aiResponse.ok) {
+                            throw new Error(`AI text generation failed: ${aiResponse.statusText}`);
+                        }
+                        const aiData = await aiResponse.json();
+                        if (!aiData.success) {
+                            throw new Error(`AI text generation API error: ${aiData.error}`);
+                        }
+                        const comicDescriptions = this.parseComicDescriptions(aiData.response);
+
+                        if (comicDescriptions.length !== 3) {
+                            throw new Error('AI failed to generate 3 distinct comic panel descriptions. Please try again or refine your prompt.');
+                        }
+
+                        const panelPromises = comicDescriptions.map(async (desc, index) => {
+                            const imagePrompt = `${desc}, ${this.comicStyle} comic art, dark theme, dramatic lighting, detailed, professional, no text bubbles, no speech, no words, comic strip panel, clean lines`;
+                            try {
+                                const imageResponse = await fetch('/api/generate-image-on-demand', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ prompt: imagePrompt, aspectRatio: "1:1" })
+                                });
+
+                                if (!imageResponse.ok) {
+                                    throw new Error(`Image generation failed for panel ${index + 1}: ${imageResponse.statusText}`);
+                                }
+                                const imageData = await imageResponse.json();
+                                if (!imageData.success) {
+                                    throw new Error(`Image generation API error for panel ${index + 1}: ${imageData.error}`);
+                                }
+                                return { imageUrl: imageData.imageUrl, caption: `Panel ${index + 1}: ${this.truncateCaption(desc)}` };
+                            } catch (imgErr) {
+                                console.error(`Error generating image for panel ${index + 1}:`, imgErr);
+                                return { imageUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="200" height="200" fill="%23616161"/><text x="50%" y="50%" font-family="Arial" font-size="16" fill="%23E0E0E0" text-anchor="middle" dominant-baseline="middle">Failed to load panel</text></svg>', caption: `Error loading panel ${index + 1}.` };
+                            }
+                        });
+
+                        this.generatedComicPanels = await Promise.all(panelPromises);
+
+                    } catch (error) {
+                        console.error('Error during comic generation:', error);
+                        this.errorMessage = `Failed to generate comic: ${error.message}. Please try again.`;
+                        this.generatedComicPanels = [];
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+                parseComicDescriptions(text) {
+                    const descriptions = [];
+                    const lines = text.split('\n');
+                    lines.forEach(line => {
+                        const match = line.match(/^Panel \d+: (.+)$/);
+                        if (match && match[1]) {
+                            descriptions.push(match[1].trim());
+                        }
+                    });
+                    return descriptions;
+                },
+                truncateCaption(caption) {
+                    const maxLength = 80;
+                    if (caption.length > maxLength) {
+                        return caption.substring(0, maxLength) + '...';
+                    }
+                    return caption;
+                },
+                initializeMaterialize() {
+                    M.AutoInit();
+                }
+            },
+            mounted() {
+                this.fetchNews();
+                this.initializeMaterialize();
+            }
+        });
+
+        app.mount('#app');
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "projectId": "00e2f20e-0409-4c1e-9cd9-bd696007678d",
+  "revisionString": "2",
+  "projectNameDisplay": "Particle simulator 2",
+  "projectType": "webapp",
+  "userPromptForThisRevision": "[2025-05-30T15:01:11.669Z] [UNCAUGHT_ERROR] TypeError: M.FormSelect.getInstance(this.uiElements.boundaryConditions).formSelect is not a function. (In 'M.FormSelect.getInstance(this.uiElements.boundaryConditions).formSelect()', 'M.FormSelect.getInstance(this.uiElements.boundaryConditions).formSelect' is undefined) at https://beepboopbeepgen.replit.app/apps/00e2f20e-0409-4c1e-9cd9-bd696007678d_rev1.html:675:88 syncSettingsToUI@https://beepboopbeepgen.replit.app/apps/00e2f20e-0409-4c1e-9cd9-bd696007678d_rev1.html:675:88\r\ninit@https://beepboopbeepgen.replit.app/apps/00e2f20e-0409-4c1e-9cd9-bd696007678d_rev1.html:576:38\r\n@https://beepboopbeepgen.replit.app/apps/00e2f20e-0409-4c1e-9cd9-bd696007678d_rev1.html:1103:21",
+  "basedOnRevisionString": "1",
+  "savedAt": "2025-05-30T15:06:46.059Z",
+  "imageAssets": []
+}

@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Routine & Chore Planner</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #121212;
+            color: #E2E8F0;
+        }
+        .card {
+            background-color: #2D3748;
+            border-color: #4A5568;
+        }
+        .card-header {
+            background-color: #1A202C;
+            border-bottom: 1px solid #4A5568;
+        }
+        .nav-tabs {
+            border-bottom: 1px solid #4A5568;
+        }
+        .nav-link {
+            color: #E2E8F0;
+            border: 1px solid transparent;
+            border-top-left-radius: 0.25rem;
+            border-top-right-radius: 0.25rem;
+        }
+        .nav-link:hover {
+            border-color: #4A5568 #4A5568 #2D3748;
+        }
+        .nav-link.active {
+            color: #FFFFFF;
+            background-color: #2D3748;
+            border-color: #4A5568 #4A5568 #2D3748;
+        }
+        .list-group-item {
+            background-color: #2D3748;
+            border-color: #4A5568;
+        }
+        .modal-content {
+            background-color: #1A202C;
+            border: 1px solid #4A5568;
+        }
+        .form-control, .form-select, .form-check-input {
+            background-color: #4A5568;
+            color: #E2E8F0;
+            border-color: #6B7280;
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: #4A5568;
+            color: #E2E8F0;
+            border-color: #63B3ED;
+            box-shadow: 0 0 0 0.25rem rgba(99, 179, 237, 0.25);
+        }
+        .form-check-input:checked {
+            background-color: #63B3ED;
+            border-color: #63B3ED;
+        }
+        .btn-primary {
+            background-color: #63B3ED;
+            border-color: #63B3ED;
+        }
+        .btn-primary:hover {
+            background-color: #4299E1;
+            border-color: #4299E1;
+        }
+        .btn-outline-success {
+            color: #48BB78;
+            border-color: #48BB78;
+        }
+        .btn-outline-success:hover {
+            background-color: #48BB78;
+            color: #FFFFFF;
+        }
+        .btn-outline-info {
+            color: #63B3ED;
+            border-color: #63B3ED;
+        }
+        .btn-outline-info:hover {
+            background-color: #63B3ED;
+            color: #FFFFFF;
+        }
+        .btn-outline-danger {
+            color: #F56565;
+            border-color: #F56565;
+        }
+        .btn-outline-danger:hover {
+            background-color: #F56565;
+            color: #FFFFFF;
+        }
+        .btn-success {
+            background-color: #48BB78;
+            border-color: #48BB78;
+        }
+        .btn-success:hover {
+            background-color: #38A169;
+            border-color: #38A169;
+        }
+    </style>
+</head>
+<body data-bs-theme="dark" class="bg-dark text-light min-vh-100 d-flex flex-column">
+    <div class="container-fluid d-flex flex-column flex-grow-1 py-3">
+        <header class="mb-4">
+            <h1 class="text-center text-primary">Daily Routine & Chore Planner</h1>
+        </header>
+
+        <nav>
+            <div class="nav nav-tabs nav-justified" id="nav-tab" role="tablist">
+                <button class="nav-link active" id="nav-dashboard-tab" data-bs-toggle="tab" data-bs-target="#nav-dashboard" type="button" role="tab" aria-controls="nav-dashboard" aria-selected="true">Dashboard</button>
+                <button class="nav-link" id="nav-chores-tab" data-bs-toggle="tab" data-bs-target="#nav-chores" type="button" role="tab" aria-controls="nav-chores" aria-selected="false">My Chores</button>
+                <button class="nav-link" id="nav-events-tab" data-bs-toggle="tab" data-bs-target="#nav-events" type="button" role="tab" aria-controls="nav-events" aria-selected="false">Daily Events</button>
+                <button class="nav-link" id="nav-dinner-tab" data-bs-toggle="tab" data-bs-target="#nav-dinner" type="button" role="tab" aria-controls="nav-dinner" aria-selected="false">Dinner Ideas</button>
+                <button class="nav-link" id="nav-settings-tab" data-bs-toggle="tab" data-bs-target="#nav-settings" type="button" role="tab" aria-controls="nav-settings" aria-selected="false">Settings</button>
+            </div>
+        </nav>
+
+        <div class="tab-content flex-grow-1 mt-3" id="nav-tabContent">
+            <div class="tab-pane fade show active" id="nav-dashboard" role="tabpanel" aria-labelledby="nav-dashboard-tab">
+                <div class="card bg-secondary mb-3">
+                    <div class="card-body text-center">
+                        <h2 id="current-datetime" class="card-title text-light"></h2>
+                        <p id="motivational-quote" class="card-text text-muted fst-italic"></p>
+                    </div>
+                </div>
+                <div class="card bg-secondary mb-3">
+                    <div class="card-header">Daily Progress</div>
+                    <div class="card-body">
+                        <div class="progress" role="progressbar" aria-label="Daily progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="height: 25px;">
+                            <div class="progress-bar bg-success" style="width: 0%" id="daily-progress-bar">0%</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card bg-secondary mb-3">
+                    <div class="card-header">Today's Chores</div>
+                    <div class="card-body">
+                        <h5 class="text-info">Due Now / Overdue</h5>
+                        <ul class="list-group list-group-flush mb-3" id="due-chores-list">
+                        </ul>
+                        <h5 class="text-primary">Upcoming</h5>
+                        <ul class="list-group list-group-flush mb-3" id="upcoming-chores-list">
+                        </ul>
+                        <h5 class="text-success">Completed</h5>
+                        <ul class="list-group list-group-flush" id="completed-chores-list">
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="nav-chores" role="tabpanel" aria-labelledby="nav-chores-tab">
+                <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#choreModal" id="add-chore-btn">Add New Chore</button>
+                <div id="chores-list" class="list-group">
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="nav-events" role="tabpanel" aria-labelledby="nav-events-tab">
+                <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#eventModal" id="add-event-btn">Add New Event</button>
+                <div id="events-list" class="list-group">
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="nav-dinner" role="tabpanel" aria-labelledby="nav-dinner-tab">
+                <div class="card bg-secondary mb-3">
+                    <div class="card-header">Get Dinner Ideas</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="dietary-prefs" class="form-label">Dietary Preferences (Optional):</label>
+                            <div id="dietary-prefs" class="d-flex flex-wrap gap-2">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="pref-vegetarian" value="vegetarian">
+                                    <label class="form-check-label" for="pref-vegetarian">Vegetarian</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="pref-vegan" value="vegan">
+                                    <label class="form-check-label" for="pref-vegan">Vegan</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="pref-gluten-free" value="gluten-free">
+                                    <label class="form-check-label" for="pref-gluten-free">Gluten-Free</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="ingredients-input" class="form-label">Ingredients I have (Optional, comma-separated):</label>
+                            <textarea class="form-control" id="ingredients-input" rows="3" placeholder="e.g., chicken, rice, broccoli, cheese"></textarea>
+                        </div>
+                        <button class="btn btn-success" id="generate-dinner-btn">Generate Dinner Idea</button>
+                        <div id="dinner-idea-output" class="mt-4">
+                            <div class="d-none spinner-border text-primary" role="status" id="dinner-text-spinner">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="text-warning" id="dinner-text-error"></p>
+                            <p id="dinner-idea-text" class="lead"></p>
+                            <button class="btn btn-outline-primary mt-2 d-none" id="generate-image-btn">Generate Image for Idea</button>
+                            <div class="mt-3 text-center">
+                                <div class="d-none spinner-border text-info" role="status" id="dinner-image-spinner">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <img src="" alt="Generated image of dinner idea" class="img-fluid rounded d-none" id="dinner-image" style="max-width: 400px;">
+                                <p class="text-warning" id="dinner-image-error"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="nav-settings" role="tabpanel" aria-labelledby="nav-settings-tab">
+                <div class="card bg-secondary mb-3">
+                    <div class="card-header">Application Settings</div>
+                    <div class="card-body">
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="notification-sound-toggle">
+                            <label class="form-check-label" for="notification-sound-toggle">Enable Notification Sound</label>
+                        </div>
+                        <button class="btn btn-primary" id="save-settings-btn">Save Settings</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="choreModal" tabindex="-1" aria-labelledby="choreModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="choreModalLabel">Add/Edit Chore</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="chore-form">
+                        <input type="hidden" id="chore-id">
+                        <div class="mb-3">
+                            <label for="chore-name" class="form-label">Chore Name</label>
+                            <input type="text" class="form-control" id="chore-name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="chore-description" class="form-label">Description (Optional)</label>
+                            <textarea class="form-control" id="chore-description" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="chore-priority" class="form-label">Priority</label>
+                            <select class="form-select" id="chore-priority">
+                                <option value="Low">Low</option>
+                                <option value="Medium" selected>Medium</option>
+                                <option value="High">High</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="chore-schedule-type" class="form-label">Schedule Type</label>
+                            <select class="form-select" id="chore-schedule-type">
+                                <option value="fixed-time">Fixed Time</option>
+                                <option value="relative-event">Relative to Daily Event</option>
+                                <option value="interval">Interval (e.g., every X hours)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3" id="fixed-time-group">
+                            <label for="chore-time" class="form-label">Time (HH:MM)</label>
+                            <input type="time" class="form-control" id="chore-time">
+                        </div>
+                        <div class="mb-3 d-none" id="relative-event-group">
+                            <label for="chore-event" class="form-label">Select Event</label>
+                            <select class="form-select" id="chore-event">
+                            </select>
+                            <label for="chore-offset" class="form-label mt-2">Offset (minutes, e.g., -15 for 15 mins before)</label>
+                            <input type="number" class="form-control" id="chore-offset" value="0">
+                        </div>
+                        <div class="mb-3 d-none" id="interval-group">
+                            <label for="chore-interval" class="form-label">Repeat Every (minutes)</label>
+                            <input type="number" class="form-control" id="chore-interval" min="1" value="60">
+                            <label for="chore-interval-start" class="form-label mt-2">Start Time (HH:MM)</label>
+                            <input type="time" class="form-control" id="chore-interval-start">
+                            <label for="chore-interval-end" class="form-label mt-2">End Time (HH:MM)</label>
+                            <input type="time" class="form-control" id="chore-interval-end">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Chore</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eventModalLabel">Add/Edit Daily Event</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="event-form">
+                        <input type="hidden" id="event-id">
+                        <div class="mb-3">
+                            <label for="event-name" class="form-label">Event Name</label>
+                            <input type="text" class="form-control" id="event-name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="event-time" class="form-label">Time (HH:MM)</label>
+                            <input type="time" class="form-control" id="event-time" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Event</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <audio id="notification-sound" src="https://www.soundjay.com/buttons/beep-07.mp3" preload="auto"></audio>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const appState = {
+            chores: [],
+            dailyEvents: [],
+            settings: {
+                notificationSound: true
+            },
+            currentDinnerIdea: null,
+            currentDinnerImage: null,
+            currentDate: null
+        };
+
+        const saveState = () => localStorage.setItem('chorePlannerState', JSON.stringify(appState));
+        const loadState = () => {
+            const savedState = localStorage.getItem('chorePlannerState');
+            if (savedState) {
+                const parsedState = JSON.parse(savedState);
+                appState.chores = parsedState.chores || [];
+                appState.dailyEvents = parsedState.dailyEvents || [];
+                appState.settings = { ...appState.settings, ...(parsedState.settings || {}) };
+                appState.currentDate = parsedState.currentDate || null;
+            }
+        };
+
+        const getTodayDateString = () => new Date().toISOString().split('T')[0];
+
+        class ChoreManager {
+            constructor(state) {
+                this.state = state;
+            }
+
+            addChore(chore) {
+                chore.id = Date.now().toString();
+                chore.completed = false;
+                chore.lastCompletedDate = null;
+                this.state.chores.push(chore);
+                saveState();
+            }
+
+            updateChore(updatedChore) {
+                const index = this.state.chores.findIndex(c => c.id === updatedChore.id);
+                if (index !== -1) {
+                    this.state.chores[index] = { ...this.state.chores[index], ...updatedChore };
+                    saveState();
+                }
+            }
+
+            deleteChore(id) {
+                this.state.chores = this.state.chores.filter(c => c.id !== id);
+                this.state.chores.forEach(chore => {
+                    if (chore.scheduleType === 'relative-event' && chore.scheduleValue === id) {
+                        chore.scheduleType = 'fixed-time';
+                        chore.scheduleValue = '00:00';
+                        chore.offset = 0;
+                    }
+                });
+                saveState();
+            }
+
+            markChoreComplete(id) {
+                const chore = this.state.chores.find(c => c.id === id);
+                if (chore) {
+                    chore.completed = true;
+                    chore.lastCompletedDate = getTodayDateString();
+                    saveState();
+                }
+            }
+
+            resetDailyChores() {
+                const today = getTodayDateString();
+                if (this.state.currentDate !== today) {
+                    this.state.chores.forEach(chore => {
+                        if (chore.lastCompletedDate !== today) {
+                            chore.completed = false;
+                        }
+                    });
+                    this.state.currentDate = today;
+                    saveState();
+                }
+            }
+
+            getDailyChores() {
+                this.resetDailyChores();
+                return this.state.chores.map(chore => {
+                    const now = new Date();
+                    const today = getTodayDateString();
+                    const choreDueTime = this._calculateChoreDueTime(chore, now);
+                    const isOverdue = choreDueTime && choreDueTime < now && !chore.completed;
+                    const isUpcoming = choreDueTime && choreDueTime > now && !chore.completed;
+                    const isCompleted = chore.completed && chore.lastCompletedDate === today;
+
+                    return {
+                        ...chore,
+                        dueTime: choreDueTime,
+                        isOverdue: isOverdue,
+                        isUpcoming: isUpcoming,
+                        isCompleted: isCompleted
+                    };
+                });
+            }
+
+            _calculateChoreDueTime(chore, now) {
+                const today = now.toISOString().split('T')[0];
+                let dueTime = null;
+
+                if (chore.scheduleType === 'fixed-time' && chore.scheduleValue) {
+                    dueTime = new Date(`${today}T${chore.scheduleValue}:00`);
+                } else if (chore.scheduleType === 'relative-event' && chore.scheduleValue && chore.offset !== undefined) {
+                    const event = this.state.dailyEvents.find(e => e.id === chore.scheduleValue);
+                    if (event && event.time) {
+                        const eventTime = new Date(`${today}T${event.time}:00`);
+                        dueTime = new Date(eventTime.getTime() + chore.offset * 60 * 1000);
+                    }
+                } else if (chore.scheduleType === 'interval' && chore.scheduleValue && chore.intervalStart && chore.intervalEnd) {
+                    const intervalMinutes = parseInt(chore.scheduleValue);
+                    const startTime = new Date(`${today}T${chore.intervalStart}:00`);
+                    const endTime = new Date(`${today}T${chore.intervalEnd}:00`);
+
+                    if (intervalMinutes > 0 && startTime < endTime) {
+                        let currentIntervalTime = new Date(startTime.getTime());
+                        let nextDueTime = null;
+
+                        while (currentIntervalTime <= endTime) {
+                            if (currentIntervalTime > now) {
+                                nextDueTime = currentIntervalTime;
+                                break;
+                            }
+                            currentIntervalTime = new Date(currentIntervalTime.getTime() + intervalMinutes * 60 * 1000);
+                        }
+                        dueTime = nextDueTime;
+                    }
+                }
+                return dueTime;
+            }
+        }
+
+        class EventManager {
+            constructor(state) {
+                this.state = state;
+            }
+
+            addEvent(event) {
+                event.id = Date.now().toString();
+                this.state.dailyEvents.push(event);
+                saveState();
+            }
+
+            updateEvent(updatedEvent) {
+                const index = this.state.dailyEvents.findIndex(e => e.id === updatedEvent.id);
+                if (index !== -1) {
+                    this.state.dailyEvents[index] = { ...this.state.dailyEvents[index], ...updatedEvent };
+                    saveState();
+                }
+            }
+
+            deleteEvent(id) {
+                this.state.dailyEvents = this.state.dailyEvents.filter(e => e.id !== id);
+                this.state.chores.forEach(chore => {
+                    if (chore.scheduleType === 'relative-event' && chore.scheduleValue === id) {
+                        chore.scheduleType = 'fixed-time';
+                        chore.scheduleValue = '00:00';
+                        chore.offset = 0;
+                    }
+                });
+                saveState();
+            }
+        }
+
+        class UIManager {
+            constructor(state, choreManager, eventManager) {
+                this.state = state;
+                this.choreManager = choreManager;
+                this.eventManager = eventManager;
+
+                this.elements = {
+                    currentDatetime: document.getElementById('current-datetime'),
+                    motivationalQuote: document.getElementById('motivational-quote'),
+                    dailyProgressBar: document.getElementById('daily-progress-bar'),
+                    dueChoresList: document.getElementById('due-chores-list'),
+                    upcomingChoresList: document.getElementById('upcoming-chores-list'),
+                    completedChoresList: document.getElementById('completed-chores-list'),
+                    choresList: document.getElementById('chores-list'),
+                    eventsList: document.getElementById('events-list'),
+                    addChoreBtn: document.getElementById('add-chore-btn'),
+                    addEventBtn: document.getElementById('add-event-btn'),
+                    choreModal: new bootstrap.Modal(document.getElementById('choreModal')),
+                    eventModal: new bootstrap.Modal(document.getElementById('eventModal')),
+                    choreForm: document.getElementById('chore-form'),
+                    choreModalLabel: document.getElementById('choreModalLabel'),
+                    eventId: document.getElementById('event-id'),
+                    eventName: document.getElementById('event-name'),
+                    eventTime: document.getElementById('event-time'),
+                    eventForm: document.getElementById('event-form'),
+                    eventModalLabel: document.getElementById('eventModalLabel'),
+                    choreId: document.getElementById('chore-id'),
+                    choreName: document.getElementById('chore-name'),
+                    choreDescription: document.getElementById('chore-description'),
+                    chorePriority: document.getElementById('chore-priority'),
+                    choreScheduleType: document.getElementById('chore-schedule-type'),
+                    fixedTimeGroup: document.getElementById('fixed-time-group'),
+                    choreTime: document.getElementById('chore-time'),
+                    relativeEventGroup: document.getElementById('relative-event-group'),
+                    choreEvent: document.getElementById('chore-event'),
+                    choreOffset: document.getElementById('chore-offset'),
+                    intervalGroup: document.getElementById('interval-group'),
+                    choreInterval: document.getElementById('chore-interval'),
+                    choreIntervalStart: document.getElementById('chore-interval-start'),
+                    choreIntervalEnd: document.getElementById('chore-interval-end'),
+                    notificationSoundToggle: document.getElementById('notification-sound-toggle'),
+                    saveSettingsBtn: document.getElementById('save-settings-btn'),
+                    generateDinnerBtn: document.getElementById('generate-dinner-btn'),
+                    dietaryPrefs: document.getElementById('dietary-prefs'),
+                    ingredientsInput: document.getElementById('ingredients-input'),
+                    dinnerIdeaOutput: document.getElementById('dinner-idea-output'),
+                    dinnerTextSpinner: document.getElementById('dinner-text-spinner'),
+                    dinnerTextError: document.getElementById('dinner-text-error'),
+                    dinnerIdeaText: document.getElementById('dinner-idea-text'),
+                    generateImageBtn: document.getElementById('generate-image-btn'),
+                    dinnerImageSpinner: document.getElementById('dinner-image-spinner'),
+                    dinnerImage: document.getElementById('dinner-image'),
+                    dinnerImageError: document.getElementById('dinner-image-error'),
+                    notificationSound: document.getElementById('notification-sound')
+                };
+                this.motivationalQuotes = [
+                    "The best way to predict the future is to create it.",
+                    "Start where you are. Use what you have. Do what you can.",
+                    "The journey of a thousand miles begins with a single step.",
+                    "Success is the sum of small efforts repeated daily.",
+                    "Believe you can and you're halfway there."
+                ];
+                this.setupEventListeners();
+            }
+
+            setupEventListeners() {
+                this.elements.addChoreBtn.addEventListener('click', () => this.openChoreModal());
+                this.elements.choreForm.addEventListener('submit', (e) => this.handleChoreFormSubmit(e));
+                this.elements.choreScheduleType.addEventListener('change', () => this.toggleChoreScheduleFields());
+                document.getElementById('choreModal').addEventListener('shown.bs.modal', () => this.populateEventSelect());
+
+                this.elements.addEventBtn.addEventListener('click', () => this.openEventModal());
+                this.elements.eventForm.addEventListener('submit', (e) => this.handleEventFormSubmit(e));
+
+                this.elements.saveSettingsBtn.addEventListener('click', () => this.saveSettings());
+                this.elements.notificationSoundToggle.addEventListener('change', () => {
+                    this.state.settings.notificationSound = this.elements.notificationSoundToggle.checked;
+                    saveState();
+                });
+
+                this.elements.generateDinnerBtn.addEventListener('click', () => this.generateDinnerIdea());
+                this.elements.generateImageBtn.addEventListener('click', () => this.generateDinnerImage());
+
+                document.getElementById('nav-tab').addEventListener('shown.bs.tab', (e) => {
+                    const activeTabId = e.target.id;
+                    if (activeTabId === 'nav-dashboard-tab') this.renderDashboard();
+                    if (activeTabId === 'nav-chores-tab') this.renderAllChores();
+                    if (activeTabId === 'nav-events-tab') this.renderAllEvents();
+                    if (activeTabId === 'nav-settings-tab') this.loadSettings();
+                });
+            }
+
+            renderApp() {
+                this.renderDashboard();
+                this.renderAllChores();
+                this.renderAllEvents();
+                this.loadSettings();
+            }
+
+            renderDashboard() {
+                const now = new Date();
+                this.elements.currentDatetime.textContent = now.toLocaleString('en-US', {
+                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+                });
+                this.elements.motivationalQuote.textContent = this.motivationalQuotes[Math.floor(Math.random() * this.motivationalQuotes.length)];
+
+                const dailyChores = this.choreManager.getDailyChores();
+                const totalChores = dailyChores.length;
+                const completedChores = dailyChores.filter(c => c.isCompleted).length;
+                const progress = totalChores > 0 ? Math.round((completedChores / totalChores) * 100) : 0;
+                this.elements.dailyProgressBar.style.width = `${progress}%`;
+                this.elements.dailyProgressBar.textContent = `${progress}%`;
+                this.elements.dailyProgressBar.setAttribute('aria-valuenow', progress);
+
+                this.elements.dueChoresList.innerHTML = '';
+                this.elements.upcomingChoresList.innerHTML = '';
+                this.elements.completedChoresList.innerHTML = '';
+
+                dailyChores.sort((a, b) => (a.dueTime || 0) - (b.dueTime || 0)).forEach(chore => {
+                    const listItem = this.createChoreListItem(chore, true);
+                    if (chore.isOverdue) {
+                        this.elements.dueChoresList.appendChild(listItem);
+                    } else if (chore.isUpcoming) {
+                        this.elements.upcomingChoresList.appendChild(listItem);
+                    } else if (chore.isCompleted) {
+                        this.elements.completedChoresList.appendChild(listItem);
+                    }
+                });
+                if (this.elements.dueChoresList.children.length === 0) this.elements.dueChoresList.innerHTML = '<li class="list-group-item bg-dark text-muted">No overdue chores.</li>';
+                if (this.elements.upcomingChoresList.children.length === 0) this.elements.upcomingChoresList.innerHTML = '<li class="list-group-item bg-dark text-muted">No upcoming chores.</li>';
+                if (this.elements.completedChoresList.children.length === 0) this.elements.completedChoresList.innerHTML = '<li class="list-group-item bg-dark text-muted">No completed chores yet.</li>';
+            }
+
+            renderAllChores() {
+                this.elements.choresList.innerHTML = '';
+                this.state.chores.forEach(chore => {
+                    this.elements.choresList.appendChild(this.createChoreListItem(chore));
+                });
+                if (this.state.chores.length === 0) {
+                    this.elements.choresList.innerHTML = '<p class="text-muted text-center">No chores defined yet. Click "Add New Chore" to get started!</p>';
+                }
+            }
+
+            createChoreListItem(chore, isDashboardView = false) {
+                const listItem = document.createElement('div');
+                listItem.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center', 'bg-dark', 'text-light', 'border-secondary', 'mb-2');
+
+                let statusClass = '';
+                let statusText = '';
+                let priorityClass = '';
+
+                if (isDashboardView) {
+                    if (chore.isCompleted) {
+                        statusClass = 'text-success';
+                        statusText = 'Completed';
+                    } else if (chore.isOverdue) {
+                        statusClass = 'text-danger';
+                        statusText = 'Overdue!';
+                    } else if (chore.isUpcoming) {
+                        statusClass = 'text-primary';
+                        statusText = `Due ${chore.dueTime ? chore.dueTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }) : ''}`;
+                    } else {
+                        statusClass = 'text-muted';
+                        statusText = 'Scheduled';
+                    }
+                }
+
+                switch (chore.priority) {
+                    case 'High': priorityClass = 'text-danger'; break;
+                    case 'Medium': priorityClass = 'text-warning'; break;
+                    case 'Low': priorityClass = 'text-info'; break;
+                }
+
+                listItem.innerHTML = `
+                    <div class="flex-grow-1 me-3">
+                        <h5 class="mb-1 ${chore.completed ? 'text-decoration-line-through text-muted' : ''}">${chore.name}</h5>
+                        <p class="mb-1 text-muted small">${chore.description || 'No description'}</p>
+                        <p class="mb-0 small ${priorityClass}">Priority: ${chore.priority}</p>
+                        ${isDashboardView && statusText ? `<p class="mb-0 small ${statusClass}">Status: ${statusText}</p>` : ''}
+                    </div>
+                    <div class="d-flex flex-column align-items-end">
+                        ${!isDashboardView || (!chore.isCompleted && !chore.isOverdue) ? `
+                        <button class="btn btn-sm btn-outline-success mb-1 complete-chore-btn" data-id="${chore.id}" ${chore.completed ? 'disabled' : ''}>Complete</button>
+                        ` : ''}
+                        ${!isDashboardView ? `
+                        <button class="btn btn-sm btn-outline-info mb-1 edit-chore-btn" data-id="${chore.id}">Edit</button>
+                        <button class="btn btn-sm btn-outline-danger delete-chore-btn" data-id="${chore.id}">Delete</button>
+                        ` : ''}
+                    </div>
+                `;
+
+                if (!isDashboardView || (!chore.isCompleted && !chore.isOverdue)) {
+                    listItem.querySelector('.complete-chore-btn')?.addEventListener('click', () => {
+                        this.choreManager.markChoreComplete(chore.id);
+                        this.renderApp();
+                        this.playNotificationSound();
+                    });
+                }
+                listItem.querySelector('.edit-chore-btn')?.addEventListener('click', () => this.openChoreModal(chore));
+                listItem.querySelector('.delete-chore-btn')?.addEventListener('click', () => {
+                    if (confirm(`Are you sure you want to delete "${chore.name}"?`)) {
+                        this.choreManager.deleteChore(chore.id);
+                        this.renderApp();
+                    }
+                });
+                return listItem;
+            }
+
+            openChoreModal(chore = null) {
+                this.elements.choreForm.reset();
+                this.elements.choreId.value = '';
+                this.elements.choreModalLabel.textContent = 'Add New Chore';
+                this.toggleChoreScheduleFields('fixed-time');
+
+                if (chore) {
+                    this.elements.choreModalLabel.textContent = 'Edit Chore';
+                    this.elements.choreId.value = chore.id;
+                    this.elements.choreName.value = chore.name;
+                    this.elements.choreDescription.value = chore.description;
+                    this.elements.chorePriority.value = chore.priority;
+                    this.elements.choreScheduleType.value = chore.scheduleType;
+
+                    this.toggleChoreScheduleFields(chore.scheduleType);
+
+                    if (chore.scheduleType === 'fixed-time') {
+                        this.elements.choreTime.value = chore.scheduleValue || '00:00';
+                    } else if (chore.scheduleType === 'relative-event') {
+                        this.elements.choreEvent.value = chore.scheduleValue || '';
+                        this.elements.choreOffset.value = chore.offset !== undefined ? chore.offset : 0;
+                    } else if (chore.scheduleType === 'interval') {
+                        this.elements.choreInterval.value = chore.scheduleValue || 60;
+                        this.elements.choreIntervalStart.value = chore.intervalStart || '00:00';
+                        this.elements.choreIntervalEnd.value = chore.intervalEnd || '23:59';
+                    }
+                }
+                this.elements.choreModal.show();
+            }
+
+            toggleChoreScheduleFields(selectedType = this.elements.choreScheduleType.value) {
+                this.elements.fixedTimeGroup.classList.add('d-none');
+                this.elements.relativeEventGroup.classList.add('d-none');
+                this.elements.intervalGroup.classList.add('d-none');
+
+                if (selectedType === 'fixed-time') {
+                    this.elements.fixedTimeGroup.classList.remove('d-none');
+                } else if (selectedType === 'relative-event') {
+                    this.elements.relativeEventGroup.classList.remove('d-none');
+                    this.populateEventSelect();
+                } else if (selectedType === 'interval') {
+                    this.elements.intervalGroup.classList.remove('d-none');
+                }
+            }
+
+            populateEventSelect() {
+                this.elements.choreEvent.innerHTML = '<option value="">Select an event</option>';
+                this.state.dailyEvents.forEach(event => {
+                    const option = document.createElement('option');
+                    option.value = event.id;
+                    option.textContent = `${event.name} (${event.time})`;
+                    this.elements.choreEvent.appendChild(option);
+                });
+            }
+
+            handleChoreFormSubmit(e) {
+                e.preventDefault();
+                const id = this.elements.choreId.value;
+                const name = this.elements.choreName.value.trim();
+                const description = this.elements.choreDescription.value.trim();
+                const priority = this.elements.chorePriority.value;
+                const scheduleType = this.elements.choreScheduleType.value;
+                let scheduleValue = null;
+                let offset = 0;
+                let intervalStart = null;
+                let intervalEnd = null;
+
+                if (scheduleType === 'fixed-time') {
+                    scheduleValue = this.elements.choreTime.value;
+                } else if (scheduleType === 'relative-event') {
+                    scheduleValue = this.elements.choreEvent.value;
+                    offset = parseInt(this.elements.choreOffset.value);
+                    if (!scheduleValue) { alert('Please select an event for relative scheduling.'); return; }
+                } else if (scheduleType === 'interval') {
+                    scheduleValue = parseInt(this.elements.choreInterval.value);
+                    intervalStart = this.elements.choreIntervalStart.value;
+                    intervalEnd = this.elements.choreIntervalEnd.value;
+                    if (!scheduleValue || scheduleValue <= 0) { alert('Please enter a valid interval in minutes.'); return; }
+                    if (!intervalStart || !intervalEnd) { alert('Please enter start and end times for interval scheduling.'); return; }
+                }
+
+                if (!name) { alert('Chore Name is required.'); return; }
+
+                const choreData = {
+                    name, description, priority, scheduleType, scheduleValue, offset, intervalStart, intervalEnd
+                };
+
+                if (id) {
+                    choreData.id = id;
+                    this.choreManager.updateChore(choreData);
+                } else {
+                    this.choreManager.addChore(choreData);
+                }
+                this.elements.choreModal.hide();
+                this.renderApp();
+            }
+
+            renderAllEvents() {
+                this.elements.eventsList.innerHTML = '';
+                this.state.dailyEvents.sort((a, b) => a.time.localeCompare(b.time)).forEach(event => {
+                    this.elements.eventsList.appendChild(this.createEventListItem(event));
+                });
+                if (this.state.dailyEvents.length === 0) {
+                    this.elements.eventsList.innerHTML = '<p class="text-muted text-center">No daily events defined yet. Click "Add New Event" to map out your day!</p>';
+                }
+            }
+
+            createEventListItem(event) {
+                const listItem = document.createElement('div');
+                listItem.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center', 'bg-dark', 'text-light', 'border-secondary', 'mb-2');
+                listItem.innerHTML = `
+                    <div class="flex-grow-1 me-3">
+                        <h5 class="mb-1">${event.name}</h5>
+                        <p class="mb-0 text-muted small">Time: ${event.time}</p>
+                    </div>
+                    <div class="d-flex flex-column align-items-end">
+                        <button class="btn btn-sm btn-outline-info mb-1 edit-event-btn" data-id="${event.id}">Edit</button>
+                        <button class="btn btn-sm btn-outline-danger delete-event-btn" data-id="${event.id}">Delete</button>
+                    </div>
+                `;
+                listItem.querySelector('.edit-event-btn').addEventListener('click', () => this.openEventModal(event));
+                listItem.querySelector('.delete-event-btn').addEventListener('click', () => {
+                    if (confirm(`Are you sure you want to delete "${event.name}"? This might affect chores linked to it.`)) {
+                        this.eventManager.deleteEvent(event.id);
+                        this.renderApp();
+                    }
+                });
+                return listItem;
+            }
+
+            openEventModal(event = null) {
+                this.elements.eventForm.reset();
+                this.elements.eventId.value = '';
+                this.elements.eventModalLabel.textContent = 'Add New Event';
+
+                if (event) {
+                    this.elements.eventModalLabel.textContent = 'Edit Event';
+                    this.elements.eventId.value = event.id;
+                    this.elements.eventName.value = event.name;
+                    this.elements.eventTime.value = event.time;
+                }
+                this.elements.eventModal.show();
+            }
+
+            handleEventFormSubmit(e) {
+                e.preventDefault();
+                const id = this.elements.eventId.value;
+                const name = this.elements.eventName.value.trim();
+                const time = this.elements.eventTime.value;
+
+                if (!name || !time) { alert('Event Name and Time are required.'); return; }
+
+                const eventData = { name, time };
+
+                if (id) {
+                    eventData.id = id;
+                    this.eventManager.updateEvent(eventData);
+                } else {
+                    this.eventManager.addEvent(eventData);
+                }
+                this.elements.eventModal.hide();
+                this.renderApp();
+            }
+
+            loadSettings() {
+                this.elements.notificationSoundToggle.checked = this.state.settings.notificationSound;
+            }
+
+            saveSettings() {
+                this.state.settings.notificationSound = this.elements.notificationSoundToggle.checked;
+                saveState();
+                alert('Settings saved!');
+            }
+
+            playNotificationSound() {
+                if (this.state.settings.notificationSound) {
+                    this.elements.notificationSound.play().catch(e => console.error("Error playing sound:", e));
+                }
+            }
+
+            async generateDinnerIdea() {
+                this.elements.dinnerTextSpinner.classList.remove('d-none');
+                this.elements.dinnerTextError.textContent = '';
+                this.elements.dinnerIdeaText.textContent = '';
+                this.elements.generateImageBtn.classList.add('d-none');
+                this.elements.dinnerImage.classList.add('d-none');
+                this.elements.dinnerImage.src = '';
+                this.elements.dinnerImageError.textContent = '';
+
+                const dietaryPrefs = Array.from(this.elements.dietaryPrefs.querySelectorAll('input:checked'))
+                    .map(cb => cb.value);
+                const ingredients = this.elements.ingredientsInput.value.trim();
+
+                let prompt = "Suggest a dinner idea.";
+                if (dietaryPrefs.length > 0) {
+                    prompt += ` It should be ${dietaryPrefs.join(' and ')}.`;
+                }
+                if (ingredients) {
+                    prompt += ` I have these ingredients: ${ingredients}. Please suggest a dish using some of them.`;
+                }
+                prompt += " Provide only the dish name and a brief, enticing description (max 2 sentences). Do not include recipe steps or full ingredients list.";
+
+                try {
+                    const response = await fetch('/api/ai', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ msgforai: prompt })
+                    });
+                    const data = await response.json();
+                    if (data.success && data.response) {
+                        this.state.currentDinnerIdea = data.response.trim();
+                        this.elements.dinnerIdeaText.textContent = this.state.currentDinnerIdea;
+                        this.elements.generateImageBtn.classList.remove('d-none');
+                    } else {
+                        this.elements.dinnerTextError.textContent = 'Failed to get dinner idea. Please try again.';
+                        console.error('AI API Error:', data.error);
+                    }
+                } catch (error) {
+                    this.elements.dinnerTextError.textContent = 'Network error or AI service unavailable.';
+                    console.error('Fetch error:', error);
+                } finally {
+                    this.elements.dinnerTextSpinner.classList.add('d-none');
+                }
+            }
+
+            async generateDinnerImage() {
+                if (!this.state.currentDinnerIdea) {
+                    this.elements.dinnerImageError.textContent = 'Please generate a dinner idea first.';
+                    return;
+                }
+
+                this.elements.dinnerImageSpinner.classList.remove('d-none');
+                this.elements.dinnerImageError.textContent = '';
+                this.elements.dinnerImage.classList.add('d-none');
+                this.elements.dinnerImage.src = '';
+
+                const prompt = `Photorealistic image of a delicious ${this.state.currentDinnerIdea}. Food photography, studio lighting, mouth-watering, vibrant colors.`;
+
+                try {
+                    const response = await fetch('/api/generate-image-on-demand', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prompt: prompt, aspectRatio: '1:1' })
+                    });
+                    const data = await response.json();
+                    if (data.success && data.imageUrl) {
+                        this.state.currentDinnerImage = data.imageUrl;
+                        this.elements.dinnerImage.src = this.state.currentDinnerImage;
+                        this.elements.dinnerImage.onload = () => {
+                            this.elements.dinnerImage.classList.remove('d-none');
+                            this.elements.dinnerImageSpinner.classList.add('d-none');
+                        };
+                        this.elements.dinnerImage.onerror = () => {
+                            this.elements.dinnerImageError.textContent = 'Failed to load image.';
+                            this.elements.dinnerImageSpinner.classList.add('d-none');
+                        };
+                    } else {
+                        this.elements.dinnerImageError.textContent = 'Failed to generate image. Please try again.';
+                        console.error('Image API Error:', data.error);
+                        this.elements.dinnerImageSpinner.classList.add('d-none');
+                    }
+                } catch (error) {
+                    this.elements.dinnerImageError.textContent = 'Network error or image generation service unavailable.';
+                    console.error('Fetch error:', error);
+                    this.elements.dinnerImageSpinner.classList.add('d-none');
+                }
+            }
+        }
+
+        class ReminderSystem {
+            constructor(state, choreManager, uiManager) {
+                this.state = state;
+                this.choreManager = choreManager;
+                this.uiManager = uiManager;
+                this.interval = null;
+                this.notifiedChoresToday = new Set();
+            }
+
+            start() {
+                this.checkReminders();
+                this.interval = setInterval(() => this.checkReminders(), 60 * 1000);
+            }
+
+            stop() {
+                if (this.interval) {
+                    clearInterval(this.interval);
+                }
+            }
+
+            checkReminders() {
+                this.uiManager.renderDashboard();
+                const now = new Date();
+                const today = getTodayDateString();
+
+                if (this.state.currentDate !== today) {
+                    this.notifiedChoresToday.clear();
+                }
+
+                const dailyChores = this.choreManager.getDailyChores();
+                dailyChores.forEach(chore => {
+                    if (chore.dueTime && !chore.isCompleted && !this.notifiedChoresToday.has(chore.id)) {
+                        const timeDiff = now.getTime() - chore.dueTime.getTime();
+                        if (timeDiff >= -59000 && timeDiff <= 0) {
+                            alert(`Reminder: ${chore.name} is due now!`);
+                            this.uiManager.playNotificationSound();
+                            this.notifiedChoresToday.add(chore.id);
+                        }
+                    }
+                });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadState();
+
+            const choreManager = new ChoreManager(appState);
+            const eventManager = new EventManager(appState);
+            const uiManager = new UIManager(appState, choreManager, eventManager);
+            const reminderSystem = new ReminderSystem(appState, choreManager, uiManager);
+
+            uiManager.renderApp();
+
+            reminderSystem.start();
+
+            choreManager.resetDailyChores();
+        });
+
+        if (!Date.prototype.toISOString) {
+            (function () {
+                function pad(number) {
+                    if (number < 10) {
+                        return '0' + number;
+                    }
+                    return number;
+                }
+                Date.prototype.toISOString = function () {
+                    return this.getUTCFullYear() +
+                        '-' + pad(this.getUTCMonth() + 1) +
+                        '-' + pad(this.getUTCDate()) +
+                        'T' + pad(this.getUTCHours()) +
+                        ':' + pad(this.getUTCMinutes()) +
+                        ':' + pad(this.getUTCSeconds()) +
+                        '.' + (this.getUTCMilliseconds() / 1000).toFixed(3).slice(2, 5) +
+                        'Z';
+                };
+            }());
+        }
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

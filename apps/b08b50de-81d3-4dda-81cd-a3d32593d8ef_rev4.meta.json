@@ -1,0 +1,10 @@
+{
+  "projectId": "b08b50de-81d3-4dda-81cd-a3d32593d8ef",
+  "revisionString": "4",
+  "projectNameDisplay": "Statscan dashboard",
+  "projectType": "webapp",
+  "userPromptForThisRevision": "Data Load Error!\r\nFailed to fetch or parse DSD: DataStructureDefinition not found in DSD XML.\r\nMake sure any one data error doesn’t break the rest of the calls. You got this ",
+  "basedOnRevisionString": "3",
+  "savedAt": "2025-05-30T15:28:53.359Z",
+  "imageAssets": []
+}

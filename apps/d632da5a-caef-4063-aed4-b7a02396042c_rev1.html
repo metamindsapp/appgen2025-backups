@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Best Chores List</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            background-color: #212529;
+            color: #f8f9fa;
+        }
+        .task-list-item {
+            transition: background-color 0.3s ease;
+        }
+        .task-list-item.completed {
+            text-decoration: line-through;
+            color: #6c757d !important;
+        }
+        .task-list-item:hover {
+            background-color: #343a40;
+        }
+        .modal-content {
+            background-color: #212529;
+            color: #f8f9fa;
+        }
+        .modal-header, .modal-footer {
+            border-color: #495057;
+        }
+        .form-control, .form-select, .form-control:disabled {
+            background-color: #343a40;
+            color: #f8f9fa;
+            border-color: #495057;
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: #343a40;
+            color: #f8f9fa;
+            border-color: #6c757d;
+            box-shadow: 0 0 0 0.25rem rgba(108, 117, 125, 0.25);
+        }
+        .form-control::placeholder {
+            color: #adb5bd;
+        }
+        .toast {
+            background-color: #343a40;
+            color: #f8f9fa;
+        }
+        .toast.text-bg-success { background-color: #198754 !important; }
+        .toast.text-bg-danger { background-color: #dc3545 !important; }
+        .toast.text-bg-warning { background-color: #ffc107 !important; color: #000 !important;}
+        .toast.text-bg-info { background-color: #0dcaf0 !important; color: #000 !important;}
+        .ai-image-container {
+            min-height: 200px;
+            background-color: #343a40;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+        .ai-image-container img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+        .ai-image-container .spinner-border {
+            position: absolute;
+        }
+    </style>
+</head>
+<body class="bg-dark text-light" data-bs-theme="dark">
+    <div class="container-fluid min-vh-100 d-flex flex-column">
+        <header class="py-4 bg-dark border-bottom border-secondary">
+            <div class="d-flex justify-content-between align-items-center px-3">
+                <h1 class="h3 mb-0 text-primary">Daily Chores & Ideas</h1>
+                <button id="settingsBtn" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#settingsModal">
+                    <i class="bi bi-gear"></i> Settings
+                </button>
+            </div>
+        </header>
+
+        <main class="row flex-grow-1 p-3">
+            <div class="col-lg-7 d-flex flex-column mb-3 mb-lg-0">
+                <div class="card bg-dark border-secondary h-100">
+                    <div class="card-header border-secondary d-flex justify-content-between align-items-center">
+                        <h2 class="card-title h4 mb-0 text-info">Today's Tasks (<span id="currentDate"></span>)</h2>
+                        <button id="addTaskBtn" class="btn btn-primary btn-sm">Add New Task</button>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <div class="progress mb-3 bg-secondary" style="height: 20px;">
+                            <div id="taskProgressBar" class="progress-bar bg-success" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                        </div>
+                        <div id="taskList" class="list-group flex-grow-1 overflow-auto">
+                            <div class="text-center p-4 text-muted" id="noTasksMessage">No tasks yet! Click "Add New Task" to get started.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5 d-flex flex-column">
+                <div class="card bg-dark border-secondary h-100">
+                    <div class="card-header border-secondary">
+                        <h2 class="card-title h4 mb-0 text-warning">Dinner Ideas</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="dinnerPromptInput" class="form-label">Tell me your dinner preferences:</label>
+                            <textarea class="form-control" id="dinnerPromptInput" rows="3" placeholder="e.g., 'quick vegetarian', 'using chicken and broccoli', 'something spicy'"></textarea>
+                        </div>
+                        <div class="d-grid gap-2 mb-3">
+                            <button id="getDinnerIdeaBtn" class="btn btn-success">Get Dinner Idea</button>
+                            <button id="generateDinnerImageBtn" class="btn btn-info" disabled>Generate Image</button>
+                        </div>
+                        <div id="dinnerIdeaOutput" class="alert alert-secondary bg-secondary text-light border-0" role="alert" style="min-height: 100px;">
+                            <p class="mb-0 text-center text-muted" id="aiIdeaPlaceholder">Your dinner idea will appear here...</p>
+                            <div class="d-flex justify-content-center align-items-center" id="aiIdeaSpinner" style="display: none;">
+                                <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>
+                            </div>
+                            <p id="aiDinnerText" class="mb-2"></p>
+                            <div class="ai-image-container mb-2 border border-secondary rounded" id="aiImageContainer">
+                                <img id="aiDinnerImage" src="" alt="Generated image of dinner idea" style="display: none;">
+                                <div class="d-flex justify-content-center align-items-center" id="aiImageSpinner" style="display: none;">
+                                    <div class="spinner-border text-info" role="status"><span class="visually-hidden">Loading...</span></div>
+                                </div>
+                            </div>
+                            <button id="clearDinnerResultsBtn" class="btn btn-outline-danger btn-sm w-100" style="display: none;">Clear Results</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="modal fade" id="addTaskModal" tabindex="-1" aria-labelledby="addTaskModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="addTaskModalLabel">Add New Task</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="taskForm">
+                        <input type="hidden" id="taskId">
+                        <div class="mb-3">
+                            <label for="taskName" class="form-label">Task Name</label>
+                            <input type="text" class="form-control" id="taskName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="taskTime" class="form-label">Time</label>
+                            <input type="time" class="form-control" id="taskTime" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="taskDescription" class="form-label">Description (Optional)</label>
+                            <textarea class="form-control" id="taskDescription" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" form="taskForm" id="saveTaskBtn" class="btn btn-primary">Save Task</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="settingsModalLabel">Settings</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Manage your app data.</p>
+                    <button id="clearAllDataBtn" class="btn btn-danger w-100">Clear All Data</button>
+                    <small class="text-muted mt-2 d-block">This will delete all your tasks and settings permanently.</small>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', initializeApp);
+
+        const appState = {
+            tasks: [],
+            lastAccessedDate: null,
+            currentDinnerIdeaText: '',
+            currentDinnerImageUrl: ''
+        };
+
+        const elements = {
+            taskList: document.getElementById('taskList'),
+            addTaskBtn: document.getElementById('addTaskBtn'),
+            taskProgressBar: document.getElementById('taskProgressBar'),
+            noTasksMessage: document.getElementById('noTasksMessage'),
+            currentDateSpan: document.getElementById('currentDate'),
+
+            addTaskModal: new bootstrap.Modal(document.getElementById('addTaskModal')),
+            addTaskModalLabel: document.getElementById('addTaskModalLabel'),
+            taskIdInput: document.getElementById('taskId'),
+            taskNameInput: document.getElementById('taskName'),
+            taskTimeInput: document.getElementById('taskTime'),
+            taskDescriptionInput: document.getElementById('taskDescription'),
+            saveTaskBtn: document.getElementById('saveTaskBtn'),
+            taskForm: document.getElementById('taskForm'),
+
+            dinnerPromptInput: document.getElementById('dinnerPromptInput'),
+            getDinnerIdeaBtn: document.getElementById('getDinnerIdeaBtn'),
+            generateDinnerImageBtn: document.getElementById('generateDinnerImageBtn'),
+            aiIdeaPlaceholder: document.getElementById('aiIdeaPlaceholder'),
+            aiDinnerText: document.getElementById('aiDinnerText'),
+            aiDinnerImage: document.getElementById('aiDinnerImage'),
+            aiImageContainer: document.getElementById('aiImageContainer'),
+            aiIdeaSpinner: document.getElementById('aiIdeaSpinner'),
+            aiImageSpinner: document.getElementById('aiImageSpinner'),
+            clearDinnerResultsBtn: document.getElementById('clearDinnerResultsBtn'),
+
+            settingsModal: new bootstrap.Modal(document.getElementById('settingsModal')),
+            settingsBtn: document.getElementById('settingsBtn'),
+            clearAllDataBtn: document.getElementById('clearAllDataBtn'),
+
+            toastContainer: document.querySelector('.toast-container')
+        };
+
+        const Utils = {
+            generateId: () => '_' + Math.random().toString(36).substr(2, 9),
+            formatDate: (date) => date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+            formatTime: (timeString) => {
+                if (!timeString) return '';
+                const [hours, minutes] = timeString.split(':').map(Number);
+                const date = new Date();
+                date.setHours(hours, minutes, 0, 0);
+                return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            },
+            showToast: (message, type = 'primary') => {
+                const toastHtml = `
+                    <div class="toast text-bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="d-flex">
+                            <div class="toast-body">${message}</div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                    </div>
+                `;
+                const toastElement = document.createElement('div');
+                toastElement.innerHTML = toastHtml;
+                elements.toastContainer.appendChild(toastElement.firstElementChild);
+                const toast = new bootstrap.Toast(toastElement.firstElementChild);
+                toast.show();
+            },
+            showSpinner: (spinnerElement) => { spinnerElement.style.display = 'flex'; },
+            hideSpinner: (spinnerElement) => { spinnerElement.style.display = 'none'; }
+        };
+
+        const TaskManager = {
+            loadTasks: () => {
+                const storedState = JSON.parse(localStorage.getItem('choresAppState'));
+                if (storedState) {
+                    appState.tasks = storedState.tasks || [];
+                    appState.lastAccessedDate = storedState.lastAccessedDate;
+                }
+                TaskManager.handleDailyReset();
+                TaskManager.sortTasks();
+            },
+            saveTasks: () => {
+                localStorage.setItem('choresAppState', JSON.stringify({
+                    tasks: appState.tasks,
+                    lastAccessedDate: appState.lastAccessedDate
+                }));
+            },
+            addTask: (taskData) => {
+                const newTask = {
+                    id: Utils.generateId(),
+                    completed: false,
+                    lastCompletedDate: null,
+                    lastRemindedDate: null,
+                    ...taskData
+                };
+                appState.tasks.push(newTask);
+                TaskManager.sortTasks();
+                TaskManager.saveTasks();
+                UIManager.renderTasks();
+                UIManager.updateProgressBar();
+                Utils.showToast('Task added!', 'success');
+            },
+            updateTask: (id, taskData) => {
+                const index = appState.tasks.findIndex(task => task.id === id);
+                if (index !== -1) {
+                    appState.tasks[index] = { ...appState.tasks[index], ...taskData };
+                    TaskManager.sortTasks();
+                    TaskManager.saveTasks();
+                    UIManager.renderTasks();
+                    UIManager.updateProgressBar();
+                    Utils.showToast('Task updated!', 'success');
+                }
+            },
+            deleteTask: (id) => {
+                appState.tasks = appState.tasks.filter(task => task.id !== id);
+                TaskManager.saveTasks();
+                UIManager.renderTasks();
+                UIManager.updateProgressBar();
+                Utils.showToast('Task deleted!', 'danger');
+            },
+            toggleTaskCompletion: (id) => {
+                const task = appState.tasks.find(t => t.id === id);
+                if (task) {
+                    task.completed = !task.completed;
+                    if (task.completed) {
+                        task.lastCompletedDate = new Date().toISOString().split('T')[0];
+                    } else {
+                        task.lastCompletedDate = null;
+                    }
+                    TaskManager.saveTasks();
+                    UIManager.renderTasks();
+                    UIManager.updateProgressBar();
+                    Utils.showToast(task.completed ? 'Task completed!' : 'Task unchecked!', 'info');
+                }
+            },
+            handleDailyReset: () => {
+                const today = new Date().toISOString().split('T')[0];
+                if (appState.lastAccessedDate !== today) {
+                    appState.tasks.forEach(task => {
+                        task.completed = false;
+                        task.lastCompletedDate = null;
+                        task.lastRemindedDate = null;
+                    });
+                    appState.lastAccessedDate = today;
+                    TaskManager.saveTasks();
+                    Utils.showToast('Daily tasks reset for today!', 'info');
+                }
+            },
+            sortTasks: () => {
+                appState.tasks.sort((a, b) => {
+                    const timeA = a.time;
+                    const timeB = b.time;
+                    if (timeA < timeB) return -1;
+                    if (timeA > timeB) return 1;
+                    return 0;
+                });
+            }
+        };
+
+        const UIManager = {
+            renderTasks: () => {
+                elements.taskList.innerHTML = '';
+                if (appState.tasks.length === 0) {
+                    elements.noTasksMessage.style.display = 'block';
+                    return;
+                }
+                elements.noTasksMessage.style.display = 'none';
+
+                appState.tasks.forEach(task => {
+                    const taskItem = document.createElement('div');
+                    taskItem.className = `list-group-item list-group-item-action bg-dark text-light border-secondary d-flex justify-content-between align-items-center task-list-item ${task.completed ? 'completed' : ''}`;
+                    taskItem.setAttribute('data-id', task.id);
+
+                    taskItem.innerHTML = `
+                        <div class="d-flex align-items-center flex-grow-1">
+                            <input class="form-check-input me-3" type="checkbox" ${task.completed ? 'checked' : ''} data-action="toggle-complete">
+                            <div>
+                                <h5 class="mb-1">${task.name} <small class="text-muted ms-2">${Utils.formatTime(task.time)}</small></h5>
+                                ${task.description ? `<p class="mb-0 text-muted small">${task.description}</p>` : ''}
+                            </div>
+                        </div>
+                        <div>
+                            <button class="btn btn-sm btn-outline-info me-2" data-action="edit">Edit</button>
+                            <button class="btn btn-sm btn-outline-danger" data-action="delete">Delete</button>
+                        </div>
+                    `;
+                    elements.taskList.appendChild(taskItem);
+                });
+            },
+            updateProgressBar: () => {
+                const totalTasks = appState.tasks.length;
+                const completedTasks = appState.tasks.filter(task => task.completed).length;
+                const percentage = totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
+                elements.taskProgressBar.style.width = `${percentage}%`;
+                elements.taskProgressBar.setAttribute('aria-valuenow', percentage);
+                elements.taskProgressBar.textContent = `${percentage}%`;
+            },
+            openAddTaskModal: (task = null) => {
+                if (task) {
+                    elements.addTaskModalLabel.textContent = 'Edit Task';
+                    elements.taskIdInput.value = task.id;
+                    elements.taskNameInput.value = task.name;
+                    elements.taskTimeInput.value = task.time;
+                    elements.taskDescriptionInput.value = task.description || '';
+                } else {
+                    elements.addTaskModalLabel.textContent = 'Add New Task';
+                    elements.taskIdInput.value = '';
+                    elements.taskForm.reset();
+                    const now = new Date();
+                    const minutes = Math.round(now.getMinutes() / 5) * 5;
+                    now.setMinutes(minutes);
+                    const hours = String(now.getHours()).padStart(2, '0');
+                    const formattedMinutes = String(now.getMinutes()).padStart(2, '0');
+                    elements.taskTimeInput.value = `${hours}:${formattedMinutes}`;
+                }
+                elements.addTaskModal.show();
+            },
+            closeAddTaskModal: () => {
+                elements.addTaskModal.hide();
+            },
+            renderDinnerIdea: (text, imageUrl) => {
+                appState.currentDinnerIdeaText = text;
+                appState.currentDinnerImageUrl = imageUrl;
+
+                elements.aiIdeaPlaceholder.style.display = 'none';
+                elements.aiDinnerText.textContent = text;
+                elements.generateDinnerImageBtn.disabled = !text;
+
+                if (imageUrl) {
+                    elements.aiDinnerImage.src = imageUrl;
+                    elements.aiDinnerImage.style.display = 'block';
+                    elements.aiImageContainer.classList.remove('d-flex');
+                    elements.aiImageContainer.classList.add('p-0');
+                } else {
+                    elements.aiDinnerImage.src = '';
+                    elements.aiDinnerImage.style.display = 'none';
+                    elements.aiImageContainer.classList.add('d-flex');
+                    elements.aiImageContainer.classList.remove('p-0');
+                }
+                elements.clearDinnerResultsBtn.style.display = 'block';
+            },
+            clearDinnerResults: () => {
+                appState.currentDinnerIdeaText = '';
+                appState.currentDinnerImageUrl = '';
+                elements.aiDinnerText.textContent = '';
+                elements.aiDinnerImage.src = '';
+                elements.aiDinnerImage.style.display = 'none';
+                elements.aiIdeaPlaceholder.style.display = 'block';
+                elements.generateDinnerImageBtn.disabled = true;
+                elements.clearDinnerResultsBtn.style.display = 'none';
+                elements.dinnerPromptInput.value = '';
+                elements.aiImageContainer.classList.add('d-flex');
+                elements.aiImageContainer.classList.remove('p-0');
+            }
+        };
+
+        const ReminderService = {
+            intervalId: null,
+            start: () => {
+                if (ReminderService.intervalId) clearInterval(ReminderService.intervalId);
+                ReminderService.intervalId = setInterval(ReminderService.checkReminders, 60 * 1000);
+                ReminderService.checkReminders();
+            },
+            checkReminders: () => {
+                const now = new Date();
+                const currentTime = now.toTimeString().slice(0, 5);
+                const currentDay = now.toISOString().split('T')[0];
+
+                appState.tasks.forEach(task => {
+                    if (!task.completed && task.time === currentTime && task.lastRemindedDate !== currentDay) {
+                        Utils.showToast(`Reminder: It's time for "${task.name}"!`, 'warning');
+                        task.lastRemindedDate = currentDay;
+                        TaskManager.saveTasks();
+                    }
+                });
+            }
+        };
+
+        const AIService = {
+            getDinnerIdea: async (prompt) => {
+                UIManager.clearDinnerResults();
+                Utils.showSpinner(elements.aiIdeaSpinner);
+                elements.getDinnerIdeaBtn.disabled = true;
+                elements.dinnerPromptInput.disabled = true;
+
+                try {
+                    const response = await fetch('/api/ai', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            aiguide: "You are a helpful assistant that provides concise dinner recipe ideas. Provide only the recipe name and a brief description, without any conversational text.",
+                            msgforai: `Generate a single, concise dinner recipe idea based on these preferences: "${prompt}". Focus on a clear recipe name and a brief description. Avoid long intros or conversational text.`,
+                            llmSettings: {
+                                temperature: 0.7,
+                                model: "gemini-1.5-flash-latest"
+                            }
+                        })
+                    });
+                    const data = await response.json();
+
+                    if (data.success && data.response) {
+                        UIManager.renderDinnerIdea(data.response, null);
+                    } else {
+                        Utils.showToast(`Failed to get dinner idea: ${data.error || 'Unknown error.'}`, 'danger');
+                        UIManager.clearDinnerResults();
+                    }
+                } catch (error) {
+                    console.error('Error fetching dinner idea:', error);
+                    Utils.showToast('Network error or server issue while getting dinner idea.', 'danger');
+                    UIManager.clearDinnerResults();
+                } finally {
+                    Utils.hideSpinner(elements.aiIdeaSpinner);
+                    elements.getDinnerIdeaBtn.disabled = false;
+                    elements.dinnerPromptInput.disabled = false;
+                }
+            },
+            generateDinnerImage: async () => {
+                const prompt = appState.currentDinnerIdeaText;
+                if (!prompt) {
+                    Utils.showToast('Please get a dinner idea first!', 'warning');
+                    return;
+                }
+
+                Utils.showSpinner(elements.aiImageSpinner);
+                elements.generateDinnerImageBtn.disabled = true;
+                elements.getDinnerIdeaBtn.disabled = true;
+
+                try {
+                    const response = await fetch('/api/generate-image-on-demand', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            prompt: `Photorealistic, high-quality image of a delicious "${prompt}" dinner dish, beautifully plated, top-down view, warm kitchen lighting, professional food photography.`,
+                            aspectRatio: "16:9"
+                        })
+                    });
+                    const data = await response.json();
+
+                    if (data.success && data.imageUrl) {
+                        UIManager.renderDinnerIdea(appState.currentDinnerIdeaText, data.imageUrl);
+                        Utils.showToast('Image generated successfully!', 'success');
+                    } else {
+                        Utils.showToast(`Failed to generate image: ${data.error || 'Unknown error.'}`, 'danger');
+                        UIManager.renderDinnerIdea(appState.currentDinnerIdeaText, null);
+                    }
+                } catch (error) {
+                    console.error('Error generating image:', error);
+                    Utils.showToast('Network error or server issue while generating image.', 'danger');
+                    UIManager.renderDinnerIdea(appState.currentDinnerIdeaText, null);
+                } finally {
+                    Utils.hideSpinner(elements.aiImageSpinner);
+                    elements.generateDinnerImageBtn.disabled = !appState.currentDinnerIdeaText;
+                    elements.getDinnerIdeaBtn.disabled = false;
+                }
+            }
+        };
+
+        function setupEventListeners() {
+            elements.addTaskBtn.addEventListener('click', () => UIManager.openAddTaskModal());
+
+            elements.taskList.addEventListener('click', (event) => {
+                const target = event.target;
+                const taskItem = target.closest('.list-group-item');
+                if (!taskItem) return;
+
+                const taskId = taskItem.dataset.id;
+
+                if (target.dataset.action === 'toggle-complete') {
+                    TaskManager.toggleTaskCompletion(taskId);
+                } else if (target.dataset.action === 'edit') {
+                    const task = appState.tasks.find(t => t.id === taskId);
+                    if (task) UIManager.openAddTaskModal(task);
+                } else if (target.dataset.action === 'delete') {
+                    if (confirm('Are you sure you want to delete this task?')) {
+                        TaskManager.deleteTask(taskId);
+                    }
+                }
+            });
+
+            elements.taskForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const id = elements.taskIdInput.value;
+                const taskData = {
+                    name: elements.taskNameInput.value,
+                    time: elements.taskTimeInput.value,
+                    description: elements.taskDescriptionInput.value
+                };
+
+                if (id) {
+                    TaskManager.updateTask(id, taskData);
+                } else {
+                    TaskManager.addTask(taskData);
+                }
+                UIManager.closeAddTaskModal();
+            });
+
+            elements.getDinnerIdeaBtn.addEventListener('click', () => {
+                const prompt = elements.dinnerPromptInput.value.trim();
+                if (prompt) {
+                    AIService.getDinnerIdea(prompt);
+                } else {
+                    Utils.showToast('Please enter some preferences for your dinner idea.', 'warning');
+                }
+            });
+
+            elements.generateDinnerImageBtn.addEventListener('click', () => {
+                AIService.generateDinnerImage();
+            });
+
+            elements.clearDinnerResultsBtn.addEventListener('click', UIManager.clearDinnerResults);
+
+            elements.settingsBtn.addEventListener('click', () => elements.settingsModal.show());
+
+            elements.clearAllDataBtn.addEventListener('click', () => {
+                if (confirm('This will delete ALL your tasks and settings permanently. Are you absolutely sure?')) {
+                    localStorage.removeItem('choresAppState');
+                    appState.tasks = [];
+                    appState.lastAccessedDate = null;
+                    UIManager.renderTasks();
+                    UIManager.updateProgressBar();
+                    UIManager.clearDinnerResults();
+                    elements.settingsModal.hide();
+                    Utils.showToast('All data cleared!', 'danger');
+                }
+            });
+        }
+
+        function initializeApp() {
+            elements.currentDateSpan.textContent = Utils.formatDate(new Date());
+            TaskManager.loadTasks();
+            UIManager.renderTasks();
+            UIManager.updateProgressBar();
+            UIManager.clearDinnerResults();
+            ReminderService.start();
+            setupEventListeners();
+        }
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

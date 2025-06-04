@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statscan SDMX Data Explorer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+        .navbar-brand svg {
+            color: var(--bs-primary);
+        }
+        .card {
+            border: 1px solid #4a5568;
+            background-color: #2d3748;
+        }
+        .card-header {
+            border-bottom: 1px solid #4a5568;
+        }
+        .form-select,
+        .form-control,
+        .form-control:focus {
+            background-color: #2d3748;
+            border-color: #4a5568;
+            color: #e2e8f0;
+        }
+        .form-select:focus,
+        .form-control:focus {
+            border-color: var(--bs-primary);
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+            outline: 0;
+        }
+        .form-select option {
+            background-color: #2d3748;
+            color: #e2e8f0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .table-dark {
+            --bs-table-bg: #2d3748;
+            --bs-table-striped-bg: #3a475a;
+            --bs-table-hover-bg: #4a5568;
+            --bs-table-color: #e2e8f0;
+            --bs-table-border-color: #4a5568;
+        }
+        .table-dark th[data-column] {
+            cursor: pointer;
+        }
+        .table-dark th[data-column]:hover {
+            background-color: #3a475a;
+        }
+        .chart-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
+        }
+        .footer {
+            background-color: #2d3748;
+            border-top: 1px solid #4a5568;
+            padding: 1rem 0;
+            margin-top: auto;
+        }
+        .modal-content {
+            background-color: #2d3748;
+            color: #e2e8f0;
+        }
+        .modal-header, .modal-footer {
+            border-color: #4a5568;
+        }
+        .btn-close-white {
+            filter: invert(1) grayscale(100%) brightness(200%);
+        }
+
+        .multiselect-container {
+            position: relative;
+            width: 100%;
+        }
+        .multiselect-button {
+            width: 100%;
+            text-align: left;
+            background-color: #2d3748;
+            border: 1px solid #4a5568;
+            border-radius: .375rem;
+            color: #e2e8f0;
+            padding: .375rem .75rem;
+            font-size: .875rem;
+            line-height: 1.5;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .multiselect-button:focus {
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+            outline: 0;
+        }
+        .multiselect-button::after {
+            display: inline-block;
+            margin-left: .255em;
+            vertical-align: .255em;
+            content: "";
+            border-top: .3em solid;
+            border-right: .3em solid transparent;
+            border-bottom: 0;
+            border-left: .3em solid transparent;
+        }
+        .multiselect-options {
+            position: absolute;
+            background-color: #2d3748;
+            border: 1px solid #4a5568;
+            border-radius: .375rem;
+            max-height: 200px;
+            overflow-y: auto;
+            width: 100%;
+            z-index: 1000;
+            display: none;
+            padding: .5rem 0;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.5);
+        }
+        .multiselect-options.show {
+            display: block;
+        }
+        .multiselect-options .form-check {
+            padding: .25rem 1rem;
+            margin-bottom: 0;
+        }
+        .multiselect-options .form-check-input {
+            margin-top: .25em;
+            margin-left: 0;
+        }
+        .multiselect-options .form-check-label {
+            color: #e2e8f0;
+            padding-left: 1.25em;
+            margin-bottom: 0;
+        }
+        .multiselect-options .form-check:hover {
+            background-color: #3a475a;
+        }
+        .multiselect-button .selected-items {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-grow: 1;
+        }
+        .is-invalid .form-control, .form-control.is-invalid {
+            border-color: var(--bs-danger);
+            padding-right: calc(1.5em + 0.75rem);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+        .invalid-feedback {
+            display: none;
+            width: 100%;
+            margin-top: 0.25rem;
+            font-size: 0.875em;
+            color: var(--bs-danger);
+        }
+        .form-control.is-invalid ~ .invalid-feedback {
+            display: block;
+        }
+    </style>
+</head>
+<body data-bs-theme="dark">
+    <header class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="#" aria-label="Statscan Data Explorer homepage">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-bar-chart-fill me-2" viewBox="0 0 16 16">
+                    <path d="M1 11.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5zm5 0a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5zm5 0a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5z"/>
+                    <path d="M.997 4.936a.5.5 0 0 1 .498-.592l3-1a.5.5 0 0 1 .192.17L6 4.793V2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v10.5a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5V7.207l-2.808-2.808a.5.5 0 0 1-.092-.17zm8 0a.5.5 0 0 1 .498-.592l3-1a.5.5 0 0 1 .192.17L14 4.793V2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v10.5a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5V7.207l-2.808-2.808a.5.5 0 0 1-.092-.17z"/>
+                </svg>
+                Statscan SDMX Data Explorer
+            </a>
+            <button class="btn btn-outline-info btn-sm ms-auto" id="aboutDatasetBtn" data-bs-toggle="modal" data-bs-target="#datasetInfoModal" aria-label="About current dataset">
+                <i class="bi bi-info-circle-fill me-1"></i> About Dataset
+            </button>
+        </div>
+    </header>
+
+    <main class="container-fluid py-4 flex-grow-1">
+        <div id="loadingIndicator" class="text-center my-5 d-none">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 text-muted" id="loadingMessage">Fetching data from Statistics Canada...</p>
+        </div>
+
+        <div id="errorMessage" class="alert alert-danger d-none" role="alert">
+            <h4 class="alert-heading">Data Load Error!</h4>
+            <p id="errorDetails"></p>
+            <hr>
+            <p class="mb-0">Please check your internet connection or try again later. If the issue persists, the Statistics Canada API might be temporarily unavailable or the dataset ID/query could be incorrect.</p>
+        </div>
+
+        <div id="noDataMessage" class="alert alert-warning d-none" role="alert">
+            <h4 class="alert-heading">No Data Found!</h4>
+            <p>Your current filter selections yielded no data. Please adjust your filters and try again.</p>
+        </div>
+
+        <div id="dashboardContent" class="d-none">
+            <div class="row g-4 mb-4">
+                <div class="col-12">
+                    <div class="card text-bg-dark">
+                        <div class="card-body d-flex flex-column flex-md-row align-items-md-center">
+                            <label for="datasetSelect" class="form-label mb-2 mb-md-0 me-md-3">Select Dataset:</label>
+                            <select class="form-select flex-grow-1" id="datasetSelect" aria-label="Select Statistics Canada Dataset"></select>
+                            <button id="refreshDataBtn" class="btn btn-primary ms-md-3 mt-2 mt-md-0" aria-label="Refresh data">
+                                <i class="bi bi-arrow-clockwise me-1"></i> Refresh Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-lg-3">
+                    <div class="card text-bg-dark h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0">Data Filters</h5>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title text-primary" id="datasetName"></h6>
+                            <p class="card-text text-muted small" id="datasetDescription"></p>
+                            <div id="filtersContainer" class="mt-3">
+                            </div>
+                            <div class="mb-3">
+                                <label for="startPeriodInput" class="form-label small text-muted">Start Period:</label>
+                                <input type="text" class="form-control form-control-sm" id="startPeriodInput" placeholder="YYYY, YYYY-MM, or YYYY-MM-DD">
+                                <div class="invalid-feedback" id="startPeriodFeedback"></div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="endPeriodInput" class="form-label small text-muted">End Period:</label>
+                                <input type="text" class="form-control form-control-sm" id="endPeriodInput" placeholder="YYYY, YYYY-MM, or YYYY-MM-DD">
+                                <div class="invalid-feedback" id="endPeriodFeedback"></div>
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label for="firstNInput" class="form-label small text-muted">First N Obs:</label>
+                                    <input type="number" class="form-control form-control-sm" id="firstNInput" min="1" placeholder="e.g., 10">
+                                </div>
+                                <div class="col-6">
+                                    <label for="lastNInput" class="form-label small text-muted">Last N Obs:</label>
+                                    <input type="number" class="form-control form-control-sm" id="lastNInput" min="1" placeholder="e.g., 5">
+                                </div>
+                            </div>
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="detailFullSwitch" checked>
+                                <label class="form-check-label small text-muted" for="detailFullSwitch">Full Detail (default)</label>
+                            </div>
+                            <button id="resetFiltersBtn" class="btn btn-outline-light btn-sm mt-3 w-100" aria-label="Reset all filters">Reset Filters</button>
+                            <button id="downloadDataBtn" class="btn btn-primary btn-sm mt-2 w-100" aria-label="Download current data as CSV">
+                                <i class="bi bi-download me-1"></i> Download CSV
+                            </button>
+                            <button id="copyApiUrlBtn" class="btn btn-outline-info btn-sm mt-2 w-100" aria-label="Copy current API URL">
+                                <i class="bi bi-link-45deg me-1"></i> Copy API URL
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-9">
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="card text-bg-dark h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title text-primary">Latest Value</h5>
+                                    <p class="card-text fs-3 mb-0" id="latestValue"></p>
+                                    <small class="text-muted" id="latestValueDate"></small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card text-bg-dark h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title text-primary">Change (Last Period)</h5>
+                                    <p class="card-text fs-3 mb-0" id="changeValue"></p>
+                                    <small class="text-muted" id="changePercentage"></small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card text-bg-dark h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title text-primary">Average Value</h5>
+                                    <p class="card-text fs-3" id="averageValue"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="card text-bg-dark">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Data Trend</h5>
+                                    <div class="d-flex align-items-center">
+                                        <label for="chartTypeSelect" class="form-label mb-0 me-2 small text-muted">Chart Type:</label>
+                                        <select class="form-select form-select-sm" id="chartTypeSelect" aria-label="Select chart type">
+                                            <option value="line">Line Chart</option>
+                                            <option value="bar">Bar Chart</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="dataChart" role="img" aria-label="Data trend chart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="card text-bg-dark">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Raw Data Table</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-dark table-striped table-hover caption-top" aria-label="Filtered data table">
+                                            <caption class="text-muted">Filtered data from Statistics Canada. Click on column headers to sort.</caption>
+                                            <thead id="dataTableHead"></thead>
+                                            <tbody id="dataTableBody"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer text-center text-muted small">
+        <div class="container-fluid">
+            Data provided by <a href="https://www.statcan.gc.ca/eng/developers/wds" target="_blank" class="text-primary text-decoration-none">Statistics Canada Open Data API</a>.
+        </div>
+    </footer>
+
+    <div class="modal fade" id="datasetInfoModal" tabindex="-1" aria-labelledby="datasetInfoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+            <div class="modal-content text-bg-dark">
+                <div class="modal-header border-bottom border-secondary">
+                    <h5 class="modal-title" id="datasetInfoModalLabel">About Dataset: <span id="modalDatasetName"></span></h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="modalDatasetInfoBody">
+                    <p class="text-muted text-center">Loading dataset metadata...</p>
+                </div>
+                <div class="modal-footer border-top border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <a id="modalDatasetSourceLink" href="#" target="_blank" class="btn btn-primary">View on Statscan Website</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        const appState = {
+            isLoading: false,
+            error: null,
+            availableDatasets: [
+                { id: '17100005', name: 'Population estimates, quarterly', description: 'Population estimates by age group, sex, and geography, quarterly. Data is subject to revision.', sourceUrl: 'https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1710000501' },
+                { id: '18100004', name: 'Consumer Price Index (CPI), monthly', description: 'Monthly Consumer Price Index (CPI) for Canada, provinces, and selected cities.', sourceUrl: 'https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1810000401' },
+                { id: '36100103', name: 'Gross domestic product (GDP), by industry', description: 'Gross domestic product (GDP) at basic prices, by industry, monthly.', sourceUrl: 'https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610010301' },
+                { id: '13100782', name: 'Labour Force Survey (LFS)', description: 'Labour Force Survey (LFS) estimates, by selected demographic characteristics, seasonally adjusted and unadjusted, monthly.', sourceUrl: 'https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1310078201' },
+                { id: '35100001', name: 'Building permits, by type of structure', description: 'Building permits, by type of structure, residential and non-residential, monthly.', sourceUrl: 'https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3510000101' }
+            ],
+            currentDatasetId: '17100005',
+            dsdMetadata: null,
+            processedData: [],
+            currentFilters: {},
+            periodParams: {
+                startPeriod: '',
+                endPeriod: '',
+                firstNObservations: '',
+                lastNObservations: '',
+                detail: 'full'
+            },
+            filteredData: [],
+            chartInstance: null,
+            chartType: 'line',
+            sortColumn: null,
+            sortDirection: 'asc',
+            chartColors: {
+                primary: 'rgb(13, 110, 253)',
+                secondary: 'rgb(108, 117, 125)',
+                success: 'rgb(25, 135, 84)',
+                info: 'rgb(13, 202, 240)',
+                warning: 'rgb(255, 193, 7)',
+                danger: 'rgb(220, 53, 69)',
+                lightText: '#e2e8f0',
+                gridLine: 'rgba(74, 85, 104, 0.5)',
+                tooltipBg: '#2d3748',
+                tooltipBorder: '#4a5568',
+                dataBackground: 'rgba(13, 110, 253, 0.4)',
+                dataBorder: 'rgb(13, 110, 253)'
+            }
+        };
+
+        const DOM = {
+            loadingIndicator: document.getElementById('loadingIndicator'),
+            loadingMessage: document.getElementById('loadingMessage'),
+            errorMessage: document.getElementById('errorMessage'),
+            errorDetails: document.getElementById('errorDetails'),
+            noDataMessage: document.getElementById('noDataMessage'),
+            dashboardContent: document.getElementById('dashboardContent'),
+            datasetSelect: document.getElementById('datasetSelect'),
+            refreshDataBtn: document.getElementById('refreshDataBtn'),
+            datasetName: document.getElementById('datasetName'),
+            datasetDescription: document.getElementById('datasetDescription'),
+            filtersContainer: document.getElementById('filtersContainer'),
+            startPeriodInput: document.getElementById('startPeriodInput'),
+            endPeriodInput: document.getElementById('endPeriodInput'),
+            firstNInput: document.getElementById('firstNInput'),
+            lastNInput: document.getElementById('lastNInput'),
+            detailFullSwitch: document.getElementById('detailFullSwitch'),
+            resetFiltersBtn: document.getElementById('resetFiltersBtn'),
+            downloadDataBtn: document.getElementById('downloadDataBtn'),
+            copyApiUrlBtn: document.getElementById('copyApiUrlBtn'),
+            latestValue: document.getElementById('latestValue'),
+            latestValueDate: document.getElementById('latestValueDate'),
+            changeValue: document.getElementById('changeValue'),
+            changePercentage: document.getElementById('changePercentage'),
+            averageValue: document.getElementById('averageValue'),
+            dataChart: document.getElementById('dataChart'),
+            chartTypeSelect: document.getElementById('chartTypeSelect'),
+            dataTableHead: document.getElementById('dataTableHead'),
+            dataTableBody: document.getElementById('dataTableBody'),
+            aboutDatasetBtn: document.getElementById('aboutDatasetBtn'),
+            modalDatasetName: document.getElementById('modalDatasetName'),
+            modalDatasetInfoBody: document.getElementById('modalDatasetInfoBody'),
+            modalDatasetSourceLink: document.getElementById('modalDatasetSourceLink'),
+            startPeriodFeedback: document.getElementById('startPeriodFeedback'),
+            endPeriodFeedback: document.getElementById('endPeriodFeedback')
+        };
+
+        const StatcanService = {
+            BASE_URL: 'https://www150.statcan.gc.ca/t1/wds/sdmx/statcan/v1/rest/',
+
+            async fetchDSD(flowRef) {
+                const url = `${this.BASE_URL}structure/Data_Structure_${flowRef}`;
+                try {
+                    const response = await fetch(url, {
+                        headers: {
+                            'Accept': 'application/vnd.sdmx.structure+xml;version=2.1'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        await this.handleErrorResponse(response);
+                    }
+
+                    const xmlText = await response.text();
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(xmlText, 'application/xml');
+
+                    const errorNode = xmlDoc.querySelector('parsererror');
+                    if (errorNode) {
+                        throw new Error('Failed to parse DSD XML: ' + errorNode.textContent);
+                    }
+
+                    const dsd = {};
+                    dsd.dimensionsOrder = [];
+                    dsd.dimensionLabels = {};
+                    dsd.codeLists = {};
+                    dsd.attributes = {};
+                    dsd.cubeTitle = xmlDoc.querySelector('Dataflow[id^="DF_"] > Name[xml\\:lang="en"]')?.textContent || 'N/A';
+                    dsd.description = xmlDoc.querySelector('Dataflow[id^="DF_"] > Description[xml\\:lang="en"]')?.textContent || 'N/A';
+
+                    const dataStructure = xmlDoc.querySelector('DataStructureDefinition');
+                    if (!dataStructure) {
+                        throw new Error('DataStructureDefinition not found in DSD XML.');
+                    }
+
+                    const dimensionList = dataStructure.querySelector('DataStructureComponents > DimensionList');
+                    if (dimensionList) {
+                        Array.from(dimensionList.querySelectorAll('Dimension')).forEach(dimElem => {
+                            const id = dimElem.getAttribute('id');
+                            const position = parseInt(dimElem.getAttribute('position'));
+                            const label = dimElem.querySelector('Name[xml\\:lang="en"]')?.textContent || id;
+                            const codelistRef = dimElem.querySelector('LocalRepresentation > EnumeratedCodeList')?.getAttribute('id');
+
+                            if (id && !isNaN(position)) {
+                                dsd.dimensionsOrder[position] = id;
+                                dsd.dimensionLabels[id] = label;
+                                if (codelistRef) {
+                                    const codeListElem = xmlDoc.querySelector(`CodeList[id="${codelistRef}"]`);
+                                    if (codeListElem) {
+                                        dsd.codeLists[id] = Array.from(codeListElem.querySelectorAll('Code')).map(codeElem => ({
+                                            id: codeElem.getAttribute('id'),
+                                            name: codeElem.querySelector('Name[xml\\:lang="en"]')?.textContent || codeElem.getAttribute('id')
+                                        }));
+                                    }
+                                }
+                            }
+                        });
+                        dsd.dimensionsOrder = dsd.dimensionsOrder.filter(Boolean);
+                    }
+
+                    const attributeList = dataStructure.querySelector('DataStructureComponents > AttributeList');
+                    if (attributeList) {
+                        Array.from(attributeList.querySelectorAll('Attribute')).forEach(attrElem => {
+                            const id = attrElem.getAttribute('id');
+                            const label = attrElem.querySelector('Name[xml\\:lang="en"]')?.textContent || id;
+                            const codelistRef = attrElem.querySelector('LocalRepresentation > EnumeratedCodeList')?.getAttribute('id');
+                            const textFormat = attrElem.querySelector('LocalRepresentation > TextFormat')?.getAttribute('textType');
+
+                            dsd.attributes[id] = { label };
+                            if (codelistRef) {
+                                dsd.attributes[id].type = 'codelist';
+                                const codeListElem = xmlDoc.querySelector(`CodeList[id="${codelistRef}"]`);
+                                if (codeListElem) {
+                                    dsd.attributes[id].codeList = Array.from(codeListElem.querySelectorAll('Code')).map(codeElem => ({
+                                        id: codeElem.getAttribute('id'),
+                                        name: codeElem.querySelector('Name[xml\\:lang="en"]')?.textContent || codeElem.getAttribute('id')
+                                    }));
+                                }
+                            } else if (textFormat) {
+                                dsd.attributes[id].type = textFormat;
+                            } else {
+                                dsd.attributes[id].type = 'text';
+                            }
+                        });
+                    }
+
+                    return dsd;
+
+                } catch (error) {
+                    throw new Error(`Failed to fetch or parse DSD: ${error.message}`);
+                }
+            },
+
+            async fetchData(flowRef, key, params) {
+                const queryParams = new URLSearchParams(params);
+                const url = `${this.BASE_URL}data/DF_${flowRef}/${key}${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+                try {
+                    const response = await fetch(url, {
+                        headers: {
+                            'Accept': 'application/vnd.sdmx.data+json;version=1.0.0-wd'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        await this.handleErrorResponse(response);
+                    }
+
+                    const data = await response.json();
+
+                    if (data.status && data.status !== 'SUCCESS') {
+                        throw new Error(`Statscan API error: ${data.message || 'Unknown API error'}`);
+                    }
+                    if (!data.dataSets || data.dataSets.length === 0) {
+                        return { observations: [], attributes: [] };
+                    }
+
+                    return data;
+
+                } catch (error) {
+                    throw new Error(`Failed to fetch data: ${error.message}`);
+                }
+            },
+
+            async handleErrorResponse(response) {
+                let errorMessage = `HTTP error! Status: ${response.status} (${response.statusText}).`;
+                switch (response.status) {
+                    case 400:
+                        errorMessage = `<strong>Syntax Error (400):</strong> Your query has a syntactic or semantic issue. Please check your filters and period inputs.`;
+                        break;
+                    case 404:
+                        errorMessage = `<strong>No Results Found (404):</strong> No data found matching your query. Please adjust your filters or dataset ID.`;
+                        break;
+                    case 406:
+                        errorMessage = `<strong>Not Acceptable (406):</strong> The server cannot provide data in the requested format. This is an internal application error.`;
+                        break;
+                    case 500:
+                        errorMessage = `<strong>Internal Server Error (500):</strong> An issue occurred on the Statscan server. Please try again later.`;
+                        break;
+                    case 501:
+                        errorMessage = `<strong>Not Implemented (501):</strong> You're using a feature not yet implemented by the Statscan API. This is an internal application error.`;
+                        break;
+                    case 503:
+                        errorMessage = `<strong>Service Unavailable (503):</strong> The Statscan web service is temporarily unavailable. Please try again later.`;
+                        break;
+                    default:
+                        errorMessage = `<strong>Network/Server Error:</strong> ${errorMessage} Please check your internet connection.`;
+                }
+                throw new Error(errorMessage);
+            }
+        };
+
+        const DataProcessor = {
+            processSDMXJson(sdmxJsonData, dsdMetadata) {
+                const processedData = [];
+                const series = sdmxJsonData.dataSets[0].series;
+
+                if (!series) {
+                    return processedData;
+                }
+
+                for (const seriesKey in series) {
+                    if (Object.prototype.hasOwnProperty.call(series, seriesKey)) {
+                        const seriesData = series[seriesKey];
+                        const observations = seriesData.observations;
+
+                        const dimensionCodes = seriesKey.split(':');
+                        const seriesDimensions = {};
+                        dsdMetadata.dimensionsOrder.forEach((dimId, index) => {
+                            const code = dimensionCodes[index];
+                            const codeDetail = dsdMetadata.codeLists[dimId]?.find(c => c.id === code);
+                            seriesDimensions[dsdMetadata.dimensionLabels[dimId]] = codeDetail ? codeDetail.name : code;
+                        });
+
+                        for (const refDate in observations) {
+                            if (Object.prototype.hasOwnProperty.call(observations, refDate)) {
+                                const value = observations[refDate][0];
+                                const dataPoint = {
+                                    'REF_DATE': refDate,
+                                    'Value': parseFloat(value)
+                                };
+                                Object.assign(dataPoint, seriesDimensions);
+
+                                if (seriesData.attributes) {
+                                    for (const attrIdx in seriesData.attributes) {
+                                        if (Object.prototype.hasOwnProperty.call(seriesData.attributes, attrIdx)) {
+                                            const attrId = sdmxJsonData.dataSets[0].structure.attributes.series[attrIdx];
+                                            const attrValueCode = seriesData.attributes[attrIdx];
+                                            if (dsdMetadata.attributes[attrId]) {
+                                                const attrLabel = dsdMetadata.attributes[attrId].label;
+                                                if (dsdMetadata.attributes[attrId].type === 'codelist' && dsdMetadata.attributes[attrId].codeList) {
+                                                    const codeDetail = dsdMetadata.attributes[attrId].codeList.find(c => c.id === attrValueCode);
+                                                    dataPoint[attrLabel] = codeDetail ? codeDetail.name : attrValueCode;
+                                                } else {
+                                                    dataPoint[attrLabel] = attrValueCode;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                processedData.push(dataPoint);
+                            }
+                        }
+                    }
+                }
+                return processedData;
+            },
+
+            parseRefDateForSorting(dateString) {
+                if (dateString.match(/^\d{4}$/)) {
+                    return new Date(dateString + '-01-01');
+                }
+                if (dateString.match(/^\d{4}-\d{2}$/)) {
+                    return new Date(dateString + '-01');
+                }
+                return new Date(dateString);
+            },
+
+            applyFilters() {
+                appState.filteredData = appState.processedData.filter(item => {
+                    for (const dimId in appState.currentFilters) {
+                        if (Object.prototype.hasOwnProperty.call(appState.currentFilters, dimId)) {
+                            const selectedCodes = appState.currentFilters[dimId];
+                            const dimensionLabel = appState.dsdMetadata.dimensionLabels[dimId];
+                            if (selectedCodes.length === 0 || selectedCodes.includes('ALL')) {
+                                continue;
+                            }
+                            const itemValue = item[dimensionLabel];
+                            const codeForValue = appState.dsdMetadata.codeLists[dimId]?.find(c => c.name === itemValue)?.id || itemValue;
+                            if (!selectedCodes.includes(codeForValue)) {
+                                return false;
+                            }
+                        }
+                    }
+                    return true;
+                });
+
+                if (appState.filteredData.length === 0) {
+                    UIManager.showNoDataMessage();
+                } else {
+                    UIManager.hideMessages();
+                }
+            },
+
+            calculateSummary() {
+                if (appState.filteredData.length === 0) {
+                    return;
+                }
+
+                const sortedData = [...appState.filteredData].sort((a, b) => {
+                    const dateA = DataProcessor.parseRefDateForSorting(a['REF_DATE']);
+                    const dateB = DataProcessor.parseRefDateForSorting(b['REF_DATE']);
+                    return dateA.getTime() - dateB.getTime();
+                });
+
+                const latest = sortedData[sortedData.length - 1];
+                const previous = sortedData.length > 1 ? sortedData[sortedData.length - 2] : null;
+
+                const latestVal = latest ? latest.Value : NaN;
+                const previousVal = previous ? previous.Value : NaN;
+
+                DOM.latestValue.textContent = !isNaN(latestVal) ? latestVal.toLocaleString() : 'N/A';
+                DOM.latestValueDate.textContent = latest ? `as of ${latest['REF_DATE']}` : '';
+
+                let change = 'N/A';
+                let changePercent = '';
+                DOM.changeValue.classList.remove('text-success', 'text-danger');
+                if (!isNaN(latestVal) && !isNaN(previousVal)) {
+                    const diff = latestVal - previousVal;
+                    change = diff.toLocaleString();
+                    if (previousVal !== 0) {
+                        changePercent = (diff / previousVal * 100).toFixed(2) + '%';
+                    }
+                    if (diff > 0) {
+                        DOM.changeValue.classList.add('text-success');
+                    } else if (diff < 0) {
+                        DOM.changeValue.classList.add('text-danger');
+                    }
+                }
+                DOM.changeValue.textContent = change;
+                DOM.changePercentage.textContent = changePercent;
+
+                const sum = appState.filteredData.reduce((acc, item) => acc + item.Value, 0);
+                const average = appState.filteredData.length > 0 ? sum / appState.filteredData.length : 0;
+                DOM.averageValue.textContent = !isNaN(average) ? average.toLocaleString(undefined, { maximumFractionDigits: 0 }) : 'N/A';
+            },
+
+            sortData(columnName) {
+                if (appState.sortColumn === columnName) {
+                    appState.sortDirection = appState.sortDirection === 'asc' ? 'desc' : 'asc';
+                } else {
+                    appState.sortColumn = columnName;
+                    appState.sortDirection = 'asc';
+                }
+                UIManager.renderTable();
+            }
+        };
+
+        const UIManager = {
+            updateLoadingState(message = 'Fetching data from Statistics Canada...') {
+                appState.isLoading = true;
+                DOM.loadingMessage.textContent = message;
+                DOM.loadingIndicator.classList.remove('d-none');
+                DOM.dashboardContent.classList.add('d-none');
+                this.hideMessages();
+            },
+
+            hideLoadingState() {
+                appState.isLoading = false;
+                DOM.loadingIndicator.classList.add('d-none');
+            },
+
+            showErrorMessage(message) {
+                DOM.errorMessage.classList.remove('d-none');
+                DOM.errorDetails.innerHTML = message;
+                DOM.dashboardContent.classList.add('d-none');
+                DOM.noDataMessage.classList.add('d-none');
+                this.hideLoadingState();
+            },
+
+            showNoDataMessage() {
+                DOM.noDataMessage.classList.remove('d-none');
+                DOM.latestValue.textContent = 'N/A';
+                DOM.latestValueDate.textContent = '';
+                DOM.changeValue.textContent = 'N/A';
+                DOM.changePercentage.textContent = '';
+                DOM.averageValue.textContent = 'N/A';
+                if (appState.chartInstance) {
+                    appState.chartInstance.destroy();
+                    appState.chartInstance = null;
+                }
+                DOM.dataTableHead.innerHTML = '';
+                DOM.dataTableBody.innerHTML = '';
+                this.hideLoadingState();
+            },
+
+            hideMessages() {
+                DOM.errorMessage.classList.add('d-none');
+                DOM.noDataMessage.classList.add('d-none');
+            },
+
+            populateDatasetSelect() {
+                DOM.datasetSelect.innerHTML = '';
+                appState.availableDatasets.forEach(dataset => {
+                    const option = document.createElement('option');
+                    option.value = dataset.id;
+                    option.textContent = dataset.name;
+                    DOM.datasetSelect.appendChild(option);
+                });
+                DOM.datasetSelect.value = appState.currentDatasetId;
+            },
+
+            renderFilters() {
+                DOM.filtersContainer.innerHTML = '';
+                if (!appState.dsdMetadata || !appState.dsdMetadata.dimensionsOrder) return;
+
+                const refDateDimensionId = appState.dsdMetadata.dimensionsOrder.find(id => id.includes('REF_DATE'));
+
+                appState.dsdMetadata.dimensionsOrder.forEach(dimId => {
+                    if (dimId === refDateDimensionId) return;
+
+                    const dimLabel = appState.dsdMetadata.dimensionLabels[dimId];
+                    const codeList = appState.dsdMetadata.codeLists[dimId];
+
+                    if (!codeList || codeList.length === 0) return;
+
+                    const div = document.createElement('div');
+                    div.classList.add('mb-3');
+
+                    const label = document.createElement('label');
+                    label.classList.add('form-label', 'small', 'text-muted');
+                    label.textContent = dimLabel + ':';
+                    div.appendChild(label);
+
+                    const multiselectContainer = document.createElement('div');
+                    multiselectContainer.classList.add('multiselect-container');
+                    multiselectContainer.setAttribute('data-dimension-id', dimId);
+
+                    const multiselectButton = document.createElement('button');
+                    multiselectButton.type = 'button';
+                    multiselectButton.classList.add('multiselect-button', 'form-control-sm');
+                    multiselectButton.setAttribute('aria-expanded', 'false');
+                    multiselectButton.setAttribute('aria-haspopup', 'true');
+                    multiselectButton.setAttribute('aria-controls', `options-${dimId}`);
+                    multiselectContainer.appendChild(multiselectButton);
+
+                    const selectedItemsSpan = document.createElement('span');
+                    selectedItemsSpan.classList.add('selected-items');
+                    multiselectButton.appendChild(selectedItemsSpan);
+
+                    const optionsDiv = document.createElement('div');
+                    optionsDiv.classList.add('multiselect-options');
+                    optionsDiv.id = `options-${dimId}`;
+                    optionsDiv.setAttribute('role', 'listbox');
+                    optionsDiv.setAttribute('aria-multiselectable', 'true');
+                    multiselectContainer.appendChild(optionsDiv);
+
+                    const allOptionDiv = document.createElement('div');
+                    allOptionDiv.classList.add('form-check');
+                    const allInput = document.createElement('input');
+                    allInput.type = 'checkbox';
+                    allInput.classList.add('form-check-input');
+                    allInput.id = `filter-${dimId}-ALL`;
+                    allInput.value = 'ALL';
+                    allInput.setAttribute('data-code', 'ALL');
+                    allInput.setAttribute('role', 'option');
+                    allInput.setAttribute('aria-selected', 'false');
+                    const allLabel = document.createElement('label');
+                    allLabel.classList.add('form-check-label');
+                    allLabel.htmlFor = `filter-${dimId}-ALL`;
+                    allLabel.textContent = 'All';
+                    allOptionDiv.appendChild(allInput);
+                    allOptionDiv.appendChild(allLabel);
+                    optionsDiv.appendChild(allOptionDiv);
+
+                    codeList.forEach(code => {
+                        const optionDiv = document.createElement('div');
+                        optionDiv.classList.add('form-check');
+                        const input = document.createElement('input');
+                        input.type = 'checkbox';
+                        input.classList.add('form-check-input');
+                        input.id = `filter-${dimId}-${code.id}`;
+                        input.value = code.id;
+                        input.setAttribute('data-code', code.id);
+                        input.setAttribute('role', 'option');
+                        input.setAttribute('aria-selected', 'false');
+                        const label = document.createElement('label');
+                        label.classList.add('form-check-label');
+                        label.htmlFor = `filter-${dimId}-${code.id}`;
+                        label.textContent = code.name;
+                        optionDiv.appendChild(input);
+                        optionDiv.appendChild(label);
+                        optionsDiv.appendChild(optionDiv);
+                    });
+
+                    div.appendChild(multiselectContainer);
+                    DOM.filtersContainer.appendChild(div);
+
+                    const currentSelected = appState.currentFilters[dimId] || ['ALL'];
+                    currentSelected.forEach(code => {
+                        const input = multiselectContainer.querySelector(`input[data-code="${code}"]`);
+                        if (input) {
+                            input.checked = true;
+                            input.setAttribute('aria-selected', 'true');
+                        }
+                    });
+                    this.updateMultiselectButtonText(multiselectContainer, dimId);
+                });
+            },
+
+            updateMultiselectButtonText(multiselectContainer, dimId) {
+                const selectedCodes = appState.currentFilters[dimId] || [];
+                const selectedItemsSpan = multiselectContainer.querySelector('.selected-items');
+                if (selectedCodes.includes('ALL') || selectedCodes.length === 0) {
+                    selectedItemsSpan.textContent = 'All';
+                } else {
+                    const selectedNames = selectedCodes.map(code => {
+                        const codeDetail = appState.dsdMetadata.codeLists[dimId]?.find(c => c.id === code);
+                        return codeDetail ? codeDetail.name : code;
+                    });
+                    selectedItemsSpan.textContent = selectedNames.join(', ');
+                }
+            },
+
+            renderSummary() {
+                DataProcessor.calculateSummary();
+            },
+
+            renderChart() {
+                if (appState.chartInstance) {
+                    appState.chartInstance.destroy();
+                }
+
+                if (appState.filteredData.length === 0) {
+                    return;
+                }
+
+                const chartData = [...appState.filteredData].sort((a, b) => {
+                    const dateA = DataProcessor.parseRefDateForSorting(a['REF_DATE']);
+                    const dateB = DataProcessor.parseRefDateForSorting(b['REF_DATE']);
+                    return dateA.getTime() - dateB.getTime();
+                });
+
+                const labels = chartData.map(item => item['REF_DATE']);
+                const values = chartData.map(item => item.Value);
+
+                const ctx = DOM.dataChart.getContext('2d');
+                appState.chartInstance = new Chart(ctx, {
+                    type: appState.chartType,
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Value',
+                            data: values,
+                            backgroundColor: appState.chartColors.dataBackground,
+                            borderColor: appState.chartColors.dataBorder,
+                            borderWidth: 2,
+                            fill: appState.chartType === 'line',
+                            tension: appState.chartType === 'line' ? 0.3 : 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: appState.chartColors.lightText
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: appState.chartColors.tooltipBg,
+                                borderColor: appState.chartColors.tooltipBorder,
+                                borderWidth: 1,
+                                titleColor: appState.chartColors.lightText,
+                                bodyColor: appState.chartColors.lightText,
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += context.parsed.y.toLocaleString();
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: {
+                                    color: appState.chartColors.lightText
+                                },
+                                grid: {
+                                    color: appState.chartColors.gridLine
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'REF_DATE',
+                                    color: appState.chartColors.lightText
+                                }
+                            },
+                            y: {
+                                ticks: {
+                                    color: appState.chartColors.lightText,
+                                    callback: function(value) {
+                                        return value.toLocaleString();
+                                    }
+                                },
+                                grid: {
+                                    color: appState.chartColors.gridLine
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Value',
+                                    color: appState.chartColors.lightText
+                                }
+                            }
+                        }
+                    }
+                });
+            },
+
+            renderTable() {
+                DOM.dataTableHead.innerHTML = '';
+                DOM.dataTableBody.innerHTML = '';
+
+                if (appState.filteredData.length === 0) {
+                    return;
+                }
+
+                const headers = Object.keys(appState.filteredData[0]);
+                const headerRow = document.createElement('tr');
+
+                const dataToSort = [...appState.filteredData];
+
+                if (appState.sortColumn) {
+                    dataToSort.sort((a, b) => {
+                        const valA = a[appState.sortColumn];
+                        const valB = b[appState.sortColumn];
+
+                        if (appState.sortColumn === 'REF_DATE') {
+                            const dateA = DataProcessor.parseRefDateForSorting(valA);
+                            const dateB = DataProcessor.parseRefDateForSorting(valB);
+                            return appState.sortDirection === 'asc' ? dateA.getTime() - dateB.getTime() : dateB.getTime() - dateA.getTime();
+                        }
+
+                        if (typeof valA === 'number' && typeof valB === 'number') {
+                            return appState.sortDirection === 'asc' ? valA - valB : valB - valA;
+                        }
+
+                        const strA = String(valA).toLowerCase();
+                        const strB = String(valB).toLowerCase();
+                        return appState.sortDirection === 'asc' ? strA.localeCompare(strB) : strB.localeCompare(strA);
+                    });
+                }
+
+                headers.forEach(headerText => {
+                    const th = document.createElement('th');
+                    th.scope = 'col';
+                    th.textContent = headerText;
+                    th.classList.add('text-nowrap', 'align-middle');
+
+                    th.setAttribute('data-column', headerText);
+                    const icon = document.createElement('i');
+                    icon.classList.add('ms-2', 'bi');
+                    if (appState.sortColumn === headerText) {
+                        icon.classList.add(appState.sortDirection === 'asc' ? 'bi-sort-up' : 'bi-sort-down');
+                    } else {
+                        icon.classList.add('bi-arrow-down-up');
+                    }
+                    th.appendChild(icon);
+                    headerRow.appendChild(th);
+                });
+                DOM.dataTableHead.appendChild(headerRow);
+
+                dataToSort.forEach(item => {
+                    const tr = document.createElement('tr');
+                    headers.forEach(header => {
+                        const td = document.createElement('td');
+                        td.textContent = (header === 'Value' && !isNaN(item[header])) ? item[header].toLocaleString() : item[header];
+                        tr.appendChild(td);
+                    });
+                    DOM.dataTableBody.appendChild(tr);
+                });
+            },
+
+            displayDatasetMetadata(dsdMetadata) {
+                DOM.modalDatasetName.textContent = dsdMetadata.cubeTitle || 'N/A';
+                const currentDataset = appState.availableDatasets.find(ds => ds.id === appState.currentDatasetId);
+                DOM.modalDatasetSourceLink.href = currentDataset?.sourceUrl || '#';
+                DOM.modalDatasetSourceLink.target = '_blank';
+
+                let html = `
+                    <p><strong>Description:</strong> ${dsdMetadata.description || 'N/A'}</p>
+                    <hr>
+                    <h6>Dimensions:</h6>
+                    <ul>
+                `;
+                if (dsdMetadata.dimensionsOrder && dsdMetadata.dimensionsOrder.length > 0) {
+                    dsdMetadata.dimensionsOrder.forEach(dimId => {
+                        const dimLabel = dsdMetadata.dimensionLabels[dimId] || dimId;
+                        const codeList = dsdMetadata.codeLists[dimId];
+                        html += `<li><strong>${dimLabel} (${dimId}):</strong> ${codeList ? `${codeList.length} members` : 'No CodeList'}</li>`;
+                    });
+                } else {
+                    html += '<li>No dimension information available.</li>';
+                }
+                html += `</ul>`;
+
+                if (Object.keys(dsdMetadata.attributes).length > 0) {
+                    html += `<hr><h6>Attributes:</h6><ul>`;
+                    for (const attrId in dsdMetadata.attributes) {
+                        if (Object.prototype.hasOwnProperty.call(dsdMetadata.attributes, attrId)) {
+                            const attr = dsdMetadata.attributes[attrId];
+                            html += `<li><strong>${attr.label} (${attrId}):</strong> Type: ${attr.type}${attr.codeList ? `, ${attr.codeList.length} members` : ''}</li>`;
+                        }
+                    }
+                    html += `</ul>`;
+                }
+
+                DOM.modalDatasetInfoBody.innerHTML = html;
+            }
+        };
+
+        const AppController = {
+            async loadData() {
+                UIManager.updateLoadingState('Fetching dataset structure...');
+                const selectedDataset = appState.availableDatasets.find(ds => ds.id === appState.currentDatasetId);
+                if (selectedDataset) {
+                    DOM.datasetName.textContent = selectedDataset.name;
+                    DOM.datasetDescription.textContent = selectedDataset.description;
+                } else {
+                    DOM.datasetName.textContent = 'Unknown Dataset';
+                    DOM.datasetDescription.textContent = '';
+                }
+
+                try {
+                    appState.dsdMetadata = await StatcanService.fetchDSD(appState.currentDatasetId);
+                    UIManager.renderFilters();
+                    AppController.initializeFiltersFromDSD();
+
+                    UIManager.updateLoadingState('Building query and fetching data...');
+                    const key = AppController.buildKeyString();
+                    const params = AppController.buildApiParams();
+                    const rawSdmxData = await StatcanService.fetchData(appState.currentDatasetId, key, params);
+
+                    appState.processedData = DataProcessor.processSDMXJson(rawSdmxData, appState.dsdMetadata);
+                    DataProcessor.applyFilters();
+                    UIManager.renderSummary();
+                    UIManager.renderChart();
+                    UIManager.renderTable();
+                    DOM.dashboardContent.classList.remove('d-none');
+                } catch (error) {
+                    UIManager.showErrorMessage(error.message);
+                } finally {
+                    UIManager.hideLoadingState();
+                    AppController.updateUrlParams();
+                }
+            },
+
+            initializeFiltersFromDSD() {
+                if (!appState.dsdMetadata) return;
+
+                const newFilters = {};
+                appState.dsdMetadata.dimensionsOrder.forEach(dimId => {
+                    if (dimId.includes('REF_DATE')) return;
+                    if (appState.currentFilters[dimId]) {
+                        newFilters[dimId] = appState.currentFilters[dimId];
+                    } else {
+                        newFilters[dimId] = ['ALL'];
+                    }
+                });
+                appState.currentFilters = newFilters;
+            },
+
+            handleFilterChange(dimensionId, selectedCodes) {
+                appState.currentFilters[dimensionId] = selectedCodes;
+                AppController.saveStateToLocalStorage();
+                DataProcessor.applyFilters();
+                UIManager.renderSummary();
+                UIManager.renderChart();
+                UIManager.renderTable();
+                AppController.updateUrlParams();
+            },
+
+            handlePeriodParamChange(paramName, value) {
+                if (paramName === 'startPeriod' || paramName === 'endPeriod') {
+                    if (value && !AppController.isValidDateFormat(value)) {
+                        DOM[`${paramName}Input`].classList.add('is-invalid');
+                        DOM[`${paramName}Feedback`].textContent = 'Invalid date format. Use YYYY, YYYY-MM, or YYYY-MM-DD.';
+                        return;
+                    } else {
+                        DOM[`${paramName}Input`].classList.remove('is-invalid');
+                        DOM[`${paramName}Feedback`].textContent = '';
+                    }
+                }
+                appState.periodParams[paramName] = value;
+                AppController.saveStateToLocalStorage();
+                AppController.loadData();
+            },
+
+            isValidDateFormat(dateString) {
+                return /^\d{4}$/.test(dateString) || /^\d{4}-\d{2}$/.test(dateString) || /^\d{4}-\d{2}-\d{2}$/.test(dateString);
+            },
+
+            buildKeyString() {
+                if (!appState.dsdMetadata || !appState.dsdMetadata.dimensionsOrder) {
+                    return '';
+                }
+                const keyParts = appState.dsdMetadata.dimensionsOrder.map(dimId => {
+                    if (dimId.includes('REF_DATE')) {
+                        return '.';
+                    }
+                    const selectedCodes = appState.currentFilters[dimId];
+                    if (!selectedCodes || selectedCodes.length === 0 || selectedCodes.includes('ALL')) {
+                        return '.';
+                    }
+                    return selectedCodes.join('+');
+                });
+                return keyParts.join('.');
+            },
+
+            buildApiParams() {
+                const params = {};
+                if (appState.periodParams.startPeriod) params.startPeriod = appState.periodParams.startPeriod;
+                if (appState.periodParams.endPeriod) params.endPeriod = appState.periodParams.endPeriod;
+                if (appState.periodParams.firstNObservations) params.firstNObservations = appState.periodParams.firstNObservations;
+                if (appState.periodParams.lastNObservations) params.lastNObservations = appState.periodParams.lastNObservations;
+                if (appState.periodParams.detail === 'full') params.detail = 'full';
+                return params;
+            },
+
+            updateUrlParams() {
+                try {
+                    const url = new URL(window.location.origin + window.location.pathname);
+                    url.searchParams.set('dataset', appState.currentDatasetId);
+                    url.searchParams.set('filters', JSON.stringify(appState.currentFilters));
+                    url.searchParams.set('periodParams', JSON.stringify(appState.periodParams));
+                    window.history.pushState({}, '', url.toString());
+                } catch (e) {
+                    console.error('Failed to update URL parameters:', e);
+                }
+            },
+
+            parseUrlParams() {
+                try {
+                    const params = new URLSearchParams(window.location.search);
+                    const datasetId = params.get('dataset');
+                    const filters = params.get('filters');
+                    const periodParams = params.get('periodParams');
+
+                    if (datasetId && appState.availableDatasets.some(ds => ds.id === datasetId)) {
+                        appState.currentDatasetId = datasetId;
+                    }
+                    if (filters) {
+                        appState.currentFilters = JSON.parse(filters);
+                    }
+                    if (periodParams) {
+                        Object.assign(appState.periodParams, JSON.parse(periodParams));
+                    }
+                } catch (e) {
+                    console.error('Failed to parse URL parameters:', e);
+                }
+            },
+
+            saveStateToLocalStorage() {
+                try {
+                    localStorage.setItem('statscan_currentDatasetId', appState.currentDatasetId);
+                    localStorage.setItem('statscan_currentFilters', JSON.stringify(appState.currentFilters));
+                    localStorage.setItem('statscan_periodParams', JSON.stringify(appState.periodParams));
+                } catch (e) {
+                    console.warn('LocalStorage not available or full:', e);
+                }
+            },
+
+            loadStateFromLocalStorage() {
+                try {
+                    const storedDatasetId = localStorage.getItem('statscan_currentDatasetId');
+                    const storedFilters = localStorage.getItem('statscan_currentFilters');
+                    const storedPeriodParams = localStorage.getItem('statscan_periodParams');
+
+                    if (storedDatasetId && appState.availableDatasets.some(ds => ds.id === storedDatasetId)) {
+                        appState.currentDatasetId = storedDatasetId;
+                    }
+                    if (storedFilters) {
+                        appState.currentFilters = JSON.parse(storedFilters);
+                    }
+                    if (storedPeriodParams) {
+                        Object.assign(appState.periodParams, JSON.parse(storedPeriodParams));
+                    }
+                } catch (e) {
+                    console.warn('Failed to load state from LocalStorage:', e);
+                }
+            },
+
+            downloadCSV() {
+                if (appState.filteredData.length === 0) {
+                    alert('No data to download.');
+                    return;
+                }
+
+                const headers = Object.keys(appState.filteredData[0]);
+                const csvRows = [];
+                csvRows.push(headers.map(h => `"${h}"`).join(','));
+
+                appState.filteredData.forEach(item => {
+                    const values = headers.map(header => {
+                        let value = item[header];
+                        if (typeof value === 'number') {
+                            value = value.toString();
+                        } else if (value === null || value === undefined) {
+                            value = '';
+                        } else {
+                            value = String(value);
+                        }
+                        const escapedValue = (value.includes(',') || value.includes('"') || value.includes('\n')) ? `"${value.replace(/"/g, '""')}"` : value;
+                        return escapedValue;
+                    });
+                    csvRows.push(values.join(','));
+                });
+
+                const csvString = csvRows.join('\n');
+                const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', `${appState.currentDatasetId}_data.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            },
+
+            copyApiUrl() {
+                const key = AppController.buildKeyString();
+                const params = AppController.buildApiParams();
+                const queryParams = new URLSearchParams(params).toString();
+                const fullUrl = `${StatcanService.BASE_URL}data/DF_${appState.currentDatasetId}/${key}${queryParams ? '?' + queryParams : ''}`;
+
+                navigator.clipboard.writeText(fullUrl).then(() => {
+                    const originalText = DOM.copyApiUrlBtn.innerHTML;
+                    DOM.copyApiUrlBtn.innerHTML = '<i class="bi bi-check-lg me-1"></i> Copied!';
+                    setTimeout(() => {
+                        DOM.copyApiUrlBtn.innerHTML = originalText;
+                    }, 2000);
+                }).catch(err => {
+                    alert('Failed to copy API URL: ' + err);
+                });
+            },
+
+            initializeListeners() {
+                DOM.datasetSelect.addEventListener('change', (event) => {
+                    appState.currentDatasetId = event.target.value;
+                    AppController.saveStateToLocalStorage();
+                    AppController.loadData();
+                });
+
+                DOM.refreshDataBtn.addEventListener('click', () => {
+                    AppController.loadData();
+                });
+
+                DOM.filtersContainer.addEventListener('click', (event) => {
+                    const button = event.target.closest('.multiselect-button');
+                    if (button) {
+                        const optionsDiv = button.nextElementSibling;
+                        optionsDiv.classList.toggle('show');
+                        button.setAttribute('aria-expanded', optionsDiv.classList.contains('show'));
+                        event.stopPropagation();
+                    }
+                });
+
+                DOM.filtersContainer.addEventListener('change', (event) => {
+                    const input = event.target;
+                    if (input.classList.contains('form-check-input')) {
+                        const multiselectContainer = input.closest('.multiselect-container');
+                        const dimId = multiselectContainer.getAttribute('data-dimension-id');
+                        const optionsDiv = multiselectContainer.querySelector('.multiselect-options');
+                        const allInput = optionsDiv.querySelector('input[data-code="ALL"]');
+
+                        let selectedCodes = [];
+                        if (input.value === 'ALL') {
+                            if (input.checked) {
+                                selectedCodes = ['ALL'];
+                                Array.from(optionsDiv.querySelectorAll('input[type="checkbox"]:not([data-code="ALL"])')).forEach(cb => {
+                                    cb.checked = false;
+                                    cb.setAttribute('aria-selected', 'false');
+                                });
+                            } else {
+                                selectedCodes = [];
+                            }
+                        } else {
+                            if (allInput) {
+                                allInput.checked = false;
+                                allInput.setAttribute('aria-selected', 'false');
+                            }
+                            selectedCodes = Array.from(optionsDiv.querySelectorAll('input[type="checkbox"]:checked'))
+                                .filter(cb => cb.value !== 'ALL')
+                                .map(cb => cb.value);
+                            if (selectedCodes.length === 0) {
+                                if (allInput) {
+                                    allInput.checked = true;
+                                    allInput.setAttribute('aria-selected', 'true');
+                                }
+                                selectedCodes = ['ALL'];
+                            }
+                        }
+                        input.setAttribute('aria-selected', input.checked);
+                        UIManager.updateMultiselectButtonText(multiselectContainer, dimId);
+                        AppController.handleFilterChange(dimId, selectedCodes);
+                    }
+                });
+
+                document.addEventListener('click', (event) => {
+                    document.querySelectorAll('.multiselect-options.show').forEach(optionsDiv => {
+                        const button = optionsDiv.previousElementSibling;
+                        if (!optionsDiv.contains(event.target) && !button.contains(event.target)) {
+                            optionsDiv.classList.remove('show');
+                            button.setAttribute('aria-expanded', 'false');
+                        }
+                    });
+                });
+
+                DOM.startPeriodInput.addEventListener('input', (event) => AppController.handlePeriodParamChange('startPeriod', event.target.value));
+                DOM.endPeriodInput.addEventListener('input', (event) => AppController.handlePeriodParamChange('endPeriod', event.target.value));
+                DOM.firstNInput.addEventListener('input', (event) => AppController.handlePeriodParamChange('firstNObservations', event.target.value));
+                DOM.lastNInput.addEventListener('input', (event) => AppController.handlePeriodParamChange('lastNObservations', event.target.value));
+                DOM.detailFullSwitch.addEventListener('change', (event) => AppController.handlePeriodParamChange('detail', event.target.checked ? 'full' : ''));
+
+                DOM.resetFiltersBtn.addEventListener('click', () => {
+                    AppController.initializeFiltersFromDSD();
+                    appState.periodParams = {
+                        startPeriod: '',
+                        endPeriod: '',
+                        firstNObservations: '',
+                        lastNObservations: '',
+                        detail: 'full'
+                    };
+                    DOM.startPeriodInput.value = '';
+                    DOM.endPeriodInput.value = '';
+                    DOM.firstNInput.value = '';
+                    DOM.lastNInput.value = '';
+                    DOM.detailFullSwitch.checked = true;
+                    DOM.startPeriodInput.classList.remove('is-invalid');
+                    DOM.endPeriodInput.classList.remove('is-invalid');
+                    DOM.startPeriodFeedback.textContent = '';
+                    DOM.endPeriodFeedback.textContent = '';
+                    AppController.saveStateToLocalStorage();
+                    AppController.loadData();
+                });
+
+                DOM.chartTypeSelect.addEventListener('change', (event) => {
+                    appState.chartType = event.target.value;
+                    UIManager.renderChart();
+                });
+
+                DOM.downloadDataBtn.addEventListener('click', AppController.downloadCSV);
+                DOM.copyApiUrlBtn.addEventListener('click', AppController.copyApiUrl);
+
+                DOM.aboutDatasetBtn.addEventListener('click', async () => {
+                    if (appState.dsdMetadata) {
+                        UIManager.displayDatasetMetadata(appState.dsdMetadata);
+                    } else {
+                        DOM.modalDatasetInfoBody.innerHTML = '<p class="text-muted text-center">Dataset metadata not yet loaded.</p>';
+                    }
+                });
+
+                DOM.dataTableHead.addEventListener('click', (event) => {
+                    const targetTh = event.target.closest('th[data-column]');
+                    if (targetTh) {
+                        const columnName = targetTh.getAttribute('data-column');
+                        DataProcessor.sortData(columnName);
+                    }
+                });
+            },
+
+            initializeApp() {
+                AppController.loadStateFromLocalStorage();
+                AppController.parseUrlParams();
+                UIManager.populateDatasetSelect();
+                AppController.initializeListeners();
+                DOM.startPeriodInput.value = appState.periodParams.startPeriod;
+                DOM.endPeriodInput.value = appState.periodParams.endPeriod;
+                DOM.firstNInput.value = appState.periodParams.firstNObservations;
+                DOM.lastNInput.value = appState.periodParams.lastNObservations;
+                DOM.detailFullSwitch.checked = appState.periodParams.detail === 'full';
+                AppController.loadData();
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', AppController.initializeApp);
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

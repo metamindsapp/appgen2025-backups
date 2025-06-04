@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>U.S. Stats Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body {
+            background-color: #121212;
+            color: #E0E0E0;
+            font-family: 'Roboto', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            flex: 1;
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+        .card {
+            background-color: #1E1E1E;
+            color: #E0E0E0;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .card .card-content {
+            padding: 24px;
+        }
+        .card-panel.red.lighten-2 {
+            background-color: #D32F2F !important;
+            color: white !important;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .input-field label {
+            color: #BBBBBB !important;
+        }
+        .input-field input:focus + label,
+        .input-field textarea:focus + label {
+            color: #81D4FA !important;
+        }
+        .input-field input[type=text]:focus,
+        .input-field textarea:focus {
+            border-bottom: 1px solid #81D4FA !important;
+            box-shadow: 0 1px 0 0 #81D4FA !important;
+        }
+        .input-field .prefix {
+            color: #BBBBBB !important;
+        }
+        select {
+            background-color: #2E2E2E !important;
+            color: #E0E0E0 !important;
+            border-bottom: 1px solid #555 !important;
+            display: block;
+            padding: 8px 0;
+            height: auto;
+        }
+        .select-wrapper input.select-dropdown {
+            background-color: #2E2E2E !important;
+            color: #E0E0E0 !important;
+            border-bottom: 1px solid #555 !important;
+        }
+        .select-wrapper input.select-dropdown:focus {
+            border-bottom: 1px solid #81D4FA !important;
+            box-shadow: 0 1px 0 0 #81D4FA !important;
+        }
+        .dropdown-content {
+            background-color: #2E2E2E !important;
+            color: #E0E0E0 !important;
+        }
+        .dropdown-content li > a, .dropdown-content li > span {
+            color: #E0E0E0 !important;
+        }
+        .dropdown-content li.active > a, .dropdown-content li.active > span,
+        .dropdown-content li > a:hover, .dropdown-content li > span:hover {
+            background-color: #424242 !important;
+        }
+        .btn, .btn-large, .btn-small, .btn-floating {
+            background-color: #424242;
+            color: #E0E0E0;
+            transition: background-color 0.3s ease;
+            margin-right: 8px;
+            margin-top: 10px;
+        }
+        .btn:hover, .btn-large:hover, .btn-small:hover, .btn-floating:hover {
+            background-color: #616161;
+        }
+        .btn.disabled {
+            background-color: #333 !important;
+            color: #888 !important;
+            cursor: not-allowed;
+        }
+        .preloader-wrapper {
+            margin: 20px auto;
+            display: block;
+        }
+        table {
+            color: #E0E0E0;
+            border-collapse: collapse;
+        }
+        table th, table td {
+            border-bottom: 1px solid #333;
+            padding: 12px 15px;
+        }
+        table th {
+            background-color: #2E2E2E;
+            font-weight: bold;
+        }
+        .ai-chat-history-container {
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 10px;
+            margin-top: 20px;
+        }
+        .ai-chat-history-container .card-panel {
+            margin-bottom: 10px;
+            padding: 12px 15px;
+            border-radius: 6px;
+        }
+        .ai-chat-history-container .blue-grey.darken-3 {
+            background-color: #37474F !important;
+        }
+        .ai-chat-history-container .grey.darken-3 {
+            background-color: #424242 !important;
+        }
+        .data-entry-card-wrapper {
+            margin-bottom: 20px;
+        }
+        .data-entry-card-wrapper .card {
+            margin-bottom: 0;
+        }
+        canvas {
+            max-width: 100%;
+            height: 300px;
+        }
+        .tabs .tab a {
+            color: #E0E0E0 !important;
+        }
+        .tabs .tab a:hover {
+            background-color: #2E2E2E !important;
+            color: #BBBBBB !important;
+        }
+        .tabs .tab a.active {
+            background-color: #1E1E1E !important;
+            color: #81D4FA !important;
+        }
+        .tabs .indicator {
+            background-color: #81D4FA !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <nav class="grey darken-4 z-depth-1">
+            <div class="nav-wrapper container">
+                <a href="#" class="brand-logo center">U.S. Stats Dashboard</a>
+            </div>
+        </nav>
+
+        <main class="container">
+            <div class="row">
+                <div class="col s12 m4 l3">
+                    <div class="card z-depth-2">
+                        <div class="card-content">
+                            <span class="card-title">Data Selection</span>
+                            <div class="input-field">
+                                <select multiple v-model="selectedStates">
+                                    <option disabled value="">Select State(s)</option>
+                                    <option v-for="state in states" :value="state.fips" :key="state.fips">{{ state.name }}</option>
+                                </select>
+                                <label>Select State(s)</label>
+                            </div>
+                            <div class="input-field">
+                                <input id="metric_search" type="text" v-model="metricSearchQuery" class="white-text">
+                                <label for="metric_search">Search Metrics</label>
+                                <i class="material-icons prefix">search</i>
+                            </div>
+                            <div class="input-field">
+                                <select multiple v-model="selectedMetricCodes">
+                                    <option disabled value="">Select Metric(s)</option>
+                                    <optgroup v-for="(category, cIndex) in metricCategories" :label="category" :key="cIndex">
+                                        <option v-for="metric in filteredMetricsByCategory[category]" :value="metric.code" :key="metric.code">{{ metric.name }}</option>
+                                    </optgroup>
+                                </select>
+                                <label>Select Metric(s)</label>
+                            </div>
+                            <div class="row">
+                                <div class="col s6">
+                                    <div class="input-field">
+                                        <select v-model="startYear">
+                                            <option v-for="year in availableYears" :value="year" :key="year">{{ year }}</option>
+                                        </select>
+                                        <label>Start Year</label>
+                                    </div>
+                                </div>
+                                <div class="col s6">
+                                    <div class="input-field">
+                                        <select v-model="endYear">
+                                            <option v-for="year in availableYears" :value="year" :key="year">{{ year }}</option>
+                                        </select>
+                                        <label>End Year</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row center">
+                                <button class="btn waves-effect waves-light blue-grey darken-1" @click="fetchData" :disabled="isLoading || selectedStates.length === 0 || selectedMetricCodes.length === 0 || parseInt(startYear) > parseInt(endYear)">
+                                    <i class="material-icons left">cloud_download</i> Fetch Data
+                                </button>
+                                <button class="btn waves-effect waves-light red darken-2" @click="clearSelections">
+                                    <i class="material-icons left">clear_all</i> Clear
+                                </button>
+                            </div>
+                            <div v-if="isLoading" class="center-align">
+                                <div class="preloader-wrapper active small"><div class="spinner-layer spinner-blue-only"><div class="circle-clipper left"><div class="circle"></div></div><div class="gap-patch"><div class="circle"></div></div><div class="circle-clipper right"><div class="circle"></div></div></div></div>
+                                <p>Loading data...</p>
+                            </div>
+                            <div v-if="errorMessage" class="card-panel red lighten-2 white-text">{{ errorMessage }}</div>
+                        </div>
+                    </div>
+
+                    <div class="card z-depth-2">
+                        <div class="card-content">
+                            <span class="card-title">AI Data Insights</span>
+                            <p>Ask the AI to summarize or interpret the data you're viewing.</p>
+                            <div class="input-field">
+                                <textarea id="ai_prompt" class="materialize-textarea white-text" v-model="aiPrompt" @keyup.enter="sendAiQuery"></textarea>
+                                <label for="ai_prompt">Your question to the AI...</label>
+                            </div>
+                            <div class="row" style="margin-bottom: 0;">
+                                <div class="col s12 m6">
+                                    <button class="btn waves-effect waves-light blue-grey darken-1" @click="sendAiQuery" :disabled="isAiLoading || !aiPrompt">
+                                        <i class="material-icons left">question_answer</i> Ask AI
+                                    </button>
+                                </div>
+                                <div class="col s12 m6 right-align">
+                                    <button class="btn waves-effect waves-light red darken-2" @click="clearAiChat" :disabled="aiChatHistory.length === 0">
+                                        <i class="material-icons left">clear</i> Clear Chat
+                                    </button>
+                                </div>
+                            </div>
+                            <div v-if="isAiLoading" class="center-align" style="margin-top: 15px;">
+                                <div class="preloader-wrapper small active"><div class="spinner-layer spinner-green-only"><div class="circle-clipper left"><div class="circle"></div></div><div class="gap-patch"><div class="circle"></div></div><div class="circle-clipper right"><div class="circle"></div></div></div></div>
+                                <p>AI is thinking...</p>
+                            </div>
+                            <div v-if="aiChatHistory.length > 0" class="ai-chat-history-container">
+                                <div v-for="(msg, index) in aiChatHistory" :key="index" class="card-panel" :class="{'blue-grey darken-3': msg.role === 'user', 'grey darken-3': msg.role === 'ai'}">
+                                    <span class="white-text"><strong>{{ msg.role === 'user' ? 'You' : 'AI' }}:</strong> {{ msg.text }}</span>
+                                </div>
+                            </div>
+                            <div v-if="aiError" class="card-panel red lighten-2 white-text">
+                                {{ aiError }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col s12 m8 l9">
+                    <div class="card z-depth-2">
+                        <div class="card-content">
+                            <div class="row">
+                                <div class="col s12">
+                                    <ul class="tabs grey darken-3 z-depth-1">
+                                        <li class="tab col s4"><a :class="{'active': currentTab === 'singleMetric'}" @click="currentTab = 'singleMetric'" href="#singleMetricTab">Single Metric</a></li>
+                                        <li class="tab col s4"><a :class="{'active': currentTab === 'metricComparison'}" @click="currentTab = 'metricComparison'" href="#metricComparisonTab">Compare Metrics</a></li>
+                                        <li class="tab col s4"><a :class="{'active': currentTab === 'rawData'}" @click="currentTab = 'rawData'" href="#rawDataTab">Raw Data</a></li>
+                                    </ul>
+                                </div>
+
+                                <div id="singleMetricTab" class="col s12" v-show="currentTab === 'singleMetric'">
+                                    <span class="card-title" style="margin-top: 20px; display: block;">Data Visualizations</span>
+                                    <div class="row">
+                                        <div class="col s12 m6">
+                                            <div class="input-field">
+                                                <select v-model="selectedChartType">
+                                                    <option value="line">Line Chart</option>
+                                                    <option value="bar">Bar Chart</option>
+                                                </select>
+                                                <label>Chart Type</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div v-for="(dataEntry, index) in displayData" :key="dataEntry.id" class="data-entry-card-wrapper">
+                                        <div class="card z-depth-1">
+                                            <div class="card-content">
+                                                <span class="card-title">{{ dataEntry.title }}</span>
+                                                <div class="row">
+                                                    <div class="col s12 m7">
+                                                        <canvas :id="'dataChart-' + dataEntry.id"></canvas>
+                                                    </div>
+                                                    <div class="col s12 m5">
+                                                        <table class="striped responsive-table">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Year</th>
+                                                                    <th v-for="(stateName, sIdx) in dataEntry.stateNames" :key="sIdx">{{ stateName }}</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr v-for="(year, yIdx) in dataEntry.trendLabels" :key="yIdx">
+                                                                    <td>{{ year }}</td>
+                                                                    <td v-for="(stateData, sdIdx) in dataEntry.multiStateTrendData" :key="sdIdx">
+                                                                        {{ formatValue(dataEntry.metricCode, stateData[yIdx]) }}
+                                                                    </td>
+                                                                </tr>
+                                                                <tr v-if="dataEntry.currentMetricData && Object.keys(dataEntry.currentMetricData).length > 0">
+                                                                    <td><strong>Current ({{ dataEntry.currentYear }})</strong></td>
+                                                                    <td v-for="(stateFips, sIdx) in dataEntry.stateFips" :key="sIdx">
+                                                                        {{ formatValue(dataEntry.metricCode, dataEntry.currentMetricData[stateFips]) }}
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div v-if="!isLoading && displayData.length === 0" class="card-panel grey darken-3 white-text center-align">
+                                        <p>Select states, metrics, and a year range to view data and insights.</p>
+                                        <i class="material-icons large">analytics</i>
+                                    </div>
+                                </div>
+
+                                <div id="metricComparisonTab" class="col s12" v-show="currentTab === 'metricComparison'">
+                                    <span class="card-title" style="margin-top: 20px; display: block;">Compare Metrics</span>
+                                    <div class="row">
+                                        <div class="col s12 m6">
+                                            <div class="input-field">
+                                                <select v-model="compareMetric1">
+                                                    <option disabled value="">Select Metric 1</option>
+                                                    <optgroup v-for="(category, cIndex) in metricCategories" :label="category" :key="cIndex">
+                                                        <option v-for="metric in filteredMetricsByCategory[category]" :value="metric.code" :key="metric.code">{{ metric.name }}</option>
+                                                    </optgroup>
+                                                </select>
+                                                <label>Metric 1</label>
+                                            </div>
+                                        </div>
+                                        <div class="col s12 m6">
+                                            <div class="input-field">
+                                                <select v-model="compareMetric2">
+                                                    <option disabled value="">Select Metric 2</option>
+                                                    <optgroup v-for="(category, cIndex) in metricCategories" :label="category" :key="cIndex">
+                                                        <option v-for="metric in filteredMetricsByCategory[category]" :value="metric.code" :key="metric.code">{{ metric.name }}</option>
+                                                    </optgroup>
+                                                </select>
+                                                <label>Metric 2</label>
+                                            </div>
+                                        </div>
+                                        <div class="col s12">
+                                            <div class="input-field">
+                                                <select multiple v-model="compareStates">
+                                                    <option disabled value="">Select State(s) for Comparison</option>
+                                                    <option v-for="state in states" :value="state.fips" :key="state.fips">{{ state.name }}</option>
+                                                </select>
+                                                <label>Select State(s)</label>
+                                            </div>
+                                        </div>
+                                        <div class="col s12 center">
+                                            <button class="btn waves-effect waves-light blue-grey darken-1" @click="fetchComparisonData" :disabled="isComparisonLoading || !compareMetric1 || !compareMetric2 || compareStates.length === 0 || parseInt(startYear) > parseInt(endYear)">
+                                                <i class="material-icons left">bar_chart</i> Compare Data
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div v-if="isComparisonLoading" class="center-align">
+                                        <div class="preloader-wrapper active small"><div class="spinner-layer spinner-blue-only"><div class="circle-clipper left"><div class="circle"></div></div><div class="gap-patch"><div class="circle"></div></div><div class="circle-clipper right"><div class="circle"></div></div></div></div>
+                                        <p>Loading comparison data...</p>
+                                    </div>
+                                    <div v-if="comparisonErrorMessage" class="card-panel red lighten-2 white-text">{{ comparisonErrorMessage }}</div>
+                                    <div v-if="comparisonData.length > 0">
+                                        <div v-for="(comparisonEntry, cIndex) in comparisonData" :key="cIndex" class="card z-depth-1">
+                                            <div class="card-content">
+                                                <span class="card-title">{{ comparisonEntry.title }}</span>
+                                                <div class="row">
+                                                    <div class="col s12 m7"><canvas :id="'comparisonChart-' + cIndex"></canvas></div>
+                                                    <div class="col s12 m5">
+                                                        <table class="striped responsive-table">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Year</th>
+                                                                    <th>{{ getMetricDetails(compareMetric1).name }}</th>
+                                                                    <th>{{ getMetricDetails(compareMetric2).name }}</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr v-for="(year, yIdx) in comparisonEntry.trendLabels" :key="yIdx">
+                                                                    <td>{{ year }}</td>
+                                                                    <td>{{ formatValue(compareMetric1, comparisonEntry.metric1Trend[yIdx]) }}</td>
+                                                                    <td>{{ formatValue(compareMetric2, comparisonEntry.metric2Trend[yIdx]) }}</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div v-else-if="!isComparisonLoading && compareMetric1 && compareMetric2 && compareStates.length > 0 && parseInt(startYear) <= parseInt(endYear)" class="card-panel grey darken-3 white-text center-align">
+                                        <p>No comparison data found for the selected metrics and states.</p>
+                                    </div>
+                                </div>
+
+                                <div id="rawDataTab" class="col s12" v-show="currentTab === 'rawData'">
+                                    <span class="card-title" style="margin-top: 20px; display: block;">All Fetched Data</span>
+                                    <button class="btn waves-effect waves-light blue-grey darken-1" @click="exportDataToCsv" :disabled="allRawData.length === 0">
+                                        <i class="material-icons left">file_download</i> Export to CSV
+                                    </button>
+                                    <div v-if="allRawData.length > 0" style="max-height: 500px; overflow-y: auto;">
+                                        <table class="striped responsive-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>State</th>
+                                                    <th>Metric</th>
+                                                    <th>Year</th>
+                                                    <th>Value</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr v-for="(row, rIdx) in allRawData" :key="rIdx">
+                                                    <td>{{ row.stateName }}</td>
+                                                    <td>{{ row.metricName }}</td>
+                                                    <td>{{ row.year }}</td>
+                                                    <td>{{ formatValue(row.metricCode, row.value) }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div v-else class="card-panel grey darken-3 white-text center-align">
+                                        <p>Fetch some data first to see the raw data table.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script>
+        const app = Vue.createApp({
+            data() {
+                const currentYear = new Date().getFullYear();
+                const availableYears = Array.from({length: (currentYear - 2009) + 1}, (v, k) => (2009 + k).toString()).reverse();
+                return {
+                    states: [
+                        { name: 'Alabama', fips: '01' }, { name: 'Alaska', fips: '02' }, { name: 'Arizona', fips: '04' },
+                        { name: 'Arkansas', fips: '05' }, { name: 'California', fips: '06' }, { name: 'Colorado', fips: '08' },
+                        { name: 'Connecticut', fips: '09' }, { name: 'Delaware', fips: '10' }, { name: 'District of Columbia', fips: '11' },
+                        { name: 'Florida', fips: '12' }, { name: 'Georgia', fips: '13' }, { name: 'Hawaii', fips: '15' },
+                        { name: 'Idaho', fips: '16' }, { name: 'Illinois', fips: '17' }, { name: 'Indiana', fips: '18' },
+                        { name: 'Iowa', fips: '19' }, { name: 'Kansas', fips: '20' }, { name: 'Kentucky', fips: '21' },
+                        { name: 'Louisiana', fips: '22' }, { name: 'Maine', fips: '23' }, { name: 'Maryland', fips: '24' },
+                        { name: 'Massachusetts', fips: '25' }, { name: 'Michigan', fips: '26' }, { name: 'Minnesota', fips: '27' },
+                        { name: 'Mississippi', fips: '28' }, { name: 'Missouri', fips: '29' }, { name: 'Montana', fips: '30' },
+                        { name: 'Nebraska', fips: '31' }, { name: 'Nevada', fips: '32' }, { name: 'New Hampshire', fips: '33' },
+                        { name: 'New Jersey', fips: '34' }, { name: 'New Mexico', fips: '35' }, { name: 'New York', fips: '36' },
+                        { name: 'North Carolina', fips: '37' }, { name: 'North Dakota', fips: '38' }, { name: 'Ohio', fips: '39' },
+                        { name: 'Oklahoma', fips: '40' }, { name: 'Oregon', fips: '41' }, { name: 'Pennsylvania', fips: '42' },
+                        { name: 'Rhode Island', fips: '44' }, { name: 'South Carolina', fips: '45' }, { name: 'South Dakota', fips: '46' },
+                        { name: 'Tennessee', fips: '47' }, { name: 'Texas', fips: '48' }, { name: 'Utah', fips: '49' },
+                        { name: 'Vermont', fips: '50' }, { name: 'Virginia', fips: '51' }, { name: 'Washington', fips: '53' },
+                        { name: 'West Virginia', fips: '54' }, { name: 'Wisconsin', fips: '55' }, { name: 'Wyoming', fips: '56' },
+                        { name: 'Puerto Rico', fips: '72' }
+                    ],
+                    availableYears: availableYears,
+                    availableMetrics: [
+                        { code: 'DP05_0001E', name: 'Total Population', category: 'ACS Demographics', type: 'count', apiSource: 'census_acs' },
+                        { code: 'DP05_0018E', name: 'Population 65 Years and Over', category: 'ACS Demographics', type: 'count', apiSource: 'census_acs' },
+                        { code: 'DP05_0021E', name: 'Median Age', category: 'ACS Demographics', type: 'number', apiSource: 'census_acs' },
+                        { code: 'DP05_0018PE', name: 'Population 65+ (Percentage)', category: 'ACS Demographics', type: 'percentage', apiSource: 'census_acs' },
+                        { code: 'DP05_0071E', name: 'White Alone Population', category: 'ACS Demographics', type: 'count', apiSource: 'census_acs' },
+                        { code: 'DP05_0077E', name: 'Black or African American Alone Population', category: 'ACS Demographics', type: 'count', apiSource: 'census_acs' },
+                        { code: 'DP05_0080E', name: 'Asian Alone Population', category: 'ACS Demographics', type: 'count', apiSource: 'census_acs' },
+                        { code: 'DP05_0086E', name: 'Hispanic or Latino Population', category: 'ACS Demographics', type: 'count', apiSource: 'census_acs' },
+                        { code: 'DP05_0071PE', name: 'White Alone (Percentage)', category: 'ACS Demographics', type: 'percentage', apiSource: 'census_acs' },
+                        { code: 'DP05_0077PE', name: 'Black or African American Alone (Percentage)', category: 'ACS Demographics', type: 'percentage', apiSource: 'census_acs' },
+                        { code: 'DP05_0080PE', name: 'Asian Alone (Percentage)', category: 'ACS Demographics', type: 'percentage', apiSource: 'census_acs' },
+                        { code: 'DP05_0086PE', name: 'Hispanic or Latino (Percentage)', category: 'ACS Demographics', type: 'percentage', apiSource: 'census_acs' },
+                        { code: 'DP05_0019E', name: 'Population 18 years and over', category: 'ACS Demographics', type: 'count', apiSource: 'census_acs' },
+                        { code: 'DP05_0019PE', name: 'Population 18 years and over (Percentage)', category: 'ACS Demographics', type: 'percentage', apiSource: 'census_acs' },
+                        { code: 'DP05_0022E', name: 'Male Population', category: 'ACS Demographics', type: 'count', apiSource: 'census_acs' },
+                        { code: 'DP05_0023E', name: 'Female Population', category: 'ACS Demographics', type: 'count', apiSource: 'census_acs' },
+                        { code: 'DP05_0022PE', name: 'Male Population (Percentage)', category: 'ACS Demographics', type: 'percentage', apiSource: 'census_acs' },
+                        { code: 'DP05_0023PE', name: 'Female Population (Percentage)', category: 'ACS Demographics', type: 'percentage', apiSource: 'census_acs' },
+
+                        { code: 'DP03_0009PE', name: 'Unemployment Rate (Percentage)', category: 'ACS Economic', type: 'percentage', apiSource: 'census_acs' },
+                        { code: 'DP03_0062E', name: 'Median Household Income', category: 'ACS Economic', type: 'currency', apiSource: 'census_acs' },
+                        { code: 'DP03_0099E', name: 'Per Capita Income', category: 'ACS Economic', 'type': 'currency', apiSource: 'census_acs' },
+                        { code: 'DP03_0119P', name: 'Poverty Rate (Percentage)', category: 'ACS Economic', type: 'percentage', apiSource: 'census_acs' },
+                        { code: 'DP03_0047E', name: 'Mean Travel Time to Work (Minutes)', category: 'ACS Economic', type: 'number', apiSource: 'census_acs' },
+                        { code: 'DP03_0063E', name: 'Mean Household Income', category: 'ACS Economic', type: 'currency', apiSource: 'census_acs' },
+                        { code: 'DP03_0052E', name: 'Median Earnings Male Full-Time', category: 'ACS Economic', type: 'currency', apiSource: 'census_acs' },
+                        { code: 'DP03_0053E', name: 'Median Earnings Female Full-Time', category: 'ACS Economic', type: 'currency', apiSource: 'census_acs' },
+
+                        { code: 'DP02_0002E', name: 'Average Household Size', category: 'ACS Social', type: 'number', apiSource: 'census_acs' },
+                        { code: 'DP02_0064PE', name: 'High School Graduate or Higher (Percentage)', category: 'ACS Social', type: 'percentage', apiSource: 'census_acs' },
+                        { code: 'DP02_0065PE', name: 'Bachelors Degree or Higher (Percentage)', category: 'ACS Social', type: 'percentage', apiSource: 'census_acs' },
+                        { code: 'DP02_0070PE', name: 'Graduate or Professional Degree (Percentage)', category: 'ACS Social', type: 'percentage', apiSource: 'census_acs' },
+                        { code: 'DP02_0093PE', name: 'Speak English Less Than "Very Well" (Percentage)', category: 'ACS Social', type: 'percentage', apiSource: 'census_acs' },
+
+                        { code: 'DP04_0002PE', name: 'Occupied Housing Units (Percentage)', category: 'ACS Housing', type: 'percentage', apiSource: 'census_acs' },
+                        { code: 'DP04_0003PE', name: 'Vacant Housing Units (Percentage)', category: 'ACS Housing', type: 'percentage', apiSource: 'census_acs' },
+                        { code: 'DP04_0004PE', name: 'Owner-Occupied Housing Units (Percentage)', category: 'ACS Housing', type: 'percentage', apiSource: 'census_acs' },
+                        { code: 'DP04_0005PE', name: 'Renter-Occupied Housing Units (Percentage)', category: 'ACS Housing', type: 'percentage', apiSource: 'census_acs' },
+                        { code: 'DP04_0047E', name: 'Median Home Value for Owner-Occupied Units', category: 'ACS Housing', type: 'currency', apiSource: 'census_acs' },
+                        { code: 'DP04_0089E', name: 'Median Gross Rent', category: 'ACS Housing', type: 'currency', apiSource: 'census_acs' },
+                        { code: 'DP04_0079PE', name: 'Housing Units Built 2010 or Later (Percentage)', category: 'ACS Housing', type: 'percentage', apiSource: 'census_acs' },
+
+                        { code: 'GDP', name: 'Gross Domestic Product (National)', category: 'FRED Economic', type: 'currency', apiSource: 'fred' },
+                        { code: 'CPIAUCSL', name: 'Consumer Price Index (National)', category: 'FRED Economic', type: 'number', apiSource: 'fred' },
+                        { code: 'UNRATE', name: 'Unemployment Rate (National)', category: 'FRED Economic', type: 'percentage', apiSource: 'fred' },
+                        { code: 'FEDFUNDS', name: 'Federal Funds Rate (National)', category: 'FRED Economic', type: 'percentage', apiSource: 'fred' },
+                        { code: 'MORTGAGE30US', name: '30-Year Fixed Mortgage Rate (National)', category: 'FRED Economic', type: 'percentage', apiSource: 'fred' },
+                        { code: 'CIVPART', name: 'Labor Force Participation Rate (National)', category: 'FRED Economic', type: 'percentage', apiSource: 'fred' },
+
+                        { code: 'CDC_DIABETES', name: 'Diabetes Prevalence (Percentage)', category: 'CDC Health', type: 'percentage', apiSource: 'cdc_chronic', questionId: 'DIABETE4' },
+                        { code: 'CDC_OBESITY', name: 'Obesity Prevalence (Percentage)', category: 'CDC Health', type: 'percentage', apiSource: 'cdc_chronic', questionId: 'OBESITY' },
+                        { code: 'CDC_HIGHBP', name: 'High Blood Pressure Prevalence (Percentage)', category: 'CDC Health', type: 'percentage', apiSource: 'cdc_chronic', questionId: 'BPHIGH' },
+                        { code: 'CDC_CHOL', name: 'High Cholesterol Prevalence (Percentage)', category: 'CDC Health', type: 'percentage', apiSource: 'cdc_chronic', questionId: 'CHOLSCREEN' },
+                        { code: 'CDC_CANCER', name: 'Cancer Prevalence (Percentage)', category: 'CDC Health', type: 'percentage', apiSource: 'cdc_chronic', questionId: 'CANCER' },
+
+                        { code: 'USGS_EARTHQUAKES', name: 'Earthquakes (M2.5+ Count, National)', category: 'USGS Natural Events', type: 'count', apiSource: 'usgs_earthquake' },
+
+                        { code: 'FIRMS', name: 'Number of Firms', category: 'Census Business', type: 'count', apiSource: 'census_bds' },
+                        { code: 'EMP', name: 'Employment', category: 'Census Business', type: 'count', apiSource: 'census_bds' },
+                        { code: 'EMP_CHG', name: 'Employment Change', category: 'Census Business', type: 'count', apiSource: 'census_bds' },
+                        { code: 'JOB_CREATION', name: 'Job Creation', category: 'Census Business', type: 'count', apiSource: 'census_bds' },
+                        { code: 'JOB_DESTRUCTION', name: 'Job Destruction', category: 'Census Business', type: 'count', apiSource: 'census_bds' },
+
+                        { code: 'POP', name: 'Total Population Estimate', category: 'Census Population Estimates', type: 'count', apiSource: 'census_pep' }
+                    ],
+                    selectedStates: ['06'],
+                    selectedMetricCodes: ['DP05_0001E'],
+                    startYear: '2019',
+                    endYear: (currentYear - 1).toString(),
+                    selectedChartType: 'line',
+                    metricSearchQuery: '',
+                    displayData: [],
+                    isLoading: false,
+                    errorMessage: '',
+                    chartColors: ['#81D4FA', '#80CBC4', '#CE93D8', '#FFAB91', '#A5D6A7', '#FFD54F', '#B39DDB', '#FFCC80', '#C5E1A5', '#EF9A9A'],
+                    aiPrompt: '',
+                    isAiLoading: false,
+                    aiError: '',
+                    aiChatHistory: [],
+                    currentTab: 'singleMetric',
+                    compareMetric1: '',
+                    compareMetric2: '',
+                    compareStates: ['06'],
+                    comparisonData: [],
+                    isComparisonLoading: false,
+                    comparisonErrorMessage: '',
+                    allRawData: [],
+                    chartInstances: {},
+                };
+            },
+            computed: {
+                metricCategories() {
+                    return [...new Set(this.availableMetrics.map(m => m.category))].sort();
+                },
+                filteredMetricsByCategory() {
+                    const filtered = this.availableMetrics.filter(metric =>
+                        metric.name.toLowerCase().includes(this.metricSearchQuery.toLowerCase()) ||
+                        metric.code.toLowerCase().includes(this.metricSearchQuery.toLowerCase())
+                    );
+                    return filtered.reduce((acc, metric) => {
+                        if (!acc[metric.category]) {
+                            acc[metric.category] = [];
+                        }
+                        acc[metric.category].push(metric);
+                        return acc;
+                    }, {});
+                },
+                getStateName() {
+                    return (fips) => {
+                        if (fips === 'national') return 'National';
+                        const state = this.states.find(s => s.fips === fips);
+                        return state ? state.name : 'Unknown State';
+                    };
+                },
+                getMetricDetails() {
+                    return (code) => {
+                        return this.availableMetrics.find(m => m.code === code);
+                    };
+                }
+            },
+            methods: {
+                destroyAllCharts() {
+                    for (const id in this.chartInstances) {
+                        if (this.chartInstances[id]) {
+                            this.chartInstances[id].destroy();
+                            delete this.chartInstances[id];
+                        }
+                    }
+                },
+                async fetchData() {
+                    this.isLoading = true;
+                    this.errorMessage = '';
+                    this.destroyAllCharts();
+                    this.displayData = [];
+                    this.allRawData = [];
+
+                    if (parseInt(this.startYear) > parseInt(this.endYear)) {
+                        this.errorMessage = 'Start year cannot be after end year.';
+                        this.isLoading = false;
+                        return;
+                    }
+                    if (this.selectedStates.length === 0 || this.selectedMetricCodes.length === 0) {
+                        this.errorMessage = 'Please select at least one state and one metric.';
+                        this.isLoading = false;
+                        return;
+                    }
+
+                    const dataPromises = [];
+                    let currentId = 0;
+
+                    for (const metricCode of this.selectedMetricCodes) {
+                        const metricDetails = this.getMetricDetails(metricCode);
+                        if (!metricDetails) {
+                            console.warn(`Metric details not found for code: ${metricCode}`);
+                            continue;
+                        }
+
+                        const trendLabels = [];
+                        for (let y = parseInt(this.startYear); y <= parseInt(this.endYear); y++) {
+                            trendLabels.push(y.toString());
+                        }
+
+                        const multiStateTrendDataPromises = this.selectedStates.map(async stateFips => {
+                            const stateName = this.getStateName(stateFips);
+                            const stateTrendData = [];
+                            let currentMetricValue = null;
+
+                            for (const year of trendLabels) {
+                                let value = null;
+                                try {
+                                    switch (metricDetails.apiSource) {
+                                        case 'census_acs':
+                                            value = await this.fetchCensusAcsData(metricCode, stateFips, year);
+                                            break;
+                                        case 'fred':
+                                            value = await this.fetchFredData(metricCode, year);
+                                            break;
+                                        case 'cdc_chronic':
+                                            value = await this.fetchCdcChronicData(metricDetails.questionId, stateFips, year);
+                                            break;
+                                        case 'usgs_earthquake':
+                                            value = await this.fetchUsgsEarthquakeData(year);
+                                            break;
+                                        case 'census_bds':
+                                            value = await this.fetchCensusBdsData(metricCode, stateFips, year);
+                                            break;
+                                        case 'census_pep':
+                                            value = await this.fetchCensusPepData(stateFips, year);
+                                            break;
+                                        default:
+                                            console.warn(`Unknown API source: ${metricDetails.apiSource}`);
+                                            break;
+                                    }
+                                } catch (error) {
+                                    console.error(`Error fetching data for ${metricDetails.name} in ${stateName} for ${year}:`, error);
+                                }
+                                stateTrendData.push(value);
+                                this.allRawData.push({
+                                    stateName: stateName,
+                                    metricName: metricDetails.name,
+                                    metricCode: metricCode,
+                                    year: year,
+                                    value: value
+                                });
+                                if (year === this.endYear) {
+                                    currentMetricValue = value;
+                                }
+                            }
+                            return { stateFips, stateName, trendData: stateTrendData, currentMetricValue };
+                        });
+
+                        dataPromises.push(Promise.all(multiStateTrendDataPromises).then(results => {
+                            const dataEntry = {
+                                id: currentId++,
+                                metricCode: metricCode,
+                                metricName: metricDetails.name,
+                                metricType: metricDetails.type,
+                                trendLabels: trendLabels,
+                                multiStateTrendData: [],
+                                stateFips: [],
+                                stateNames: [],
+                                currentMetricData: {},
+                            };
+
+                            results.forEach(res => {
+                                dataEntry.stateFips.push(res.stateFips);
+                                dataEntry.stateNames.push(res.stateName);
+                                dataEntry.multiStateTrendData.push(res.trendData);
+                                dataEntry.currentMetricData[res.stateFips] = res.currentMetricValue;
+                            });
+
+                            if (this.selectedStates.length > 1) {
+                                dataEntry.title = `${metricDetails.name} Comparison Across States (${this.startYear}-${this.endYear})`;
+                            } else {
+                                dataEntry.title = `${metricDetails.name} for ${dataEntry.stateNames[0]} (${this.startYear}-${this.endYear})`;
+                            }
+                            dataEntry.currentYear = this.endYear;
+
+                            this.displayData.push(dataEntry);
+                        }));
+                    }
+
+                    try {
+                        await Promise.all(dataPromises);
+                        this.displayData.sort((a,b) => a.id - b.id);
+                    } catch (error) {
+                        this.errorMessage = `Failed to fetch data: ${error.message}. Please try again or check your selections.`;
+                        console.error('Fetch data error:', error);
+                    } finally {
+                        this.isLoading = false;
+                        this.$nextTick(() => {
+                            this.initMaterializeComponents();
+                            this.renderCharts();
+                        });
+                    }
+                },
+
+                async fetchCensusAcsData(metricCode, stateFips, year) {
+                    const apiUrl = `https://api.census.gov/data/${year}/acs/acs1/profile?get=NAME,${metricCode}&for=state:${stateFips}`;
+                    try {
+                        const response = await fetch(apiUrl);
+                        if (!response.ok) {
+                            console.warn(`Census ACS fetch failed for ${metricCode} in ${stateFips} for ${year}: HTTP status ${response.status}`);
+                            return null;
+                        }
+                        const rawData = await response.json();
+                        if (rawData && rawData.length > 1 && rawData[1] && rawData[1][1]) {
+                            const value = parseFloat(rawData[1][1]);
+                            return isNaN(value) ? null : value;
+                        }
+                    } catch (error) {
+                        console.error(`Error fetching Census ACS data for ${metricCode} in ${stateFips} for ${year}:`, error);
+                    }
+                    return null;
+                },
+
+                async fetchFredData(seriesId, year) {
+                    const apiUrl = `https://api.stlouisfed.org/fred/series/observations?series_id=${seriesId}&file_type=json&observation_start=${year}-01-01&observation_end=${year}-12-31`;
+                    try {
+                        const response = await fetch(apiUrl);
+                        if (!response.ok) {
+                            console.warn(`FRED API fetch failed for ${seriesId} (${year}): HTTP status ${response.status}`);
+                            return null;
+                        }
+                        const data = await response.json();
+                        if (data.observations && data.observations.length > 0) {
+                            const latestObservation = data.observations[data.observations.length - 1];
+                            const value = parseFloat(latestObservation.value);
+                            return isNaN(value) ? null : value;
+                        }
+                    } catch (error) {
+                        console.error(`Error fetching FRED data for ${seriesId} for ${year}:`, error);
+                    }
+                    return null;
+                },
+
+                async fetchCdcChronicData(questionId, stateFips, year) {
+                    const apiUrl = `https://chronicdata.cdc.gov/resource/xq63-q46p.json?statefips=${stateFips}&yearstart=${year}&questionid=${questionId}&datavaluetypeid=CrdPrv&stratificationid=OVERALL`;
+                    try {
+                        const response = await fetch(apiUrl);
+                        if (!response.ok) {
+                            console.warn(`CDC Chronic Data fetch failed for ${questionId} in ${stateFips} for ${year}: HTTP status ${response.status}`);
+                            return null;
+                        }
+                        const data = await response.json();
+                        if (data && data.length > 0) {
+                            const value = parseFloat(data[0].datavalue);
+                            return isNaN(value) ? null : value;
+                        }
+                    } catch (error) {
+                        console.error(`Error fetching CDC data for ${questionId} in ${stateFips} for ${year}:`, error);
+                    }
+                    return null;
+                },
+
+                async fetchUsgsEarthquakeData(year) {
+                    const apiUrl = `https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=${year}-01-01&endtime=${year}-12-31&minmagnitude=2.5&eventtype=earthquake`;
+                    try {
+                        const response = await fetch(apiUrl);
+                        if (!response.ok) {
+                            console.warn(`USGS Earthquake fetch failed for ${year}: HTTP status ${response.status}`);
+                            return null;
+                        }
+                        const data = await response.json();
+                        return data.features ? data.features.length : 0;
+                    } catch (error) {
+                        console.error(`Error fetching USGS Earthquake data for ${year}:`, error);
+                    }
+                    return null;
+                },
+
+                async fetchCensusBdsData(metricCode, stateFips, year) {
+                    const apiUrl = `https://api.census.gov/data/timeseries/bds/sic?get=${metricCode}&for=state:${stateFips}&time=${year}`;
+                    try {
+                        const response = await fetch(apiUrl);
+                        if (!response.ok) {
+                            console.warn(`Census BDS fetch failed for ${metricCode} in ${stateFips} for ${year}: HTTP status ${response.status}`);
+                            return null;
+                        }
+                        const rawData = await response.json();
+                        if (rawData && rawData.length > 1 && rawData[1] && rawData[1][0]) {
+                            const value = parseFloat(rawData[1][0]);
+                            return isNaN(value) ? null : value;
+                        }
+                    } catch (error) {
+                        console.error(`Error fetching Census BDS data for ${metricCode} in ${stateFips} for ${year}:`, error);
+                    }
+                    return null;
+                },
+
+                async fetchCensusPepData(stateFips, year) {
+                    const apiUrl = `https://api.census.gov/data/${year}/pep/population?get=POP,NAME&for=state:${stateFips}`;
+                    try {
+                        const response = await fetch(apiUrl);
+                        if (!response.ok) {
+                            console.warn(`Census PEP fetch failed for ${stateFips} for ${year}: HTTP status ${response.status}`);
+                            return null;
+                        }
+                        const rawData = await response.json();
+                        if (rawData && rawData.length > 1 && rawData[1] && rawData[1][0]) {
+                            const value = parseFloat(rawData[1][0]);
+                            return isNaN(value) ? null : value;
+                        }
+                    } catch (error) {
+                        console.error(`Error fetching Census PEP data for ${stateFips} for ${year}:`, error);
+                    }
+                    return null;
+                },
+
+                renderCharts() {
+                    this.displayData.forEach((dataEntry) => {
+                        const ctx = document.getElementById(`dataChart-${dataEntry.id}`);
+                        if (!ctx) return;
+
+                        if (this.chartInstances[`single-${dataEntry.id}`]) {
+                            this.chartInstances[`single-${dataEntry.id}`].destroy();
+                        }
+
+                        Chart.defaults.color = '#E0E0E0';
+                        Chart.defaults.borderColor = '#424242';
+
+                        const datasets = dataEntry.multiStateTrendData.map((trendData, sIdx) => ({
+                            label: dataEntry.stateNames[sIdx],
+                            data: trendData,
+                            borderColor: this.chartColors[sIdx % this.chartColors.length],
+                            backgroundColor: this.chartColors[sIdx % this.chartColors.length].replace(')', ', 0.2)').replace('rgb(', 'rgba('),
+                            tension: this.selectedChartType === 'line' ? 0.3 : 0,
+                            fill: this.selectedChartType === 'line',
+                            pointBackgroundColor: this.chartColors[sIdx % this.chartColors.length],
+                            pointBorderColor: this.chartColors[sIdx % this.chartColors.length],
+                            pointRadius: this.selectedChartType === 'line' ? 4 : 0,
+                            pointHoverRadius: this.selectedChartType === 'line' ? 6 : 0,
+                            barPercentage: 0.8,
+                            categoryPercentage: 0.8,
+                        }));
+
+                        this.chartInstances[`single-${dataEntry.id}`] = new Chart(ctx, {
+                            type: this.selectedChartType,
+                            data: {
+                                labels: dataEntry.trendLabels,
+                                datasets: datasets
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                    x: {
+                                        grid: { color: '#424242', drawBorder: true, borderColor: '#424242' },
+                                        ticks: { color: '#E0E0E0' }
+                                    },
+                                    y: {
+                                        beginAtZero: false,
+                                        grid: { color: '#424242', drawBorder: true, borderColor: '#424242' },
+                                        ticks: {
+                                            color: '#E0E0E0',
+                                            callback: (value) => this.formatValue(dataEntry.metricCode, value)
+                                        }
+                                    }
+                                },
+                                plugins: {
+                                    legend: {
+                                        labels: { color: '#E0E0E0' }
+                                    },
+                                    tooltip: {
+                                        backgroundColor: '#2E2E2E',
+                                        titleColor: '#E0E0E0',
+                                        bodyColor: '#E0E0E0',
+                                        borderColor: '#424242',
+                                        borderWidth: 1,
+                                        padding: 10,
+                                        callbacks: {
+                                            label: (context) => {
+                                                const label = context.dataset.label || '';
+                                                const value = context.parsed.y;
+                                                return `${label}: ${this.formatValue(dataEntry.metricCode, value)}`;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    });
+                },
+
+                async fetchComparisonData() {
+                    this.isComparisonLoading = true;
+                    this.comparisonErrorMessage = '';
+                    this.destroyAllCharts();
+                    this.comparisonData = [];
+
+                    if (parseInt(this.startYear) > parseInt(this.endYear)) {
+                        this.comparisonErrorMessage = 'Start year cannot be after end year.';
+                        this.isComparisonLoading = false;
+                        return;
+                    }
+                    if (!this.compareMetric1 || !this.compareMetric2 || this.compareStates.length === 0) {
+                        this.comparisonErrorMessage = 'Please select two metrics and at least one state for comparison.';
+                        this.isComparisonLoading = false;
+                        return;
+                    }
+
+                    const metric1Details = this.getMetricDetails(this.compareMetric1);
+                    const metric2Details = this.getMetricDetails(this.compareMetric2);
+
+                    if (!metric1Details || !metric2Details) {
+                        this.comparisonErrorMessage = 'Selected metrics are invalid.';
+                        this.isComparisonLoading = false;
+                        return;
+                    }
+
+                    const trendLabels = [];
+                    for (let y = parseInt(this.startYear); y <= parseInt(this.endYear); y++) {
+                        trendLabels.push(y.toString());
+                    }
+
+                    const comparisonPromises = this.compareStates.map(async stateFips => {
+                        const stateName = this.getStateName(stateFips);
+                        const metric1Trend = [];
+                        const metric2Trend = [];
+
+                        for (const year of trendLabels) {
+                            let value1 = null;
+                            let value2 = null;
+                            try {
+                                switch (metric1Details.apiSource) {
+                                    case 'census_acs': value1 = await this.fetchCensusAcsData(this.compareMetric1, stateFips, year); break;
+                                    case 'fred': value1 = await this.fetchFredData(this.compareMetric1, year); break;
+                                    case 'cdc_chronic': value1 = await this.fetchCdcChronicData(metric1Details.questionId, stateFips, year); break;
+                                    case 'usgs_earthquake': value1 = await this.fetchUsgsEarthquakeData(year); break;
+                                    case 'census_bds': value1 = await this.fetchCensusBdsData(this.compareMetric1, stateFips, year); break;
+                                    case 'census_pep': value1 = await this.fetchCensusPepData(stateFips, year); break;
+                                    default: console.warn(`Unknown API source for M1: ${metric1Details.apiSource}`); break;
+                                }
+                            } catch (e) { console.error(`Error fetching M1 for ${stateName} ${year}:`, e); }
+
+                            try {
+                                switch (metric2Details.apiSource) {
+                                    case 'census_acs': value2 = await this.fetchCensusAcsData(this.compareMetric2, stateFips, year); break;
+                                    case 'fred': value2 = await this.fetchFredData(this.compareMetric2, year); break;
+                                    case 'cdc_chronic': value2 = await this.fetchCdcChronicData(metric2Details.questionId, stateFips, year); break;
+                                    case 'usgs_earthquake': value2 = await this.fetchUsgsEarthquakeData(year); break;
+                                    case 'census_bds': value2 = await this.fetchCensusBdsData(this.compareMetric2, stateFips, year); break;
+                                    case 'census_pep': value2 = await this.fetchCensusPepData(stateFips, year); break;
+                                    default: console.warn(`Unknown API source for M2: ${metric2Details.apiSource}`); break;
+                                }
+                            } catch (e) { console.error(`Error fetching M2 for ${stateName} ${year}:`, e); }
+
+                            metric1Trend.push(value1);
+                            metric2Trend.push(value2);
+                            this.allRawData.push({
+                                stateName: stateName,
+                                metricName: metric1Details.name,
+                                metricCode: this.compareMetric1,
+                                year: year,
+                                value: value1
+                            });
+                            this.allRawData.push({
+                                stateName: stateName,
+                                metricName: metric2Details.name,
+                                metricCode: this.compareMetric2,
+                                year: year,
+                                value: value2
+                            });
+                        }
+                        return { stateFips, stateName, metric1Trend, metric2Trend };
+                    });
+
+                    try {
+                        const results = await Promise.all(comparisonPromises);
+                        this.comparisonData = results.map((res, index) => ({
+                            id: index,
+                            title: `Comparison for ${res.stateName} (${this.startYear}-${this.endYear})`,
+                            trendLabels: trendLabels,
+                            metric1Trend: res.metric1Trend,
+                            metric2Trend: res.metric2Trend,
+                            stateName: res.stateName
+                        }));
+                    } catch (error) {
+                        this.comparisonErrorMessage = `Failed to fetch comparison data: ${error.message}.`;
+                        console.error('Fetch comparison data error:', error);
+                    } finally {
+                        this.isComparisonLoading = false;
+                        this.$nextTick(() => {
+                            this.initMaterializeComponents();
+                            this.renderComparisonCharts();
+                        });
+                    }
+                },
+
+                renderComparisonCharts() {
+                    this.comparisonData.forEach((comparisonEntry, index) => {
+                        const ctx = document.getElementById(`comparisonChart-${index}`);
+                        if (!ctx) return;
+
+                        if (this.chartInstances[`comparison-${index}`]) {
+                            this.chartInstances[`comparison-${index}`].destroy();
+                        }
+
+                        Chart.defaults.color = '#E0E0E0';
+                        Chart.defaults.borderColor = '#424242';
+
+                        this.chartInstances[`comparison-${index}`] = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: comparisonEntry.trendLabels,
+                                datasets: [
+                                    {
+                                        label: this.getMetricDetails(this.compareMetric1).name,
+                                        data: comparisonEntry.metric1Trend,
+                                        borderColor: this.chartColors[0],
+                                        backgroundColor: this.chartColors[0].replace(')', ', 0.2)').replace('rgb(', 'rgba('),
+                                        yAxisID: 'y',
+                                        tension: 0.3,
+                                        fill: false,
+                                        pointBackgroundColor: this.chartColors[0],
+                                        pointBorderColor: this.chartColors[0],
+                                        pointRadius: 4,
+                                        pointHoverRadius: 6,
+                                    },
+                                    {
+                                        label: this.getMetricDetails(this.compareMetric2).name,
+                                        data: comparisonEntry.metric2Trend,
+                                        borderColor: this.chartColors[1],
+                                        backgroundColor: this.chartColors[1].replace(')', ', 0.2)').replace('rgb(', 'rgba('),
+                                        yAxisID: 'y1',
+                                        tension: 0.3,
+                                        fill: false,
+                                        pointBackgroundColor: this.chartColors[1],
+                                        pointBorderColor: this.chartColors[1],
+                                        pointRadius: 4,
+                                        pointHoverRadius: 6,
+                                    }
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                    x: {
+                                        grid: { color: '#424242', drawBorder: true, borderColor: '#424242' },
+                                        ticks: { color: '#E0E0E0' }
+                                    },
+                                    y: {
+                                        beginAtZero: false,
+                                        position: 'left',
+                                        grid: { color: '#424242', drawBorder: true, borderColor: '#424242' },
+                                        ticks: {
+                                            color: this.chartColors[0],
+                                            callback: (value) => this.formatValue(this.compareMetric1, value)
+                                        },
+                                        title: {
+                                            display: true,
+                                            text: this.getMetricDetails(this.compareMetric1).name,
+                                            color: this.chartColors[0]
+                                        }
+                                    },
+                                    y1: {
+                                        beginAtZero: false,
+                                        position: 'right',
+                                        grid: { drawOnChartArea: false, color: '#424242', drawBorder: true, borderColor: '#424242' },
+                                        ticks: {
+                                            color: this.chartColors[1],
+                                            callback: (value) => this.formatValue(this.compareMetric2, value)
+                                        },
+                                        title: {
+                                            display: true,
+                                            text: this.getMetricDetails(this.compareMetric2).name,
+                                            color: this.chartColors[1]
+                                        }
+                                    }
+                                },
+                                plugins: {
+                                    legend: {
+                                        labels: { color: '#E0E0E0' }
+                                    },
+                                    tooltip: {
+                                        backgroundColor: '#2E2E2E',
+                                        titleColor: '#E0E0E0',
+                                        bodyColor: '#E0E0E0',
+                                        borderColor: '#424242',
+                                        borderWidth: 1,
+                                        padding: 10,
+                                        callbacks: {
+                                            label: (context) => {
+                                                const label = context.dataset.label || '';
+                                                const value = context.parsed.y;
+                                                const metricCode = context.dataset.yAxisID === 'y' ? this.compareMetric1 : this.compareMetric2;
+                                                return `${label}: ${this.formatValue(metricCode, value)}`;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    });
+                },
+
+                async sendAiQuery() {
+                    this.isAiLoading = true;
+                    this.aiError = '';
+
+                    this.aiChatHistory.push({ role: 'user', text: this.aiPrompt });
+
+                    let dataContext = "No specific data loaded yet.";
+                    if (this.allRawData.length > 0) {
+                        dataContext = "All loaded raw data (State, Metric, Year, Value) - sample of up to 100 entries:\n";
+                        dataContext += this.allRawData.slice(0, 100).map(row =>
+                            `${row.stateName}, ${row.metricName}, ${row.year}, ${this.formatValue(row.metricCode, row.value)}`
+                        ).join('\n');
+                        if (this.allRawData.length > 100) {
+                            dataContext += `\n... (truncated ${this.allRawData.length - 100} more entries)`;
+                        }
+                    }
+                    if (this.comparisonData.length > 0) {
+                        dataContext += "\n\nCurrently displayed comparison data:\n";
+                        this.comparisonData.forEach(entry => {
+                            dataContext += `- State: ${entry.stateName}, Metric 1: ${this.getMetricDetails(this.compareMetric1)?.name || 'N/A'}, Metric 2: ${this.getMetricDetails(this.compareMetric2)?.name || 'N/A'}\n`;
+                            dataContext += `  Years: ${entry.trendLabels.join(', ')}\n`;
+                            dataContext += `  Metric 1 Trend: ${entry.metric1Trend.map(val => this.formatValue(this.compareMetric1, val)).join(', ')}\n`;
+                            dataContext += `  Metric 2 Trend: ${entry.metric2Trend.map(val => this.formatValue(this.compareMetric2, val)).join(', ')}\n`;
+                        });
+                    }
+                    if (this.displayData.length > 0) {
+                        dataContext += "\n\nCurrently displayed single metric data summaries:\n";
+                        this.displayData.forEach(entry => {
+                            dataContext += `- Metric: ${entry.metricName}, States: ${entry.stateNames.join(', ')}, Years: ${entry.trendLabels.join(', ')}\n`;
+                            dataContext += `  Current Values (${entry.currentYear}): ${Object.entries(entry.currentMetricData).map(([fips, val]) => `${this.getStateName(fips)}: ${this.formatValue(entry.metricCode, val)}`).join('; ')}\n`;
+                        });
+                    }
+
+                    const chatContext = this.aiChatHistory.map(msg => `${msg.role === 'user' ? 'User' : 'AI'}: ${msg.text}`).join('\n');
+
+                    const msgforai = `You are a helpful assistant providing concise and accurate insights on U.S. government statistics. Analyze the provided data context and answer the user's question. If the question is about data not explicitly provided in the context, clearly state that you can only analyze the current data. Keep your responses focused and factual.
+
+Data Context:
+${dataContext}
+
+Conversation History:
+${chatContext}
+
+User's Current Question: ${this.aiPrompt}`;
+
+                    try {
+                        const response = await fetch('/api/ai', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ msgforai: msgforai })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`AI API HTTP error! Status: ${response.status}`);
+                        }
+
+                        const data = await response.json();
+                        if (data.success) {
+                            this.aiChatHistory.push({ role: 'ai', text: data.response });
+                        } else {
+                            this.aiError = data.error || 'Failed to get AI response.';
+                        }
+                    } catch (error) {
+                        this.aiError = `Error communicating with AI: ${error.message}. Please check your network or try again.`;
+                        console.error('AI API error:', error);
+                    } finally {
+                        this.isAiLoading = false;
+                        this.aiPrompt = '';
+                        this.$nextTick(() => {
+                            const chatContainer = document.querySelector('.ai-chat-history-container');
+                            if (chatContainer) {
+                                chatContainer.scrollTop = chatContainer.scrollHeight;
+                            }
+                        });
+                    }
+                },
+
+                clearAiChat() {
+                    this.aiChatHistory = [];
+                    this.aiError = '';
+                    this.aiPrompt = '';
+                },
+
+                clearSelections() {
+                    this.selectedStates = ['06'];
+                    this.selectedMetricCodes = ['DP05_0001E'];
+                    this.startYear = '2019';
+                    this.endYear = (new Date().getFullYear() - 1).toString();
+                    this.metricSearchQuery = '';
+                    this.compareMetric1 = '';
+                    this.compareMetric2 = '';
+                    this.compareStates = ['06'];
+                    this.displayData = [];
+                    this.comparisonData = [];
+                    this.allRawData = [];
+                    this.errorMessage = '';
+                    this.comparisonErrorMessage = '';
+                    this.destroyAllCharts();
+                    this.$nextTick(() => {
+                        this.initMaterializeComponents();
+                    });
+                },
+
+                formatValue(metricCode, value) {
+                    if (value === null || value === undefined || value === '') {
+                        return 'N/A';
+                    }
+                    const numValue = parseFloat(value);
+                    if (isNaN(numValue)) {
+                        return value;
+                    }
+
+                    const metricDetails = this.getMetricDetails(metricCode);
+                    switch (metricDetails ? metricDetails.type : '') {
+                        case 'currency':
+                            return `$${numValue.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+                        case 'percentage':
+                            return `${numValue.toFixed(1)}%`;
+                        case 'count':
+                            return numValue.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+                        case 'number':
+                            return numValue.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+                        default:
+                            return numValue.toLocaleString('en-US');
+                    }
+                },
+
+                exportDataToCsv() {
+                    if (this.allRawData.length === 0) {
+                        alert('No data to export.');
+                        return;
+                    }
+
+                    const headers = ['State', 'Metric', 'Year', 'Value'];
+                    const rows = this.allRawData.map(row => [
+                        `"${row.stateName.replace(/"/g, '""')}"`,
+                        `"${row.metricName.replace(/"/g, '""')}"`,
+                        `"${row.year}"`,
+                        `"${this.formatValue(row.metricCode, row.value).replace(/"/g, '""')}"`
+                    ]);
+
+                    const csvContent = [
+                        headers.join(','),
+                        ...rows.map(e => e.join(','))
+                    ].join('\n');
+
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = 'us_stats_dashboard_data.csv';
+                    link.click();
+                    URL.revokeObjectURL(link.href);
+                },
+
+                initMaterializeComponents() {
+                    M.AutoInit();
+                    M.FormSelect.init(document.querySelectorAll('select'));
+                    M.Tabs.init(document.querySelector('.tabs'));
+                },
+
+                savePreferences() {
+                    localStorage.setItem('usStatsDashboard_states', JSON.stringify(this.selectedStates));
+                    localStorage.setItem('usStatsDashboard_metrics', JSON.stringify(this.selectedMetricCodes));
+                    localStorage.setItem('usStatsDashboard_startYear', this.startYear);
+                    localStorage.setItem('usStatsDashboard_endYear', this.endYear);
+                    localStorage.setItem('usStatsDashboard_chartType', this.selectedChartType);
+                    localStorage.setItem('usStatsDashboard_currentTab', this.currentTab);
+                    localStorage.setItem('usStatsDashboard_compareMetric1', this.compareMetric1);
+                    localStorage.setItem('usStatsDashboard_compareMetric2', this.compareMetric2);
+                    localStorage.setItem('usStatsDashboard_compareStates', JSON.stringify(this.compareStates));
+                },
+
+                loadPreferences() {
+                    const savedStates = localStorage.getItem('usStatsDashboard_states');
+                    const savedMetrics = localStorage.getItem('usStatsDashboard_metrics');
+                    const savedStartYear = localStorage.getItem('usStatsDashboard_startYear');
+                    const savedEndYear = localStorage.getItem('usStatsDashboard_endYear');
+                    const savedChartType = localStorage.getItem('usStatsDashboard_chartType');
+                    const savedCurrentTab = localStorage.getItem('usStatsDashboard_currentTab');
+                    const savedCompareMetric1 = localStorage.getItem('usStatsDashboard_compareMetric1');
+                    const savedCompareMetric2 = localStorage.getItem('usStatsDashboard_compareMetric2');
+                    const savedCompareStates = localStorage.getItem('usStatsDashboard_compareStates');
+
+                    if (savedStates) this.selectedStates = JSON.parse(savedStates);
+                    if (savedMetrics) this.selectedMetricCodes = JSON.parse(savedMetrics);
+                    if (savedStartYear) this.startYear = savedStartYear;
+                    if (savedEndYear) this.endYear = savedEndYear;
+                    if (savedChartType) this.selectedChartType = savedChartType;
+                    if (savedCurrentTab) this.currentTab = savedCurrentTab;
+                    if (savedCompareMetric1) this.compareMetric1 = savedCompareMetric1;
+                    if (savedCompareMetric2) this.compareMetric2 = savedCompareMetric2;
+                    if (savedCompareStates) this.compareStates = JSON.parse(savedCompareStates);
+                }
+            },
+            watch: {
+                selectedChartType() {
+                    if (this.currentTab === 'singleMetric' && this.displayData.length > 0) {
+                        this.$nextTick(() => {
+                            this.renderCharts();
+                        });
+                    }
+                },
+                currentTab(newTab) {
+                    this.$nextTick(() => {
+                        this.initMaterializeComponents();
+                        if (newTab === 'singleMetric' && this.displayData.length > 0) {
+                            this.renderCharts();
+                        } else if (newTab === 'metricComparison' && this.comparisonData.length > 0) {
+                            this.renderComparisonCharts();
+                        }
+                    });
+                }
+            },
+            mounted() {
+                this.loadPreferences();
+                this.$nextTick(() => {
+                    this.initMaterializeComponents();
+                    if (this.currentTab === 'singleMetric' && this.selectedStates.length > 0 && this.selectedMetricCodes.length > 0 && parseInt(this.startYear) <= parseInt(this.endYear)) {
+                        this.fetchData();
+                    } else if (this.currentTab === 'metricComparison' && this.compareStates.length > 0 && this.compareMetric1 && this.compareMetric2 && parseInt(this.startYear) <= parseInt(this.endYear)) {
+                        this.fetchComparisonData();
+                    }
+                });
+            },
+            updated() {
+                this.initMaterializeComponents();
+                this.savePreferences();
+            },
+            beforeUnmount() {
+                this.destroyAllCharts();
+            }
+        });
+
+        app.mount('#app');
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

@@ -1,0 +1,32 @@
+{
+  "projectId": "d59a3f01-91cf-4380-8732-6fa84080fd60",
+  "revisionString": "1",
+  "projectNameDisplay": "Helichoppers Inc",
+  "projectType": "website",
+  "userPromptForThisRevision": "Pruning drone company we have saws on drones and do amazing work. In Crofton BC",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-06-01T02:31:26.059Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/imagen3_b6171ef2-8a2.png",
+      "url": "/generated_images/imagen3_b6171ef2-8a2.png",
+      "description": "A high-angle, dynamic shot of a futuristic industrial drone equipped with precision saws, actively flying near lush green tree canopies or power lines. The drone should look robust and technologically advanced, with visible saw blades. Emphasize the 'saws on drones' aspect. The lighting should be dramatic, perhaps a golden hour glow or a slightly overcast sky, casting subtle shadows to highlight the drone's features against a dark, slightly moody background. The overall aesthetic should be modern, professional, and slightly rugged, with a focus on precision and power. The color palette should lean towards dark blues, grays, and metallic tones for the drone, with vibrant greens for the foliage, and subtle orange or teal accents for operational lights or branding elements to align with a dark theme.",
+      "purpose": "Main hero banner for the website homepage, visually representing 'Helichoppers Inc' and its core service.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_fe51f2f8-f5e.png",
+      "url": "/generated_images/imagen3_fe51f2f8-f5e.png",
+      "description": "An eye-level, close-up shot of a sophisticated drone, focusing on its undercarriage where a specialized saw mechanism is clearly visible. The drone should be in a hovering or pre-flight state, perhaps against a blurred background of a forest or an agricultural field. The lighting should be crisp and clear, highlighting the intricate details of the saw and drone components. The mood should be professional and innovative, emphasizing the cutting-edge technology. The color palette should maintain the dark, metallic tones of the drone with hints of the natural environment, ensuring it fits a dark theme.",
+      "purpose": "Image for the 'Why Choose Us' or 'Technology' section, showcasing the precision equipment and engineering.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_473acbd0-8e3.png",
+      "url": "/generated_images/imagen3_473acbd0-8e3.png",
+      "description": "A drone's perspective shot, looking down slightly, showing a drone (with visible saws) actively engaged in pruning a tree or clearing vegetation near utility poles. The scene should convey efficiency and safety, with the drone being the central focus. The background should be a typical British Columbia landscape (coniferous trees, possibly hints of mountains or water in the distance). The lighting should be natural daylight, emphasizing the drone's work. The colors should be natural greens and blues, with the drone's dark, metallic body standing out, complementing the dark theme.",
+      "purpose": "Image for the 'Services' or 'Gallery' section, illustrating the drone in action and the scope of work.",
+      "isNewlyGenerated": true
+    }
+  ]
+}

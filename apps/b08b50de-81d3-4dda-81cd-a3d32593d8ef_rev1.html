@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statscan Data Explorer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+        .navbar-brand svg {
+            color: var(--bs-primary);
+        }
+        .card {
+            border: 1px solid #4a5568;
+            background-color: #2d3748;
+        }
+        .card-header {
+            border-bottom: 1px solid #4a5568;
+        }
+        .form-select,
+        .form-control {
+            background-color: #2d3748;
+            border-color: #4a5568;
+            color: #e2e8f0;
+        }
+        .form-select:focus,
+        .form-control:focus {
+            background-color: #2d3748;
+            border-color: var(--bs-primary);
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+            color: #e2e8f0;
+        }
+        .form-select option {
+            background-color: #2d3748;
+            color: #e2e8f0;
+        }
+        .table-dark {
+            --bs-table-bg: #2d3748;
+            --bs-table-striped-bg: #3a475a;
+            --bs-table-hover-bg: #4a5568;
+            --bs-table-color: #e2e8f0;
+            --bs-table-border-color: #4a5568;
+        }
+        .chart-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
+        }
+        .footer {
+            background-color: #2d3748;
+            border-top: 1px solid #4a5568;
+            padding: 1rem 0;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body data-bs-theme="dark">
+    <header class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="#" aria-label="Statscan Data Explorer homepage">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-bar-chart-fill me-2" viewBox="0 0 16 16">
+                    <path d="M1 11.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5zm5 0a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5zm5 0a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5z"/>
+                    <path d="M.997 4.936a.5.5 0 0 1 .498-.592l3-1a.5.5 0 0 1 .192.17L6 4.793V2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v10.5a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5V7.207l-2.808-2.808a.5.5 0 0 1-.092-.17zm8 0a.5.5 0 0 1 .498-.592l3-1a.5.5 0 0 1 .192.17L14 4.793V2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v10.5a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5V7.207l-2.808-2.808a.5.5 0 0 1-.092-.17z"/>
+                </svg>
+                Statscan Data Explorer
+            </a>
+        </div>
+    </header>
+
+    <main class="container-fluid py-4 flex-grow-1">
+        <div id="loadingIndicator" class="text-center my-5 d-none">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 text-muted">Fetching data from Statistics Canada...</p>
+        </div>
+
+        <div id="errorMessage" class="alert alert-danger d-none" role="alert">
+            <h4 class="alert-heading">Data Load Error!</h4>
+            <p id="errorDetails"></p>
+            <hr>
+            <p class="mb-0">Please check your internet connection or try again later. The Statistics Canada API might be temporarily unavailable.</p>
+        </div>
+
+        <div id="noDataMessage" class="alert alert-warning d-none" role="alert">
+            <h4 class="alert-heading">No Data Found!</h4>
+            <p>Your current filter selections yielded no data. Please adjust your filters and try again.</p>
+        </div>
+
+        <div id="dashboardContent" class="d-none">
+            <div class="row g-4 mb-4">
+                <div class="col-lg-3">
+                    <div class="card text-bg-dark h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0">Data Filters</h5>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title text-primary" id="datasetName"></h6>
+                            <p class="card-text text-muted small" id="datasetDescription"></p>
+                            <div id="filtersContainer" class="mt-3"></div>
+                            <button id="resetFiltersBtn" class="btn btn-outline-light btn-sm mt-3 w-100" aria-label="Reset all filters">Reset Filters</button>
+                            <button id="downloadDataBtn" class="btn btn-primary btn-sm mt-2 w-100" aria-label="Download current data as CSV">Download CSV</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-9">
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="card text-bg-dark h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title text-primary">Latest Value</h5>
+                                    <p class="card-text fs-3 mb-0" id="latestValue"></p>
+                                    <small class="text-muted" id="latestValueDate"></small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card text-bg-dark h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title text-primary">Change (Last Period)</h5>
+                                    <p class="card-text fs-3 mb-0" id="changeValue"></p>
+                                    <small class="text-muted" id="changePercentage"></small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card text-bg-dark h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title text-primary">Average Value</h5>
+                                    <p class="card-text fs-3" id="averageValue"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="card text-bg-dark">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Data Trend</h5>
+                                    <div class="d-flex align-items-center">
+                                        <label for="chartTypeSelect" class="form-label mb-0 me-2 small text-muted">Chart Type:</label>
+                                        <select class="form-select form-select-sm" id="chartTypeSelect" aria-label="Select chart type">
+                                            <option value="line">Line Chart</option>
+                                            <option value="bar">Bar Chart</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="dataChart" role="img" aria-label="Data trend chart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="card text-bg-dark">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Raw Data Table</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-dark table-striped table-hover caption-top" aria-label="Filtered data table">
+                                            <caption class="text-muted">Filtered data from Statistics Canada.</caption>
+                                            <thead id="dataTableHead"></thead>
+                                            <tbody id="dataTableBody"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer text-center text-muted small">
+        <div class="container-fluid">
+            Data provided by <a href="https://www.statcan.gc.ca/eng/developers/wds" target="_blank" class="text-primary text-decoration-none">Statistics Canada Open Data API</a>.
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        const appState = {
+            isLoading: false,
+            error: null,
+            rawData: null,
+            processedData: [],
+            dimensions: {},
+            dimensionLabels: {},
+            currentFilters: {},
+            filteredData: [],
+            chartInstance: null,
+            chartType: 'line',
+            datasetMeta: {
+                id: '17100005',
+                name: 'Population estimates, quarterly',
+                description: 'Population estimates by age group, sex, and geography, quarterly. Data is subject to revision.'
+            },
+            chartColors: {
+                primary: 'rgb(13, 110, 253)',
+                secondary: 'rgb(108, 117, 125)',
+                success: 'rgb(25, 135, 84)',
+                info: 'rgb(13, 202, 240)',
+                warning: 'rgb(255, 193, 7)',
+                danger: 'rgb(220, 53, 69)',
+                lightText: '#e2e8f0',
+                gridLine: 'rgba(74, 85, 104, 0.5)',
+                tooltipBg: '#2d3748',
+                tooltipBorder: '#4a5568',
+                dataBackground: 'rgba(13, 110, 253, 0.4)',
+                dataBorder: 'rgb(13, 110, 253)'
+            }
+        };
+
+        const DOM = {
+            loadingIndicator: document.getElementById('loadingIndicator'),
+            errorMessage: document.getElementById('errorMessage'),
+            errorDetails: document.getElementById('errorDetails'),
+            noDataMessage: document.getElementById('noDataMessage'),
+            dashboardContent: document.getElementById('dashboardContent'),
+            datasetName: document.getElementById('datasetName'),
+            datasetDescription: document.getElementById('datasetDescription'),
+            filtersContainer: document.getElementById('filtersContainer'),
+            resetFiltersBtn: document.getElementById('resetFiltersBtn'),
+            downloadDataBtn: document.getElementById('downloadDataBtn'),
+            latestValue: document.getElementById('latestValue'),
+            latestValueDate: document.getElementById('latestValueDate'),
+            changeValue: document.getElementById('changeValue'),
+            changePercentage: document.getElementById('changePercentage'),
+            averageValue: document.getElementById('averageValue'),
+            dataChart: document.getElementById('dataChart'),
+            chartTypeSelect: document.getElementById('chartTypeSelect'),
+            dataTableHead: document.getElementById('dataTableHead'),
+            dataTableBody: document.getElementById('dataTableBody')
+        };
+
+        function updateLoadingState() {
+            if (appState.isLoading) {
+                DOM.loadingIndicator.classList.remove('d-none');
+                DOM.dashboardContent.classList.add('d-none');
+                hideMessages();
+            } else {
+                DOM.loadingIndicator.classList.add('d-none');
+            }
+        }
+
+        function showErrorMessage(message) {
+            DOM.errorMessage.classList.remove('d-none');
+            DOM.errorDetails.textContent = message;
+            DOM.dashboardContent.classList.add('d-none');
+            DOM.noDataMessage.classList.add('d-none');
+        }
+
+        function hideMessages() {
+            DOM.errorMessage.classList.add('d-none');
+            DOM.noDataMessage.classList.add('d-none');
+        }
+
+        async function fetchData() {
+            appState.isLoading = true;
+            updateLoadingState();
+            try {
+                const url = `https://www150.statcan.gc.ca/t1/wds/rest/json/getSeriesByCubeAndLatestNPeriods?cubeId=${appState.datasetMeta.id}&latestN=100`;
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const data = await response.json();
+                if (data.status && data.status !== 'SUCCESS') {
+                    throw new Error(`API error: ${data.message || 'Unknown API error'}`);
+                }
+                if (!data.object || data.object.length === 0 || !data.object[0].series) {
+                    throw new Error('No series data found in API response.');
+                }
+                appState.rawData = data;
+                processRawData(data);
+                applyFiltersAndRender();
+                DOM.dashboardContent.classList.remove('d-none');
+            } catch (error) {
+                console.error('Failed to fetch or process data:', error);
+                showErrorMessage(`Failed to load data: ${error.message}`);
+            } finally {
+                appState.isLoading = false;
+                updateLoadingState();
+            }
+        }
+
+        function processRawData(data) {
+            appState.processedData = [];
+            appState.dimensions = {};
+            appState.dimensionLabels = {};
+            appState.currentFilters = {};
+
+            const cube = data.object[0];
+            const dimensionMetadata = cube.dimension;
+
+            for (const dimKey in dimensionMetadata) {
+                if (Object.prototype.hasOwnProperty.call(dimensionMetadata, dimKey)) {
+                    const dim = dimensionMetadata[dimKey];
+                    appState.dimensionLabels[dimKey] = dim.label;
+                    appState.dimensions[dim.label] = new Set();
+                }
+            }
+
+            cube.series.forEach(series => {
+                const dataPoint = {};
+                let isValid = true;
+
+                dataPoint[appState.dimensionLabels.REF_DATE] = series.refPeriod;
+                dataPoint['Value'] = parseFloat(series.value);
+
+                for (const dimKey in series.dimensions) {
+                    if (Object.prototype.hasOwnProperty.call(series.dimensions, dimKey)) {
+                        const categoryIndex = series.dimensions[dimKey];
+                        const dimensionLabel = appState.dimensionLabels[dimKey];
+                        if (dimensionLabel && dimensionMetadata[dimKey] && dimensionMetadata[dimKey].category && dimensionMetadata[dimKey].category.label) {
+                            const categoryLabel = dimensionMetadata[dimKey].category.label[dimensionMetadata[dimKey].category.index[categoryIndex]];
+                            dataPoint[dimensionLabel] = categoryLabel;
+                            appState.dimensions[dimensionLabel].add(categoryLabel);
+                        } else {
+                            isValid = false;
+                            break;
+                        }
+                    }
+                }
+                if (isValid) {
+                    appState.processedData.push(dataPoint);
+                }
+            });
+
+            for (const dimLabel in appState.dimensions) {
+                if (Object.prototype.hasOwnProperty.call(appState.dimensions, dimLabel)) {
+                    appState.dimensions[dimLabel] = Array.from(appState.dimensions[dimLabel]).sort();
+                    appState.currentFilters[dimLabel] = 'All';
+                }
+            }
+        }
+
+        function parseRefDateForSorting(dateString) {
+            if (dateString.match(/^\d{4}-\d{2}$/)) {
+                return new Date(dateString + '-01');
+            }
+            return new Date(dateString);
+        }
+
+        function applyFiltersAndRender() {
+            hideMessages();
+            appState.filteredData = appState.processedData.filter(item => {
+                for (const dimLabel in appState.currentFilters) {
+                    if (Object.prototype.hasOwnProperty.call(appState.currentFilters, dimLabel)) {
+                        const filterValue = appState.currentFilters[dimLabel];
+                        if (filterValue !== 'All' && item[dimLabel] !== filterValue) {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            });
+
+            if (appState.filteredData.length === 0) {
+                DOM.noDataMessage.classList.remove('d-none');
+                DOM.latestValue.textContent = 'N/A';
+                DOM.latestValueDate.textContent = '';
+                DOM.changeValue.textContent = 'N/A';
+                DOM.changePercentage.textContent = '';
+                DOM.averageValue.textContent = 'N/A';
+                if (appState.chartInstance) {
+                    appState.chartInstance.destroy();
+                    appState.chartInstance = null;
+                }
+                DOM.dataTableHead.innerHTML = '';
+                DOM.dataTableBody.innerHTML = '';
+            } else {
+                DOM.noDataMessage.classList.add('d-none');
+                updateUI();
+            }
+        }
+
+        function updateUI() {
+            renderFilters();
+            renderSummary();
+            renderChart();
+            renderTable();
+        }
+
+        function renderFilters() {
+            DOM.filtersContainer.innerHTML = '';
+            DOM.datasetName.textContent = appState.datasetMeta.name;
+            DOM.datasetDescription.textContent = appState.datasetMeta.description;
+
+            for (const dimLabel in appState.dimensions) {
+                if (Object.prototype.hasOwnProperty.call(appState.dimensions, dimLabel)) {
+                    const div = document.createElement('div');
+                    div.classList.add('mb-3');
+
+                    const label = document.createElement('label');
+                    label.classList.add('form-label', 'small', 'text-muted');
+                    label.textContent = dimLabel + ':';
+                    label.setAttribute('for', `filter-${dimLabel.replace(/\s/g, '-')}`);
+
+                    const select = document.createElement('select');
+                    select.classList.add('form-select', 'form-select-sm');
+                    select.id = `filter-${dimLabel.replace(/\s/g, '-')}`;
+                    select.setAttribute('data-dimension', dimLabel);
+                    select.setAttribute('aria-label', `Filter by ${dimLabel}`);
+
+                    const allOption = document.createElement('option');
+                    allOption.value = 'All';
+                    allOption.textContent = 'All';
+                    select.appendChild(allOption);
+
+                    appState.dimensions[dimLabel].forEach(value => {
+                        const option = document.createElement('option');
+                        option.value = value;
+                        option.textContent = value;
+                        select.appendChild(option);
+                    });
+
+                    select.value = appState.currentFilters[dimLabel];
+
+                    div.appendChild(label);
+                    div.appendChild(select);
+                    DOM.filtersContainer.appendChild(div);
+                }
+            }
+        }
+
+        function renderSummary() {
+            if (appState.filteredData.length === 0) {
+                return;
+            }
+
+            const sortedData = [...appState.filteredData].sort((a, b) => {
+                const dateA = parseRefDateForSorting(a[appState.dimensionLabels.REF_DATE]);
+                const dateB = parseRefDateForSorting(b[appState.dimensionLabels.REF_DATE]);
+                return dateA.getTime() - dateB.getTime();
+            });
+
+            const latest = sortedData[sortedData.length - 1];
+            const previous = sortedData.length > 1 ? sortedData[sortedData.length - 2] : null;
+
+            const latestVal = latest ? latest.Value : NaN;
+            const previousVal = previous ? previous.Value : NaN;
+
+            DOM.latestValue.textContent = !isNaN(latestVal) ? latestVal.toLocaleString() : 'N/A';
+            DOM.latestValueDate.textContent = latest ? `as of ${latest[appState.dimensionLabels.REF_DATE]}` : '';
+
+            let change = 'N/A';
+            let changePercent = '';
+            DOM.changeValue.classList.remove('text-success', 'text-danger');
+            if (!isNaN(latestVal) && !isNaN(previousVal)) {
+                const diff = latestVal - previousVal;
+                change = diff.toLocaleString();
+                if (previousVal !== 0) {
+                    changePercent = (diff / previousVal * 100).toFixed(2) + '%';
+                }
+                if (diff > 0) {
+                    DOM.changeValue.classList.add('text-success');
+                } else if (diff < 0) {
+                    DOM.changeValue.classList.add('text-danger');
+                }
+            }
+            DOM.changeValue.textContent = change;
+            DOM.changePercentage.textContent = changePercent;
+
+            const sum = appState.filteredData.reduce((acc, item) => acc + item.Value, 0);
+            const average = appState.filteredData.length > 0 ? sum / appState.filteredData.length : 0;
+            DOM.averageValue.textContent = !isNaN(average) ? average.toLocaleString(undefined, { maximumFractionDigits: 0 }) : 'N/A';
+        }
+
+        function renderChart() {
+            if (appState.chartInstance) {
+                appState.chartInstance.destroy();
+            }
+
+            const chartData = [...appState.filteredData].sort((a, b) => {
+                const dateA = parseRefDateForSorting(a[appState.dimensionLabels.REF_DATE]);
+                const dateB = parseRefDateForSorting(b[appState.dimensionLabels.REF_DATE]);
+                return dateA.getTime() - dateB.getTime();
+            });
+
+            const labels = chartData.map(item => item[appState.dimensionLabels.REF_DATE]);
+            const values = chartData.map(item => item.Value);
+
+            const ctx = DOM.dataChart.getContext('2d');
+            appState.chartInstance = new Chart(ctx, {
+                type: appState.chartType,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Value',
+                        data: values,
+                        backgroundColor: appState.chartColors.dataBackground,
+                        borderColor: appState.chartColors.dataBorder,
+                        borderWidth: 2,
+                        fill: appState.chartType === 'line',
+                        tension: appState.chartType === 'line' ? 0.3 : 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: appState.chartColors.lightText
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: appState.chartColors.tooltipBg,
+                            borderColor: appState.chartColors.tooltipBorder,
+                            borderWidth: 1,
+                            titleColor: appState.chartColors.lightText,
+                            bodyColor: appState.chartColors.lightText,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y.toLocaleString();
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: appState.chartColors.lightText
+                            },
+                            grid: {
+                                color: appState.chartColors.gridLine
+                            },
+                            title: {
+                                display: true,
+                                text: appState.dimensionLabels.REF_DATE,
+                                color: appState.chartColors.lightText
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: appState.chartColors.lightText,
+                                callback: function(value) {
+                                    return value.toLocaleString();
+                                }
+                            },
+                            grid: {
+                                color: appState.chartColors.gridLine
+                            },
+                            title: {
+                                display: true,
+                                text: 'Value',
+                                color: appState.chartColors.lightText
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderTable() {
+            DOM.dataTableHead.innerHTML = '';
+            DOM.dataTableBody.innerHTML = '';
+
+            if (appState.filteredData.length === 0) {
+                return;
+            }
+
+            const headers = Object.keys(appState.filteredData[0]);
+            const headerRow = document.createElement('tr');
+            headers.forEach(headerText => {
+                const th = document.createElement('th');
+                th.scope = 'col';
+                th.textContent = headerText;
+                headerRow.appendChild(th);
+            });
+            DOM.dataTableHead.appendChild(headerRow);
+
+            appState.filteredData.forEach(item => {
+                const tr = document.createElement('tr');
+                headers.forEach(header => {
+                    const td = document.createElement('td');
+                    td.textContent = (header === 'Value' && !isNaN(item[header])) ? item[header].toLocaleString() : item[header];
+                    tr.appendChild(td);
+                });
+                DOM.dataTableBody.appendChild(tr);
+            });
+        }
+
+        function downloadCSV() {
+            if (appState.filteredData.length === 0) {
+                alert('No data to download.');
+                return;
+            }
+
+            const headers = Object.keys(appState.filteredData[0]);
+            const csvRows = [];
+            csvRows.push(headers.map(h => `"${h}"`).join(','));
+
+            appState.filteredData.forEach(item => {
+                const values = headers.map(header => {
+                    let value = item[header];
+                    if (typeof value === 'number') {
+                        value = value.toString();
+                    } else if (value === null || value === undefined) {
+                        value = '';
+                    } else {
+                        value = String(value);
+                    }
+                    const escapedValue = (value.includes(',') || value.includes('"') || value.includes('\n')) ? `"${value.replace(/"/g, '""')}"` : value;
+                    return escapedValue;
+                });
+                csvRows.push(values.join(','));
+            });
+
+            const csvString = csvRows.join('\n');
+            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'statscan_data.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        function initializeApp() {
+            DOM.datasetName.textContent = appState.datasetMeta.name;
+            DOM.datasetDescription.textContent = appState.datasetMeta.description;
+
+            DOM.filtersContainer.addEventListener('change', (event) => {
+                if (event.target.tagName === 'SELECT') {
+                    const dimensionLabel = event.target.getAttribute('data-dimension');
+                    appState.currentFilters[dimensionLabel] = event.target.value;
+                    applyFiltersAndRender();
+                }
+            });
+
+            DOM.resetFiltersBtn.addEventListener('click', () => {
+                for (const dimLabel in appState.currentFilters) {
+                    if (Object.prototype.hasOwnProperty.call(appState.currentFilters, dimLabel)) {
+                        appState.currentFilters[dimLabel] = 'All';
+                    }
+                }
+                applyFiltersAndRender();
+            });
+
+            DOM.chartTypeSelect.addEventListener('change', (event) => {
+                appState.chartType = event.target.value;
+                renderChart();
+            });
+
+            DOM.downloadDataBtn.addEventListener('click', downloadCSV);
+
+            fetchData();
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

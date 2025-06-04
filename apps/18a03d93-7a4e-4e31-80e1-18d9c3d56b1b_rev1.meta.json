@@ -52,9 +52,11 @@
     {
       "placeholder_id": "/generated_images/imagen3_214ba217-06f.png",
       "url": "/generated_images/imagen3_214ba217-06f.png",
-      "description": "Exterior shot of the Airbnb accommodation showing its unique connection to the beehives. Could be a charming cabin or small structure with beehives neatly arranged nearby, in a beautiful Sooke garden setting. Emphasize harmony with nature. Style: photorealistic, architectural/travel photography.",
+      "description": "Content replaced by: imagen_test_412a11fa.png (Original: Exterior shot of the Airbnb accommodation showing its unique connection to the beehives. Could be a charming cabin or small structure with beehives neatly arranged nearby, in a beautiful Sooke garden setting. Emphasize harmony with nature. Style: photorealistic, architectural/travel photography.)",
       "purpose": "Supporting exterior image for 'Airbnb' section, possibly for a carousel.",
-      "isNewlyGenerated": true
+      "isNewlyGenerated": true,
+      "originalUploadedFilename": "imagen_test_412a11fa.png",
+      "swappedAt": "2025-06-04T04:24:28.936Z"
     },
     {
       "placeholder_id": "/generated_images/imagen3_e8ebd6e6-065.png",

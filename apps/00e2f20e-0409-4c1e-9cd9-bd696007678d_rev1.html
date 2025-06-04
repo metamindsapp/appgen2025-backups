@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Particle Simulator 2</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Roboto', sans-serif;
+            background-color: #121212;
+            color: #E0E0E0;
+        }
+
+        .container-fluid {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            background-color: #000000;
+        }
+
+        .sidebar {
+            width: 300px;
+            min-width: 280px;
+            background-color: #1E1E1E;
+            padding: 20px;
+            overflow-y: auto;
+            flex-shrink: 0;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
+            z-index: 1;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background-color: #000000;
+        }
+
+        .card-panel {
+            background-color: #2D2D2D !important;
+            color: #E0E0E0 !important;
+            box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        h4, h5, h6 {
+            color: #E0E0E0;
+            margin-top: 0;
+        }
+
+        .input-field label {
+            color: #BDBDBD !important;
+        }
+        .input-field input[type=text]:not(.browser-default),
+        .input-field input[type=number]:not(.browser-default),
+        .input-field input[type=range]:not(.browser-default) {
+            color: #E0E0E0 !important;
+            border-bottom: 1px solid #616161 !important;
+        }
+        .input-field input[type=text]:not(.browser-default):focus:not([readonly]),
+        .input-field input[type=number]:not(.browser-default):focus:not([readonly]),
+        .input-field input[type=range]:not(.browser-default):focus:not([readonly]) {
+            border-bottom: 1px solid #00BCD4 !important;
+            box-shadow: 0 1px 0 0 #00BCD4 !important;
+        }
+        .input-field input[type=text]:not(.browser-default):focus:not([readonly]) + label,
+        .input-field input[type=number]:not(.browser-default):focus:not([readonly]) + label {
+            color: #00BCD4 !important;
+        }
+        .input-field .prefix {
+            color: #BDBDBD;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            background-color: #00BCD4;
+        }
+        input[type=range]::-moz-range-thumb {
+            background-color: #00BCD4;
+        }
+        input[type=range]::-ms-thumb {
+            background-color: #00BCD4;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            background-color: #616161;
+        }
+        input[type=range]::-moz-range-track {
+            background-color: #616161;
+        }
+        input[type=range]::-ms-track {
+            background-color: #616161;
+        }
+
+        .btn, .btn-small, .btn-large {
+            background-color: #00BCD4 !important;
+            color: #121212 !important;
+            transition: background-color 0.3s ease;
+        }
+        .btn:hover, .btn-small:hover, .btn-large:hover {
+            background-color: #0097A7 !important;
+        }
+        .btn-flat {
+            color: #00BCD4 !important;
+            transition: background-color 0.3s ease;
+        }
+        .btn-flat:hover {
+            background-color: rgba(0, 188, 212, 0.1) !important;
+        }
+
+        .switch label input[type=checkbox]:checked + .lever {
+            background-color: #00BCD4 !important;
+        }
+        .switch label input[type=checkbox]:checked + .lever:after {
+            background-color: #E0E0E0 !important;
+        }
+
+        .modal {
+            background-color: #2D2D2D;
+            color: #E0E0E0;
+            border-radius: 8px;
+        }
+        .modal .modal-footer {
+            background-color: #1E1E1E;
+            border-top: 1px solid #424242;
+        }
+
+        .select-wrapper input.select-dropdown {
+            color: #E0E0E0;
+            border-bottom-color: #616161;
+        }
+        .dropdown-content li > a, .dropdown-content li > span {
+            color: #00BCD4;
+        }
+        .dropdown-content li.active, .dropdown-content li.selected {
+            background-color: rgba(0, 188, 212, 0.2);
+        }
+        .dropdown-content li:hover, .dropdown-content li.active:hover {
+            background-color: rgba(0, 188, 212, 0.1);
+        }
+
+        #loadingOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        #loadingOverlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .spinner-blue-only .circle-clipper .circle,
+        .spinner-blue-only .gap-patch .circle {
+            border-color: #00BCD4 !important;
+        }
+
+        @media (max-width: 992px) {
+            .container-fluid {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                max-height: 40vh;
+                padding-bottom: 0;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+            }
+            .main-content {
+                height: 60vh;
+            }
+        }
+        @media (max-width: 600px) {
+            .sidebar {
+                max-height: 50vh;
+            }
+            .main-content {
+                height: 50vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="sidebar">
+            <h4 class="center-align">Particle Sim 2</h4>
+            <div class="divider"></div>
+
+            <div class="card-panel">
+                <h6>New Particle Properties</h6>
+                <div class="row">
+                    <div class="col s12">
+                        <p class="range-field">
+                            <label for="particleSize">Size: <span id="particleSizeValue">10</span></label>
+                            <input type="range" id="particleSize" min="1" max="50" value="10">
+                        </p>
+                    </div>
+                    <div class="col s12">
+                        <p class="range-field">
+                            <label for="particleMass">Mass: <span id="particleMassValue">1.0</span></label>
+                            <input type="range" id="particleMass" min="0.1" max="10" step="0.1" value="1.0">
+                        </p>
+                    </div>
+                    <div class="col s12">
+                        <p class="range-field">
+                            <label for="particleCharge">Charge: <span id="particleChargeValue">0.0</span></label>
+                            <input type="range" id="particleCharge" min="-10" max="10" step="0.1" value="0.0">
+                        </p>
+                    </div>
+                    <div class="col s12">
+                        <label for="particleColor">Color:</label>
+                        <input type="color" id="particleColor" value="#00BCD4" class="browser-default">
+                    </div>
+                    <div class="col s12">
+                        <div class="switch">
+                            <label>
+                                Tap to Add
+                                <input type="checkbox" id="addWithVelocity">
+                                <span class="lever"></span>
+                                Drag for Velocity
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-panel">
+                <h6>Global Simulation Settings</h6>
+                <div class="row">
+                    <div class="col s12">
+                        <p class="range-field">
+                            <label for="globalGravity">Gravity: <span id="globalGravityValue">0.05</span></label>
+                            <input type="range" id="globalGravity" min="0" max="0.5" step="0.01" value="0.05">
+                        </p>
+                    </div>
+                    <div class="col s12">
+                        <p class="range-field">
+                            <label for="damping">Damping: <span id="dampingValue">0.010</span></label>
+                            <input type="range" id="damping" min="0" max="0.1" step="0.001" value="0.010">
+                        </p>
+                    </div>
+                    <div class="col s12">
+                        <div class="switch">
+                            <label>
+                                Collisions Off
+                                <input type="checkbox" id="enableCollisions" checked>
+                                <span class="lever"></span>
+                                Collisions On
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col s12">
+                        <div class="switch">
+                            <label>
+                                Electrostatics Off
+                                <input type="checkbox" id="enableElectrostatic" checked>
+                                <span class="lever"></span>
+                                Electrostatics On
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col s12">
+                        <div class="input-field">
+                            <select id="boundaryConditions">
+                                <option value="bounce">Bounce</option>
+                                <option value="wrap">Wrap</option>
+                                <option value="absorb">Absorb</option>
+                            </select>
+                            <label>Boundary Conditions</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-panel">
+                <h6>Simulation Controls</h6>
+                <div class="row">
+                    <div class="col s6">
+                        <a class="waves-effect waves-light btn-small" id="playPauseBtn">Pause</a>
+                    </div>
+                    <div class="col s6">
+                        <a class="waves-effect waves-light btn-small" id="resetSimulationBtn">Reset</a>
+                    </div>
+                    <div class="col s12" style="margin-top: 15px;">
+                        <p class="range-field">
+                            <label for="simulationSpeed">Speed: <span id="simulationSpeedValue">1.0x</span></label>
+                            <input type="range" id="simulationSpeed" min="0.1" max="5" step="0.1" value="1.0">
+                        </p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col s12">
+                        <a class="waves-effect waves-light btn-small red darken-1" id="clearParticlesBtn" style="width: 100%;">Clear All Particles</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-panel">
+                <h6>Display Options</h6>
+                <div class="row">
+                    <div class="col s12">
+                        <div class="switch">
+                            <label>
+                                Trails Off
+                                <input type="checkbox" id="showTrails" checked>
+                                <span class="lever"></span>
+                                Trails On
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col s12">
+                        <div class="switch">
+                            <label>
+                                Force Vectors Off
+                                <input type="checkbox" id="showForceVectors">
+                                <span class="lever"></span>
+                                Force Vectors On
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <canvas id="particleCanvas"></canvas>
+            <div id="loadingOverlay" class="valign-wrapper">
+                <div class="preloader-wrapper big active">
+                    <div class="spinner-layer spinner-blue-only">
+                        <div class="circle-clipper left">
+                            <div class="circle"></div>
+                        </div><div class="gap-patch">
+                            <div class="circle"></div>
+                        </div><div class="circle-clipper right">
+                            <div class="circle"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="particleInspectorModal" class="modal">
+        <div class="modal-content">
+            <h4>Particle Inspector</h4>
+            <div class="row">
+                <div class="col s12">
+                    <p class="range-field">
+                        <label for="inspectorSize">Size: <span id="inspectorSizeValue"></span></label>
+                        <input type="range" id="inspectorSize" min="1" max="50" value="">
+                    </p>
+                </div>
+                <div class="col s12">
+                    <p class="range-field">
+                        <label for="inspectorMass">Mass: <span id="inspectorMassValue"></span></label>
+                        <input type="range" id="inspectorMass" min="0.1" max="10" step="0.1" value="">
+                    </p>
+                </div>
+                <div class="col s12">
+                    <p class="range-field">
+                        <label for="inspectorCharge">Charge: <span id="inspectorChargeValue"></span></label>
+                        <input type="range" id="inspectorCharge" min="-10" max="10" step="0.1" value="">
+                    </p>
+                </div>
+                <div class="col s12">
+                    <label for="inspectorColor">Color:</label>
+                    <input type="color" id="inspectorColor" value="" class="browser-default">
+                </div>
+            </div>
+            <p><strong>Current State:</strong></p>
+            <p>Position: <span id="inspectorPos"></span></p>
+            <p>Velocity: <span id="inspectorVel"></span></p>
+            <p>Acceleration: <span id="inspectorAcc"></span></p>
+        </div>
+        <div class="modal-footer">
+            <a id="deleteParticleBtn" class="modal-close waves-effect waves-red btn-flat">Delete Particle</a>
+            <a class="modal-close waves-effect waves-green btn-flat">Close</a>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        class Particle {
+            constructor(id, x, y, vx, vy, mass, charge, radius, color) {
+                this.id = id;
+                this.x = x;
+                this.y = y;
+                this.vx = vx;
+                this.vy = vy;
+                this.ax = 0;
+                this.ay = 0;
+                this.mass = mass;
+                this.charge = charge;
+                this.radius = radius;
+                this.color = color;
+                this.trail = [];
+                this.maxTrailLength = 30;
+                this.isAbsorbed = false;
+            }
+
+            update(deltaTime, globalGravity, damping, boundaryType, canvasWidth, canvasHeight) {
+                if (this.isAbsorbed) return;
+
+                this.ay += globalGravity;
+
+                this.vx += this.ax * deltaTime;
+                this.vy += this.ay * deltaTime;
+
+                this.vx *= (1 - damping);
+                this.vy *= (1 - damping);
+
+                this.x += this.vx * deltaTime;
+                this.y += this.vy * deltaTime;
+
+                this.ax = 0;
+                this.ay = 0;
+
+                this.trail.push({ x: this.x, y: this.y });
+                if (this.trail.length > this.maxTrailLength) {
+                    this.trail.shift();
+                }
+
+                this.handleBoundaries(boundaryType, canvasWidth, canvasHeight);
+            }
+
+            handleBoundaries(boundaryType, canvasWidth, canvasHeight) {
+                const buffer = 1;
+                switch (boundaryType) {
+                    case 'bounce':
+                        if (this.x - this.radius < 0) {
+                            this.x = this.radius + buffer;
+                            this.vx *= -1;
+                        } else if (this.x + this.radius > canvasWidth) {
+                            this.x = canvasWidth - this.radius - buffer;
+                            this.vx *= -1;
+                        }
+                        if (this.y - this.radius < 0) {
+                            this.y = this.radius + buffer;
+                            this.vy *= -1;
+                        } else if (this.y + this.radius > canvasHeight) {
+                            this.y = canvasHeight - this.radius - buffer;
+                            this.vy *= -1;
+                        }
+                        break;
+                    case 'wrap':
+                        if (this.x + this.radius < 0) this.x = canvasWidth + this.radius;
+                        else if (this.x - this.radius > canvasWidth) this.x = -this.radius;
+                        if (this.y + this.radius < 0) this.y = canvasHeight + this.radius;
+                        else if (this.y - this.radius > canvasHeight) this.y = -this.radius;
+                        break;
+                    case 'absorb':
+                        if (this.x < -this.radius || this.x > canvasWidth + this.radius ||
+                            this.y < -this.radius || this.y > canvasHeight + this.radius) {
+                            this.isAbsorbed = true;
+                        }
+                        break;
+                }
+            }
+
+            applyForce(fx, fy) {
+                this.ax += fx / this.mass;
+                this.ay += fy / this.mass;
+            }
+
+            draw(ctx, showTrails, showForceVectors, isSelected) {
+                if (this.isAbsorbed) return;
+
+                if (showTrails) {
+                    ctx.beginPath();
+                    for (let i = 0; i < this.trail.length; i++) {
+                        const p = this.trail[i];
+                        const alpha = (i / this.trail.length) * 0.5;
+                        const r = parseInt(this.color.slice(1, 3), 16);
+                        const g = parseInt(this.color.slice(3, 5), 16);
+                        const b = parseInt(this.color.slice(5, 7), 16);
+                        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+                        ctx.arc(p.x, p.y, this.radius * (i / this.trail.length) * 0.5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.strokeStyle = isSelected ? '#FFD700' : this.color;
+                ctx.lineWidth = isSelected ? 3 : 1;
+                ctx.stroke();
+
+                if (showForceVectors && (this.ax !== 0 || this.ay !== 0)) {
+                    const forceScale = 50;
+                    ctx.beginPath();
+                    ctx.moveTo(this.x, this.y);
+                    ctx.lineTo(this.x + this.ax * forceScale, this.y + this.ay * forceScale);
+                    ctx.strokeStyle = '#FF0000';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+            }
+
+            isPointInParticle(px, py) {
+                const distSq = (px - this.x) * (px - this.x) + (py - this.y) * (py - this.y);
+                return distSq <= (this.radius * this.radius);
+            }
+        }
+
+        class SimulationApp {
+            constructor() {
+                this.canvas = document.getElementById('particleCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.particles = [];
+                this.particleIdCounter = 0;
+
+                this.animationFrameId = null;
+                this.lastTimestamp = 0;
+                this.isRunning = true;
+
+                this.settings = {
+                    particleSize: 10,
+                    particleMass: 1.0,
+                    particleCharge: 0.0,
+                    particleColor: '#00BCD4',
+                    addWithVelocity: false,
+                    globalGravity: 0.05,
+                    damping: 0.010,
+                    enableCollisions: true,
+                    enableElectrostatic: true,
+                    boundaryConditions: 'bounce',
+                    simulationSpeed: 1.0,
+                    showTrails: true,
+                    showForceVectors: false
+                };
+
+                this.selectedParticle = null;
+                this.dragStartPos = null;
+                this.currentDragPos = null;
+                this.touchTimer = null;
+                this.isDragging = false;
+                this.longPressThreshold = 500;
+
+                this.uiElements = {};
+
+                this.loadSettings();
+            }
+
+            init() {
+                this.cacheUIElements();
+                M.AutoInit();
+                M.FormSelect.init(this.uiElements.boundaryConditions);
+                M.Modal.init(this.uiElements.particleInspectorModal, {
+                    onOpenEnd: () => this.populateInspectorModal(),
+                    onCloseEnd: () => this.clearSelectedParticle()
+                });
+
+                this.attachEventListeners();
+                this.syncSettingsToUI();
+                this.resizeCanvas();
+                this.start();
+            }
+
+            cacheUIElements() {
+                this.uiElements = {
+                    particleSize: document.getElementById('particleSize'),
+                    particleSizeValue: document.getElementById('particleSizeValue'),
+                    particleMass: document.getElementById('particleMass'),
+                    particleMassValue: document.getElementById('particleMassValue'),
+                    particleCharge: document.getElementById('particleCharge'),
+                    particleChargeValue: document.getElementById('particleChargeValue'),
+                    particleColor: document.getElementById('particleColor'),
+                    addWithVelocity: document.getElementById('addWithVelocity'),
+                    globalGravity: document.getElementById('globalGravity'),
+                    globalGravityValue: document.getElementById('globalGravityValue'),
+                    damping: document.getElementById('damping'),
+                    dampingValue: document.getElementById('dampingValue'),
+                    enableCollisions: document.getElementById('enableCollisions'),
+                    enableElectrostatic: document.getElementById('enableElectrostatic'),
+                    boundaryConditions: document.getElementById('boundaryConditions'),
+                    playPauseBtn: document.getElementById('playPauseBtn'),
+                    resetSimulationBtn: document.getElementById('resetSimulationBtn'),
+                    simulationSpeed: document.getElementById('simulationSpeed'),
+                    simulationSpeedValue: document.getElementById('simulationSpeedValue'),
+                    clearParticlesBtn: document.getElementById('clearParticlesBtn'),
+                    showTrails: document.getElementById('showTrails'),
+                    showForceVectors: document.getElementById('showForceVectors'),
+
+                    particleInspectorModal: document.getElementById('particleInspectorModal'),
+                    inspectorSize: document.getElementById('inspectorSize'),
+                    inspectorSizeValue: document.getElementById('inspectorSizeValue'),
+                    inspectorMass: document.getElementById('inspectorMass'),
+                    inspectorMassValue: document.getElementById('inspectorMassValue'),
+                    inspectorCharge: document.getElementById('inspectorCharge'),
+                    inspectorChargeValue: document.getElementById('inspectorChargeValue'),
+                    inspectorColor: document.getElementById('inspectorColor'),
+                    inspectorPos: document.getElementById('inspectorPos'),
+                    inspectorVel: document.getElementById('inspectorVel'),
+                    inspectorAcc: document.getElementById('inspectorAcc'),
+                    deleteParticleBtn: document.getElementById('deleteParticleBtn'),
+                    loadingOverlay: document.getElementById('loadingOverlay')
+                };
+            }
+
+            attachEventListeners() {
+                window.addEventListener('resize', this.resizeCanvas.bind(this));
+
+                this.canvas.addEventListener('mousedown', this.handleCanvasMouseDown.bind(this));
+                this.canvas.addEventListener('mousemove', this.handleCanvasMouseMove.bind(this));
+                this.canvas.addEventListener('mouseup', this.handleCanvasMouseUp.bind(this));
+
+                this.canvas.addEventListener('touchstart', this.handleCanvasTouchStart.bind(this), { passive: false });
+                this.canvas.addEventListener('touchmove', this.handleCanvasTouchMove.bind(this), { passive: false });
+                this.canvas.addEventListener('touchend', this.handleCanvasTouchEnd.bind(this));
+                this.canvas.addEventListener('touchcancel', this.handleCanvasTouchEnd.bind(this));
+
+                this.uiElements.particleSize.addEventListener('input', this.updateSettings.bind(this));
+                this.uiElements.particleMass.addEventListener('input', this.updateSettings.bind(this));
+                this.uiElements.particleCharge.addEventListener('input', this.updateSettings.bind(this));
+                this.uiElements.particleColor.addEventListener('input', this.updateSettings.bind(this));
+                this.uiElements.addWithVelocity.addEventListener('change', this.updateSettings.bind(this));
+                this.uiElements.globalGravity.addEventListener('input', this.updateSettings.bind(this));
+                this.uiElements.damping.addEventListener('input', this.updateSettings.bind(this));
+                this.uiElements.enableCollisions.addEventListener('change', this.updateSettings.bind(this));
+                this.uiElements.enableElectrostatic.addEventListener('change', this.updateSettings.bind(this));
+                this.uiElements.boundaryConditions.addEventListener('change', this.updateSettings.bind(this));
+                this.uiElements.simulationSpeed.addEventListener('input', this.updateSettings.bind(this));
+                this.uiElements.showTrails.addEventListener('change', this.updateSettings.bind(this));
+                this.uiElements.showForceVectors.addEventListener('change', this.updateSettings.bind(this));
+
+                this.uiElements.playPauseBtn.addEventListener('click', this.togglePlayPause.bind(this));
+                this.uiElements.resetSimulationBtn.addEventListener('click', this.resetSimulation.bind(this));
+                this.uiElements.clearParticlesBtn.addEventListener('click', this.clearAllParticles.bind(this));
+                this.uiElements.deleteParticleBtn.addEventListener('click', this.deleteSelectedParticle.bind(this));
+
+                this.uiElements.inspectorSize.addEventListener('input', this.updateSelectedParticleFromModal.bind(this));
+                this.uiElements.inspectorMass.addEventListener('input', this.updateSelectedParticleFromModal.bind(this));
+                this.uiElements.inspectorCharge.addEventListener('input', this.updateSelectedParticleFromModal.bind(this));
+                this.uiElements.inspectorColor.addEventListener('input', this.updateSelectedParticleFromModal.bind(this));
+            }
+
+            syncSettingsToUI() {
+                this.uiElements.particleSize.value = this.settings.particleSize;
+                this.uiElements.particleSizeValue.textContent = this.settings.particleSize;
+                this.uiElements.particleMass.value = this.settings.particleMass;
+                this.uiElements.particleMassValue.textContent = this.settings.particleMass.toFixed(1);
+                this.uiElements.particleCharge.value = this.settings.particleCharge;
+                this.uiElements.particleChargeValue.textContent = this.settings.particleCharge.toFixed(1);
+                this.uiElements.particleColor.value = this.settings.particleColor;
+                this.uiElements.addWithVelocity.checked = this.settings.addWithVelocity;
+                this.uiElements.globalGravity.value = this.settings.globalGravity;
+                this.uiElements.globalGravityValue.textContent = this.settings.globalGravity.toFixed(2);
+                this.uiElements.damping.value = this.settings.damping;
+                this.uiElements.dampingValue.textContent = this.settings.damping.toFixed(3);
+                this.uiElements.enableCollisions.checked = this.settings.enableCollisions;
+                this.uiElements.enableElectrostatic.checked = this.settings.enableElectrostatic;
+                this.uiElements.boundaryConditions.value = this.settings.boundaryConditions;
+                M.FormSelect.getInstance(this.uiElements.boundaryConditions).formSelect();
+                this.uiElements.simulationSpeed.value = this.settings.simulationSpeed;
+                this.uiElements.simulationSpeedValue.textContent = `${this.settings.simulationSpeed.toFixed(1)}x`;
+                this.uiElements.showTrails.checked = this.settings.showTrails;
+                this.uiElements.showForceVectors.checked = this.settings.showForceVectors;
+            }
+
+            updateSettings(event) {
+                const target = event.target;
+                const settingName = target.id;
+                let value;
+
+                if (target.type === 'checkbox') {
+                    value = target.checked;
+                } else if (target.type === 'range') {
+                    value = parseFloat(target.value);
+                } else if (target.type === 'color') {
+                    value = target.value;
+                } else if (target.tagName === 'SELECT') {
+                    value = target.value;
+                } else {
+                    value = target.value;
+                }
+
+                this.settings[settingName] = value;
+
+                if (target.type === 'range') {
+                    const valueSpan = document.getElementById(settingName + 'Value');
+                    if (valueSpan) {
+                        if (settingName === 'simulationSpeed') {
+                            valueSpan.textContent = `${value.toFixed(1)}x`;
+                        } else if (settingName === 'particleMass' || settingName === 'particleCharge') {
+                            valueSpan.textContent = value.toFixed(1);
+                        } else if (settingName === 'globalGravity') {
+                            valueSpan.textContent = value.toFixed(2);
+                        } else if (settingName === 'damping') {
+                            valueSpan.textContent = value.toFixed(3);
+                        } else {
+                            valueSpan.textContent = value;
+                        }
+                    }
+                }
+                this.saveSettings();
+            }
+
+            saveSettings() {
+                try {
+                    localStorage.setItem('particleSimSettings', JSON.stringify(this.settings));
+                } catch (e) {
+                    console.error('Failed to save settings to localStorage:', e);
+                }
+            }
+
+            loadSettings() {
+                try {
+                    const savedSettings = localStorage.getItem('particleSimSettings');
+                    if (savedSettings) {
+                        const parsedSettings = JSON.parse(savedSettings);
+                        this.settings = { ...this.settings, ...parsedSettings };
+                    }
+                } catch (e) {
+                    console.error('Failed to load settings from localStorage:', e);
+                }
+            }
+
+            start() {
+                if (!this.isRunning) {
+                    this.isRunning = true;
+                    this.uiElements.playPauseBtn.textContent = 'Pause';
+                    this.lastTimestamp = performance.now();
+                    this.loop();
+                }
+            }
+
+            pause() {
+                if (this.isRunning) {
+                    this.isRunning = false;
+                    this.uiElements.playPauseBtn.textContent = 'Play';
+                    cancelAnimationFrame(this.animationFrameId);
+                }
+            }
+
+            togglePlayPause() {
+                if (this.isRunning) {
+                    this.pause();
+                } else {
+                    this.start();
+                }
+            }
+
+            resetSimulation() {
+                this.clearAllParticles();
+                this.lastTimestamp = performance.now();
+                if (!this.isRunning) {
+                    this.start();
+                }
+            }
+
+            loop(timestamp) {
+                if (!this.isRunning) {
+                    this.animationFrameId = null;
+                    return;
+                }
+
+                const deltaTime = (timestamp - this.lastTimestamp) / 1000 * this.settings.simulationSpeed;
+                this.lastTimestamp = timestamp;
+
+                try {
+                    this.applyForces();
+                    this.handleCollisions();
+
+                    this.particles = this.particles.filter(p => !p.isAbsorbed);
+                    this.particles.forEach(p => p.update(deltaTime, this.settings.globalGravity, this.settings.damping, this.settings.boundaryConditions, this.canvas.width, this.canvas.height));
+
+                    this.draw();
+                } catch (e) {
+                    console.error('Simulation loop error:', e);
+                    this.pause();
+                    M.toast({ html: 'Simulation error! Paused.', classes: 'red darken-1' });
+                }
+
+                this.animationFrameId = requestAnimationFrame(this.loop.bind(this));
+            }
+
+            applyForces() {
+                const k = 8.9875e-3;
+
+                for (let i = 0; i < this.particles.length; i++) {
+                    const p1 = this.particles[i];
+
+                    if (this.settings.enableElectrostatic) {
+                        for (let j = i + 1; j < this.particles.length; j++) {
+                            const p2 = this.particles[j];
+
+                            const dx = p2.x - p1.x;
+                            const dy = p2.y - p1.y;
+                            const distSq = dx * dx + dy * dy;
+                            const minDistanceSq = Math.pow(p1.radius + p2.radius, 2);
+
+                            if (distSq > minDistanceSq * 0.1) {
+                                const dist = Math.sqrt(distSq);
+                                const forceMagnitude = k * p1.charge * p2.charge / distSq;
+
+                                const fx = forceMagnitude * (dx / dist);
+                                const fy = forceMagnitude * (dy / dist);
+
+                                p1.applyForce(fx, fy);
+                                p2.applyForce(-fx, -fy);
+                            }
+                        }
+                    }
+                }
+            }
+
+            handleCollisions() {
+                if (!this.settings.enableCollisions) return;
+
+                for (let i = 0; i < this.particles.length; i++) {
+                    const p1 = this.particles[i];
+                    for (let j = i + 1; j < this.particles.length; j++) {
+                        const p2 = this.particles[j];
+
+                        const dx = p2.x - p1.x;
+                        const dy = p2.y - p1.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        const minDist = p1.radius + p2.radius;
+
+                        if (dist < minDist) {
+                            const overlap = minDist - dist;
+                            const normalX = dx / dist;
+                            const normalY = dy / dist;
+
+                            const separationFactor = overlap / (p1.mass + p2.mass);
+                            p1.x -= normalX * separationFactor * p2.mass;
+                            p1.y -= normalY * separationFactor * p2.mass;
+                            p2.x += normalX * separationFactor * p1.mass;
+                            p2.y += normalY * separationFactor * p1.mass;
+
+                            const rvX = p2.vx - p1.vx;
+                            const rvY = p2.vy - p1.vy;
+
+                            const velAlongNormal = rvX * normalX + rvY * normalY;
+
+                            if (velAlongNormal > 0) continue;
+
+                            const e = 0.9;
+
+                            const j = -(1 + e) * velAlongNormal / (1 / p1.mass + 1 / p2.mass);
+
+                            const impulseX = j * normalX;
+                            const impulseY = j * normalY;
+
+                            p1.vx -= impulseX / p1.mass;
+                            p1.vy -= impulseY / p1.mass;
+                            p2.vx += impulseX / p2.mass;
+                            p2.vy += impulseY / p2.mass;
+                        }
+                    }
+                }
+            }
+
+            draw() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                this.particles.forEach(p => p.draw(this.ctx, this.settings.showTrails, this.settings.showForceVectors, p === this.selectedParticle));
+
+                if (this.settings.addWithVelocity && this.dragStartPos && this.currentDragPos) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(this.dragStartPos.x, this.dragStartPos.y);
+                    this.ctx.lineTo(this.currentDragPos.x, this.currentDragPos.y);
+                    this.ctx.strokeStyle = '#FFFFFF';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.stroke();
+
+                    const arrowHeadSize = 10;
+                    const angle = Math.atan2(this.currentDragPos.y - this.dragStartPos.y, this.currentDragPos.x - this.dragStartPos.x);
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(this.currentDragPos.x, this.currentDragPos.y);
+                    this.ctx.lineTo(this.currentDragPos.x - arrowHeadSize * Math.cos(angle - Math.PI / 6), this.currentDragPos.y - arrowHeadSize * Math.sin(angle - Math.PI / 6));
+                    this.ctx.moveTo(this.currentDragPos.x, this.currentDragPos.y);
+                    this.ctx.lineTo(this.currentDragPos.x - arrowHeadSize * Math.cos(angle + Math.PI / 6), this.currentDragPos.y - arrowHeadSize * Math.sin(angle + Math.PI / 6));
+                    this.ctx.stroke();
+                }
+            }
+
+            resizeCanvas() {
+                this.canvas.width = this.canvas.offsetWidth;
+                this.canvas.height = this.canvas.offsetHeight;
+            }
+
+            getCanvasCoordinates(event) {
+                const rect = this.canvas.getBoundingClientRect();
+                let clientX, clientY;
+                if (event.touches && event.touches.length > 0) {
+                    clientX = event.touches[0].clientX;
+                    clientY = event.touches[0].clientY;
+                } else {
+                    clientX = event.clientX;
+                    clientY = event.clientY;
+                }
+                return {
+                    x: clientX - rect.left,
+                    y: clientY - rect.top
+                };
+            }
+
+            handleCanvasMouseDown(event) {
+                event.preventDefault();
+                this.isDragging = false;
+                const coords = this.getCanvasCoordinates(event);
+                if (this.settings.addWithVelocity) {
+                    this.dragStartPos = coords;
+                    this.currentDragPos = coords;
+                } else {
+                    this.addParticle(coords.x, coords.y);
+                }
+            }
+
+            handleCanvasMouseMove(event) {
+                if (this.dragStartPos) {
+                    this.isDragging = true;
+                    this.currentDragPos = this.getCanvasCoordinates(event);
+                }
+            }
+
+            handleCanvasMouseUp(event) {
+                const coords = this.getCanvasCoordinates(event);
+                if (this.settings.addWithVelocity && this.dragStartPos) {
+                    if (this.isDragging) {
+                        const vx = (coords.x - this.dragStartPos.x) * 0.1;
+                        const vy = (coords.y - this.dragStartPos.y) * 0.1;
+                        this.addParticle(this.dragStartPos.x, this.dragStartPos.y, vx, vy);
+                    } else {
+                        this.addParticle(coords.x, coords.y);
+                    }
+                    this.dragStartPos = null;
+                    this.currentDragPos = null;
+                } else if (!this.isDragging) {
+                    this.trySelectParticle(coords.x, coords.y);
+                }
+                this.isDragging = false;
+            }
+
+            handleCanvasTouchStart(event) {
+                event.preventDefault();
+                this.isDragging = false;
+                const coords = this.getCanvasCoordinates(event);
+                if (this.settings.addWithVelocity) {
+                    this.dragStartPos = coords;
+                    this.currentDragPos = coords;
+                } else {
+                    this.addParticle(coords.x, coords.y);
+                }
+
+                clearTimeout(this.touchTimer);
+                this.touchTimer = setTimeout(() => {
+                    if (!this.isDragging) {
+                        this.trySelectParticle(coords.x, coords.y);
+                    }
+                }, this.longPressThreshold);
+            }
+
+            handleCanvasTouchMove(event) {
+                if (this.dragStartPos) {
+                    this.isDragging = true;
+                    this.currentDragPos = this.getCanvasCoordinates(event);
+                }
+                clearTimeout(this.touchTimer);
+            }
+
+            handleCanvasTouchEnd(event) {
+                const coords = this.getCanvasCoordinates(event);
+                clearTimeout(this.touchTimer);
+
+                if (this.settings.addWithVelocity && this.dragStartPos) {
+                    if (this.isDragging) {
+                        const vx = (coords.x - this.dragStartPos.x) * 0.1;
+                        const vy = (coords.y - this.dragStartPos.y) * 0.1;
+                        this.addParticle(this.dragStartPos.x, this.dragStartPos.y, vx, vy);
+                    } else {
+                        this.addParticle(coords.x, coords.y);
+                    }
+                    this.dragStartPos = null;
+                    this.currentDragPos = null;
+                }
+                this.isDragging = false;
+            }
+
+            addParticle(x, y, vx = 0, vy = 0) {
+                const newParticle = new Particle(
+                    this.particleIdCounter++,
+                    x, y, vx, vy,
+                    this.settings.particleMass,
+                    this.settings.particleCharge,
+                    this.settings.particleSize,
+                    this.settings.particleColor
+                );
+                this.particles.push(newParticle);
+            }
+
+            trySelectParticle(x, y) {
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    const p = this.particles[i];
+                    if (p.isPointInParticle(x, y)) {
+                        this.selectParticle(p);
+                        return;
+                    }
+                }
+            }
+
+            selectParticle(particle) {
+                this.selectedParticle = particle;
+                const instance = M.Modal.getInstance(this.uiElements.particleInspectorModal);
+                instance.open();
+            }
+
+            clearSelectedParticle() {
+                this.selectedParticle = null;
+            }
+
+            populateInspectorModal() {
+                if (!this.selectedParticle) return;
+
+                this.uiElements.inspectorSize.value = this.selectedParticle.radius;
+                this.uiElements.inspectorSizeValue.textContent = this.selectedParticle.radius;
+                this.uiElements.inspectorMass.value = this.selectedParticle.mass;
+                this.uiElements.inspectorMassValue.textContent = this.selectedParticle.mass.toFixed(1);
+                this.uiElements.inspectorCharge.value = this.selectedParticle.charge;
+                this.uiElements.inspectorChargeValue.textContent = this.selectedParticle.charge.toFixed(1);
+                this.uiElements.inspectorColor.value = this.selectedParticle.color;
+
+                this.updateInspectorReadouts();
+            }
+
+            updateInspectorReadouts() {
+                if (!this.selectedParticle) return;
+                this.uiElements.inspectorPos.textContent = `(${this.selectedParticle.x.toFixed(2)}, ${this.selectedParticle.y.toFixed(2)})`;
+                this.uiElements.inspectorVel.textContent = `(${this.selectedParticle.vx.toFixed(2)}, ${this.selectedParticle.vy.toFixed(2)})`;
+                this.uiElements.inspectorAcc.textContent = `(${this.selectedParticle.ax.toFixed(2)}, ${this.selectedParticle.ay.toFixed(2)})`;
+
+                if (M.Modal.getInstance(this.uiElements.particleInspectorModal).isOpen) {
+                    requestAnimationFrame(this.updateInspectorReadouts.bind(this));
+                }
+            }
+
+            updateSelectedParticleFromModal(event) {
+                if (!this.selectedParticle) return;
+                const target = event.target;
+                const settingName = target.id;
+                let value;
+
+                if (target.type === 'range') {
+                    value = parseFloat(target.value);
+                } else if (target.type === 'color') {
+                    value = target.value;
+                }
+
+                if (settingName === 'inspectorSize') {
+                    this.selectedParticle.radius = value;
+                    this.uiElements.inspectorSizeValue.textContent = value;
+                } else if (settingName === 'inspectorMass') {
+                    this.selectedParticle.mass = value;
+                    this.uiElements.inspectorMassValue.textContent = value.toFixed(1);
+                } else if (settingName === 'inspectorCharge') {
+                    this.selectedParticle.charge = value;
+                    this.uiElements.inspectorChargeValue.textContent = value.toFixed(1);
+                } else if (settingName === 'inspectorColor') {
+                    this.selectedParticle.color = value;
+                }
+            }
+
+            deleteSelectedParticle() {
+                if (this.selectedParticle) {
+                    this.particles = this.particles.filter(p => p.id !== this.selectedParticle.id);
+                    this.clearSelectedParticle();
+                    M.Modal.getInstance(this.uiElements.particleInspectorModal).close();
+                }
+            }
+
+            clearAllParticles() {
+                this.particles = [];
+                this.particleIdCounter = 0;
+                this.clearSelectedParticle();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const app = new SimulationApp();
+            app.init();
+        });
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

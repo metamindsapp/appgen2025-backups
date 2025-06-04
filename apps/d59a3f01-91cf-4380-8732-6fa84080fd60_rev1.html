@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Helichoppers Inc - Precision Drone Pruning & Vegetation Management in BC</title>
+    <meta name="description" content="Helichoppers Inc offers advanced drone pruning and vegetation management services in Crofton, BC. Specializing in precision tree care, utility line clearance, and agricultural solutions with cutting-edge drone technology.">
+    <meta name="keywords" content="drone pruning, vegetation management, tree care, utility clearance, agricultural drones, Crofton BC, British Columbia, drone services, saw drones, Helichoppers Inc">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #121212;
+            color: #E0E0E0;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        #app {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .blue-grey.darken-4 { background-color: #263238 !important; }
+        .blue-grey.darken-3 { background-color: #37474F !important; }
+        .blue-grey.darken-2 { background-color: #455A64 !important; }
+        .blue-grey.lighten-5 { color: #ECEFF1 !important; }
+        .teal.accent-3 { background-color: #1DE9B6 !important; }
+        .teal-text.accent-3 { color: #1DE9B6 !important; }
+        .white-text { color: #ECEFF1 !important; }
+
+        nav {
+            box-shadow: none;
+            padding: 0 20px;
+        }
+        nav .brand-logo {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: #1DE9B6;
+        }
+        nav ul a {
+            color: #ECEFF1;
+            font-weight: 400;
+            transition: color 0.3s ease;
+        }
+        nav ul a:hover {
+            color: #1DE9B6;
+            background-color: transparent;
+        }
+        nav ul a.active {
+            color: #1DE9B6;
+            font-weight: 700;
+        }
+        .sidenav {
+            background-color: #263238;
+        }
+        .sidenav li > a {
+            color: #ECEFF1;
+            font-size: 1.1rem;
+            padding: 0 32px;
+            height: 48px;
+            line-height: 48px;
+        }
+        .sidenav li > a:hover {
+            background-color: #37474F;
+        }
+
+        #hero {
+            position: relative;
+            height: 100vh;
+            min-height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background-image: url('/generated_images/imagen3_b6171ef2-8a2.png');
+            background-size: cover;
+            background-position: center center;
+            background-attachment: fixed;
+            color: #ECEFF1;
+            overflow: hidden;
+            z-index: 1;
+        }
+        #hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: -1;
+        }
+        #hero .hero-content {
+            z-index: 2;
+            padding: 20px;
+        }
+        #hero h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            line-height: 1.2;
+            color: #1DE9B6;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        #hero p {
+            font-size: 1.3rem;
+            margin-bottom: 40px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .btn-large {
+            padding: 0 40px;
+            height: 60px;
+            line-height: 60px;
+            font-size: 1.2rem;
+            border-radius: 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+        .btn-large:hover {
+            box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+            transform: translateY(-2px);
+        }
+
+        .section {
+            padding: 80px 0;
+            color: #ECEFF1;
+        }
+        .section h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 2.8rem;
+            text-align: center;
+            margin-bottom: 60px;
+            color: #1DE9B6;
+            position: relative;
+        }
+        .section h2::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background-color: #1DE9B6;
+            margin: 20px auto 0;
+            border-radius: 2px;
+        }
+        .dark-background-primary { background-color: #1A202C; }
+        .dark-background-secondary { background-color: #2D3748; }
+        .container {
+            max-width: 1200px;
+        }
+
+        #about p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+        #about img {
+            border-radius: 8px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+
+        .service-card {
+            text-align: center;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+        .service-card .icon {
+            font-size: 3.5rem;
+            color: #1DE9B6;
+            margin-bottom: 20px;
+        }
+        .service-card h4 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 1.6rem;
+            margin-bottom: 15px;
+            color: #ECEFF1;
+        }
+        .service-card p {
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        #why-us .card-panel {
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            height: 100%;
+        }
+        #why-us .card-panel i {
+            font-size: 2.5rem;
+            color: #1DE9B6;
+            margin-right: 15px;
+            vertical-align: middle;
+        }
+        #why-us .card-panel span {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #ECEFF1;
+        }
+        #why-us img {
+            border-radius: 8px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+
+        #testimonials .carousel {
+            height: 300px;
+            margin-bottom: 40px;
+        }
+        #testimonials .carousel-item {
+            background-color: #37474F;
+            color: #ECEFF1;
+            padding: 40px;
+            text-align: center;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        #testimonials .carousel-item p {
+            font-size: 1.3rem;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        #testimonials .carousel-item span {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #1DE9B6;
+        }
+        .carousel .indicators .indicator-item {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        .carousel .indicators .indicator-item.active {
+            background-color: #1DE9B6;
+        }
+
+        .input-field input:not([type]):focus:not([readonly]) + label,
+        .input-field input[type=text]:not(.browser-default):focus:not([readonly]) + label,
+        .input-field input[type=email]:not(.browser-default):focus:not([readonly]) + label,
+        .input-field input[type=tel]:not(.browser-default):focus:not([readonly]) + label,
+        .input-field textarea.materialize-textarea:focus:not([readonly]) + label {
+            color: #1DE9B6 !important;
+        }
+        .input-field input:not([type]):focus:not([readonly]),
+        .input-field input[type=text]:not(.browser-default):focus:not([readonly]),
+        .input-field input[type=email]:not(.browser-default):focus:not([readonly]),
+        .input-field input[type=tel]:not(.browser-default):focus:not([readonly]),
+        .input-field textarea.materialize-textarea:focus:not([readonly]) {
+            border-bottom: 1px solid #1DE9B6 !important;
+            box-shadow: 0 1px 0 0 #1DE9B6 !important;
+        }
+        .input-field input:not([type]),
+        .input-field input[type=text],
+        .input-field input[type=email],
+        .input-field input[type=tel],
+        .input-field textarea.materialize-textarea {
+            color: #ECEFF1 !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3) !important;
+        }
+        .input-field label {
+            color: rgba(255, 255, 255, 0.7) !important;
+        }
+        .input-field .prefix {
+            color: rgba(255, 255, 255, 0.7) !important;
+        }
+        .input-field .prefix.active {
+            color: #1DE9B6 !important;
+        }
+
+        .select-wrapper input.select-dropdown {
+            color: #ECEFF1 !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3) !important;
+        }
+        .select-wrapper input.select-dropdown:focus {
+            border-bottom: 1px solid #1DE9B6 !important;
+            box-shadow: 0 1px 0 0 #1DE9B6 !important;
+        }
+        .dropdown-content li > span {
+            color: #ECEFF1;
+        }
+        .dropdown-content li > a {
+            color: #ECEFF1;
+        }
+        .dropdown-content li.selected {
+            background-color: #37474F;
+        }
+        .dropdown-content li.selected span {
+            color: #1DE9B6;
+        }
+        .dropdown-content {
+            background-color: #263238;
+        }
+
+        .contact-info p {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+        .contact-info i {
+            color: #1DE9B6;
+            margin-right: 10px;
+        }
+        .map-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+        .map-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        footer.page-footer {
+            padding-top: 40px;
+            color: #ECEFF1;
+        }
+        footer .footer-copyright {
+            background-color: #1A202C;
+            padding: 20px 0;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        footer .footer-links a {
+            color: #ECEFF1;
+            transition: color 0.3s ease;
+        }
+        footer .footer-links a:hover {
+            color: #1DE9B6;
+        }
+        footer .social-icons a {
+            color: #ECEFF1;
+            font-size: 1.8rem;
+            margin: 0 10px;
+            transition: color 0.3s ease;
+        }
+        footer .social-icons a:hover {
+            color: #1DE9B6;
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #1DE9B6;
+            color: #263238;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            z-index: 999;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+        .back-to-top:hover {
+            background-color: #15b88c;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 992px) {
+            #hero h1 {
+                font-size: 2.8rem;
+            }
+            #hero p {
+                font-size: 1.1rem;
+            }
+            .section h2 {
+                font-size: 2.2rem;
+            }
+            nav .brand-logo {
+                font-size: 1.5rem;
+            }
+            .sidenav-trigger {
+                display: block !important;
+            }
+            nav .right.hide-on-med-and-down {
+                display: none !important;
+            }
+            .service-card {
+                margin-bottom: 30px;
+            }
+            .contact-info {
+                margin-bottom: 40px;
+            }
+        }
+        @media (max-width: 600px) {
+            #hero h1 {
+                font-size: 2rem;
+            }
+            #hero p {
+                font-size: 1rem;
+            }
+            .section {
+                padding: 60px 0;
+            }
+            .section h2 {
+                font-size: 1.8rem;
+            }
+            .btn-large {
+                height: 50px;
+                line-height: 50px;
+                font-size: 1rem;
+            }
+            .service-card {
+                padding: 20px;
+            }
+            #testimonials .carousel {
+                height: 250px;
+            }
+            #testimonials .carousel-item p {
+                font-size: 1.1rem;
+            }
+            .back-to-top {
+                width: 45px;
+                height: 45px;
+                font-size: 1.3rem;
+                bottom: 15px;
+                right: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <header>
+            <nav class="blue-grey darken-4 z-depth-0">
+                <div class="nav-wrapper container">
+                    <a href="#" class="brand-logo" @click.prevent="scrollToSection('hero')">Helichoppers Inc</a>
+                    <a href="#" data-target="mobile-demo" class="sidenav-trigger hide-on-large-only" aria-label="Open navigation menu"><i class="material-icons">menu</i></a>
+                    <ul class="right hide-on-med-and-down">
+                        <li><a href="#hero" :class="{ active: activeSection === 'hero' }" @click.prevent="scrollToSection('hero')">Home</a></li>
+                        <li><a href="#about" :class="{ active: activeSection === 'about' }" @click.prevent="scrollToSection('about')">About Us</a></li>
+                        <li><a href="#services" :class="{ active: activeSection === 'services' }" @click.prevent="scrollToSection('services')">Services</a></li>
+                        <li><a href="#why-us" :class="{ active: activeSection === 'why-us' }" @click.prevent="scrollToSection('why-us')">Why Choose Us</a></li>
+                        <li><a href="#testimonials" :class="{ active: activeSection === 'testimonials' }" @click.prevent="scrollToSection('testimonials')">Testimonials</a></li>
+                        <li><a href="#contact" :class="{ active: activeSection === 'contact' }" @click.prevent="scrollToSection('contact')">Contact</a></li>
+                    </ul>
+                </div>
+            </nav>
+            <ul class="sidenav" id="mobile-demo">
+                <li><a href="#hero" :class="{ active: activeSection === 'hero' }" @click.prevent="scrollToSection('hero')">Home</a></li>
+                <li><a href="#about" :class="{ active: activeSection === 'about' }" @click.prevent="scrollToSection('about')">About Us</a></li>
+                <li><a href="#services" :class="{ active: activeSection === 'services' }" @click.prevent="scrollToSection('services')">Services</a></li>
+                <li><a href="#why-us" :class="{ active: activeSection === 'why-us' }" @click.prevent="scrollToSection('why-us')">Why Choose Us</a></li>
+                <li><a href="#testimonials" :class="{ active: activeSection === 'testimonials' }" @click.prevent="scrollToSection('testimonials')">Testimonials</a></li>
+                <li><a href="#contact" :class="{ active: activeSection === 'contact' }" @click.prevent="scrollToSection('contact')">Contact</a></li>
+            </ul>
+        </header>
+
+        <main>
+            <section id="hero" class="valign-wrapper">
+                <div class="hero-content">
+                    <h1 class="white-text">Precision Drone Pruning <br> for a Safer, Greener Future</h1>
+                    <p class="white-text">Specializing in advanced drone vegetation management and tree care services in Crofton, BC, and beyond. Experience unparalleled efficiency and safety with our cutting-edge 'saws on drones' technology.</p>
+                    <a href="#contact" class="btn-large waves-effect waves-light teal accent-3" @click.prevent="scrollToSection('contact')">Request a Quote</a>
+                </div>
+            </section>
+
+            <section id="about" class="container section dark-background-primary">
+                <div class="row valign-wrapper">
+                    <div class="col s12 m6">
+                        <h2 class="teal-text accent-3">About Helichoppers Inc</h2>
+                        <p>Helichoppers Inc is a pioneering drone technology company based in Crofton, British Columbia, dedicated to revolutionizing vegetation management and tree care. We harness the power of advanced, custom-built drones equipped with precision cutting tools to deliver safe, efficient, and environmentally conscious solutions.</p>
+                        <p>Our mission is to provide superior pruning and clearing services that minimize disruption, enhance safety, and achieve results unmatched by traditional methods. With a focus on innovation and client satisfaction, we are setting new standards in aerial vegetation management across residential, commercial, and utility sectors.</p>
+                    </div>
+                    <div class="col s12 m6 hide-on-small-only">
+                        <img src="/generated_images/imagen3_fe51f2f8-f5e.png" alt="Close-up of a sophisticated drone with visible saw mechanism, highlighting precision engineering" class="responsive-img">
+                    </div>
+                </div>
+            </section>
+
+            <section id="services" class="section dark-background-secondary">
+                <div class="container">
+                    <h2 class="teal-text accent-3">Our Specialized Drone Services</h2>
+                    <div class="row">
+                        <div class="col s12 m6 l3" v-for="service in services" :key="service.title">
+                            <div class="card blue-grey darken-3 service-card">
+                                <div class="card-content white-text">
+                                    <i :class="service.icon" class="icon"></i>
+                                    <h4>{{ service.title }}</h4>
+                                    <p>{{ service.description }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="why-us" class="container section dark-background-primary">
+                <h2 class="teal-text accent-3">Why Choose Helichoppers Inc?</h2>
+                <div class="row valign-wrapper">
+                    <div class="col s12 m6">
+                        <div class="card-panel blue-grey darken-3 white-text z-depth-1">
+                            <i class="fas fa-microchip teal-text accent-3"></i><span>Cutting-Edge Drone Technology:</span> Our custom-engineered drones are equipped with state-of-the-art precision saws, allowing for unparalleled accuracy and efficiency in every cut.
+                        </div>
+                        <div class="card-panel blue-grey darken-3 white-text z-depth-1">
+                            <i class="fas fa-shield-alt teal-text accent-3"></i><span>Enhanced Safety:</span> By utilizing drones, we eliminate the need for personnel to work at dangerous heights or in hazardous terrain, significantly reducing risks.
+                        </div>
+                        <div class="card-panel blue-grey darken-3 white-text z-depth-1">
+                            <i class="fas fa-tachometer-alt teal-text accent-3"></i><span>Unmatched Efficiency:</span> Drones complete tasks faster and with less labor, translating to quicker project completion and cost savings for our clients.
+                        </div>
+                        <div class="card-panel blue-grey darken-3 white-text z-depth-1">
+                            <i class="fas fa-leaf teal-text accent-3"></i><span>Environmentally Responsible:</span> Our electric drones operate with minimal noise and zero emissions, offering a greener alternative to traditional methods.
+                        </div>
+                        <div class="card-panel blue-grey darken-3 white-text z-depth-1">
+                            <i class="fas fa-map-marker-alt teal-text accent-3"></i><span>Access to Difficult Areas:</span> Drones can easily reach inaccessible or challenging locations, making our services ideal for steep slopes, dense forests, or areas near sensitive infrastructure.
+                        </div>
+                    </div>
+                    <div class="col s12 m6 hide-on-small-only">
+                        <img src="/generated_images/imagen3_473acbd0-8e3.png" alt="Drone with visible saws actively pruning a tree near utility poles, showcasing efficiency and safety" class="responsive-img">
+                    </div>
+                </div>
+            </section>
+
+            <section id="testimonials" class="section dark-background-secondary">
+                <div class="container">
+                    <h2 class="teal-text accent-3">What Our Clients Say</h2>
+                    <div class="carousel carousel-slider">
+                        <a class="carousel-item" v-for="(testimonial, index) in testimonials" :key="index">
+                            <p>"{{ testimonial.quote }}"</p>
+                            <span>- {{ testimonial.author }}</span>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <section id="contact" class="container section dark-background-primary">
+                <h2 class="teal-text accent-3">Get in Touch with Helichoppers Inc</h2>
+                <div class="row">
+                    <div class="col s12 m6">
+                        <form @submit.prevent="submitContactForm">
+                            <div class="input-field">
+                                <input id="name" type="text" v-model="contactForm.name" required aria-required="true">
+                                <label for="name">Your Name</label>
+                            </div>
+                            <div class="input-field">
+                                <input id="email" type="email" v-model="contactForm.email" class="validate" required aria-required="true">
+                                <label for="email">Your Email</label>
+                                <span class="helper-text" data-error="Invalid email" data-success="Valid email"></span>
+                            </div>
+                            <div class="input-field">
+                                <input id="phone" type="tel" v-model="contactForm.phone">
+                                <label for="phone">Phone Number (Optional)</label>
+                            </div>
+                            <div class="input-field">
+                                <select id="service_select" v-model="contactForm.service" required aria-required="true">
+                                    <option value="" disabled selected>Choose your service</option>
+                                    <option value="Precision Tree Pruning">Precision Tree Pruning</option>
+                                    <option value="Utility Line Clearance">Utility Line Clearance</option>
+                                    <option value="Agricultural Crop Management">Agricultural Crop Management</option>
+                                    <option value="Land & Slope Clearing">Land & Slope Clearing</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <label for="service_select">Interested Service</label>
+                            </div>
+                            <div class="input-field">
+                                <textarea id="message" class="materialize-textarea" v-model="contactForm.message" required aria-required="true"></textarea>
+                                <label for="message">Your Message</label>
+                            </div>
+                            <button class="btn waves-effect waves-light teal accent-3 btn-large" type="submit" name="action">Send Message
+                                <i class="material-icons right">send</i>
+                            </button>
+                            <p class="white-text" style="margin-top: 20px;">Note: This is a demo form. Actual submission requires backend processing not included in this single-file applet.</p>
+                        </form>
+                    </div>
+                    <div class="col s12 m6 contact-info">
+                        <h4 class="teal-text accent-3">Our Location & Details</h4>
+                        <p><i class="material-icons">location_on</i>Crofton, BC, Canada</p>
+                        <p><i class="material-icons">email</i>info@helichoppers.com</p>
+                        <p><i class="material-icons">phone</i>+1 (250) 555-1234</p>
+                        <div class="map-container">
+                            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2586.357497042571!2d-123.87679362305018!3d48.87447477133749!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x54889c1932f91599%3A0x27f549c43b9c0268!2sCrofton%2C%20BC%20V0R%201R0%2C%20Canada!5e0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2sus" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Map of Crofton, BC"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="page-footer blue-grey darken-4">
+            <div class="container">
+                <div class="row">
+                    <div class="col l6 s12">
+                        <h5 class="white-text">Helichoppers Inc</h5>
+                        <p class="blue-grey-text lighten-5">Revolutionizing vegetation management with advanced drone technology for a safer, more efficient future.</p>
+                    </div>
+                    <div class="col l4 offset-l2 s12">
+                        <h5 class="white-text">Quick Links</h5>
+                        <ul>
+                            <li><a class="blue-grey-text lighten-5 footer-links" href="#about" @click.prevent="scrollToSection('about')">About Us</a></li>
+                            <li><a class="blue-grey-text lighten-5 footer-links" href="#services" @click.prevent="scrollToSection('services')">Our Services</a></li>
+                            <li><a class="blue-grey-text lighten-5 footer-links" href="#contact" @click.prevent="scrollToSection('contact')">Contact Us</a></li>
+                            <li><a class="blue-grey-text lighten-5 footer-links" href="#">Privacy Policy</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-copyright blue-grey darken-4">
+                <div class="container">
+                    © 2025 Helichoppers Inc. All rights reserved.
+                    <div class="right social-icons">
+                        <a href="#" class="white-text" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="white-text" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="white-text" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="white-text" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+        <div class="back-to-top" @click="scrollToSection('hero')" v-show="showBackToTop" role="button" aria-label="Back to top">
+            <i class="material-icons">arrow_upward</i>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <script>
+        const app = Vue.createApp({
+            data() {
+                return {
+                    activeSection: 'hero',
+                    contactForm: {
+                        name: '',
+                        email: '',
+                        phone: '',
+                        service: '',
+                        message: ''
+                    },
+                    testimonials: [
+                        { quote: "Helichoppers Inc transformed our property! Their precision pruning is unmatched and incredibly efficient. Highly recommend!", author: "John D., Residential Client, Victoria BC" },
+                        { quote: "We rely on Helichoppers for vegetation management around our power lines. Their drone technology ensures safety and speed, significantly reducing our operational costs.", author: "PowerGrid Solutions, Vancouver Island" },
+                        { quote: "Outstanding work! The team was professional, and the drone pruning was far less disruptive than traditional methods. A game-changer for large properties.", author: "Sarah L., Property Manager, Duncan BC" },
+                        { quote: "Their agricultural pruning service optimized our vineyard's yield. The precision and speed were remarkable, and their team is a pleasure to work with.", author: "Harvest Vineyards, Cowichan Valley" }
+                    ],
+                    services: [
+                        { icon: 'fas fa-tree', title: 'Precision Tree Pruning', description: 'Advanced drone-mounted saws for accurate and safe tree and hedge trimming, reaching difficult areas with unparalleled precision and efficiency.' },
+                        { icon: 'fas fa-bolt', title: 'Utility Line Clearance', description: 'Efficient vegetation management around power lines and critical infrastructure, reducing outage risks and ensuring public safety.' },
+                        { icon: 'fas fa-seedling', title: 'Agricultural Crop Management', description: 'Targeted pruning and canopy management for vineyards, orchards, and specialty crops, optimizing yield, plant health, and resource utilization.' },
+                        { icon: 'fas fa-mountain', title: 'Land & Slope Clearing', description: 'Rapid and effective clearing of brush, small trees, and dense vegetation on challenging or inaccessible terrain, ideal for site preparation or firebreaks.' }
+                    ],
+                    showBackToTop: false
+                };
+            },
+            methods: {
+                scrollToSection(sectionId) {
+                    const element = document.getElementById(sectionId);
+                    if (element) {
+                        element.scrollIntoView({ behavior: 'smooth' });
+                        this.activeSection = sectionId;
+                        const sidenavInstance = M.Sidenav.getInstance(document.getElementById('mobile-demo'));
+                        if (sidenavInstance && sidenavInstance.isOpen) {
+                            sidenavInstance.close();
+                        }
+                    }
+                },
+                submitContactForm() {
+                    if (!this.contactForm.name || !this.contactForm.email || !this.contactForm.message || !this.contactForm.service) {
+                        M.toast({ html: 'Please fill in all required fields.', classes: 'red darken-3' });
+                        return;
+                    }
+
+                    console.log('Contact Form Submitted:', this.contactForm);
+                    M.toast({ html: 'Thank you for your inquiry! We will get back to you soon.', classes: 'green darken-3' });
+
+                    this.contactForm = { name: '', email: '', phone: '', service: '', message: '' };
+                    const selectElement = document.getElementById('service_select');
+                    if (selectElement) {
+                        M.FormSelect.init(selectElement);
+                    }
+                },
+                handleScroll() {
+                    this.showBackToTop = window.scrollY > 300;
+                    const sections = ['hero', 'about', 'services', 'why-us', 'testimonials', 'contact'];
+                    let currentActive = this.activeSection;
+
+                    for (let i = sections.length - 1; i >= 0; i--) {
+                        const section = document.getElementById(sections[i]);
+                        if (section) {
+                            const rect = section.getBoundingClientRect();
+                            if (rect.top <= window.innerHeight / 2 && rect.bottom >= window.innerHeight / 2) {
+                                currentActive = sections[i];
+                                break;
+                            }
+                        }
+                    }
+                    if (currentActive !== this.activeSection) {
+                        this.activeSection = currentActive;
+                    }
+                }
+            },
+            mounted() {
+                M.AutoInit();
+
+                const carouselElement = document.querySelector('.carousel.carousel-slider');
+                M.Carousel.init(carouselElement, {
+                    fullWidth: true,
+                    indicators: true,
+                    duration: 200
+                });
+
+                const selectElements = document.querySelectorAll('select');
+                M.FormSelect.init(selectElements);
+
+                window.addEventListener('scroll', this.handleScroll);
+                this.handleScroll();
+            },
+            beforeUnmount() {
+                window.removeEventListener('scroll', this.handleScroll);
+            }
+        });
+        app.mount('#app');
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

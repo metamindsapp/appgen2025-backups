@@ -1,0 +1,25 @@
+{
+  "projectId": "46b2e725-22b9-4e13-81f9-bca47395203c",
+  "revisionString": "1",
+  "projectNameDisplay": "Pic maker ",
+  "projectType": "website",
+  "userPromptForThisRevision": "Uses the generate image in demand endpoint to let the user make images",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-06-04T17:28:12.859Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/imagen3_86eabc0c-a0a.png",
+      "url": "/generated_images/imagen3_86eabc0c-a0a.png",
+      "description": "A sleek, modern, abstract logo for 'Imaginarium AI'. The design should feature subtle, flowing lines or shapes that evoke creativity and artificial intelligence. Use a dark background with primary accent colors of #BB86FC (purple) and secondary accent colors of #03DAC6 (teal). The style should be minimalist and professional, suitable for a technology company. No text in the image, just a symbolic icon.",
+      "purpose": "Main logo for the website, used in the navbar and potentially footer. Should be small and iconic.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_009040d6-77b.png",
+      "url": "/generated_images/imagen3_009040d6-77b.png",
+      "description": "A subtle, dark, abstract background image with a gentle gradient or very faint, flowing lines. The colors should primarily be dark grays and blacks, with very subtle hints of #BB86FC (purple) and #03DAC6 (teal) to match the dark theme. It should be non-distracting and suitable for a hero section background or general page background.",
+      "purpose": "Subtle background for the main content area or hero section to enhance the dark theme aesthetic.",
+      "isNewlyGenerated": true
+    }
+  ]
+}

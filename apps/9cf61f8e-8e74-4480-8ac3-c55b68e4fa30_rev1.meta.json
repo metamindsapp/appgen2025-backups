@@ -1,0 +1,41 @@
+{
+  "projectId": "9cf61f8e-8e74-4480-8ac3-c55b68e4fa30",
+  "revisionString": "1",
+  "projectNameDisplay": "Honeybee friends site",
+  "projectType": "website",
+  "userPromptForThisRevision": "Site for friends of honeybees",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-06-04T17:03:06.344Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/imagen3_011dcb3a-b4d.png",
+      "url": "/generated_images/imagen3_011dcb3a-b4d.png",
+      "description": "A stunning, photorealistic hero banner for a 'Honeybee Friends' website. It should feature a vibrant, diverse meadow or garden scene bathed in warm, golden sunlight, with numerous honeybees actively pollinating various colorful flowers. The focus is on natural beauty, abundance, and the critical role of bees. The overall mood should be hopeful, inspiring, and harmonious. Dominant colors are rich greens, various flower colors (purples, yellows, blues), and warm honey-gold sunlight. The image should convey vitality and the interconnectedness of nature.",
+      "purpose": "Main hero banner for the website homepage, setting an inviting and inspiring tone.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_bfa6eb4c-c99.png",
+      "url": "/generated_images/imagen3_bfa6eb4c-c99.png",
+      "description": "A close-up, photorealistic image of a honeybee in mid-flight, carrying visible pollen sacs on its legs. The background should be slightly blurred (bokeh effect) showing a field of flowers, emphasizing the bee's action and importance. The lighting is bright and natural. Colors are warm, highlighting the bee's golden fuzz and the yellow pollen.",
+      "purpose": "Illustrative image for the 'About Honeybees' section, demonstrating pollination.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_a63e2411-a95.png",
+      "url": "/generated_images/imagen3_a63e2411-a95.png",
+      "description": "A detailed, photorealistic close-up of a golden honeycomb filled with glistening honey. Some hexagonal cells should be slightly open, showing the depth and texture of the honey. The lighting is soft and warm, making the honey appear inviting and pure. The focus is on the intricate structure and delicious product of the hive.",
+      "purpose": "Illustrative image for the 'About Honeybees' section, showing the honey product.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_4ac708a5-bc6.png",
+      "url": "/generated_images/imagen3_4ac708a5-bc6.png",
+      "description": "Content replaced by: lp_image.jpeg (Original: A clear, photorealistic image of a honeybee diligently collecting nectar and pollen from a vibrant purple flower. The bee should be in sharp focus, with its fuzzy body and delicate wings clearly visible. The flower's petals should be rich in color, and the background subtly blurred. The scene should feel peaceful and industrious.)",
+      "purpose": "Illustrative image for the 'About Honeybees' section, showing a bee on a flower.",
+      "isNewlyGenerated": true,
+      "originalUploadedFilename": "lp_image.jpeg",
+      "swappedAt": "2025-06-04T17:04:34.713Z"
+    }
+  ]
+}

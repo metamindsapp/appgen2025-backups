@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Honeybee Friends - Nurturing Our Pollinators</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body {
+            background-color: #121212;
+            color: #E0E0E0;
+            font-family: 'Roboto', sans-serif;
+        }
+        .navbar-fixed nav {
+            background-color: #212121 !important;
+            box-shadow: 0 2px 5px 0 rgba(0,0,0,0.2);
+        }
+        .navbar-fixed nav .brand-logo {
+            color: #FFC107;
+        }
+        .navbar-fixed nav ul a {
+            color: #E0E0E0;
+        }
+        .navbar-fixed nav ul a:hover {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: #FFD54F;
+        }
+        .navbar-fixed nav ul li.active a {
+            color: #FFC107 !important;
+            border-bottom: 2px solid #FFC107;
+        }
+        .card {
+            background-color: #2D2D2D;
+            color: #E0E0E0;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.3);
+        }
+        .card .card-title {
+            color: #FFC107;
+        }
+        .btn {
+            background-color: #FFC107 !important;
+            color: #212121 !important;
+        }
+        .btn:hover {
+            background-color: #FFD54F !important;
+        }
+        .btn-flat {
+            color: #FFC107 !important;
+        }
+        .input-field input:not([type]):focus:not(.browser-default),
+        .input-field input[type=text]:not(.browser-default):focus:not([readonly]),
+        .input-field input[type=password]:not(.browser-default):focus:not([readonly]),
+        .input-field input[type=email]:not(.browser-default):focus:not([readonly]),
+        .input-field input[type=url]:not(.browser-default):focus:not([readonly]),
+        .input-field input[type=time]:not(.browser-default):focus:not([readonly]),
+        .input-field input[type=date]:not(.browser-default):focus:not([readonly]),
+        .input-field input[type=datetime-local]:not(.browser-default):focus:not([readonly]),
+        .input-field input[type=tel]:not(.browser-default):focus:not([readonly]),
+        .input-field input[type=number]:not(.browser-default):focus:not([readonly]),
+        .input-field input[type=search]:not(.browser-default):focus:not([readonly]),
+        .input-field textarea.materialize-textarea:focus:not([readonly]) {
+            border-bottom: 1px solid #FFC107 !important;
+            box-shadow: 0 1px 0 0 #FFC107 !important;
+        }
+        .input-field label {
+            color: #BDBDBD !important;
+        }
+        .input-field label.active {
+            color: #FFC107 !important;
+        }
+        .input-field input:not([type]):focus:not(.browser-default) + label,
+        .input-field input[type=text]:not(.browser-default):focus:not([readonly]) + label,
+        .input-field input[type=password]:not(.browser-default):focus:not([readonly]) + label,
+        .input-field input[type=email]:not(.browser-default):focus:not([readonly]) + label,
+        .input-field input[type=url]:not(.browser-default):focus:not([readonly]) + label,
+        .input-field input[type=time]:not(.browser-default):focus:not([readonly]) + label,
+        .input-field input[type=date]:not(.browser-default):focus:not([readonly]) + label,
+        .input-field input[type=datetime-local]:not(.browser-default):focus:not([readonly]) + label,
+        .input-field input[type=tel]:not(.browser-default):focus:not([readonly]) + label,
+        .input-field input[type=number]:not(.browser-default):focus:not([readonly]) + label,
+        .input-field input[type=search]:not(.browser-default):focus:not([readonly]) + label,
+        .input-field textarea.materialize-textarea:focus:not([readonly]) + label {
+            color: #FFC107 !important;
+        }
+        .input-field input[type=text], .input-field input[type=email], .input-field textarea {
+            color: #E0E0E0 !important;
+            border-bottom: 1px solid #424242 !important;
+        }
+        .footer-copyright, .page-footer {
+            background-color: #212121 !important;
+            color: #BDBDBD;
+        }
+        .page-footer .footer-copyright a {
+            color: #FFC107 !important;
+        }
+        .hero-section {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            color: white;
+            padding: 20px;
+        }
+        .hero-section::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1;
+        }
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+        .hero-content h1 {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #FFEB3B;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .hero-content p {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        @media (max-width: 600px) {
+            .hero-content h1 {
+                font-size: 2.5rem;
+            }
+            .hero-content p {
+                font-size: 1.2rem;
+            }
+        }
+        .section-title {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #FFC107;
+            font-size: 2.5rem;
+            font-weight: 500;
+        }
+        .section {
+            padding: 60px 0;
+        }
+        .icon-block {
+            padding: 0 15px;
+        }
+        .icon-block .material-icons {
+            font-size: 4rem;
+            color: #FFC107;
+        }
+        .image-placeholder {
+            background-color: #424242;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #BDBDBD;
+            font-style: italic;
+            border-radius: 4px;
+            text-align: center;
+            overflow: hidden;
+        }
+        .image-placeholder img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+        .spinner-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 150px;
+        }
+        .preloader-wrapper.active .spinner-layer.spinner-yellow-only {
+            border-color: #FFC107;
+        }
+        .collection .collection-item {
+            background-color: #383838 !important;
+            color: #E0E0E0 !important;
+            border-bottom: 1px solid #424242 !important;
+        }
+        .collection .collection-item a {
+            color: #FFC107 !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="navbar-fixed">
+            <nav>
+                <div class="nav-wrapper container">
+                    <a href="#" class="brand-logo">Honeybee Friends</a>
+                    <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+                    <ul class="right hide-on-med-and-down">
+                        <li><a href="#home" @click="scrollToSection('home')">Home</a></li>
+                        <li><a href="#about-bees" @click="scrollToSection('about-bees')">About Bees</a></li>
+                        <li><a href="#threats-solutions" @click="scrollToSection('threats-solutions')">Threats & Solutions</a></li>
+                        <li><a href="#how-to-help" @click="scrollToSection('how-to-help')">How You Can Help</a></li>
+                        <li><a href="#garden-visualizer" @click="scrollToSection('garden-visualizer')">Garden Visualizer</a></li>
+                        <li><a href="#resources" @click="scrollToSection('resources')">Resources</a></li>
+                        <li><a href="#contact" @click="scrollToSection('contact')">Contact Us</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+        <ul class="sidenav" id="mobile-demo">
+            <li><a href="#home" @click="scrollToSection('home')">Home</a></li>
+            <li><a href="#about-bees" @click="scrollToSection('about-bees')">About Bees</a></li>
+            <li><a href="#threats-solutions" @click="scrollToSection('threats-solutions')">Threats & Solutions</a></li>
+            <li><a href="#how-to-help" @click="scrollToSection('how-to-help')">How You Can Help</a></li>
+            <li><a href="#garden-visualizer" @click="scrollToSection('garden-visualizer')">Garden Visualizer</a></li>
+            <li><a href="#resources" @click="scrollToSection('resources')">Resources</a></li>
+            <li><a href="#contact" @click="scrollToSection('contact')">Contact Us</a></li>
+        </ul>
+
+        <main>
+            <section id="home" class="hero-section" :style="{ backgroundImage: 'url(' + heroImage + ')' }">
+                <div class="hero-content">
+                    <h1 class="white-text">Nurturing Our Tiny Heroes: The Honeybees</h1>
+                    <p class="white-text text-lighten-2">Join us in protecting the invaluable honeybees, vital to our planet's ecosystem and food supply. Discover how you can make a difference!</p>
+                    <a href="#how-to-help" class="btn btn-large waves-effect waves-light" @click="scrollToSection('how-to-help')">Discover How You Can Help</a>
+                </div>
+            </section>
+
+            <section id="about-bees" class="section container">
+                <h2 class="section-title">About Honeybees</h2>
+                <div class="row">
+                    <div class="col s12 m6">
+                        <div class="card z-depth-2">
+                            <div class="card-content">
+                                <span class="card-title">Who Are Honeybees?</span>
+                                <p>Honeybees (Apis mellifera) are social insects known for their ability to produce honey and wax, and most importantly, for their crucial role as pollinators. A single colony can house tens of thousands of bees, each with a specific job, from the queen bee laying eggs to worker bees foraging for nectar and pollen.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col s12 m6">
+                        <div class="card z-depth-2">
+                            <div class="card-content">
+                                <span class="card-title">Why Are They So Important?</span>
+                                <p>Honeybees are responsible for pollinating a vast majority of the world's crops, including fruits, vegetables, and nuts. Without them, our food supply would be severely impacted. Beyond agriculture, they play a vital role in maintaining biodiversity by pollinating wild plants, supporting entire ecosystems.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col s12 m4">
+                        <div class="card z-depth-2">
+                            <div class="card-image">
+                                <img :src="beeInFlightImage" alt="Honeybee in flight carrying pollen sacs, blurred field of flowers in background" class="responsive-img">
+                            </div>
+                            <div class="card-content">
+                                <span class="card-title">Pollination Powerhouses</span>
+                                <p>Bees transfer pollen between flowers, enabling plants to reproduce. This process is essential for the production of many fruits, vegetables, and seeds we rely on daily.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col s12 m4">
+                        <div class="card z-depth-2">
+                            <div class="card-image">
+                                <img :src="honeycombImage" alt="Close-up of a golden honeycomb filled with glistening honey" class="responsive-img">
+                            </div>
+                            <div class="card-content">
+                                <span class="card-title">Beyond Honey</span>
+                                <p>While honey is a delicious byproduct, bees also produce beeswax, propolis, and royal jelly, all with various uses. Their primary value, however, remains their ecological service.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col s12 m4">
+                        <div class="card z-depth-2">
+                            <div class="card-image">
+                                <img :src="beeOnFlowerImage" alt="Honeybee diligently collecting nectar and pollen from a vibrant purple flower" class="responsive-img">
+                            </div>
+                            <div class="card-content">
+                                <span class="card-title">Social & Organized</span>
+                                <p>Honeybees live in highly organized colonies with a queen, worker bees, and drones, each contributing to the hive's survival and success through complex communication and cooperation.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="threats-solutions" class="section container">
+                <h2 class="section-title">Threats & Solutions</h2>
+                <div class="row">
+                    <div class="col s12 m6 l4">
+                        <div class="card z-depth-2">
+                            <div class="card-content">
+                                <span class="card-title"><i class="material-icons left">bug_report</i>Pesticides</span>
+                                <p>Neonicotinoids and other harmful chemicals used in agriculture can disorient, weaken, or kill bees, impacting their foraging and navigation abilities.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col s12 m6 l4">
+                        <div class="card z-depth-2">
+                            <div class="card-content">
+                                <span class="card-title"><i class="material-icons left">eco</i>Habitat Loss</span>
+                                <p>Urbanization and monoculture farming reduce the availability of diverse flowering plants, limiting food sources and nesting sites for bees.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col s12 m6 l4">
+                        <div class="card z-depth-2">
+                            <div class="card-content">
+                                <span class="card-title"><i class="material-icons left">thermostat</i>Climate Change</span>
+                                <p>Changes in weather patterns can disrupt flowering seasons, leading to a mismatch between when plants bloom and when bees are active.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col s12 m6 l4">
+                        <div class="card z-depth-2">
+                            <div class="card-content">
+                                <span class="card-title"><i class="material-icons left">healing</i>Diseases & Parasites</span>
+                                <p>Pests like the Varroa mite and various bee diseases can decimate bee colonies, especially when bees are already stressed by other factors.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col s12 offset-m3 l4 offset-l4">
+                        <div class="card z-depth-2">
+                            <div class="card-content center-align">
+                                <span class="card-title"><i class="material-icons">lightbulb_outline</i>The Good News: Solutions Exist!</span>
+                                <p>By understanding these challenges, we can implement targeted solutions. Every small action contributes to a larger positive impact on bee populations.</p>
+                                <a href="#how-to-help" class="btn waves-effect waves-light" @click="scrollToSection('how-to-help')">See Solutions</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="how-to-help" class="section container">
+                <h2 class="section-title">How You Can Help</h2>
+                <div class="row">
+                    <div class="col s12 m6 l4">
+                        <div class="card z-depth-2">
+                            <div class="card-content center-align">
+                                <i class="material-icons large">local_florist</i>
+                                <span class="card-title">Plant Bee-Friendly Flowers</span>
+                                <p>Create a pollinator paradise in your garden, balcony, or even a window box. Choose native plants that provide nectar and pollen throughout the seasons.</p>
+                                <a href="#garden-visualizer" class="btn-flat waves-effect waves-light" @click="scrollToSection('garden-visualizer')">Visualize Your Garden</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col s12 m6 l4">
+                        <div class="card z-depth-2">
+                            <div class="card-content center-align">
+                                <i class="material-icons large">eco</i>
+                                <span class="card-title">Avoid Harmful Pesticides</span>
+                                <p>Opt for organic pest control methods. Many common pesticides can harm bees directly or indirectly. Research bee-safe alternatives.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col s12 m6 l4">
+                        <div class="card z-depth-2">
+                            <div class="card-content center-align">
+                                <i class="material-icons large">storefront</i>
+                                <span class="card-title">Support Local Beekeepers</span>
+                                <p>Buying local honey and beeswax products supports beekeepers who work to maintain healthy bee populations and sustainable practices.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col s12 m6 l4">
+                        <div class="card z-depth-2">
+                            <div class="card-content center-align">
+                                <i class="material-icons large">home</i>
+                                <span class="card-title">Build a Bee Hotel</span>
+                                <p>Provide nesting habitats for solitary bees. Simple structures with hollow stems or drilled wood blocks can make a big difference.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col s12 offset-m3 l4 offset-l4">
+                        <div class="card z-depth-2">
+                            <div class="card-content center-align">
+                                <i class="material-icons large">share</i>
+                                <span class="card-title">Spread the Word</span>
+                                <p>Educate your friends, family, and community about the importance of honeybees and how they can help. Share this site!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="garden-visualizer" class="section container">
+                <h2 class="section-title">Your Bee-Friendly Garden Visualizer</h2>
+                <p class="center-align">Describe your ideal bee-friendly garden, and our AI will generate a visual concept for you! Be specific about size, location, and preferred plant types.</p>
+                <div class="row">
+                    <div class="col s12 m8 offset-m2">
+                        <div class="card z-depth-2">
+                            <div class="card-content">
+                                <div class="input-field">
+                                    <input id="garden_prompt" type="text" v-model="gardenPrompt" @keyup.enter="generateGardenImage" :disabled="isGeneratingImage">
+                                    <label for="garden_prompt">Describe your dream bee garden...</label>
+                                </div>
+                                <button class="btn waves-effect waves-light" @click="generateGardenImage" :disabled="isGeneratingImage">
+                                    <span v-if="!isGeneratingImage">Generate Garden Image</span>
+                                    <span v-else>Generating...</span>
+                                </button>
+                                <div v-if="isGeneratingImage" class="spinner-container">
+                                    <div class="preloader-wrapper big active">
+                                        <div class="spinner-layer spinner-yellow-only">
+                                            <div class="circle-clipper left">
+                                                <div class="circle"></div>
+                                            </div><div class="gap-patch">
+                                                <div class="circle"></div>
+                                            </div><div class="circle-clipper right">
+                                                <div class="circle"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div v-if="imageGenerationError" class="card-panel red lighten-1 white-text" style="margin-top: 20px;">
+                                    {{ imageGenerationError }}
+                                </div>
+                                <div v-if="generatedGardenImage" style="margin-top: 20px;">
+                                    <h5>Your Bee-Friendly Garden Concept:</h5>
+                                    <div class="image-placeholder">
+                                        <img :src="generatedGardenImage" alt="AI generated bee-friendly garden based on user prompt" class="responsive-img">
+                                    </div>
+                                    <p class="center-align grey-text text-lighten-2">This is an AI-generated concept. Use it for inspiration!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="resources" class="section container">
+                <h2 class="section-title">Resources</h2>
+                <div class="row">
+                    <div class="col s12 m6">
+                        <div class="card z-depth-2">
+                            <div class="card-content">
+                                <span class="card-title">Organizations to Support</span>
+                                <ul class="collection">
+                                    <li class="collection-item">
+                                        <a href="https://www.pollinator.org/" target="_blank" rel="noopener noreferrer">Pollinator Partnership</a>
+                                        <p class="grey-text text-lighten-2">Dedicated to the protection and promotion of pollinators and their ecosystems.</p>
+                                    </li>
+                                    <li class="collection-item">
+                                        <a href="https://xerces.org/" target="_blank" rel="noopener noreferrer">Xerces Society for Invertebrate Conservation</a>
+                                        <p class="grey-text text-lighten-2">Protects wildlife through the conservation of invertebrates and their habitats.</p>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col s12 m6">
+                        <div class="card z-depth-2">
+                            <div class="card-content">
+                                <span class="card-title">Recommended Reading</span>
+                                <ul class="collection">
+                                    <li class="collection-item">
+                                        "The Bee Book" by DK
+                                        <p class="grey-text text-lighten-2">A beautiful guide to the world of bees and their vital role.</p>
+                                    </li>
+                                    <li class="collection-item">
+                                        "A Sting in the Tale" by Dave Goulson
+                                        <p class="grey-text text-lighten-2">An engaging account of bumblebee conservation.</p>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="contact" class="section container">
+                <h2 class="section-title">Contact Us</h2>
+                <div class="row">
+                    <div class="col s12 m8 offset-m2">
+                        <div class="card z-depth-2">
+                            <div class="card-content">
+                                <span class="card-title">Get In Touch</span>
+                                <p>Have questions or want to share your bee-friendly efforts? Send us a message!</p>
+                                <form @submit.prevent="submitContactForm">
+                                    <div class="input-field">
+                                        <input id="name" type="text" v-model="contactForm.name" required>
+                                        <label for="name">Your Name</label>
+                                    </div>
+                                    <div class="input-field">
+                                        <input id="email" type="email" v-model="contactForm.email" required>
+                                        <label for="email">Your Email</label>
+                                    </div>
+                                    <div class="input-field">
+                                        <textarea id="message" class="materialize-textarea" v-model="contactForm.message" required></textarea>
+                                        <label for="message">Your Message</label>
+                                    </div>
+                                    <button class="btn waves-effect waves-light" type="submit">Send Message</button>
+                                </form>
+                                <div style="margin-top: 20px;">
+                                    <p class="grey-text text-lighten-2">Sign up for our newsletter for regular updates!</p>
+                                    <div class="input-field inline">
+                                        <input id="newsletter_email" type="email">
+                                        <label for="newsletter_email">Your Email for Newsletter</label>
+                                    </div>
+                                    <button class="btn waves-effect waves-light">Subscribe</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="page-footer">
+            <div class="container">
+                <div class="row">
+                    <div class="col l6 s12">
+                        <h5 class="white-text">Honeybee Friends</h5>
+                        <p class="grey-text text-lighten-4">Dedicated to raising awareness and fostering action for honeybee conservation worldwide.</p>
+                    </div>
+                    <div class="col l4 offset-l2 s12">
+                        <h5 class="white-text">Links</h5>
+                        <ul>
+                            <li><a class="grey-text text-lighten-3" href="#about-bees" @click="scrollToSection('about-bees')">About Bees</a></li>
+                            <li><a class="grey-text text-lighten-3" href="#how-to-help" @click="scrollToSection('how-to-help')">How You Can Help</a></li>
+                            <li><a class="grey-text text-lighten-3" href="#garden-visualizer" @click="scrollToSection('garden-visualizer')">Garden Visualizer</a></li>
+                            <li><a class="grey-text text-lighten-3" href="#contact" @click="scrollToSection('contact')">Contact Us</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-copyright">
+                <div class="container">
+                    © 2025 Honeybee Friends. All rights reserved.
+                    <a class="grey-text text-lighten-4 right" href="#!">Privacy Policy</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script>
+        const app = Vue.createApp({
+            data() {
+                return {
+                    heroImage: '/generated_images/imagen3_011dcb3a-b4d.png',
+                    beeInFlightImage: '/generated_images/imagen3_bfa6eb4c-c99.png',
+                    honeycombImage: '/generated_images/imagen3_a63e2411-a95.png',
+                    beeOnFlowerImage: '/generated_images/imagen3_4ac708a5-bc6.png',
+                    gardenPrompt: '',
+                    generatedGardenImage: '',
+                    isGeneratingImage: false,
+                    imageGenerationError: '',
+                    contactForm: {
+                        name: '',
+                        email: '',
+                        message: ''
+                    }
+                };
+            },
+            methods: {
+                scrollToSection(id) {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.scrollIntoView({ behavior: 'smooth' });
+                        const sidenavInstance = M.Sidenav.getInstance(document.getElementById('mobile-demo'));
+                        if (sidenavInstance && sidenavInstance.isOpen) {
+                            sidenavInstance.close();
+                        }
+                    }
+                },
+                async generateGardenImage() {
+                    if (!this.gardenPrompt.trim()) {
+                        this.imageGenerationError = 'Please enter a description for your garden.';
+                        return;
+                    }
+                    this.isGeneratingImage = true;
+                    this.generatedGardenImage = '';
+                    this.imageGenerationError = '';
+
+                    try {
+                        const response = await fetch('/api/generate-image-on-demand', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                prompt: `Photorealistic image of a beautiful, vibrant, bee-friendly garden based on this description: "${this.gardenPrompt}". Focus on diverse flowering plants, bright colors, and a natural, inviting atmosphere. Include honeybees actively pollinating. Emphasize a harmonious, slightly dark-toned aesthetic to match the website theme.`,
+                                aspectRatio: "16:9",
+                                style: "photorealistic"
+                            }),
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success && data.imageUrl) {
+                            this.generatedGardenImage = data.imageUrl;
+                        } else {
+                            this.imageGenerationError = data.error || 'Failed to generate image. Please try again.';
+                        }
+                    } catch (error) {
+                        console.error('Error generating image:', error);
+                        this.imageGenerationError = 'Network error or API unavailable. Please try again later.';
+                    } finally {
+                        this.isGeneratingImage = false;
+                    }
+                },
+                submitContactForm() {
+                    if (!this.contactForm.name || !this.contactForm.email || !this.contactForm.message) {
+                        M.toast({ html: 'Please fill in all contact form fields.', classes: 'red darken-1' });
+                        return;
+                    }
+                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.contactForm.email)) {
+                        M.toast({ html: 'Please enter a valid email address.', classes: 'red darken-1' });
+                        return;
+                    }
+
+                    console.log('Contact form submitted:', this.contactForm);
+                    M.toast({ html: 'Message sent! (Note: This is a demo; no actual backend submission)', classes: 'green darken-1' });
+
+                    this.contactForm.name = '';
+                    this.contactForm.email = '';
+                    this.contactForm.message = '';
+                }
+            },
+            mounted() {
+                M.AutoInit();
+                const elems = document.querySelectorAll('.sidenav');
+                M.Sidenav.init(elems);
+            }
+        });
+
+        app.mount('#app');
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Imaginarium AI - Generate Images from Text</title>
+    <meta name="description" content="Unleash your creativity with Imaginarium AI. Generate stunning images from text prompts using advanced AI technology.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body {
+            background-color: #121212;
+            color: #E0E0E0;
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+        main {
+            flex: 1 0 auto;
+        }
+        body::-webkit-scrollbar {
+            width: 8px;
+        }
+        body::-webkit-scrollbar-track {
+            background: #1F1F1F;
+        }
+        body::-webkit-scrollbar-thumb {
+            background-color: #4A4A4A;
+            border-radius: 10px;
+            border: 2px solid #1F1F1F;
+        }
+        nav {
+            background-color: #1F1F1F;
+            box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.2);
+        }
+        nav .brand-logo img {
+            height: 40px;
+            margin-top: 10px;
+        }
+        nav ul a {
+            color: #E0E0E0;
+        }
+        nav ul a:hover {
+            color: #BB86FC;
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .sidenav {
+            background-color: #1F1F1F;
+        }
+        .sidenav li > a {
+            color: #E0E0E0;
+        }
+        .sidenav li > a:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .hero-section {
+            background-image: url('/generated_images/imagen3_009040d6-77b.png');
+            background-size: cover;
+            background-position: center;
+            padding: 80px 0;
+            text-align: center;
+            color: #FFFFFF;
+            position: relative;
+            z-index: 1;
+        }
+        .hero-section::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: -1;
+        }
+        .hero-section h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            color: #BB86FC;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        .hero-section p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 40px auto;
+        }
+        .card {
+            background-color: #1F1F1F;
+            color: #E0E0E0;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+        }
+        .card .card-title {
+            color: #BB86FC;
+        }
+        .input-field label {
+            color: #BB86FC !important;
+        }
+        .input-field input:focus + label,
+        .input-field textarea:focus + label {
+            color: #03DAC6 !important;
+        }
+        .input-field input:focus,
+        .input-field textarea:focus {
+            border-bottom: 1px solid #03DAC6 !important;
+            box-shadow: 0 1px 0 0 #03DAC6 !important;
+        }
+        .input-field input,
+        .input-field textarea {
+            color: #E0E0E0 !important;
+            border-bottom: 1px solid #4A4A4A !important;
+        }
+        .btn, .btn-large {
+            background-color: #BB86FC !important;
+            color: #FFFFFF !important;
+            transition: background-color 0.3s ease;
+        }
+        .btn:hover, .btn-large:hover {
+            background-color: #9D5BEE !important;
+        }
+        .btn:disabled, .btn-large:disabled {
+            background-color: #6200EE50 !important;
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        .preloader-wrapper {
+            margin: 20px auto;
+            display: block;
+        }
+        .preloader-wrapper .spinner-layer.spinner-blue-only {
+            border-color: #BB86FC;
+        }
+        .error-message {
+            color: #CF6679;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        .generated-image-container {
+            min-height: 300px;
+            background-color: #2D2D2D;
+            border: 1px solid #4A4A4A;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+        .generated-image-container img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+        }
+        .generated-image-container img:hover {
+            transform: scale(1.01);
+        }
+        .generated-image-placeholder {
+            color: #6C6C6C;
+            font-size: 1.2rem;
+        }
+        .chip {
+            background-color: #2D2D2D;
+            color: #E0E0E0;
+            margin: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .chip:hover {
+            background-color: #3D3D3D;
+        }
+        .modal {
+            background-color: #1F1F1F;
+            color: #E0E0E0;
+            border-radius: 8px;
+        }
+        .modal .modal-content h4 {
+            color: #BB86FC;
+            border-bottom: 1px solid #3D3D3D;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .modal .modal-footer {
+            background-color: #1F1F1F;
+            border-top: 1px solid #3D3D3D;
+        }
+        .modal .modal-footer .btn-flat {
+            color: #BB86FC;
+        }
+        footer.page-footer {
+            background-color: #1F1F1F;
+            padding-top: 20px;
+            color: #E0E0E0;
+            box-shadow: 0 -2px 5px 0 rgba(0, 0, 0, 0.2);
+        }
+        footer.page-footer .footer-copyright {
+            background-color: #121212;
+            padding: 10px 0;
+        }
+        .image-history-card .card-image {
+            height: 150px;
+            overflow: hidden;
+        }
+        .image-history-card .card-image img {
+            object-fit: cover;
+            width: 100%;
+            height: 100%;
+        }
+        .image-history-card .card-content {
+            padding: 10px;
+            font-size: 0.9em;
+            word-break: break-word;
+            white-space: normal;
+        }
+        .image-history-card .card-title {
+            font-size: 1.1em;
+            line-height: 1.2em;
+            margin-bottom: 5px;
+        }
+        @media (max-width: 600px) {
+            .hero-section h1 {
+                font-size: 2.5rem;
+            }
+            .hero-section p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <header>
+            <nav>
+                <div class="nav-wrapper container">
+                    <a href="#" class="brand-logo left">
+                        <img src="/generated_images/imagen3_86eabc0c-a0a.png" alt="Imaginarium AI Logo">
+                    </a>
+                    <a href="#" data-target="mobile-demo" class="sidenav-trigger right"><i class="material-icons">menu</i></a>
+                    <ul class="right hide-on-med-and-down">
+                        <li><a href="#aboutModal" class="modal-trigger" @click="openModal('aboutModal')">About Us</a></li>
+                        <li><a href="#contactModal" class="modal-trigger" @click="openModal('contactModal')">Contact</a></li>
+                    </ul>
+                </div>
+            </nav>
+            <ul class="sidenav" id="mobile-demo">
+                <li><a href="#aboutModal" class="modal-trigger" @click="openModal('aboutModal')">About Us</a></li>
+                <li><a href="#contactModal" class="modal-trigger" @click="openModal('contactModal')">Contact</a></li>
+            </ul>
+        </header>
+
+        <main>
+            <section class="hero-section">
+                <div class="container">
+                    <h1 class="white-text">Imaginarium AI</h1>
+                    <p class="flow-text">Unleash your creativity. Generate stunning images from text prompts using advanced AI technology. Describe your vision, and watch it come to life.</p>
+                </div>
+            </section>
+
+            <section id="image-generator" class="container section">
+                <div class="row">
+                    <div class="col s12 m8 offset-m2">
+                        <div class="card z-depth-3">
+                            <div class="card-content">
+                                <span class="card-title">Create Your Masterpiece</span>
+                                <div class="input-field">
+                                    <textarea id="prompt-input" class="materialize-textarea" v-model="promptInput"></textarea>
+                                    <label for="prompt-input">Enter your image prompt here...</label>
+                                </div>
+                                <div class="chips-container" style="margin-bottom: 20px;">
+                                    <div class="chips">
+                                        <span class="chip" v-for="prompt in examplePrompts" :key="prompt" @click="applyPrompt(prompt)">
+                                            {{ prompt }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <button class="btn btn-large waves-effect waves-light" :disabled="isLoading || !promptInput" @click="generateImage">
+                                    <span v-if="!isLoading">Generate Image</span>
+                                    <span v-else>Generating...</span>
+                                    <i class="material-icons right">photo_library</i>
+                                </button>
+                                <div class="preloader-wrapper big active" v-if="isLoading">
+                                    <div class="spinner-layer spinner-blue-only">
+                                        <div class="circle-clipper left">
+                                            <div class="circle"></div>
+                                        </div><div class="gap-patch">
+                                            <div class="circle"></div>
+                                        </div><div class="circle-clipper right">
+                                            <div class="circle"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="error-message" v-if="errorMessage">{{ errorMessage }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col s12 m8 offset-m2">
+                        <div class="card z-depth-3">
+                            <div class="card-content">
+                                <span class="card-title">Your Generated Image</span>
+                                <div class="generated-image-container">
+                                    <img v-if="generatedImage" :src="generatedImage" alt="Generated AI Image">
+                                    <p v-else class="generated-image-placeholder">Your generated image will appear here.</p>
+                                </div>
+                                <div class="card-action" v-if="generatedImage">
+                                    <button class="btn waves-effect waves-light" @click="downloadImage">
+                                        Download Image
+                                        <i class="material-icons right">file_download</i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="recent-creations" class="container section">
+                <h4 class="center-align white-text">Recent Creations</h4>
+                <div class="row">
+                    <div class="col s12" v-if="imageHistory.length === 0">
+                        <p class="center-align flow-text grey-text text-darken-1">No images generated yet. Start creating!</p>
+                    </div>
+                    <div class="col s12 m6 l4" v-for="(item, index) in imageHistory" :key="index">
+                        <div class="card z-depth-2 image-history-card">
+                            <div class="card-image waves-effect waves-block waves-light">
+                                <img class="activator" :src="item.imageUrl" :alt="'Generated image for: ' + item.prompt.substring(0, 100)">
+                            </div>
+                            <div class="card-content">
+                                <span class="card-title activator">{{ item.prompt.substring(0, 50) }}...<i class="material-icons right">more_vert</i></span>
+                            </div>
+                            <div class="card-reveal">
+                                <span class="card-title grey-text text-darken-4">Prompt<i class="material-icons right">close</i></span>
+                                <p>{{ item.prompt }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="page-footer">
+            <div class="container">
+                <div class="row">
+                    <div class="col l6 s12">
+                        <h5 class="white-text">Imaginarium AI</h5>
+                        <p class="grey-text text-lighten-4">Your gateway to AI-powered image generation. Explore the possibilities of artificial creativity.</p>
+                    </div>
+                    <div class="col l4 offset-l2 s12">
+                        <h5 class="white-text">Quick Links</h5>
+                        <ul>
+                            <li><a class="grey-text text-lighten-3 modal-trigger" href="#aboutModal" @click="openModal('aboutModal')">About Us</a></li>
+                            <li><a class="grey-text text-lighten-3 modal-trigger" href="#contactModal" @click="openModal('contactModal')">Contact</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-copyright">
+                <div class="container center-align">
+                    © {{ new Date().getFullYear() }} Imaginarium AI. All rights reserved.
+                </div>
+            </div>
+        </footer>
+
+        <div id="aboutModal" class="modal">
+            <div class="modal-content">
+                <h4>About Imaginarium AI</h4>
+                <p>Imaginarium AI is a cutting-edge platform designed to democratize access to powerful AI image generation. Our mission is to empower creators, artists, and enthusiasts to transform their textual ideas into stunning visual realities with ease.</p>
+                <p>Leveraging advanced machine learning models, Imaginarium AI interprets your prompts to generate unique, high-quality images. We believe in the boundless potential of AI to augment human creativity, and we're excited to be part of your creative journey.</p>
+                <p>This application demonstrates the capabilities of modern web technologies, built with Vue.js for reactive UI, Materialize CSS for a sleek Material Design aesthetic, and powered by server-side AI image generation.</p>
+            </div>
+            <div class="modal-footer">
+                <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
+            </div>
+        </div>
+
+        <div id="contactModal" class="modal">
+            <div class="modal-content">
+                <h4>Contact Us</h4>
+                <p>Have questions, feedback, or just want to say hello? We'd love to hear from you!</p>
+                <p>While this single-page application does not include a live backend for direct form submissions, you can reach out to us via email:</p>
+                <p><a href="mailto:info@imaginariumai.com?subject=Inquiry from Website" class="btn waves-effect waves-light">Send us an Email <i class="material-icons right">email</i></a></p>
+                <p>We aim to respond to all inquiries within 24-48 hours.</p>
+            </div>
+            <div class="modal-footer">
+                <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script>
+        const app = Vue.createApp({
+            data() {
+                return {
+                    promptInput: '',
+                    generatedImage: null,
+                    isLoading: false,
+                    errorMessage: '',
+                    imageHistory: [],
+                    maxHistory: 6,
+                    examplePrompts: [
+                        'A futuristic city skyline at sunset, cyberpunk style, neon lights, flying cars, highly detailed',
+                        'An astronaut riding a horse on the moon, surreal, photorealistic, space art',
+                        'A whimsical forest with glowing mushrooms and tiny fairies, fantasy art, volumetric lighting',
+                        'A lone wolf howling at a supermoon in a snowy landscape, majestic, cinematic lighting',
+                        'Underwater ancient ruins, sun rays piercing through the water, vibrant coral, schools of fish, highly detailed',
+                        'A cozy reading nook with a fireplace and a cat curled up on a armchair, warm lighting, hyperrealistic',
+                        'A steampunk airship floating above a Victorian city, intricate details, sepia tones',
+                        'A robot chef preparing gourmet meal in a high-tech kitchen, futuristic, clean lines'
+                    ]
+                };
+            },
+            methods: {
+                async generateImage() {
+                    if (!this.promptInput.trim()) {
+                        this.errorMessage = 'Please enter a prompt to generate an image.';
+                        return;
+                    }
+
+                    this.isLoading = true;
+                    this.errorMessage = '';
+                    this.generatedImage = null;
+
+                    try {
+                        const response = await fetch('/api/generate-image-on-demand', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                prompt: this.promptInput,
+                                aspectRatio: '16:9'
+                            })
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success && data.imageUrl) {
+                            this.generatedImage = data.imageUrl;
+                            this.addImageToHistory(this.promptInput, data.imageUrl);
+                            this.promptInput = '';
+                            M.textareaAutoResize(document.getElementById('prompt-input'));
+                        } else {
+                            this.errorMessage = data.error || 'Failed to generate image. Please try again.';
+                        }
+                    } catch (error) {
+                        console.error('API Error:', error);
+                        this.errorMessage = 'Network error or server issue. Please try again later.';
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+                addImageToHistory(prompt, imageUrl) {
+                    this.imageHistory.unshift({ prompt, imageUrl });
+                    if (this.imageHistory.length > this.maxHistory) {
+                        this.imageHistory.pop();
+                    }
+                },
+                downloadImage() {
+                    if (this.generatedImage) {
+                        const link = document.createElement('a');
+                        link.href = this.generatedImage;
+                        link.download = `imaginarium_ai_${Date.now()}.png`;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    }
+                },
+                applyPrompt(prompt) {
+                    this.promptInput = prompt;
+                    this.$nextTick(() => {
+                        M.textareaAutoResize(document.getElementById('prompt-input'));
+                        const label = document.querySelector('label[for="prompt-input"]');
+                        if (label) {
+                            label.classList.add('active');
+                        }
+                    });
+                },
+                openModal(id) {
+                    const elem = document.getElementById(id);
+                    const instance = M.Modal.getInstance(elem);
+                    if (instance) {
+                        instance.open();
+                    }
+                },
+                initMaterializeComponents() {
+                    M.AutoInit();
+                    const sidenavs = document.querySelectorAll('.sidenav');
+                    M.Sidenav.init(sidenavs);
+                    const modals = document.querySelectorAll('.modal');
+                    M.Modal.init(modals);
+                    M.textareaAutoResize(document.getElementById('prompt-input'));
+                }
+            },
+            mounted() {
+                this.initMaterializeComponents();
+                this.$nextTick(() => {
+                    M.textareaAutoResize(document.getElementById('prompt-input'));
+                    const label = document.querySelector('label[for="prompt-input"]');
+                    if (this.promptInput && label) {
+                        label.classList.add('active');
+                    }
+                });
+            }
+        });
+
+        app.mount('#app');
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>
