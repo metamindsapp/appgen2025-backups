@@ -1,0 +1,28 @@
+{
+  "projectId": "88d4b823-cb6b-4ab8-a879-8fad57593b68",
+  "revisionString": "1",
+  "projectNameDisplay": "egg picture",
+  "projectType": "website",
+  "ownerPublicKey": "FasjMytLz4YvCekTUiMXR8n5KoHbLvqCmvnX6D6GG5s8",
+  "userPromptForThisRevision": "just a picture of a hard boiled egg",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-06-17T06:15:26.898Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/imagen3_FasjMy_88d4b8_b7a2768e-501.png",
+      "url": "/generated_images/imagen3_FasjMy_88d4b8_b7a2768e-501.png",
+      "description": "A high-quality, appetizing photorealistic image of a single, perfectly hard-boiled egg. The egg is neatly sliced in half, showcasing a vibrant, perfectly cooked rich yellow yolk and firm, opaque white. It should be presented simply on a clean, light-colored, subtly textured surface like a white ceramic plate or a light, rustic wooden cutting board. Lighting should be bright, soft, and natural, making the egg look fresh and appealing. Minimal background elements, focus entirely on the egg. No cracks on the shell part if any is visible. The image should evoke a sense of simple perfection.",
+      "purpose": "Main hero image for the website (ID: main-egg-image), prominently displayed at the top of the page. This is the 'star' hard-boiled egg.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_FasjMy_88d4b8_29336df3-e64.png",
+      "url": "/generated_images/imagen3_FasjMy_88d4b8_29336df3-e64.png",
+      "description": "A simple, clean, and charming flat design icon representing an egg timer. The icon should be easily recognizable, using a light and friendly color palette (e.g., soft blues, pale yellows, white accents, perhaps a hint of orange or red for contrast) consistent with the website's light theme. Minimalist style with clear outlines. Should be visually appealing at small sizes.",
+      "purpose": "A small decorative icon (ID: egg-timer-icon) to be potentially used alongside the 'Perfect Boil' tips section. It should also be suitable as a favicon.",
+      "isNewlyGenerated": true
+    }
+  ],
+  "isPublished": false,
+  "isShowcased": false
+}

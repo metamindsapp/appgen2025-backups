@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Image Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+        .main-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .image-display-area {
+            background-color: #2d3748;
+            border: 1px solid #4a5568;
+            min-height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+        .image-display-area img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .image-history-container {
+            max-height: 300px;
+            overflow-y: auto;
+            border-top: 1px solid #4a5568;
+            padding-top: 1rem;
+        }
+        .history-thumbnail {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.2s ease-in-out;
+        }
+        .history-thumbnail:hover {
+            border-color: #0d6efd;
+        }
+        .prompt-tips-card {
+            background-color: #2d3748;
+            border-color: #4a5568;
+        }
+        .form-control, .form-select {
+            background-color: #4a5568;
+            color: #e2e8f0;
+            border-color: #6a7385;
+        }
+        .form-control::placeholder {
+            color: #a0aec0;
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: #4a5568;
+            color: #e2e8f0;
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid main-container p-4">
+        <h1 class="text-center mb-4 text-primary">AI Image Generator</h1>
+
+        <div class="row g-4 flex-grow-1">
+            <div class="col-lg-4 d-flex flex-column">
+                <div class="card bg-dark text-light p-4 shadow-sm flex-grow-1">
+                    <div class="mb-3">
+                        <label for="promptInput" class="form-label">Image Prompt</label>
+                        <textarea class="form-control" id="promptInput" rows="5" placeholder="Describe the image you want to generate (e.g., 'A futuristic city at sunset, neon lights, flying cars, photorealistic, cinematic lighting')"></textarea>
+                        <div class="invalid-feedback" id="promptError">Prompt cannot be empty.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="aspectRatioSelect" class="form-label">Aspect Ratio</label>
+                        <select class="form-select" id="aspectRatioSelect">
+                            <option value="1:1" selected>1:1 (Square)</option>
+                            <option value="16:9">16:9 (Landscape)</option>
+                            <option value="9:16">9:16 (Portrait)</option>
+                            <option value="4:3">4:3 (Traditional)</option>
+                            <option value="3:4">3:4 (Portrait Traditional)</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label for="seedInput" class="form-label">Seed (Optional)</label>
+                        <input type="number" class="form-control" id="seedInput" placeholder="Enter a number for reproducibility">
+                    </div>
+                    <button id="generateBtn" class="btn btn-primary w-100 py-3">Generate Image</button>
+                    <div id="loadingIndicator" class="text-center mt-3 d-none">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Generating image...</p>
+                    </div>
+                    <div id="errorDisplay" class="alert alert-danger mt-3 d-none" role="alert"></div>
+                </div>
+
+                <div class="card prompt-tips-card text-light mt-4 shadow-sm">
+                    <div class="card-header" id="promptTipsHeader">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link text-light text-decoration-none w-100 text-start d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#promptTipsCollapse" aria-expanded="false" aria-controls="promptTipsCollapse">
+                                Prompting Tips <i class="bi bi-chevron-down"></i>
+                            </button>
+                        </h5>
+                    </div>
+                    <div id="promptTipsCollapse" class="collapse">
+                        <div class="card-body">
+                            <p><strong>Be Specific:</strong> Instead of "dog", try "a golden retriever puppy playing in a field of sunflowers".</p>
+                            <p><strong>Add Styles:</strong> Include artistic styles like "photorealistic", "oil painting", "pixel art", "digital art", "cinematic".</p>
+                            <p><strong>Specify Details:</strong> Think about lighting ("golden hour", "neon glow"), mood ("serene", "dramatic"), and composition ("close-up", "wide shot").</p>
+                            <p><strong>Use Keywords:</strong> "4K", "8K", "highly detailed", "vibrant colors", "masterpiece" can improve quality.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8 d-flex flex-column">
+                <div class="card bg-dark text-light p-4 shadow-sm flex-grow-1">
+                    <h5 class="card-title text-primary mb-3">Generated Image</h5>
+                    <div class="image-display-area rounded mb-3 flex-grow-1">
+                        <img id="generatedImage" src="" alt="Generated image will appear here" class="img-fluid d-none">
+                        <p id="imagePlaceholder" class="text-muted">Your generated image will appear here.</p>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button id="downloadBtn" class="btn btn-success" disabled>Download Image</button>
+                    </div>
+                </div>
+
+                <div class="card bg-dark text-light p-4 shadow-sm mt-4">
+                    <h5 class="card-title text-primary mb-3">Generation History</h5>
+                    <div id="imageHistoryContainer" class="d-flex flex-wrap gap-3 image-history-container">
+                        <p class="text-muted w-100 text-center" id="historyPlaceholder">No images generated yet.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function() {
+            const promptInput = document.getElementById('promptInput');
+            const aspectRatioSelect = document.getElementById('aspectRatioSelect');
+            const seedInput = document.getElementById('seedInput');
+            const generateBtn = document.getElementById('generateBtn');
+            const generatedImage = document.getElementById('generatedImage');
+            const imagePlaceholder = document.getElementById('imagePlaceholder');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const errorDisplay = document.getElementById('errorDisplay');
+            const promptError = document.getElementById('promptError');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const imageHistoryContainer = document.getElementById('imageHistoryContainer');
+            const historyPlaceholder = document.getElementById('historyPlaceholder');
+
+            const appState = {
+                currentImageUrl: null,
+                currentPrompt: null,
+                generatedImages: [],
+                isLoading: false,
+                error: null
+            };
+
+            function updateUI() {
+                if (appState.isLoading) {
+                    loadingIndicator.classList.remove('d-none');
+                    generateBtn.disabled = true;
+                    promptInput.disabled = true;
+                    aspectRatioSelect.disabled = true;
+                    seedInput.disabled = true;
+                } else {
+                    loadingIndicator.classList.add('d-none');
+                    generateBtn.disabled = false;
+                    promptInput.disabled = false;
+                    aspectRatioSelect.disabled = false;
+                    seedInput.disabled = false;
+                }
+
+                if (appState.error) {
+                    errorDisplay.textContent = appState.error;
+                    errorDisplay.classList.remove('d-none');
+                } else {
+                    errorDisplay.classList.add('d-none');
+                }
+
+                if (appState.currentImageUrl) {
+                    generatedImage.src = appState.currentImageUrl;
+                    generatedImage.classList.remove('d-none');
+                    imagePlaceholder.classList.add('d-none');
+                    downloadBtn.disabled = false;
+                } else {
+                    generatedImage.src = '';
+                    generatedImage.classList.add('d-none');
+                    imagePlaceholder.classList.remove('d-none');
+                    downloadBtn.disabled = true;
+                }
+
+                renderImageHistory();
+            }
+
+            function renderImageHistory() {
+                imageHistoryContainer.innerHTML = '';
+
+                if (appState.generatedImages.length === 0) {
+                    historyPlaceholder.classList.remove('d-none');
+                    return;
+                } else {
+                    historyPlaceholder.classList.add('d-none');
+                }
+
+                appState.generatedImages.forEach((imgData) => {
+                    const imgElement = document.createElement('img');
+                    imgElement.src = imgData.imageUrl;
+                    imgElement.alt = `Generated image: ${imgData.prompt}`;
+                    imgElement.classList.add('img-thumbnail', 'history-thumbnail', 'rounded');
+                    imgElement.title = imgData.prompt;
+
+                    imgElement.addEventListener('click', () => {
+                        appState.currentImageUrl = imgData.imageUrl;
+                        appState.currentPrompt = imgData.prompt;
+                        updateUI();
+                    });
+
+                    imageHistoryContainer.appendChild(imgElement);
+                });
+            }
+
+            function saveHistory() {
+                try {
+                    localStorage.setItem('imageGenHistory', JSON.stringify(appState.generatedImages));
+                } catch (e) {
+                    console.error('Failed to save history to localStorage:', e);
+                }
+            }
+
+            function loadHistory() {
+                try {
+                    const history = localStorage.getItem('imageGenHistory');
+                    if (history) {
+                        appState.generatedImages = JSON.parse(history);
+                        if (appState.generatedImages.length > 0) {
+                            const lastImage = appState.generatedImages[appState.generatedImages.length - 1];
+                            appState.currentImageUrl = lastImage.imageUrl;
+                            appState.currentPrompt = lastImage.prompt;
+                        }
+                    }
+                } catch (e) {
+                    console.error('Failed to load history from localStorage:', e);
+                    appState.generatedImages = [];
+                }
+            }
+
+            async function handleGenerateImage() {
+                const prompt = promptInput.value.trim();
+                const aspectRatio = aspectRatioSelect.value;
+                const seed = seedInput.value ? parseInt(seedInput.value, 10) : undefined;
+
+                if (!prompt) {
+                    promptInput.classList.add('is-invalid');
+                    promptError.textContent = 'Prompt cannot be empty.';
+                    return;
+                } else {
+                    promptInput.classList.remove('is-invalid');
+                }
+
+                appState.isLoading = true;
+                appState.error = null;
+                appState.currentImageUrl = null;
+                updateUI();
+
+                try {
+                    const response = await fetch('/api/generate-image-on-demand', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prompt, aspectRatio, seed })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        appState.currentImageUrl = data.imageUrl;
+                        appState.currentPrompt = prompt;
+                        appState.generatedImages.push({ prompt, imageUrl: data.imageUrl, aspectRatio, seed });
+                        saveHistory();
+                    } else {
+                        appState.error = data.error || 'Unknown error occurred during image generation.';
+                    }
+                } catch (e) {
+                    console.error('Error generating image:', e);
+                    appState.error = `Failed to generate image: ${e.message}. Please try again.`;
+                } finally {
+                    appState.isLoading = false;
+                    updateUI();
+                }
+            }
+
+            function handleDownloadImage() {
+                if (appState.currentImageUrl) {
+                    const link = document.createElement('a');
+                    link.href = appState.currentImageUrl;
+                    const filename = `generated_image_${Date.now()}.png`;
+                    link.download = filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                generateBtn.addEventListener('click', handleGenerateImage);
+                downloadBtn.addEventListener('click', handleDownloadImage);
+
+                loadHistory();
+                updateUI();
+
+                new bootstrap.Collapse(document.getElementById('promptTipsCollapse'), {
+                    toggle: false
+                });
+            });
+        })();
+    </script>
+...
+</body>
+</html>

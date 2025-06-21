@@ -1,0 +1,69 @@
+{
+  "projectId": "db77c4c7-1066-4e08-b51d-c84cc69c4074",
+  "revisionString": "1",
+  "projectNameDisplay": "Cat cafe",
+  "projectType": "website",
+  "userPromptForThisRevision": "website for my cat cafe in paris, Kitten Kaboodle",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-05-29T06:48:17.487Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/dalle3_0a2b5353-47c.png",
+      "url": "/generated_images/dalle3_0a2b5353-47c.png",
+      "description": "Content replaced by: imagen_test_273c82dd.png (Original: Content replaced by: imagen_test_273c82dd.png (Original: A captivating, wide hero image for a Parisian cat cafe named 'Kitten Kaboodle'. The scene should be a sun-drenched, cozy cafe interior. Several adorable, diverse cats (e.g., a ginger tabby, a calico, a black cat) are lounging comfortably on plush velvet chairs or by a window overlooking a charming Parisian street (subtle Haussmannian architecture visible). Sunlight streams in. Overall mood: Warm, inviting, whimsical, and chic. Style: Photorealistic with a soft, slightly dreamy quality. Dominant colors: Light creams, soft pastels (like blush pink or mint green), warm wood tones, with accents of soft coral (#FF6B6B). Avoid clutter. No text on image.))",
+      "purpose": "Main hero banner for the website homepage (background of #home section). Will be named something like `hero_image_kitten_kaboodle.png`.",
+      "isNewlyGenerated": true,
+      "originalUploadedFilename": "imagen_test_273c82dd.png",
+      "swappedAt": "2025-05-29T07:01:06.931Z"
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_9d14677b-43c.png",
+      "url": "/generated_images/dalle3_9d14677b-43c.png",
+      "description": "An inviting, well-lit interior shot of the Kitten Kaboodle cat cafe for the 'About Us' section. Focus on a clean, stylish, and comfortable atmosphere. Show a couple of cozy armchairs, a small bookshelf with books and cat toys, and perhaps a glimpse of a coffee bar. A cat can be subtly present, perhaps curled on a chair. Lighting: Bright, natural, airy. Style: Photorealistic, warm, professional, and inviting. Colors: Light and airy, consistent with the light theme and soft coral accents.",
+      "purpose": "Image for the 'About Us' section (`#aboutImage`). Will be named something like `about_us_cafe_interior.png`.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_991c6bf6-976.png",
+      "url": "/generated_images/dalle3_991c6bf6-976.png",
+      "description": "Charming portrait of a healthy, photogenic ginger tabby cat named 'Léo'. Léo should look curious and friendly, perhaps with a slight head tilt. Background: Softly blurred cafe interior, highlighting Léo. Style: High-quality pet photography, sharp focus on the cat. Colors: Vibrant ginger fur, bright eyes (e.g., green or yellow), warm background tones.",
+      "purpose": "Profile picture for 'Léo' in 'Meet Our Cats' section. Will be named `cat_leo.png`.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_2193e077-b68.png",
+      "url": "/generated_images/dalle3_2193e077-b68.png",
+      "description": "Elegant portrait of a beautiful calico cat named 'Chloé'. Chloé could be gracefully grooming a paw or looking serenely at the camera. Background: A comfortable cushion or a sunlit spot in the cafe, softly blurred. Style: High-quality pet photography, capturing a calm and gentle demeanor. Colors: Distinct calico patches (white, black, orange/cream), soft, light background.",
+      "purpose": "Profile picture for 'Chloé' in 'Meet Our Cats' section. Will be named `cat_chloe.png`.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_c0d30a2d-35b.png",
+      "url": "/generated_images/dalle3_c0d30a2d-35b.png",
+      "description": "Striking portrait of a sleek black cat named 'Noir', with captivating bright eyes (e.g., yellow or green). Noir could be playfully peeking out from behind a plant or a stack of books, adding a touch of mystery. Background: Cafe interior elements, softly blurred. Style: High-quality pet photography, emphasizing the cat's glossy fur and expressive eyes. Colors: Deep black fur, contrasting bright eyes, subtle background colors.",
+      "purpose": "Profile picture for 'Noir' in 'Meet Our Cats' section. Will be named `cat_noir.png`.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_2ef18d02-111.png",
+      "url": "/generated_images/dalle3_2ef18d02-111.png",
+      "description": "An appetizing flat lay or close-up shot of delicious Parisian pastries (e.g., flaky croissants, colorful macarons, a slice of fruit tart) and a beautifully prepared cup of coffee with latte art (perhaps a subtle cat paw print). Arranged elegantly on a rustic wooden cafe table. Style: Bright, vibrant food photography, photorealistic. Colors: Warm browns of pastries, rich coffee color, colorful fruit/macarons, against a textured table surface.",
+      "purpose": "Image for the Gallery section, showcasing food offerings. Will be named `gallery_food_1.png`.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_157bd0a0-d02.png",
+      "url": "/generated_images/dalle3_157bd0a0-d02.png",
+      "description": "A heartwarming, candid-style photograph of a person (face not prominent or out of focus) gently interacting with a happy, relaxed cat in the Kitten Kaboodle cafe. Could be someone petting a cat on their lap or a cat rubbing against a leg. Focus on the positive, gentle connection. Style: Lifestyle photography, warm, emotional, natural lighting, photorealistic. Colors: Soft, natural tones, consistent with cafe ambiance.",
+      "purpose": "Image for the Gallery, showing positive customer-cat interaction. Will be named `gallery_interaction_1.png`.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_0f75e643-852.png",
+      "url": "/generated_images/dalle3_0f75e643-852.png",
+      "description": "A wider shot of the Kitten Kaboodle cafe ambiance, showing a few different cats in various relaxed poses (one sleeping in a basket, another watching birds from a window perch, one strolling). Include some blurred human figures enjoying the cafe to give a sense of life. Emphasize the clean, spacious, and cat-friendly design of the environment (climbing structures, cozy beds). Style: Photorealistic, inviting, atmospheric. Colors: Light and bright, with warm accents, reflecting the overall theme.",
+      "purpose": "Image for the Gallery, showcasing overall cafe atmosphere and cat-friendly features. Will be named `gallery_ambiance_1.png`.",
+      "isNewlyGenerated": true
+    }
+  ]
+}

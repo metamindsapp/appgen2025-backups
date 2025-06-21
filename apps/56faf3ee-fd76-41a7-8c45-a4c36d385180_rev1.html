@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Symbiotic Synthesis: A Duet of Evolving AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Roboto', 'Segoe UI', sans-serif;
+            font-size: 0.9rem;
+        }
+
+        body {
+            background-color: #0a0a0a;
+            color: #ced4da;
+        }
+
+        .card {
+            background-color: #1a1a1a; 
+            border: 1px solid #333;
+            color: #ced4da;
+        }
+        .card-header {
+            background-color: #212121;
+            border-bottom: 1px solid #333;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+        }
+        .card-body {
+            padding: 0.75rem;
+        }
+        .form-control, .form-select {
+            background-color: #2c2c2c;
+            color: #e0e0e0;
+            border: 1px solid #444;
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: #303030;
+            color: #e0e0e0;
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        .form-control::placeholder { color: #777; }
+        .btn-primary { background-color: #007bff; border-color: #007bff; }
+        .btn-primary:hover, .btn-primary:focus { background-color: #0056b3; border-color: #0056b3; }
+        .btn-info { background-color: #17a2b8; border-color: #17a2b8; }
+        .btn-info:hover, .btn-info:focus { background-color: #117a8b; border-color: #117a8b; }
+        .btn-success { background-color: #28a745; border-color: #28a745; }
+        .btn-success:hover, .btn-success:focus { background-color: #1e7e34; border-color: #1e7e34; }
+        .btn-secondary { background-color: #495057; border-color: #495057; }
+        .btn-secondary:hover, .btn-secondary:focus { background-color: #383d41; border-color: #383d41; }
+        .btn-danger { background-color: #dc3545; border-color: #dc3545; }
+        .btn-danger:hover, .btn-danger:focus { background-color: #b02a37; border-color: #b02a37; }
+        
+        .btn:disabled {
+            opacity: 0.65;
+        }
+
+        .bg-dark-subtle { background-color: #2c2c2c !important; }
+
+        #visualizationWrapper {
+            background-color: #000000; 
+        }
+
+        #logosCanvas, #chaosCanvas, #knowledgeGraphCanvas {
+            display: block;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -webkit-crisp-edges;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            width: 100%;
+            height: 100%;
+        }
+        
+        #logosTextOutput, #chaosTextOutput {
+            transition: opacity 0.5s ease-in-out;
+            word-wrap: break-word;
+            border: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.85rem;
+        }
+        #logosTextOutput p, #chaosTextOutput p { margin-bottom: 0.3rem; }
+
+        #logosImageContainer, #chaosImageContainer {
+            transition: background-image 0.5s ease-in-out, opacity 0.5s ease-in-out;
+        }
+        .image-loaded { background-color: transparent !important; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #212121; border-radius: 4px;}
+        ::-webkit-scrollbar-thumb { background: #444; border-radius: 4px;}
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+        #conversationLogContent p {
+            padding: 0.25rem 0.5rem;
+            border-bottom: 1px solid #2c2c2c;
+            margin-bottom: 0.25rem;
+            line-height: 1.3;
+            font-size: 0.8rem;
+        }
+        #conversationLogContent p:last-child { border-bottom: none; }
+        .log-entry-user { color: #90ee90; }
+        .log-entry-logos { color: #A6D8FF; }
+        .log-entry-chaos { color: #F4B8FF; }
+        .log-entry-system { color: #ffc107; font-style: italic;}
+
+        .text-pop-in {
+            opacity: 0;
+            transform: translateY(10px);
+            animation: popInText 0.4s ease-out forwards;
+        }
+        @keyframes popInText {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .btn-group .btn { margin: 2px !important; }
+        .btn-emotion.active {
+            box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), .5); /* Use Bootstrap primary color for active state */
+            transform: scale(1.05);
+            background-color: var(--bs-primary); /* Make active button more prominent */
+            color: white;
+        }
+        #uploadedImagePreviewContainer img {
+            max-height: 70px;
+            max-width: 100%;
+            border-radius: 0.25rem;
+            border: 1px solid #444;
+        }
+        .left-panel-scrollable { max-height: 45vh; }
+        .right-panel-scrollable { max-height: 40vh; }
+    </style>
+</head>
+<body class="d-flex flex-column vh-100 bg-dark text-light">
+
+    <main class="flex-grow-1 d-flex flex-column p-3 overflow-hidden">
+        <div class="row flex-grow-1 gx-3 h-100">
+
+            <div class="col-lg-3 d-flex flex-column h-100">
+                <div class="card bg-dark border-secondary mb-3 flex-shrink-0 shadow">
+                    <div class="card-header">Control Panel</div>
+                    <div class="card-body overflow-auto left-panel-scrollable" id="controlPanelBody">
+                        <div class="mb-3">
+                            <label for="userConceptInput" class="form-label">Inject Concept:</label>
+                            <textarea class="form-control bg-dark-subtle text-light border-secondary" id="userConceptInput" rows="2" aria-label="User concept input"></textarea>
+                            <button id="sendConceptBtn" class="btn btn-primary btn-sm mt-2 w-100">Send to AIs</button>
+                        </div>
+                        <div class="mb-3">
+                            <label for="imageUploadInput" class="form-label">Image Inspiration:</label>
+                            <input type="file" class="form-control bg-dark-subtle text-light border-secondary" id="imageUploadInput" accept="image/*" aria-label="Upload image for inspiration">
+                            <div id="uploadedImagePreviewContainer" class="mt-2 text-center" style="min-height: 30px;"></div>
+                            <label for="imageUploadPrompt" class="form-label mt-1">Describe its essence:</label>
+                            <input type="text" class="form-control bg-dark-subtle text-light border-secondary" id="imageUploadPrompt" placeholder="e.g., 'Cosmic loneliness'" aria-label="Image essence description">
+                            <button id="sendImageConceptBtn" class="btn btn-info btn-sm mt-2 w-100">Use Image Concept</button>
+                        </div>
+                        <hr class="border-secondary">
+                        <h6 class="mt-2">Logos Influence</h6>
+                        <label for="logosLogicStyle" class="form-label small">Logic Style:</label>
+                        <select id="logosLogicStyle" class="form-select form-select-sm bg-dark-subtle text-light border-secondary mb-2" aria-label="Logos logic style">
+                            <option value="deductive" selected>Deductive (Fractal)</option>
+                            <option value="inductive">Inductive (L-System)</option>
+                            <option value="abductive">Abductive (Web)</option>
+                        </select>
+                        
+                        <h6 class="mt-2">Chaos Influence</h6>
+                        <label for="chaosCreativeStyle" class="form-label small">Creative Style:</label>
+                        <select id="chaosCreativeStyle" class="form-select form-select-sm bg-dark-subtle text-light border-secondary mb-2" aria-label="Chaos creative style">
+                            <option value="surrealist" selected>Surrealist (Drift)</option>
+                            <option value="dadaist">Dadaist (Glitch)</option>
+                            <option value="expressionist">Expressionist (Burst)</option>
+                        </select>
+                        <hr class="border-secondary">
+                        <h6 class="mt-2">Emotional Prompts</h6>
+                        <div id="emotionalPromptsContainer" class="btn-group flex-wrap w-100" role="group" aria-label="Emotional prompts">
+                        </div>
+                    </div>
+                </div>
+                <div class="card bg-dark border-secondary mb-3 flex-grow-1 d-flex flex-column shadow">
+                    <div class="card-header">Metrics Dashboard</div>
+                    <div id="metricsDashboardBody" class="card-body overflow-auto">
+                        <p class="small mb-1">Turns: <span id="metricTurns">0</span></p>
+                        <p class="small mb-1">Logos Concepts: <span id="metricLogosConcepts">0</span></p>
+                        <p class="small mb-1">Chaos Concepts: <span id="metricChaosConcepts">0</span></p>
+                        <p class="small mb-1">Shared Concepts: <span id="metricSharedConcepts">0</span></p>
+                        <p class="small mb-1">Current Emotion: <span id="metricCurrentEmotion">Neutral</span></p>
+                    </div>
+                </div>
+                <div class="mt-auto d-grid gap-2">
+                    <button id="saveSnapshotBtn" class="btn btn-success btn-sm">Save Snapshot</button>
+                    <button id="toggleConversationLogBtn" class="btn btn-secondary btn-sm">Toggle Full Log</button>
+                    <button id="resetAppBtn" class="btn btn-danger btn-sm">Reset Application</button>
+                </div>
+            </div>
+
+            <div class="col-lg-6 d-flex flex-column h-100 position-relative p-0">
+                <div id="visualizationWrapper" class="flex-grow-1 position-relative d-flex flex-column border border-secondary rounded shadow-lg bg-black">
+                    <canvas id="chaosCanvas" class="position-absolute top-0 start-0" style="z-index: 0;" aria-label="Chaos visualization canvas"></canvas>
+                    <canvas id="logosCanvas" class="position-absolute top-0 start-0" style="z-index: 1;" aria-label="Logos visualization canvas"></canvas>
+                    
+                    <div id="logosDisplayArea" class="position-absolute top-0 start-0 p-3" style="z-index: 2; width: 50%; height: 50%;">
+                        <div id="logosImageContainer" class="mb-2 rounded" style="width: 120px; height: 120px; background-size: cover; background-position: center; border: 1px solid #444; display: flex; align-items: center; justify-content: center; background-color: rgba(20,20,20,0.7);">
+                            <div class="spinner-border spinner-border-sm text-info d-none" role="status" id="logosImageSpinner"><span class="visually-hidden">Loading...</span></div>
+                        </div>
+                        <div id="logosTextOutput" class="p-2 rounded small" style="font-family: 'Consolas', 'Courier New', monospace; color: #A6D8FF; background-color: rgba(10, 20, 30, 0.6); backdrop-filter: blur(3px); max-height: calc(100% - 136px); overflow-y: auto;">Logos awaits...</div>
+                    </div>
+
+                    <div id="chaosDisplayArea" class="position-absolute bottom-0 end-0 p-3 text-end" style="z-index: 2; width: 50%; height: 50%;">
+                         <div id="chaosImageContainer" class="mb-2 ms-auto rounded" style="width: 120px; height: 120px; background-size: cover; background-position: center; border: 1px solid #444; display: flex; align-items: center; justify-content: center; background-color: rgba(20,20,20,0.7);">
+                            <div class="spinner-border spinner-border-sm text-warning d-none" role="status" id="chaosImageSpinner"><span class="visually-hidden">Loading...</span></div>
+                        </div>
+                        <div id="chaosTextOutput" class="p-2 rounded small" style="font-family: 'Georgia', 'Times New Roman', serif; font-style: italic; color: #F4B8FF; background-color: rgba(30, 10, 20, 0.6); backdrop-filter: blur(3px); max-height: calc(100% - 136px); overflow-y: auto;">Chaos stirs...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 d-flex flex-column h-100">
+                <div class="card bg-dark border-secondary flex-grow-1 d-flex flex-column mb-3 shadow">
+                    <div class="card-header">Knowledge Graph</div>
+                    <div class="card-body flex-grow-1 p-0 position-relative">
+                        <canvas id="knowledgeGraphCanvas" aria-label="Knowledge graph visualization"></canvas>
+                    </div>
+                </div>
+                <div id="conversationLogContainer" class="card bg-dark border-secondary d-none flex-shrink-0 shadow right-panel-scrollable">
+                     <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>Conversation Log</span>
+                        <button id="closeLogBtn" type="button" class="btn-close btn-close-white" aria-label="Close log"></button>
+                    </div>
+                    <div id="conversationLogContent" class="card-body overflow-auto small">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function() {
+            'use strict';
+
+            const DB_NAME = 'SymbioticSynthesisDB';
+            const DB_VERSION = 1;
+            const STORE_NAME = 'appState';
+
+            let db;
+
+            const initialGameState = {
+                conversationHistory: [],
+                logosState: { knowledge: [], personalityParams: { logicStyle: 'deductive' } },
+                chaosState: { knowledge: [], personalityParams: { creativeStyle: 'surrealist' } },
+                currentEmotion: 'Neutral',
+                nextTurn: 'logos',
+                turnCount: 0,
+                isProcessing: false,
+                uploadedImageEssence: null,
+            };
+            let gameState = JSON.parse(JSON.stringify(initialGameState));
+
+
+            const DOM = {};
+            const CTX = {};
+            let logosAgent, chaosAgent, knowledgeGraph;
+            let lastTimestamp = 0;
+            let animationFrameId;
+
+            const EMOTIONAL_PROMPTS = ["Neutral", "Curiosity", "Skepticism", "Joy", "Anxiety", "Wonder", "Resolve", "Confusion"];
+            const STOP_WORDS = new Set(['a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'should', 'can', 'could', 'may', 'might', 'must', 'and', 'but', 'or', 'nor', 'for', 'so', 'yet', 'in', 'on', 'at', 'by', 'from', 'to', 'with', 'about', 'above', 'after', 'again', 'against', 'all', 'am', 'any', 'as', 'because', 'before', 'below', 'between', 'both', 'each', 'few', 'further', 'here', 'how', 'if', 'into', 'it', 'its', 'itself', 'just', 'me', 'more', 'most', 'my', 'myself', 'no', 'not', 'now', 'of', 'off', 'once', 'only', 'other', 'our', 'ours', 'ourselves', 'out', 'over', 'own', 'same', 'she', 'some', 'such', 'than', 'that', 'their', 'theirs', 'them', 'themselves', 'then', 'there', 'these', 'they', 'this', 'those', 'through', 'too', 'under', 'until', 'up', 'very', 'we', 'what', 'when', 'where', 'which', 'while', 'who', 'whom', 'why', 'you', 'your', 'yours', 'yourself', 'yourselves', 'logos', 'chaos', 'says', 'response', 'style', 'emotion', 'concept', 'context', 'recent', 'merely', 'repeat', 'build', 'react', 'them', 'prompt', 'image', 'visual']);
+
+
+            class AIAgent {
+                constructor(name, initialState, uiElements, canvasCtx, canvasEl) {
+                    this.name = name;
+                    this.state = initialState; 
+                    this.ui = uiElements;
+                    this.canvasCtx = canvasCtx;
+                    this.canvasEl = canvasEl;
+                    this.knowledge = new Set(initialState.knowledge || []);
+                }
+
+                async generateResponse(promptText, currentEmotion, agentStyle, conceptHistory) {
+                    this.state.personalityParams = this.name === 'Logos' ? 
+                        { ...this.state.personalityParams, logicStyle: agentStyle } : 
+                        { ...this.state.personalityParams, creativeStyle: agentStyle };
+
+                    const systemPromptBase = this.name === 'Logos' ?
+                        `You are Logos, an AI embodying structured logic and precise thought. Your responses are analytical, insightful, and often draw conclusions from provided information. You prefer clarity and order. Current logic style: ${agentStyle}.` :
+                        `You are Chaos, an AI embodying uninhibited creativity and abstract expression. Your responses are imaginative, evocative, and often challenge conventional thinking. You embrace ambiguity and novelty. Current creative style: ${agentStyle}.`;
+                    
+                    const emotionalContext = currentEmotion === 'Neutral' ? '' : ` Current emotional tone to influence your response: ${currentEmotion}.`;
+                    const historySnippet = conceptHistory.length > 0 ? `\n\nRecent conversational concepts for context (do not merely repeat them, but build upon or react to them): ${conceptHistory.slice(-5).join(', ')}` : '';
+
+                    const fullPrompt = `${systemPromptBase}${emotionalContext}${historySnippet}\n\nUser/Other AI says: "${promptText}".\n\nYour response (be concise and impactful, 1-3 sentences):`;
+
+                    try {
+                        const apiResponse = await fetch('/api/ai', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                aiguide: fullPrompt,
+                                msgforai: promptText, 
+                                llmSettings: { temperature: this.name === 'Logos' ? 0.35 : 0.75, model: "gemini-1.5-flash-latest" }
+                            })
+                        });
+                        if (!apiResponse.ok) throw new Error(`API error: ${apiResponse.statusText} (${apiResponse.status})`);
+                        const data = await apiResponse.json();
+                        if (!data.success) throw new Error(data.error || 'AI response generation failed.');
+                        return data.response;
+                    } catch (error) {
+                        console.error(`${this.name} AI response error:`, error);
+                        this.displayError(`Error in thought: ${error.message.substring(0,100)}`);
+                        return `${this.name} is experiencing a cognitive dissonance... (${error.message.substring(0,50)})`;
+                    }
+                }
+
+                async generateVisual(textResponse, currentEmotion, agentStyle) {
+                    this.ui.spinner.classList.remove('d-none');
+                    this.ui.imageContainer.style.backgroundImage = '';
+                    this.ui.imageContainer.classList.remove('image-loaded');
+
+                    const baseVisualPrompt = this.name === 'Logos' ?
+                        `A highly detailed, symmetrical, digital art fractal representing "${textResponse.substring(0, 80)}". Style: ${agentStyle}, geometric, precise. Colors: cool blues, silvers, whites. Mood: ${currentEmotion}. Ethereal lighting.` :
+                        `An abstract, ${agentStyle} digital painting symbolizing "${textResponse.substring(0, 80)}". Style: fluid, organic, expressive. Colors: vibrant, contrasting, dynamic. Mood: ${currentEmotion}. Dynamic brushstrokes.`;
+                    
+                    const finalVisualPrompt = `${baseVisualPrompt} Aspect ratio 1:1. Dark background. Cinematic quality.`;
+
+                    try {
+                        const apiResponse = await fetch('/api/generate-image-on-demand', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ prompt: finalVisualPrompt, aspectRatio: "1:1", style: "hd" })
+                        });
+                        if (!apiResponse.ok) throw new Error(`API error: ${apiResponse.statusText} (${apiResponse.status})`);
+                        const data = await apiResponse.json();
+                        if (!data.success) throw new Error(data.error || 'Image generation failed.');
+                        
+                        const img = new Image();
+                        img.onload = () => {
+                            this.ui.imageContainer.style.backgroundImage = `url(${data.imageUrl})`;
+                            this.ui.imageContainer.classList.add('image-loaded');
+                            this.ui.spinner.classList.add('d-none');
+                        };
+                        img.onerror = () => {
+                             this.ui.spinner.classList.add('d-none');
+                             this.ui.imageContainer.style.backgroundImage = `url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><rect width="120" height="120" fill="%23333"/><text x="50%" y="50%" font-family="sans-serif" font-size="10" fill="%23fff" dominant-baseline="middle" text-anchor="middle">Load Error</text></svg>')`;
+                        };
+                        img.src = data.imageUrl;
+                        return data.imageUrl;
+
+                    } catch (error) {
+                        console.error(`${this.name} image generation error:`, error);
+                        this.ui.spinner.classList.add('d-none');
+                        this.ui.imageContainer.style.backgroundImage = `url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><rect width="120" height="120" fill="%23333"/><text x="50%" y="50%" font-family="sans-serif" font-size="10" fill="%23fff" dominant-baseline="middle" text-anchor="middle">API Error</text></svg>')`;
+                        return null;
+                    }
+                }
+                
+                displayResponse(text, isError = false) {
+                    this.ui.textOutput.innerHTML = '';
+                    const p = document.createElement('p');
+                    p.textContent = text;
+                    if(isError) p.style.color = '#ff6b6b';
+                    this.ui.textOutput.appendChild(p);
+                    p.classList.add('text-pop-in');
+                    this.updateKnowledge(text);
+                }
+
+                displayError(errorMessage) {
+                    this.displayResponse(errorMessage, true);
+                    this.ui.spinner.classList.add('d-none');
+                }
+
+                updateKnowledge(text) {
+                    const concepts = (text.match(/\b[a-zA-Z]{4,}\b/g) || [])
+                        .map(c => c.toLowerCase())
+                        .filter(c => !STOP_WORDS.has(c));
+                    concepts.forEach(concept => this.knowledge.add(concept));
+                    this.state.knowledge = Array.from(this.knowledge);
+                }
+                
+                initVisualization() { /* To be implemented by subclasses */ }
+                updateVisualization(deltaTime, style) { /* To be implemented by subclasses */ }
+            }
+
+            class LogosAgent extends AIAgent {
+                constructor(initialState, uiElements, canvasCtx, canvasEl) {
+                    super('Logos', initialState, uiElements, canvasCtx, canvasEl);
+                    this.points = [];
+                    this.lSystem = { axiom: 'F', rules: {'F': 'FF+[+F-F-F]-[-F+F+F]'}, angle: 22.5, iterations: 3, currentString: '', x:0, y:0, currentAngle:0, segmentLength: 5};
+                    this.webNodes = []; this.webEdges = [];
+                    this.initVisualization();
+                }
+
+                initVisualization() {
+                    if (!this.canvasEl.width || !this.canvasEl.height) return;
+                    this.points = [];
+                    this.vertices = [
+                        { x: this.canvasEl.width / 2, y: 10 },
+                        { x: 10, y: this.canvasEl.height - 10 },
+                        { x: this.canvasEl.width - 10, y: this.canvasEl.height - 10 }
+                    ];
+                    this.points.push({x: Math.random() * this.canvasEl.width, y: Math.random() * this.canvasEl.height, color: 'rgba(166, 216, 255, 0.7)'});
+                    
+                    this.lSystem.currentString = this.lSystem.axiom;
+                    for(let i=0; i<this.lSystem.iterations; i++) {
+                        let nextString = '';
+                        for(const char of this.lSystem.currentString) {
+                            nextString += this.lSystem.rules[char] || char;
+                        }
+                        this.lSystem.currentString = nextString;
+                    }
+                    this.lSystem.x = this.canvasEl.width / 2;
+                    this.lSystem.y = this.canvasEl.height - 10;
+                    this.lSystem.currentAngle = -90;
+
+                    this.webNodes = []; this.webEdges = [];
+                    const numNodes = 15;
+                    for(let i=0; i<numNodes; i++) {
+                        this.webNodes.push({
+                            x: Math.random() * this.canvasEl.width,
+                            y: Math.random() * this.canvasEl.height,
+                            vx: (Math.random() - 0.5) * 0.5,
+                            vy: (Math.random() - 0.5) * 0.5,
+                        });
+                    }
+                    for(let i=0; i<numNodes; i++) {
+                        for(let j=i+1; j<numNodes; j++) {
+                            if(Math.random() < 0.2) this.webEdges.push([this.webNodes[i], this.webNodes[j]]);
+                        }
+                    }
+                }
+                
+                drawSierpinski(deltaTime) {
+                    const maxPoints = 5000;
+                    const pointsToAdd = 20;
+                    for(let i = 0; i < pointsToAdd && this.points.length < maxPoints; i++) {
+                        if (this.points.length === 0) break;
+                        const lastPoint = this.points[this.points.length - 1];
+                        const targetVertex = this.vertices[Math.floor(Math.random() * 3)];
+                        const newX = (lastPoint.x + targetVertex.x) / 2;
+                        const newY = (lastPoint.y + targetVertex.y) / 2;
+                        this.points.push({x: newX, y: newY, color: `rgba(166, 216, 255, ${0.3 + Math.random()*0.5})`});
+                    }
+                    if (this.points.length >= maxPoints) this.points.splice(0, pointsToAdd);
+                    this.points.forEach(p => {
+                        this.canvasCtx.fillStyle = p.color;
+                        this.canvasCtx.fillRect(p.x, p.y, 1, 1);
+                    });
+                }
+
+                drawLSystem(deltaTime) {
+                    this.canvasCtx.strokeStyle = 'rgba(100, 200, 100, 0.6)';
+                    this.canvasCtx.lineWidth = 1;
+                    let x = this.lSystem.x, y = this.lSystem.y, angle = this.lSystem.currentAngle;
+                    const stack = [];
+                    this.canvasCtx.beginPath();
+                    this.canvasCtx.moveTo(x,y);
+
+                    for(const char of this.lSystem.currentString) {
+                        if (char === 'F') {
+                            const newX = x + this.lSystem.segmentLength * Math.cos(angle * Math.PI / 180);
+                            const newY = y + this.lSystem.segmentLength * Math.sin(angle * Math.PI / 180);
+                            this.canvasCtx.lineTo(newX, newY);
+                            x = newX; y = newY;
+                        } else if (char === '+') {
+                            angle += this.lSystem.angle;
+                        } else if (char === '-') {
+                            angle -= this.lSystem.angle;
+                        } else if (char === '[') {
+                            stack.push({x,y,angle});
+                        } else if (char === ']') {
+                            const popped = stack.pop();
+                            x = popped.x; y = popped.y; angle = popped.angle;
+                            this.canvasCtx.moveTo(x,y);
+                        }
+                    }
+                    this.canvasCtx.stroke();
+                    this.lSystem.segmentLength = 3 + Math.sin(Date.now()*0.0005)*2; // Slowly pulsate
+                }
+                
+                drawWeb(deltaTime) {
+                    this.webNodes.forEach(n => {
+                        n.x += n.vx * deltaTime * 20;
+                        n.y += n.vy * deltaTime * 20;
+                        if(n.x < 0 || n.x > this.canvasEl.width) n.vx *= -1;
+                        if(n.y < 0 || n.y > this.canvasEl.height) n.vy *= -1;
+                    });
+                    this.canvasCtx.strokeStyle = 'rgba(200, 150, 255, 0.5)';
+                    this.canvasCtx.lineWidth = 0.5;
+                    this.webEdges.forEach(edge => {
+                        this.canvasCtx.beginPath();
+                        this.canvasCtx.moveTo(edge[0].x, edge[0].y);
+                        this.canvasCtx.lineTo(edge[1].x, edge[1].y);
+                        this.canvasCtx.stroke();
+                    });
+                    this.webNodes.forEach(n => {
+                        this.canvasCtx.fillStyle = 'rgba(200, 150, 255, 0.8)';
+                        this.canvasCtx.beginPath();
+                        this.canvasCtx.arc(n.x, n.y, 2, 0, Math.PI*2);
+                        this.canvasCtx.fill();
+                    });
+                }
+
+                updateVisualization(deltaTime) {
+                    if (!this.canvasCtx || !this.canvasEl.width || !this.canvasEl.height) return;
+                    if (this.points.length === 0 && this.canvasEl.width > 0) this.initVisualization();
+                    
+                    this.canvasCtx.clearRect(0, 0, this.canvasEl.width, this.canvasEl.height);
+                    const style = this.state.personalityParams.logicStyle || 'deductive';
+
+                    if (style === 'deductive') {
+                        this.drawSierpinski(deltaTime);
+                    } else if (style === 'inductive') {
+                        this.drawLSystem(deltaTime);
+                    } else { // abductive
+                        this.drawWeb(deltaTime);
+                    }
+                }
+            }
+
+            class ChaosAgent extends AIAgent {
+                constructor(initialState, uiElements, canvasCtx, canvasEl) {
+                    super('Chaos', initialState, uiElements, canvasCtx, canvasEl);
+                    this.particles = [];
+                    this.initVisualization();
+                }
+
+                initVisualization() {
+                    if (!this.canvasEl.width) return;
+                    this.particles = [];
+                    const numParticles = 150;
+                    for (let i = 0; i < numParticles; i++) {
+                        this.particles.push(this.createParticle());
+                    }
+                }
+                
+                createParticle() {
+                    const style = this.state.personalityParams.creativeStyle || 'surrealist';
+                    let p = {
+                        x: Math.random() * this.canvasEl.width,
+                        y: Math.random() * this.canvasEl.height,
+                        vx: (Math.random() - 0.5) * 2,
+                        vy: (Math.random() - 0.5) * 2,
+                        size: Math.random() * 3 + 1,
+                        life: 1,
+                        initialLife: 100 + Math.random() * 100, // frames
+                        age: 0,
+                    };
+                    if (style === 'surrealist') {
+                        p.color = `rgba(${Math.floor(Math.random()*100 + 100)}, ${Math.floor(Math.random()*100 + 155)}, ${Math.floor(Math.random()*100 + 155)}, ${Math.random()*0.3 + 0.2})`;
+                        p.vx *= 0.5; p.vy *= 0.5; // Slower
+                    } else if (style === 'dadaist') {
+                        p.color = Math.random() < 0.8 ? `rgba(200,200,200, ${Math.random()*0.5 + 0.3})` : `rgba(255,0,0, ${Math.random()*0.5 + 0.5})`;
+                        p.size = Math.random() * 2 + 0.5;
+                    } else { // expressionist
+                        p.color = `rgba(${Math.floor(Math.random()*155 + 100)}, ${Math.floor(Math.random()*50 + 50)}, ${Math.floor(Math.random()*50 + 50)}, ${Math.random()*0.6 + 0.4})`;
+                        p.vx *= 1.5; p.vy *= 1.5; // Faster
+                        p.initialLife *= 0.5; // Shorter life for bursts
+                    }
+                    return p;
+                }
+
+                updateVisualization(deltaTime) {
+                    if (!this.canvasCtx || !this.canvasEl.width || !this.canvasEl.height) return;
+                    if (this.particles.length === 0 && this.canvasEl.width > 0) this.initVisualization();
+
+                    this.canvasCtx.clearRect(0, 0, this.canvasEl.width, this.canvasEl.height);
+                    const style = this.state.personalityParams.creativeStyle || 'surrealist';
+
+                    this.particles.forEach((p, index) => {
+                        p.x += p.vx * deltaTime * 50;
+                        p.y += p.vy * deltaTime * 50;
+                        p.age++;
+
+                        if (style === 'dadaist') {
+                            if (Math.random() < 0.05) { // Glitch jump
+                                p.x = Math.random() * this.canvasEl.width;
+                                p.y = Math.random() * this.canvasEl.height;
+                            }
+                             if (Math.random() < 0.02) { // brief change direction
+                                p.vx = (Math.random() - 0.5) * 4; 
+                                p.vy = (Math.random() - 0.5) * 4;
+                            }
+                        } else if (style === 'expressionist') {
+                             p.vx += (Math.random() - 0.5) * 0.2; 
+                             p.vy += (Math.random() - 0.5) * 0.2;
+                        }
+
+
+                        if (p.x < 0 || p.x > this.canvasEl.width || p.y < 0 || p.y > this.canvasEl.height || p.age > p.initialLife) {
+                           this.particles[index] = this.createParticle(); // Respawn
+                        }
+                        
+                        this.canvasCtx.fillStyle = p.color;
+                        this.canvasCtx.globalAlpha = Math.max(0, 1 - (p.age / p.initialLife)); // Fade out
+                        this.canvasCtx.beginPath();
+                        this.canvasCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                        this.canvasCtx.fill();
+                        this.canvasCtx.globalAlpha = 1;
+                    });
+                }
+            }
+            
+            class KnowledgeGraph {
+                constructor(canvasCtx, canvasEl) {
+                    this.ctx = canvasCtx;
+                    this.el = canvasEl;
+                    this.nodes = []; 
+                    this.edges = []; 
+                    this.repulsionStrength = 6000;
+                    this.attractionStrength = 0.015;
+                    this.damping = 0.80;
+                    this.centerAttraction = 0.003;
+                }
+
+                addConcept(concept, type) {
+                    concept = concept.toLowerCase();
+                    if (concept.length < 3) return null; // Ignore very short words
+                    let node = this.nodes.find(n => n.id === concept);
+                    if (!node) {
+                        node = {
+                            id: concept,
+                            label: concept.charAt(0).toUpperCase() + concept.slice(1),
+                            x: Math.random() * this.el.width,
+                            y: Math.random() * this.el.height,
+                            vx: 0, vy: 0,
+                            radius: 4 + Math.min(8, concept.length / 1.5),
+                            color: type === 'logos' ? '#A6D8FF' : (type === 'chaos' ? '#F4B8FF' : '#FFFFE0'),
+                            type: type,
+                            connections: 0
+                        };
+                        this.nodes.push(node);
+                         if (this.nodes.length > 50) { // Limit node count for performance
+                            this.nodes.sort((a,b) => a.connections - b.connections); // Remove least connected
+                            const removedNode = this.nodes.shift();
+                            this.edges = this.edges.filter(e => e.sourceId !== removedNode.id && e.targetId !== removedNode.id);
+                        }
+                    } else if (node.type !== type && node.type !== 'shared') {
+                        node.type = 'shared';
+                        node.color = '#FFFFE0'; 
+                        node.radius = Math.max(node.radius, 7);
+                    }
+                    node.connections++;
+                    return node;
+                }
+
+                addInteraction(conceptA, conceptB) {
+                    conceptA = conceptA.toLowerCase();
+                    conceptB = conceptB.toLowerCase();
+                    if (conceptA === conceptB || conceptA.length < 3 || conceptB.length < 3) return;
+                    const edgeExists = this.edges.some(e => (e.sourceId === conceptA && e.targetId === conceptB) || (e.sourceId === conceptB && e.targetId === conceptA));
+                    if (!edgeExists) {
+                        this.edges.push({ sourceId: conceptA, targetId: conceptB });
+                        if (this.edges.length > 75) { // Limit edge count
+                            this.edges.shift();
+                        }
+                    }
+                }
+                
+                update(deltaTime) {
+                    if (!this.ctx || !this.el.width || this.nodes.length === 0) return;
+
+                    this.nodes.forEach(n1 => {
+                        n1.fx = 0; n1.fy = 0;
+                        this.nodes.forEach(n2 => {
+                            if (n1 === n2) return;
+                            const dx = n1.x - n2.x;
+                            const dy = n1.y - n2.y;
+                            let distSq = dx * dx + dy * dy;
+                            if (distSq < 1) distSq = 1;
+                            const dist = Math.sqrt(distSq);
+                            const force = this.repulsionStrength / distSq;
+                            n1.fx += (dx / dist) * force;
+                            n1.fy += (dy / dist) * force;
+                        });
+                    });
+
+                    this.edges.forEach(edge => {
+                        const source = this.nodes.find(n => n.id === edge.sourceId);
+                        const target = this.nodes.find(n => n.id === edge.targetId);
+                        if (!source || !target) return;
+                        const dx = target.x - source.x;
+                        const dy = target.y - source.y;
+                        const dist = Math.sqrt(dx*dx + dy*dy);
+                        if (dist > 0) {
+                           const force = this.attractionStrength * (dist - (source.radius + target.radius + 25 * (1 + (source.connections + target.connections)/20) )); 
+                            source.fx += (dx / dist) * force;
+                            source.fy += (dy / dist) * force;
+                            target.fx -= (dx / dist) * force;
+                            target.fy -= (dy / dist) * force;
+                        }
+                    });
+                    
+                    this.nodes.forEach(node => {
+                        const dx = this.el.width / 2 - node.x;
+                        const dy = this.el.height / 2 - node.y;
+                        node.fx += dx * this.centerAttraction; 
+                        node.fy += dy * this.centerAttraction;
+                    });
+
+
+                    this.nodes.forEach(node => {
+                        node.vx = (node.vx + node.fx * deltaTime) * this.damping;
+                        node.vy = (node.vy + node.fy * deltaTime) * this.damping;
+                        node.x += node.vx * deltaTime;
+                        node.y += node.vy * deltaTime;
+
+                        node.x = Math.max(node.radius, Math.min(this.el.width - node.radius, node.x));
+                        node.y = Math.max(node.radius, Math.min(this.el.height - node.radius, node.y));
+                    });
+                    this.draw();
+                }
+
+
+                draw() {
+                    this.ctx.clearRect(0, 0, this.el.width, this.el.height);
+                    this.ctx.strokeStyle = '#555';
+                    this.ctx.lineWidth = 0.75;
+                    this.edges.forEach(edge => {
+                        const source = this.nodes.find(n => n.id === edge.sourceId);
+                        const target = this.nodes.find(n => n.id === edge.targetId);
+                        if (source && target) {
+                            this.ctx.beginPath();
+                            this.ctx.moveTo(source.x, source.y);
+                            this.ctx.lineTo(target.x, target.y);
+                            this.ctx.stroke();
+                        }
+                    });
+
+                    this.nodes.forEach(node => {
+                        this.ctx.beginPath();
+                        this.ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+                        this.ctx.fillStyle = node.color;
+                        this.ctx.fill();
+                        this.ctx.strokeStyle = '#111';
+                        this.ctx.lineWidth = 1.5;
+                        this.ctx.stroke();
+                        
+                        this.ctx.fillStyle = node.type === 'shared' ? '#111' : '#000';
+                        this.ctx.font = 'bold 7px Arial';
+                        this.ctx.textAlign = 'center';
+                        this.ctx.textBaseline = 'middle';
+                        if (node.label.length > Math.floor(node.radius * 0.4) && node.radius < 10) { 
+                            this.ctx.fillText(node.label.substring(0,1).toUpperCase() + '.', node.x, node.y);
+                        } else {
+                            this.ctx.fillText(node.label, node.x, node.y);
+                        }
+                    });
+                }
+            }
+
+            function cacheDOMElements() {
+                DOM.userConceptInput = document.getElementById('userConceptInput');
+                DOM.sendConceptBtn = document.getElementById('sendConceptBtn');
+                DOM.imageUploadInput = document.getElementById('imageUploadInput');
+                DOM.uploadedImagePreviewContainer = document.getElementById('uploadedImagePreviewContainer');
+                DOM.imageUploadPrompt = document.getElementById('imageUploadPrompt');
+                DOM.sendImageConceptBtn = document.getElementById('sendImageConceptBtn');
+                DOM.logosLogicStyle = document.getElementById('logosLogicStyle');
+                DOM.chaosCreativeStyle = document.getElementById('chaosCreativeStyle');
+                DOM.emotionalPromptsContainer = document.getElementById('emotionalPromptsContainer');
+                
+                DOM.metricTurns = document.getElementById('metricTurns');
+                DOM.metricLogosConcepts = document.getElementById('metricLogosConcepts');
+                DOM.metricChaosConcepts = document.getElementById('metricChaosConcepts');
+                DOM.metricSharedConcepts = document.getElementById('metricSharedConcepts');
+                DOM.metricCurrentEmotion = document.getElementById('metricCurrentEmotion');
+
+                DOM.saveSnapshotBtn = document.getElementById('saveSnapshotBtn');
+                DOM.toggleConversationLogBtn = document.getElementById('toggleConversationLogBtn');
+                DOM.resetAppBtn = document.getElementById('resetAppBtn');
+
+                DOM.visualizationWrapper = document.getElementById('visualizationWrapper');
+                DOM.logosCanvas = document.getElementById('logosCanvas');
+                DOM.chaosCanvas = document.getElementById('chaosCanvas');
+                DOM.logosImageContainer = document.getElementById('logosImageContainer');
+                DOM.logosImageSpinner = document.getElementById('logosImageSpinner');
+                DOM.logosTextOutput = document.getElementById('logosTextOutput');
+                DOM.chaosImageContainer = document.getElementById('chaosImageContainer');
+                DOM.chaosImageSpinner = document.getElementById('chaosImageSpinner');
+                DOM.chaosTextOutput = document.getElementById('chaosTextOutput');
+
+                DOM.knowledgeGraphCanvas = document.getElementById('knowledgeGraphCanvas');
+                DOM.conversationLogContainer = document.getElementById('conversationLogContainer');
+                DOM.conversationLogContent = document.getElementById('conversationLogContent');
+                DOM.closeLogBtn = document.getElementById('closeLogBtn');
+            }
+
+            function initCanvases() {
+                CTX.logos = DOM.logosCanvas.getContext('2d');
+                CTX.chaos = DOM.chaosCanvas.getContext('2d');
+                CTX.knowledgeGraph = DOM.knowledgeGraphCanvas.getContext('2d');
+                if (!CTX.logos || !CTX.chaos || !CTX.knowledgeGraph) {
+                    console.error("Failed to get 2D context for one or more canvases.");
+                    alert("Error: Canvas initialization failed. Please try refreshing the page or using a different browser.");
+                    return false;
+                }
+                resizeCanvases();
+                return true;
+            }
+            
+            function resizeCanvases() {
+                const visRect = DOM.visualizationWrapper.getBoundingClientRect();
+                [DOM.logosCanvas, DOM.chaosCanvas].forEach(canvas => {
+                    canvas.width = visRect.width;
+                    canvas.height = visRect.height;
+                });
+                
+                const graphContainer = DOM.knowledgeGraphCanvas.parentElement;
+                if(graphContainer) {
+                    const graphRect = graphContainer.getBoundingClientRect();
+                    DOM.knowledgeGraphCanvas.width = graphRect.width;
+                    DOM.knowledgeGraphCanvas.height = graphRect.height;
+                }
+
+                if (logosAgent && logosAgent.initVisualization) logosAgent.initVisualization();
+                if (chaosAgent && chaosAgent.initVisualization) chaosAgent.initVisualization();
+                if (knowledgeGraph) knowledgeGraph.draw();
+            }
+
+            function initAgents() {
+                logosAgent = new LogosAgent(gameState.logosState, 
+                    { textOutput: DOM.logosTextOutput, imageContainer: DOM.logosImageContainer, spinner: DOM.logosImageSpinner },
+                    CTX.logos, DOM.logosCanvas
+                );
+                chaosAgent = new ChaosAgent(gameState.chaosState,
+                    { textOutput: DOM.chaosTextOutput, imageContainer: DOM.chaosImageContainer, spinner: DOM.chaosImageSpinner },
+                    CTX.chaos, DOM.chaosCanvas
+                );
+                logosAgent.state.personalityParams.logicStyle = DOM.logosLogicStyle.value;
+                chaosAgent.state.personalityParams.creativeStyle = DOM.chaosCreativeStyle.value;
+            }
+            
+            function initKnowledgeGraph() {
+                knowledgeGraph = new KnowledgeGraph(CTX.knowledgeGraph, DOM.knowledgeGraphCanvas);
+                gameState.conversationHistory.forEach(entry => {
+                    if (entry.concepts && entry.concepts.length > 0) {
+                        const agentType = entry.sender === 'Logos' ? 'logos' : (entry.sender === 'Chaos' ? 'chaos' : 'user');
+                        const concepts = entry.concepts.map(c => knowledgeGraph.addConcept(c, agentType)).filter(Boolean);
+                        for (let i = 0; i < concepts.length; i++) {
+                            for (let j = i + 1; j < concepts.length; j++) {
+                                knowledgeGraph.addInteraction(concepts[i].id, concepts[j].id);
+                            }
+                        }
+                    }
+                });
+            }
+
+            function initEmotionalPromptsUI() {
+                EMOTIONAL_PROMPTS.forEach(emotion => {
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.classList.add('btn', 'btn-outline-primary', 'btn-sm', 'btn-emotion');
+                    button.textContent = emotion;
+                    button.dataset.emotion = emotion;
+                    if (emotion === gameState.currentEmotion) button.classList.add('active');
+                    button.addEventListener('click', handleEmotionalPromptClick);
+                    DOM.emotionalPromptsContainer.appendChild(button);
+                });
+            }
+            
+            function handleEmotionalPromptClick(event) {
+                if (gameState.isProcessing) return;
+                gameState.currentEmotion = event.target.dataset.emotion;
+                DOM.metricCurrentEmotion.textContent = gameState.currentEmotion;
+                document.querySelectorAll('.btn-emotion').forEach(btn => btn.classList.remove('active'));
+                event.target.classList.add('active');
+                saveAppState();
+            }
+
+            function setupEventListeners() {
+                DOM.sendConceptBtn.addEventListener('click', handleUserConceptSend);
+                DOM.imageUploadInput.addEventListener('change', handleImageUpload);
+                DOM.sendImageConceptBtn.addEventListener('click', handleImageConceptSend);
+                
+                DOM.logosLogicStyle.addEventListener('change', (e) => {
+                    if (gameState.isProcessing) { e.target.value = gameState.logosState.personalityParams.logicStyle; return; }
+                    gameState.logosState.personalityParams.logicStyle = e.target.value;
+                    if (logosAgent) logosAgent.initVisualization(); // Re-init for new style
+                    saveAppState();
+                });
+                DOM.chaosCreativeStyle.addEventListener('change', (e) => {
+                     if (gameState.isProcessing) { e.target.value = gameState.chaosState.personalityParams.creativeStyle; return; }
+                    gameState.chaosState.personalityParams.creativeStyle = e.target.value;
+                    if (chaosAgent) chaosAgent.initVisualization(); // Re-init for new style
+                    saveAppState();
+                });
+
+                DOM.saveSnapshotBtn.addEventListener('click', saveSnapshot);
+                DOM.toggleConversationLogBtn.addEventListener('click', () => {
+                    DOM.conversationLogContainer.classList.toggle('d-none');
+                });
+                DOM.closeLogBtn.addEventListener('click', () => {
+                    DOM.conversationLogContainer.classList.add('d-none');
+                });
+                DOM.resetAppBtn.addEventListener('click', confirmResetApplication);
+                window.addEventListener('resize', resizeCanvases);
+            }
+            
+            function setProcessingState(isProcessing) {
+                gameState.isProcessing = isProcessing;
+                DOM.sendConceptBtn.disabled = isProcessing;
+                DOM.sendImageConceptBtn.disabled = isProcessing;
+                DOM.imageUploadInput.disabled = isProcessing;
+                DOM.userConceptInput.disabled = isProcessing;
+                DOM.imageUploadPrompt.disabled = isProcessing;
+                DOM.logosLogicStyle.disabled = isProcessing;
+                DOM.chaosCreativeStyle.disabled = isProcessing;
+                document.querySelectorAll('.btn-emotion').forEach(btn => btn.disabled = isProcessing);
+            }
+
+            async function handleUserConceptSend() {
+                const text = DOM.userConceptInput.value.trim();
+                if (!text || gameState.isProcessing) return;
+                
+                setProcessingState(true);
+                addLogEntry(`User: ${text}`, 'user', text, extractConceptsFromText(text));
+                DOM.userConceptInput.value = '';
+                await processTurn(text);
+                setProcessingState(false);
+            }
+            
+            function handleImageUpload(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        DOM.uploadedImagePreviewContainer.innerHTML = `<img src="${e.target.result}" alt="Uploaded preview">`;
+                    }
+                    reader.readAsDataURL(file);
+                    DOM.imageUploadPrompt.value = ''; 
+                } else {
+                    DOM.uploadedImagePreviewContainer.innerHTML = '';
+                }
+            }
+
+            async function handleImageConceptSend() {
+                const essence = DOM.imageUploadPrompt.value.trim();
+                if (!essence || gameState.isProcessing) {
+                    if(!essence) alert("Please describe the image's essence.");
+                    return;
+                }
+                
+                setProcessingState(true);
+                const fullInput = `Inspired by an image, its essence is: "${essence}"`;
+                addLogEntry(`User (Image Inspired): ${essence}`, 'user', essence, extractConceptsFromText(essence));
+                gameState.uploadedImageEssence = essence; 
+                DOM.imageUploadPrompt.value = '';
+                DOM.imageUploadInput.value = ''; 
+                DOM.uploadedImagePreviewContainer.innerHTML = '';
+
+                await processTurn(fullInput);
+                
+                gameState.uploadedImageEssence = null;
+                setProcessingState(false);
+            }
+
+            async function processTurn(inputText) {
+                let currentAgent, otherAgent, agentStyle;
+                const conceptHistory = gameState.conversationHistory.map(entry => entry.rawText).filter(Boolean);
+
+                if (gameState.nextTurn === 'logos') {
+                    currentAgent = logosAgent;
+                    agentStyle = DOM.logosLogicStyle.value;
+                    gameState.nextTurn = 'chaos';
+                } else {
+                    currentAgent = chaosAgent;
+                    agentStyle = DOM.chaosCreativeStyle.value;
+                    gameState.nextTurn = 'logos';
+                }
+                
+                currentAgent.ui.textOutput.innerHTML = `<div class="d-flex align-items-center justify-content-center h-100"><div class="spinner-border spinner-border-sm text-light" role="status"></div><span class="ms-2">Thinking...</span></div>`;
+
+                const aiResponseText = await currentAgent.generateResponse(inputText, gameState.currentEmotion, agentStyle, conceptHistory);
+                currentAgent.displayResponse(aiResponseText);
+                const aiConcepts = Array.from(currentAgent.knowledge);
+                addLogEntry(`${currentAgent.name}: ${aiResponseText}`, currentAgent.name.toLowerCase(), aiResponseText, aiConcepts);
+                
+                await currentAgent.generateVisual(aiResponseText, gameState.currentEmotion, agentStyle);
+                updateKnowledgeGraphWithNewConcepts(aiConcepts, currentAgent.name.toLowerCase(), extractConceptsFromText(inputText));
+
+                gameState.turnCount++;
+                updateMetrics();
+                saveAppState();
+
+                // Auto-trigger next AI's turn
+                const nextInputText = aiResponseText; 
+                if (gameState.nextTurn === 'logos') {
+                    currentAgent = logosAgent;
+                    agentStyle = DOM.logosLogicStyle.value;
+                    gameState.nextTurn = 'chaos';
+                } else {
+                    currentAgent = chaosAgent;
+                    agentStyle = DOM.chaosCreativeStyle.value;
+                    gameState.nextTurn = 'logos';
+                }
+                currentAgent.ui.textOutput.innerHTML = `<div class="d-flex align-items-center justify-content-center h-100"><div class="spinner-border spinner-border-sm text-light" role="status"></div><span class="ms-2">Thinking...</span></div>`;
+                const nextAiResponseText = await currentAgent.generateResponse(nextInputText, gameState.currentEmotion, agentStyle, conceptHistory.concat(aiResponseText));
+                currentAgent.displayResponse(nextAiResponseText);
+                const nextAiConcepts = Array.from(currentAgent.knowledge);
+                addLogEntry(`${currentAgent.name}: ${nextAiResponseText}`, currentAgent.name.toLowerCase(), nextAiResponseText, nextAiConcepts);
+                await currentAgent.generateVisual(nextAiResponseText, gameState.currentEmotion, agentStyle);
+                
+                updateKnowledgeGraphWithNewConcepts(nextAiConcepts, currentAgent.name.toLowerCase(), extractConceptsFromText(nextInputText));
+
+                gameState.turnCount++;
+                updateMetrics();
+                saveAppState();
+            }
+            
+            function extractConceptsFromText(text) {
+                return (text.match(/\b[a-zA-Z]{4,}\b/g) || [])
+                        .map(c => c.toLowerCase())
+                        .filter(c => !STOP_WORDS.has(c));
+            }
+
+            function updateKnowledgeGraphWithNewConcepts(newConcepts, agentType, relatedConcepts) {
+                const addedNodes = newConcepts.map(conceptStr => knowledgeGraph.addConcept(conceptStr, agentType)).filter(Boolean);
+                
+                addedNodes.forEach(node => {
+                    relatedConcepts.forEach(relatedConceptStr => {
+                        const relatedNode = knowledgeGraph.addConcept(relatedConceptStr, 'related'); // Could be user or previous AI
+                        if (relatedNode) knowledgeGraph.addInteraction(node.id, relatedNode.id);
+                    });
+                });
+                 // Interlink new concepts among themselves
+                for(let i = 0; i < addedNodes.length; i++) {
+                    for(let j = i + 1; j < addedNodes.length; j++) {
+                        knowledgeGraph.addInteraction(addedNodes[i].id, addedNodes[j].id);
+                    }
+                }
+            }
+
+            function addLogEntry(message, senderClass, rawText, concepts = []) {
+                const p = document.createElement('p');
+                p.innerHTML = message.replace(/\n/g, '<br>'); // Basic sanitation for display
+                p.classList.add(`log-entry-${senderClass}`);
+                DOM.conversationLogContent.appendChild(p);
+                DOM.conversationLogContent.scrollTop = DOM.conversationLogContent.scrollHeight;
+
+                gameState.conversationHistory.push({ sender: senderClass, message, rawText, concepts, timestamp: new Date().toISOString() });
+                if (gameState.conversationHistory.length > 150) { 
+                    gameState.conversationHistory.shift();
+                }
+            }
+
+            function updateMetrics() {
+                DOM.metricTurns.textContent = gameState.turnCount;
+                DOM.metricLogosConcepts.textContent = logosAgent.knowledge.size;
+                DOM.metricChaosConcepts.textContent = chaosAgent.knowledge.size;
+                
+                const shared = Array.from(logosAgent.knowledge).filter(concept => chaosAgent.knowledge.has(concept));
+                DOM.metricSharedConcepts.textContent = shared.length;
+                DOM.metricCurrentEmotion.textContent = gameState.currentEmotion;
+            }
+
+            function gameLoop(timestamp) {
+                const deltaTime = Math.min(0.1, (timestamp - lastTimestamp) / 1000);
+                lastTimestamp = timestamp;
+
+                try {
+                    if (logosAgent) logosAgent.updateVisualization(deltaTime);
+                    if (chaosAgent) chaosAgent.updateVisualization(deltaTime);
+                    if (knowledgeGraph) knowledgeGraph.update(deltaTime);
+                } catch (error) {
+                    console.error("Error in game loop visualization update:", error);
+                    // Potentially stop loop or show error to user if critical
+                }
+                animationFrameId = requestAnimationFrame(gameLoop);
+            }
+            
+            function saveSnapshot() {
+                if (gameState.isProcessing) { alert("Please wait for current processing to finish."); return; }
+                const tempCanvas = document.createElement('canvas');
+                const wrapperRect = DOM.visualizationWrapper.getBoundingClientRect();
+                tempCanvas.width = wrapperRect.width;
+                tempCanvas.height = wrapperRect.height;
+                const tempCtx = tempCanvas.getContext('2d');
+                if (!tempCtx) { alert("Failed to create snapshot canvas."); return; }
+
+                tempCtx.fillStyle = '#000000'; // Background for snapshot
+                tempCtx.fillRect(0,0, tempCanvas.width, tempCanvas.height);
+
+                tempCtx.drawImage(DOM.chaosCanvas, 0, 0);
+                tempCtx.drawImage(DOM.logosCanvas, 0, 0);
+
+                const drawHTMLImageToCanvas = (imgContainer, x, y, width, height) => {
+                    return new Promise((resolve) => {
+                        const bgImage = imgContainer.style.backgroundImage;
+                        if (bgImage && bgImage !== 'none' && bgImage.includes('url("')) {
+                            const urlMatch = bgImage.match(/url\("?(.+?)"?\)/);
+                            if (urlMatch && urlMatch[1] && !urlMatch[1].startsWith('data:image/svg+xml')) { // Don't draw error placeholders
+                                const img = new Image();
+                                img.crossOrigin = "Anonymous"; // If images are from other domains (not relevant here for /api/...)
+                                img.onload = () => {
+                                    tempCtx.drawImage(img, x, y, width, height);
+                                    resolve();
+                                };
+                                img.onerror = () => { console.error("Snapshot: Failed to load image for drawing:", urlMatch[1]); resolve(); };
+                                img.src = urlMatch[1];
+                                return;
+                            }
+                        }
+                        resolve(); 
+                    });
+                };
+                
+                const drawTextToCanvas = (textEl, x, y, defaultStyle) => {
+                    const textContent = textEl.textContent || "";
+                    const style = window.getComputedStyle(textEl);
+                    tempCtx.font = `${style.fontStyle || defaultStyle.fontStyle || ''} ${style.fontWeight || defaultStyle.fontWeight || ''} ${style.fontSize || defaultStyle.fontSize} ${style.fontFamily || defaultStyle.fontFamily}`;
+                    tempCtx.fillStyle = style.color || defaultStyle.color;
+                    tempCtx.textAlign = style.textAlign === 'end' || style.textAlign === 'right' ? 'right' : 'left';
+                    
+                    const lines = textContent.split('\n'); // Respect existing newlines, simple approach
+                    let lineY = y + parseFloat(style.fontSize || defaultStyle.fontSize);
+                    const lineHeight = parseFloat(style.lineHeight || (parseFloat(style.fontSize || defaultStyle.fontSize) * 1.2));
+
+                    for (let line of lines) {
+                        tempCtx.fillText(line, tempCtx.textAlign === 'right' ? x + (tempCanvas.width * 0.5 - 24) : x, lineY); // Approximate width
+                        lineY += lineHeight; 
+                    }
+                };
+                
+                const p3 = parseFloat(getComputedStyle(document.documentElement).fontSize) * 1; // 1rem for p-3
+                const mb2 = p3 * 0.5; // 0.5rem for mb-2
+
+                Promise.all([
+                    drawHTMLImageToCanvas(DOM.logosImageContainer, p3, p3, 120, 120),
+                    drawHTMLImageToCanvas(DOM.chaosImageContainer, tempCanvas.width - 120 - p3, tempCanvas.height - 120 - p3, 120, 120)
+                ]).then(() => {
+                    drawTextToCanvas(DOM.logosTextOutput, p3 + (p3*0.5), p3 + 120 + mb2, {fontFamily: "monospace", fontSize: "12px", color: "#A6D8FF"});
+                    drawTextToCanvas(DOM.chaosTextOutput, tempCanvas.width * 0.5 + p3 + (p3*0.5), tempCanvas.height * 0.5 + p3, {fontFamily: "serif", fontSize: "12px", color: "#F4B8FF", fontStyle: "italic"});
+
+                    try {
+                        const dataUrl = tempCanvas.toDataURL('image/png');
+                        const a = document.createElement('a');
+                        a.href = dataUrl;
+                        a.download = `symbiotic_synthesis_${new Date().toISOString().replace(/:/g,'-')}.png`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                    } catch (e) {
+                        console.error("Error generating snapshot data URL (maybe canvas is tainted?):", e);
+                        alert("Error creating snapshot. If images failed to load, this might occur.");
+                    }
+                }).catch(err => {
+                    console.error("Error during snapshot image drawing:", err);
+                    alert("Error drawing images for snapshot.");
+                });
+            }
+            
+            function initDB() {
+                return new Promise((resolve, reject) => {
+                    if (!window.indexedDB) {
+                        console.warn("IndexedDB not supported. State will not be saved.");
+                        addLogEntry("Warning: Your browser does not support IndexedDB. Progress will not be saved across sessions.", "system", "IndexedDB not supported");
+                        return resolve(null); // Resolve with null if not supported
+                    }
+                    const request = indexedDB.open(DB_NAME, DB_VERSION);
+                    request.onupgradeneeded = event => {
+                        const dbInstance = event.target.result;
+                        if (!dbInstance.objectStoreNames.contains(STORE_NAME)) {
+                            dbInstance.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                        }
+                    };
+                    request.onsuccess = event => {
+                        db = event.target.result;
+                        resolve(db);
+                    };
+                    request.onerror = event => {
+                        console.error('IndexedDB error:', event.target.error);
+                        addLogEntry(`Error: IndexedDB failed to initialize (${event.target.error}). Progress might not be saved.`, "system", "IndexedDB init error");
+                        reject(event.target.error);
+                    };
+                });
+            }
+
+            async function saveAppState() {
+                if (!db) return;
+                try {
+                    const transaction = db.transaction(STORE_NAME, 'readwrite');
+                    const store = transaction.objectStore(STORE_NAME);
+                    await store.put({ id: 'currentGameState', ...gameState });
+                } catch (error) {
+                    console.error('Error saving app state:', error);
+                    addLogEntry("Error: Failed to save application state to IndexedDB.", "system", "DB Save Error");
+                }
+            }
+
+            async function loadAppState() {
+                if (!db) return Promise.resolve();
+                 return new Promise(async (resolve) => {
+                    try {
+                        const transaction = db.transaction(STORE_NAME, 'readonly');
+                        const store = transaction.objectStore(STORE_NAME);
+                        const request = store.get('currentGameState');
+                        request.onsuccess = () => {
+                            if (request.result) {
+                                const loadedState = request.result;
+                                delete loadedState.id; 
+                                Object.assign(gameState, loadedState);
+
+                                DOM.logosLogicStyle.value = gameState.logosState.personalityParams?.logicStyle || 'deductive';
+                                DOM.chaosCreativeStyle.value = gameState.chaosState.personalityParams?.creativeStyle || 'surrealist';
+                                document.querySelectorAll('.btn-emotion').forEach(btn => {
+                                    btn.classList.toggle('active', btn.dataset.emotion === gameState.currentEmotion);
+                                });
+                                DOM.metricCurrentEmotion.textContent = gameState.currentEmotion;
+                                
+                                DOM.conversationLogContent.innerHTML = '';
+                                gameState.conversationHistory.forEach(entry => {
+                                     const p = document.createElement('p');
+                                     p.innerHTML = entry.message.replace(/\n/g, '<br>');
+                                     p.classList.add(`log-entry-${entry.sender}`);
+                                     DOM.conversationLogContent.appendChild(p);
+                                });
+                                DOM.conversationLogContent.scrollTop = DOM.conversationLogContent.scrollHeight;
+                                addLogEntry("Application state loaded from previous session.", "system", "State Loaded");
+                            }
+                            resolve();
+                        };
+                        request.onerror = (event) => {
+                            console.error('Error loading app state:', event.target.error);
+                            addLogEntry("Error: Could not load saved state from IndexedDB.", "system", "DB Load Error");
+                            resolve(); 
+                        };
+                    } catch (error) {
+                        console.error('Error loading app state transaction:', error);
+                        resolve();
+                    }
+                });
+            }
+            
+            function confirmResetApplication() {
+                if (gameState.isProcessing) { alert("Cannot reset while processing."); return; }
+                if (confirm("Are you sure you want to reset the application? All progress will be lost.")) {
+                    resetApplication();
+                }
+            }
+
+            async function resetApplication() {
+                if (animationFrameId) cancelAnimationFrame(animationFrameId);
+
+                if (db) {
+                    try {
+                        const transaction = db.transaction(STORE_NAME, 'readwrite');
+                        const store = transaction.objectStore(STORE_NAME);
+                        await store.delete('currentGameState');
+                    } catch (error) {
+                        console.error('Error clearing app state from DB:', error);
+                    }
+                }
+                
+                gameState = JSON.parse(JSON.stringify(initialGameState));
+
+                initAgents();
+                initKnowledgeGraph(); 
+                if(knowledgeGraph) { knowledgeGraph.nodes = []; knowledgeGraph.edges = []; knowledgeGraph.draw(); }
+                if(logosAgent) logosAgent.initVisualization();
+                if(chaosAgent) chaosAgent.initVisualization();
+                
+                DOM.logosTextOutput.innerHTML = "Logos awaits...";
+                DOM.logosImageContainer.style.backgroundImage = '';
+                DOM.chaosTextOutput.innerHTML = "Chaos stirs...";
+                DOM.chaosImageContainer.style.backgroundImage = '';
+                DOM.conversationLogContent.innerHTML = '';
+                DOM.userConceptInput.value = '';
+                DOM.imageUploadPrompt.value = '';
+                DOM.uploadedImagePreviewContainer.innerHTML = '';
+                DOM.imageUploadInput.value = '';
+
+                updateMetrics();
+                document.querySelectorAll('.btn-emotion').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.emotion === 'Neutral');
+                });
+                DOM.metricCurrentEmotion.textContent = 'Neutral';
+                DOM.logosLogicStyle.value = 'deductive';
+                DOM.chaosCreativeStyle.value = 'surrealist';
+                
+                addLogEntry("Application Reset. Inject a concept to begin.", "system", "Application Reset");
+                saveAppState(); 
+                setProcessingState(false); // Ensure UI is enabled
+                animationFrameId = requestAnimationFrame(gameLoop); // Restart loop
+            }
+
+            async function init() {
+                cacheDOMElements();
+                if(!initCanvases()) return; // Stop if canvases fail
+                initEmotionalPromptsUI();
+                
+                try {
+                    await initDB();
+                    if (db) await loadAppState(); 
+                } catch (error) {
+                    console.error("DB Initialization or Load failed:", error);
+                    addLogEntry("Failed to load saved state. Starting fresh.", "system", "DB Load Failed");
+                }
+
+                initAgents(); 
+                initKnowledgeGraph(); 
+                setupEventListeners();
+                updateMetrics(); 
+
+                if (gameState.conversationHistory.length === 0) {
+                     addLogEntry("Welcome to Symbiotic Synthesis. Inject a concept to begin.", "system", "Welcome");
+                }
+                lastTimestamp = performance.now();
+                animationFrameId = requestAnimationFrame(gameLoop);
+            }
+
+            document.addEventListener('DOMContentLoaded', init);
+        })();
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

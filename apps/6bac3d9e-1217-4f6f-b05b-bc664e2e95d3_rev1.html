@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Celestial Cartographer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #121212;
+            color: #E2E8F0;
+            font-family: 'Arial', sans-serif;
+        }
+        #game-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #1a202c;
+            position: relative;
+        }
+        #game-wrapper {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #gameCanvas {
+            display: block;
+            touch-action: none;
+            background-color: #000;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+             /* Default state allows pointer events */
+             pointer-events: auto;
+        }
+         #gameCanvas.ui-active {
+             /* Disable pointer events on canvas when UI is active */
+             pointer-events: none;
+         }
+        .ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .ui-content {
+            pointer-events: auto;
+            background-color: rgba(30, 41, 59, 0.95);
+            border: 1px solid rgba(71, 85, 105, 0.8);
+            color: #E2E8F0;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            text-align: center; /* Center content by default */
+        }
+        .hidden {
+            display: none;
+        }
+        .hud {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 11;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .hud-item {
+            background-color: rgba(30, 41, 59, 0.8);
+            color: #E2E8F0;
+            padding: 5px 10px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        .modal-content {
+             background-color: #1a202c;
+             color: #E2E8F0;
+        }
+        .modal-header, .modal-footer {
+             border-color: #2d3748;
+        }
+        .btn-close {
+             filter: invert(1);
+        }
+        .atlas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            padding: 15px;
+            justify-items: center;
+        }
+        .atlas-item {
+            background-color: #2d3748;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        .atlas-item img {
+            width: 100%;
+            height: auto;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+        }
+        .atlas-item .constellation-name {
+            font-size: 0.9em;
+            color: #CBD5E0;
+        }
+        .loading-indicator {
+            color: #9AE6B4;
+            font-size: 1.2em;
+            margin-top: 20px;
+        }
+        .error-message {
+            color: #FEB2B2;
+            font-size: 1em;
+            margin-top: 10px;
+        }
+         #clue-screen .ui-content,
+         #shop-screen .ui-content,
+         #settings-screen .ui-content {
+             text-align: left; /* Align text left for these panels */
+         }
+         #mission-list {
+             display: flex;
+             flex-direction: column;
+             align-items: center;
+         }
+         #mission-list button {
+             width: 80%;
+             max-width: 300px;
+         }
+         #shop-items .card {
+             width: 100%;
+             max-width: 400px;
+             margin: 10px auto;
+         }
+         .charting-controls {
+             position: absolute;
+             bottom: 20px;
+             left: 50%;
+             transform: translateX(-50%);
+             z-index: 11; /* Above canvas */
+             pointer-events: auto; /* Allow button clicks */
+         }
+    </style>
+</head>
+<body data-bs-theme="dark">
+
+    <div id="game-container" class="d-flex flex-column justify-content-center align-items-center min-vh-100 bg-dark">
+        <div id="game-wrapper">
+            <canvas id="gameCanvas"></canvas>
+            <div id="hud" class="hud hidden">
+                <div class="hud-item">Rank: <span id="player-rank">Apprentice</span></div>
+                <div class="hud-item">XP: <span id="player-xp">0</span></div>
+                <div class="hud-item">Dust: <span id="player-dust">0</span></div>
+            </div>
+        </div>
+
+        <div id="loading-screen" class="ui-overlay">
+            <div class="ui-content text-center">
+                <h1>Loading Celestial Cartographer...</h1>
+                <div class="spinner-border text-primary mt-3" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="main-menu" class="ui-overlay hidden">
+            <div class="ui-content text-center">
+                <h1>Celestial Cartographer</h1>
+                <p class="lead">Chart the stars, unlock the cosmos.</p>
+                <div class="d-grid gap-3 col-md-6 mx-auto mt-4">
+                    <button id="btn-start-game" class="btn btn-primary btn-lg">Start New Journey</button>
+                    <button id="btn-continue-game" class="btn btn-secondary btn-lg hidden">Continue Journey</button>
+                    <button id="btn-atlas" class="btn btn-info btn-lg">View Atlas</button>
+                    <button id="btn-shop" class="btn btn-success btn-lg">Observatory</button>
+                    <button id="btn-settings" class="btn btn-secondary btn-lg">Settings</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="mission-select-screen" class="ui-overlay hidden">
+            <div class="ui-content">
+                <h2>Select Mission</h2>
+                <div id="mission-list" class="mt-3">
+                    <!-- Mission buttons will be populated here -->
+                </div>
+                <button id="btn-back-to-main" class="btn btn-secondary mt-4">Back</button>
+            </div>
+        </div>
+
+        <div id="clue-screen" class="ui-overlay hidden">
+            <div class="ui-content">
+                <h2 id="clue-screen-title">Mission Briefing</h2>
+                <p id="headmaster-intro" class="text-info"></p>
+                <div id="mission-clues" class="mt-3">
+                    <h5>Clues:</h5>
+                    <p id="clue-text"></p>
+                    <h5>Coordinates:</h5>
+                    <p id="coordinate-text"></p>
+                </div>
+                <div id="ai-loading-clues" class="loading-indicator hidden">Generating clues...</div>
+                 <div id="ai-error-clues" class="error-message hidden"></div>
+                <button id="btn-start-charting" class="btn btn-primary mt-4 hidden">Begin Charting</button>
+                 <button id="btn-clue-back" class="btn btn-secondary mt-4">Back</button>
+            </div>
+        </div>
+
+         <div id="charting-ui" class="charting-controls hidden">
+             <button id="btn-submit-chart" class="btn btn-success btn-lg" disabled>Submit Chart</button>
+         </div>
+
+
+        <div class="modal fade" id="missionResultModal" tabindex="-1" aria-labelledby="missionResultModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="missionResultModalLabel">Mission Complete!</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <p id="result-message" class="lead"></p>
+                        <div id="ai-feedback-display" class="mt-3 text-info"></div>
+                        <div id="constellationImageContainer" class="mt-4">
+                             <div id="image-loading-indicator" class="loading-indicator hidden">Generating constellation image...</div>
+                             <div id="image-error-message" class="error-message hidden"></div>
+                             <img id="generated-constellation-image" src="" alt="Constellation Image" class="img-fluid rounded hidden">
+                        </div>
+                        <p id="reward-text" class="mt-3 text-warning"></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="btn-next-mission" data-bs-dismiss="modal">Next Mission</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="atlas-screen" class="ui-overlay hidden">
+            <div class="ui-content">
+                <h2>Celestial Atlas</h2>
+                <div id="atlas-content" class="atlas-grid mt-3">
+                    <!-- Unlocked constellations will be displayed here -->
+                     <p id="atlas-empty-message" class="text-muted text-center w-100">Your atlas is empty. Complete missions to unlock constellations!</p>
+                </div>
+                <button id="btn-atlas-back" class="btn btn-secondary mt-4">Back</button>
+            </div>
+        </div>
+
+        <div id="shop-screen" class="ui-overlay hidden">
+             <div class="ui-content">
+                 <h2>Observatory Upgrades</h2>
+                 <p>Improve your observatory to unlock higher quality constellation images and better tools.</p>
+                 <div id="observatory-level" class="mb-3">Current Level: <span id="current-observatory-level">1</span></div>
+                 <div id="shop-items" class="mt-3">
+                     <!-- Shop items will be populated here -->
+                 </div>
+                 <button id="btn-shop-back" class="btn btn-secondary mt-4">Back</button>
+             </div>
+        </div>
+
+         <div id="settings-screen" class="ui-overlay hidden">
+             <div class="ui-content text-center">
+                 <h2>Settings</h2>
+                 <button id="btn-toggle-sound" class="btn btn-secondary mt-3">Toggle Sound (On)</button>
+                 <button id="btn-reset-progress" class="btn btn-danger mt-3">Reset All Progress</button>
+                 <button id="btn-settings-back" class="btn btn-secondary mt-4">Back</button>
+             </div>
+         </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
+    <script>
+        const GAME_CONFIG = {
+            CANVAS_NATIVE_WIDTH: 1024,
+            CANVAS_NATIVE_HEIGHT: 768,
+            STAR_SIZE: 3,
+            STAR_COLOR: '#FFFFFF',
+            LINE_COLOR: '#00FFFF',
+            LINE_WIDTH: 2,
+            PARALLAX_LAYERS: 3,
+            PARALLAX_SPEEDS: [0.02, 0.05, 0.1],
+            PARALLAX_COLORS: ['#1e3a8a', '#3b82f6', '#60a5fa'],
+            STAR_CLICK_RADIUS: 15,
+            XP_PER_MISSION: 100,
+            DUST_PER_MISSION: 50,
+            RANK_LEVELS: [0, 100, 300, 600, 1000, 1500, 2200, 3000, 4000, 5500, 7000],
+            RANKS: ["Apprentice", "Cartographer", "Navigator", "Stargazer", "Cosmic Surveyor", "Celestial Master", "Galactic Explorer", "Nebula Nomad", "Void Wanderer", "Astral Sage", "Cosmic Entity"],
+            OBSERVATORY_LEVELS: [
+                { cost: 0, quality: "simple, line-drawing style" },
+                { cost: 200, quality: "basic, artistic rendering" },
+                { cost: 500, quality: "detailed, artistic rendering with subtle effects" },
+                { cost: 1000, quality: "high-quality, photorealistic artistic rendering with dynamic lighting" }
+            ],
+            SOUNDS: {
+                ambientSpace: 'https://cdn.jsdelivr.net/gh/Tonejs/Tone.js/examples/audio/berlin_2.mp3',
+                uiClick: 'https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3',
+                starConnect: 'https://assets.mixkit.co/sfx/preview/mixkit-game-bling-award-2061.mp3',
+                missionSuccess: 'https://assets.mixkit.co/sfx/preview/mixkit-game-success-alert-2039.mp3',
+                missionFailure: 'https://assets.mixkit.co/sfx/preview/mixkit-game-fail-object-1694.mp3'
+            },
+             MISSIONS: [
+                 { id: 'ursa_major', name: 'Ursa Major', constellationId: 'Ursa Major', requiredConnections: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 0], [3, 5]] },
+                 { id: 'orion', name: 'Orion', constellationId: 'Orion', requiredConnections: [[0, 1], [1, 2], [2, 3], [3, 0], [0, 4], [1, 5], [2, 6], [3, 7], [4, 8], [5, 9], [6, 10], [7, 11]] },
+                 { id: 'cassiopeia', name: 'Cassiopeia', constellationId: 'Cassiopeia', requiredConnections: [[0, 1], [1, 2], [2, 3], [3, 4]] },
+                 { id: 'leo', name: 'Leo', constellationId: 'Leo', requiredConnections: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 0], [1, 6], [6, 7], [7, 8]] },
+                 { id: 'cygnus', name: 'Cygnus', constellationId: 'Cygnus', requiredConnections: [[0, 1], [1, 2], [2, 3], [3, 4], [1, 5], [5, 6]] }
+             ],
+             STAR_DATA: {
+                 'Ursa Major': [
+                     { id: 0, x: 0.3, y: 0.2 }, { id: 1, x: 0.4, y: 0.15 }, { id: 2, x: 0.55, y: 0.18 }, { id: 3, x: 0.6, y: 0.3 },
+                     { id: 4, x: 0.5, y: 0.35 }, { id: 5, x: 0.4, y: 0.3 }, { id: 6, x: 0.35, y: 0.25 }
+                 ],
+                 'Orion': [
+                     { id: 0, x: 0.4, y: 0.4 }, { id: 1, x: 0.6, y: 0.4 }, { id: 2, x: 0.65, y: 0.6 }, { id: 3, x: 0.35, y: 0.6 },
+                     { id: 4, x: 0.45, y: 0.2 }, { id: 5, x: 0.55, y: 0.2 }, { id: 6, x: 0.7, y: 0.8 }, { id: 7, x: 0.3, y: 0.8 },
+                     { id: 8, x: 0.45, y: 0.1 }, { id: 9, x: 0.55, y: 0.1 }, { id: 10, x: 0.75, y: 0.9 }, { id: 11, x: 0.25, y: 0.9 }
+                 ],
+                 'Cassiopeia': [
+                      { id: 0, x: 0.2, y: 0.5 }, { id: 1, x: 0.4, y: 0.4 }, { id: 2, x: 0.6, y: 0.5 }, { id: 3, x: 0.8, y: 0.4 }, { id: 4, x: 0.9, y: 0.6 }
+                 ],
+                 'Leo': [
+                     { id: 0, x: 0.3, y: 0.6 }, { id: 1, x: 0.4, y: 0.5 }, { id: 2, x: 0.6, y: 0.4 }, { id: 3, x: 0.75, y: 0.45 },
+                     { id: 4, x: 0.8, y: 0.6 }, { id: 5, x: 0.7, y: 0.7 }, { id: 6, x: 0.45, y: 0.3 }, { id: 7, x: 0.55, y: 0.2 }, { id: 8, x: 0.6, y: 0.1 }
+                 ],
+                 'Cygnus': [
+                      { id: 0, x: 0.5, y: 0.1 }, { id: 1, x: 0.5, y: 0.5 }, { id: 2, x: 0.4, y: 0.6 }, { id: 3, x: 0.3, y: 0.7 },
+                      { id: 4, x: 0.2, y: 0.8 }, { id: 5, x: 0.6, y: 0.6 }, { id: 6, x: 0.7, y: 0.7 }
+                 ]
+             }
+        };
+
+        let canvas, ctx;
+        let gameState = {};
+        let lastTime = 0;
+        let mousePos = { x: 0, y: 0, isDown: false };
+        let selectedStar = null;
+        let playerLines = [];
+
+        const uiElements = {};
+        let howlerSounds = {};
+        let isSoundMuted = false;
+
+        const apiManager = {
+            async getAIResponse(prompt, settings = {}) {
+                uiElements.aiLoadingClues.classList.remove('hidden');
+                uiElements.aiErrorClues.classList.add('hidden');
+                try {
+                    const response = await fetch('/api/ai', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ aiguide: "You are the wise and slightly eccentric Headmaster of the Celestial Academy. Provide guidance, clues, or feedback in a helpful, slightly whimsical tone. Keep responses concise and focused.", msgforai: prompt, llmSettings: settings })
+                    });
+                    const data = await response.json();
+                    if (response.ok && data.success) {
+                        return data.response;
+                    } else {
+                        console.error('AI API error:', data.error);
+                        uiElements.aiErrorClues.textContent = `AI Error: ${data.error || 'Failed to get AI response.'}`;
+                         uiElements.aiErrorClues.classList.remove('hidden');
+                        return null;
+                    }
+                } catch (err) {
+                    console.error('AI API fetch error:', err);
+                    uiElements.aiErrorClues.textContent = 'Network error. Could not get AI response.';
+                    uiElements.aiErrorClues.classList.remove('hidden');
+                    return null;
+                } finally {
+                    uiElements.aiLoadingClues.classList.add('hidden');
+                }
+            },
+
+            async generateConstellationImage(prompt, aspectRatio = "1:1", style = "standard") {
+                 uiElements.imageLoadingIndicator.classList.remove('hidden');
+                 uiElements.imageErrorMessage.classList.add('hidden');
+                 uiElements.generatedConstellationImage.classList.add('hidden');
+                 uiElements.generatedConstellationImage.src = ''; // Clear previous image
+                try {
+                    const response = await fetch('/api/generate-image-on-demand', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prompt: prompt, aspectRatio: aspectRatio, style: style })
+                    });
+                    const data = await response.json();
+                    if (response.ok && data.success) {
+                        return data.imageUrl;
+                    } else {
+                         console.error('Image API error:', data.error);
+                         uiElements.imageErrorMessage.textContent = `Image Error: ${data.error || 'Failed to generate image.'}`;
+                         uiElements.imageErrorMessage.classList.remove('hidden');
+                        return null;
+                    }
+                } catch (err) {
+                    console.error('Image API fetch error:', err);
+                    uiElements.imageErrorMessage.textContent = 'Network error. Could not generate image.';
+                    uiElements.imageErrorMessage.classList.remove('hidden');
+                    return null;
+                } finally {
+                    uiElements.imageLoadingIndicator.classList.add('hidden');
+                }
+            }
+        };
+
+        const soundManager = {
+            loadSounds() {
+                for (const key in GAME_CONFIG.SOUNDS) {
+                    howlerSounds[key] = new Howl({
+                        src: [GAME_CONFIG.SOUNDS[key]],
+                        html5: true,
+                        loop: key === 'ambientSpace',
+                        volume: key === 'ambientSpace' ? 0.5 : 1.0,
+                        onloaderror: (id, error) => {
+                             console.error(`Failed to load sound ${key}:`, error);
+                        },
+                        onplayerror: (id, error) => {
+                             console.error(`Failed to play sound ${key}:`, error);
+                        }
+                    });
+                }
+            },
+            play(soundId) {
+                if (!isSoundMuted && howlerSounds[soundId] && howlerSounds[soundId].state() === 'loaded') {
+                    howlerSounds[soundId].play();
+                }
+            },
+            stop(soundId) {
+                 if (howlerSounds[soundId]) {
+                     howlerSounds[soundId].stop();
+                 }
+            },
+            setAmbient(soundId, volume = 0.5) {
+                this.stopAllAmbient();
+                if (!isSoundMuted && howlerSounds[soundId] && howlerSounds[soundId].state() === 'loaded') {
+                    howlerSounds[soundId].volume(volume);
+                    howlerSounds[soundId].play();
+                }
+            },
+            stopAllAmbient() {
+                for(const key in howlerSounds) {
+                    if(howlerSounds[key].loop && howlerSounds[key].playing()) {
+                        howlerSounds[key].stop();
+                    }
+                }
+            },
+            toggleMute() {
+                isSoundMuted = !isSoundMuted;
+                Howler.mute(isSoundMuted);
+                uiElements.btnToggleSound.textContent = isSoundMuted ? "Toggle Sound (Off)" : "
+Toggle Sound (On)";
+                if (!isSoundMuted && gameState.currentPhase === 'CHARTING') {
+                    soundManager.setAmbient('ambientSpace');
+                } else if (isSoundMuted && gameState.currentPhase === 'CHARTING') {
+                     soundManager.stopAllAmbient();
+                }
+                saveGame();
+            }
+        };
+
+        const player = {
+            rank: "Apprentice",
+            xp: 0,
+            dust: 0,
+            observatoryLevel: 0,
+            atlas: {},
+            tools: [],
+
+            addXP(amount) {
+                this.xp += amount;
+                this.checkRankUp();
+                uiManager.updateHUD();
+                saveGame();
+            },
+            addDust(amount) {
+                this.dust += amount;
+                uiManager.updateHUD();
+                saveGame();
+            },
+            checkRankUp() {
+                let currentRankIndex = GAME_CONFIG.RANKS.indexOf(this.rank);
+                while (currentRankIndex < GAME_CONFIG.RANK_LEVELS.length - 1 && this.xp >= GAME_CONFIG.RANK_LEVELS[currentRankIndex + 1]) {
+                    currentRankIndex++;
+                    this.rank = GAME_CONFIG.RANKS[currentRankIndex];
+                }
+            },
+            buyUpgrade(upgradeCost) {
+                if (this.dust >= upgradeCost && this.observatoryLevel < GAME_CONFIG.OBSERVATORY_LEVELS.length - 1) {
+                    this.dust -= upgradeCost;
+                    this.observatoryLevel++;
+                    uiManager.updateHUD();
+                    uiManager.populateShop();
+                    saveGame();
+                    soundManager.play('uiClick');
+                    return true;
+                } else {
+                     soundManager.play('missionFailure');
+                    return false;
+                }
+            },
+            addToAtlas(constellationId, imageUrl) {
+                 this.atlas[constellationId] = imageUrl;
+                 saveGame();
+            },
+            resetProgress() {
+                 localStorage.removeItem('celestialCartographerSave');
+                 gameState = createInitialGameState();
+                 loadGame();
+                 uiManager.showScreen('MAIN_MENU');
+                 soundManager.play('uiClick');
+            }
+        };
+
+        const missionManager = {
+             currentMission: null,
+             completedMissions: [],
+
+             async loadMission(missionId) {
+                 const mission = GAME_CONFIG.MISSIONS.find(m => m.id === missionId);
+                 if (!mission) {
+                     console.error("Mission not found:", missionId);
+                     return false;
+                 }
+                 this.currentMission = mission;
+                 playerLines = [];
+                 selectedStar = null;
+                 uiElements.btnSubmitChart.disabled = true;
+
+                 const cluePrompt = `Generate a cryptic clue and celestial coordinates for the constellation ${mission.name}, suitable for an apprentice cartographer. Include hints about its shape or mythology. Format the response clearly separating the clue text and the coordinates. Example: Clue: [Your clue here] Coordinates: [List of coordinates here, e.g., Star A: RA 10h 30m, Dec +20° 15']`;
+                 const introPrompt = `Write a short, encouraging message from the Headmaster introducing the mission to chart ${mission.name}.`;
+
+                 uiElements.clueText.textContent = 'Loading...';
+                 uiElements.coordinateText.textContent = 'Loading...';
+                 uiElements.headmasterIntro.textContent = 'Loading...';
+                 uiElements.btnStartCharting.classList.add('hidden');
+
+                 const headmasterIntro = await apiManager.getAIResponse(introPrompt);
+                 if (headmasterIntro) {
+                     uiElements.headmasterIntro.textContent = headmasterIntro;
+                 } else {
+                      uiElements.headmasterIntro.textContent = "Headmaster's message failed to load.";
+                 }
+
+                 const cluesResponse = await apiManager.getAIResponse(cluePrompt);
+                 if (cluesResponse) {
+                     const clueParts = cluesResponse.split('Coordinates:');
+                     if (clueParts.length === 2) {
+                         uiElements.clueText.textContent = clueParts[0].replace('Clue:', '').trim();
+                         uiElements.coordinateText.textContent = clueParts[1].trim();
+                         uiElements.btnStartCharting.classList.remove('hidden');
+                     } else {
+                          uiElements.clueText.textContent = cluesResponse;
+                          uiElements.coordinateText.textContent = "Could not parse coordinates from AI response.";
+                          uiElements.btnStartCharting.classList.remove('hidden');
+                     }
+                 } else {
+                      uiElements.clueText.textContent = "Mission clues failed to load.";
+                      uiElements.coordinateText.textContent = "Coordinates failed to load.";
+                 }
+
+                 uiManager.showScreen('CLUE_SCREEN');
+                 return true;
+             },
+
+             validateChart() {
+                 if (!this.currentMission) return false;
+
+                 const canonicalPlayerLines = playerLines.map(line => {
+                     const s = Math.min(line.startStarId, line.endStarId);
+                     const e = Math.max(line.startStarId, line.endStarId);
+                     return `${s}-${e}`;
+                 }).sort();
+
+                 const canonicalRequiredLines = this.currentMission.requiredConnections.map(conn => {
+                     const s = Math.min(conn[0], conn[1]);
+                     const e = Math.max(conn[0], conn[1]);
+                     return `${s}-${e}`;
+                 }).sort();
+
+                 if (canonicalPlayerLines.length !== canonicalRequiredLines.length) {
+                      return false; // Must have the exact number of lines
+                 }
+
+                 for (const requiredLine of canonicalRequiredLines) {
+                     if (!canonicalPlayerLines.includes(requiredLine)) {
+                         return false; // Must contain all required lines
+                     }
+                 }
+
+                 return true; // All required lines present and no extra
+             },
+
+             getStarsForCurrentMission() {
+                 if (!this.currentMission) return [];
+                 return GAME_CONFIG.STAR_DATA[this.currentMission.constellationId] || [];
+             },
+
+             markMissionComplete(missionId) {
+                 if (!this.completedMissions.includes(missionId)) {
+                      this.completedMissions.push(missionId);
+                      saveGame();
+                 }
+             },
+             getAvailableMissions() {
+                 return GAME_CONFIG.MISSIONS.filter(m => !this.completedMissions.includes(m.id));
+             }
+        };
+
+        const starChartRenderer = {
+            canvas: null,
+            ctx: null,
+            backgroundStars: [],
+
+            init(canvasElement) {
+                this.canvas = canvasElement;
+                this.ctx = canvasElement.getContext('2d');
+                this.generateBackgroundStars();
+            },
+
+            generateBackgroundStars() {
+                this.backgroundStars = [];
+                const numStars = GAME_CONFIG.CANVAS_NATIVE_WIDTH * GAME_CONFIG.CANVAS_NATIVE_HEIGHT / 800;
+                for (let i = 0; i < numStars; i++) {
+                    this.backgroundStars.push({
+                        x: Math.random() * GAME_CONFIG.CANVAS_NATIVE_WIDTH,
+                        y: Math.random() * GAME_CONFIG.CANVAS_NATIVE_HEIGHT,
+                        size: Math.random() * 1.2 + 0.3,
+                        speed: Math.random() * 0.3 + 0.05
+                    });
+                }
+            },
+
+            draw(currentPhase, mouseX, mouseY, stars, lines, selectedStarId) {
+                if (!this.ctx) return;
+
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                this.drawParallaxBackground(mouseX, mouseY);
+
+                if (currentPhase === 'CHARTING') {
+                    this.drawStars(stars, selectedStarId);
+                    this.drawLines(lines, stars);
+                    this.drawCurrentLine(mouseX, mouseY, stars, selectedStarId);
+                }
+            },
+
+            drawParallaxBackground(mouseX, mouseY) {
+                const centerMouseX = mouseX - window.innerWidth / 2;
+                const centerMouseY = mouseY - window.innerHeight / 2;
+
+                for (let i = 0; i < GAME_CONFIG.PARALLAX_LAYERS; i++) {
+                    this.ctx.fillStyle = GAME_CONFIG.PARALLAX_COLORS[i];
+                    const speed = GAME_CONFIG.PARALLAX_SPEEDS[i];
+                    const offsetX = -centerMouseX * speed;
+                    const offsetY = -centerMouseY * speed;
+
+                    this.ctx.save();
+                    this.ctx.translate(offsetX, offsetY);
+
+                    this.ctx.globalAlpha = 0.2 + i * 0.05;
+
+                     // Draw background stars
+                     this.ctx.fillStyle = '#FFFFFF';
+                     this.backgroundStars.forEach(star => {
+                          const starOffsetX = star.x + offsetX * star.speed;
+                          const starOffsetY = star.y + offsetY * star.speed;
+
+                          const wrappedX = (starOffsetX % this.canvas.width + this.canvas.width) % this.canvas.width;
+                          const wrappedY = (starOffsetY % this.canvas.height + this.canvas.height) % this.canvas.height;
+
+                          this.ctx.beginPath();
+                          this.ctx.arc(wrappedX, wrappedY, star.size, 0, Math.PI * 2);
+                          this.ctx.fill();
+                     });
+
+                    this.ctx.restore();
+                }
+            },
+
+            drawStars(stars, selectedStarId) {
+                stars.forEach(star => {
+                    const x = star.x * this.canvas.width;
+                    const y = star.y * this.canvas.height;
+
+                    this.ctx.fillStyle = star.id === selectedStarId ? GAME_CONFIG.LINE_COLOR : GAME_CONFIG.STAR_COLOR;
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, y, GAME_CONFIG.STAR_SIZE, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    if (star.id === selectedStarId) {
+                        this.ctx.strokeStyle = GAME_CONFIG.LINE_COLOR;
+                        this.ctx.lineWidth = 1;
+                        this.ctx.beginPath();
+                        this.ctx.arc(x, y, GAME_CONFIG.STAR_CLICK_RADIUS, 0, Math.PI * 2);
+                        this.ctx.stroke();
+                    }
+                });
+            },
+
+            drawLines(lines, stars) {
+                this.ctx.strokeStyle = GAME_CONFIG.LINE_COLOR;
+                this.ctx.lineWidth = GAME_CONFIG.LINE_WIDTH;
+                this.ctx.lineCap = 'round';
+
+                lines.forEach(line => {
+                    const startStar = stars.find(s => s.id === line.startStarId);
+                    const endStar = stars.find(s => s.id === line.endStarId);
+
+                    if (startStar && endStar) {
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(startStar.x * this.canvas.width, startStar.y * this.canvas.height);
+                        this.ctx.lineTo(endStar.x * this.canvas.width, endStar.y * this.canvas.height);
+                        this.ctx.stroke();
+                    }
+                });
+            },
+
+            drawCurrentLine(mouseX, mouseY, stars, selectedStarId) {
+                if (selectedStarId !== null) {
+                    const startStar = stars.find(s => s.id === selectedStarId);
+                    if (startStar) {
+                        this.ctx.strokeStyle = GAME_CONFIG.LINE_COLOR;
+                        this.ctx.lineWidth = GAME_CONFIG.LINE_WIDTH;
+                        this.ctx.lineCap = 'round';
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(startStar.x * this.canvas.width, startStar.y * this.canvas.height);
+                        const canvasMouse = this.screenToCanvas(mouseX, mouseY);
+                        this.ctx.lineTo(canvasMouse.x, canvasMouse.y);
+                        this.ctx.stroke();
+                    }
+                }
+            },
+
+            screenToCanvas(screenX, screenY) {
+                const rect = this.canvas.getBoundingClientRect();
+                const scaleX = this.canvas.width / rect.width;
+                const scaleY = this.canvas.height / rect.height;
+                return {
+                    x: (screenX - rect.left) * scaleX,
+                    y: (screenY - rect.top) * scaleY
+                };
+            },
+
+             getStarAt(screenX, screenY, stars) {
+                 const canvasCoords = this.screenToCanvas(screenX, screenY);
+                 for (const star of stars) {
+                     const starX = star.x * this.canvas.width;
+                     const starY = star.y * this.canvas.height;
+                     const distance = Math.sqrt((canvasCoords.x - starX) ** 2 + (canvasCoords.y - starY) ** 2);
+                     if (distance < GAME_CONFIG.STAR_CLICK_RADIUS) {
+                         return star;
+                     }
+                 }
+                 return null;
+             }
+        };
+
+        const uiManager = {
+            init(elements) {
+                Object.assign(uiElements, elements);
+            },
+
+            showScreen(phase) {
+                gameState.currentPhase = phase;
+                this.hideAllScreens();
+                soundManager.stopAllAmbient();
+
+                const uiScreenElements = [
+                    uiElements.loadingScreen, uiElements.mainMenu, uiElements.missionSelectScreen,
+                    uiElements.clueScreen, uiElements.atlasScreen, uiElements.shopScreen, uiElements.settingsScreen
+                ];
+
+                // Hide/Show canvas pointer events based on whether a UI screen is active
+                if (phase === 'CHARTING') {
+                    uiElements.gameCanvas.classList.remove('ui-active');
+                    uiElements.hud.classList.remove('hidden');
+                    uiElements.chartingUi.classList.remove('hidden');
+                    soundManager.setAmbient('ambientSpace');
+                } else {
+                    uiElements.gameCanvas.classList.add('ui-active');
+                    uiElements.hud.classList.add('hidden');
+                    uiElements.chartingUi.classList.add('hidden');
+                }
+
+
+                switch (phase) {
+                    case 'LOADING':
+                        uiElements.loadingScreen.classList.remove('hidden');
+                        break;
+                    case 'MAIN_MENU':
+                        uiElements.mainMenu.classList.remove('hidden');
+                         if (localStorage.getItem('celestialCartographerSave')) {
+                             uiElements.btnContinueGame.classList.remove('hidden');
+                         } else {
+                             uiElements.btnContinueGame.classList.add('hidden');
+                         }
+                        break;
+                    case 'MISSION_SELECT':
+                        uiElements.missionSelectScreen.classList.remove('hidden');
+                        this.populateMissionList();
+                        break;
+                    case 'CLUE_SCREEN':
+                        uiElements.clueScreen.classList.remove('hidden');
+                        uiElements.clueScreenTitle.textContent = `Mission: ${missionManager.currentMission.name}`;
+                        break;
+                    case 'CHARTING':
+                        // Handled above
+                         break;
+                    case 'MISSION_RESULT':
+                        // Handled by Bootstrap modal, but HUD stays visible
+                        uiElements.hud.classList.remove('hidden');
+                        break;
+                    case 'ATLAS':
+                        uiElements.atlasScreen.classList.remove('hidden');
+                        this.populateAtlas();
+                        break;
+                    case 'SHOP':
+                         uiElements.shopScreen.classList.remove('hidden');
+                         this.populateShop();
+                        break;
+                     case 'SETTINGS':
+                         uiElements.settingsScreen.classList.remove('hidden');
+                         break;
+                }
+            },
+
+            hideAllScreens() {
+                const screens = [
+                    uiElements.loadingScreen, uiElements.mainMenu, uiElements.missionSelectScreen,
+                    uiElements.clueScreen, uiElements.atlasScreen, uiElements.shopScreen,
+                    uiElements.settingsScreen
+                ];
+                screens.forEach(screen => screen.classList.add('hidden'));
+                // Charting UI and HUD visibility is managed in showScreen('CHARTING')
+            },
+
+            updateHUD() {
+                uiElements.playerRank.textContent = player.rank;
+                uiElements.playerXP.textContent = player.xp;
+                uiElements.playerDust.textContent = player.dust;
+            },
+
+            populateMissionList() {
+                 const missionListDiv = uiElements.missionList;
+                 missionListDiv.innerHTML = '';
+
+                 const available = missionManager.getAvailableMissions();
+
+                 if (available.length === 0) {
+                     missionListDiv.innerHTML = '<p class="text-warning">You have completed all available missions! Congratulations, Master Cartographer!</p>';
+                     return;
+                 }
+
+                 available.forEach(mission => {
+                     const button = document.createElement('button');
+                     button.classList.add('btn', 'btn-outline-primary', 'm-2');
+                     button.textContent = mission.name;
+                     button.addEventListener('click', async () => {
+                         soundManager.play('uiClick');
+                         await missionManager.loadMission(mission.id);
+                     });
+                     missionListDiv.appendChild(button);
+                 });
+            },
+
+             async showMissionResult(success) {
+                 const modal = new bootstrap.Modal(uiElements.missionResultModal);
+                 uiElements.aiFeedbackDisplay.textContent = '';
+                 uiElements.generatedConstellationImage.classList.add('hidden');
+                 uiElements.imageLoadingIndicator.classList.add('hidden');
+                 uiElements.imageErrorMessage.classList.add('hidden');
+                 uiElements.generatedConstellationImage.src = ''; // Clear previous image
+
+                 if (success) {
+                     uiElements.missionResultModalLabel.textContent = "Mission Success!";
+                     uiElements.resultMessage.textContent = `You successfully charted ${missionManager.currentMission.name}!`;
+                     const feedback = await apiManager.getAIResponse(`The player successfully charted the constellation ${missionManager.currentMission.name}. Provide encouraging feedback from the Headmaster.`);
+                     if (feedback) uiElements.aiFeedbackDisplay.textContent = feedback;
+
+                     const xpEarned = GAME_CONFIG.XP_PER_MISSION;
+                     const dustEarned = GAME_CONFIG.DUST_PER_MISSION;
+                     player.addXP(xpEarned);
+                     player.addDust(dustEarned);
+                     uiElements.rewardText.textContent = `Rewards: +${xpEarned} XP, +${dustEarned} Cosmic Dust`;
+
+                     missionManager.markMissionComplete(missionManager.currentMission.id);
+                     soundManager.play('missionSuccess');
+
+                     const observatoryQuality = GAME_CONFIG.OBSERVATORY_LEVELS[player.observatoryLevel].quality;
+                     const imagePrompt = `Generate a beautiful, artistic image of the constellation ${missionManager.currentMission.name} in a dark space background, incorporating stars connected by subtle lines. The style should be ${observatoryQuality}. Focus on the visual representation of the constellation itself.`;
+                     const imageUrl = await apiManager.generateConstellationImage(imagePrompt, "1:1", "hd");
+                     if (imageUrl) {
+                          uiElements.generatedConstellationImage.src = imageUrl;
+                          uiElements.generatedConstellationImage.classList.remove('hidden');
+                          player.addToAtlas(missionManager.currentMission.constellationId, imageUrl);
+                     }
+
+
+                 } else {
+                     uiElements.missionResultModalLabel.textContent = "Mission Failed";
+                     uiElements.resultMessage.textContent = `Your chart for ${missionManager.currentMission.name} was incorrect.`;
+                     const feedback = await apiManager.getAIResponse(`The player failed to correctly chart the constellation ${missionManager.currentMission.name}. Provide constructive but gentle feedback from the Headmaster.`);
+                     if (feedback) uiElements.aiFeedbackDisplay.textContent = feedback;
+                     uiElements.rewardText.textContent = "No rewards this time.";
+                     soundManager.play('missionFailure');
+                 }
+
+                 modal.show();
+             },
+
+             populateAtlas() {
+                 const atlasContentDiv = uiElements.atlasContent;
+                 atlasContentDiv.innerHTML = '';
+
+                 const constellations = Object.keys(player.atlas);
+
+                 if (constellations.length === 0) {
+                     uiElements.atlasEmptyMessage.classList.remove('hidden');
+                     return;
+                 } else {
+                      uiElements.atlasEmptyMessage.classList.add('hidden');
+                 }
+
+                 constellations.forEach(constellationId => {
+                     const imageUrl = player.atlas[constellationId];
+                     const constellationName = GAME_CONFIG.MISSIONS.find(m => m.constellationId === constellationId)?.name || constellationId;
+
+                     const itemDiv = document.createElement('div');
+                     itemDiv.classList.add('atlas-item');
+
+                     const img = document.createElement('img');
+                     img.src = imageUrl;
+                     img.alt = `${constellationName} Constellation`;
+                     img.onload = () => { /* Image loaded */ };
+                     img.onerror = () => {
+                          console.error("Failed to load atlas image:", imageUrl);
+                          img.src = '';
+                          img.alt = "Image Failed to Load";
+                          const errorDiv = document.createElement('div');
+                          errorDiv.textContent = "Image Failed to Load";
+                          errorDiv.classList.add('text-danger', 'mt-2');
+                           // Replace image with error text container
+                           if(img.parentNode) {
+                               img.parentNode.replaceChild(errorDiv, img);
+                           } else {
+                               // If img wasn't appended yet, just append errorDiv
+                               itemDiv.appendChild(errorDiv);
+                           }
+                     };
+
+                     const nameSpan = document.createElement('div');
+                     nameSpan.classList.add('constellation-name');
+                     nameSpan.textContent = constellationName;
+
+                     itemDiv.appendChild(img);
+                     itemDiv.appendChild(nameSpan);
+                     atlasContentDiv.appendChild(itemDiv);
+                 });
+             },
+
+             populateShop() {
+                 const shopItemsDiv = uiElements.shopItems;
+                 shopItemsDiv.innerHTML = '';
+
+                 uiElements.currentObservatoryLevel.textContent = player.observatoryLevel + 1;
+
+                 GAME_CONFIG.OBSERVATORY_LEVELS.forEach((level, index) => {
+                     if (index < player.observatoryLevel) {
+                         const ownedItem = document.createElement('div');
+                         ownedItem.classList.add('alert', 'alert-success', 'm-2');
+                         ownedItem.textContent = `Observatory Level ${index + 1} (${level.quality}) - Owned`;
+                         shopItemsDiv.appendChild(ownedItem);
+                     } else if (index === player.observatoryLevel) {
+                          const currentItem = document.createElement('div');
+                          currentItem.classList.add('alert', 'alert-info', 'm-2');
+                          currentItem.textContent = `Current Observatory Level ${index + 1} (${level.quality})`;
+                          shopItemsDiv.appendChild(currentItem);
+                     }
+                     else if (index === player.observatoryLevel + 1) {
+                         const upgradeCost = level.cost;
+                         const upgradeItem = document.createElement('div');
+                         upgradeItem.classList.add('card', 'bg-secondary', 'text-light', 'm-2');
+                         upgradeItem.innerHTML = `
+                             <div class="card-body">
+                                 <h5 class="card-title">Upgrade Observatory to Level ${index + 1}</h5>
+                                 <p class="card-text">Unlocks: ${level.quality}</p>
+                                 <p class="card-text">Cost: <span class="text-warning">${upgradeCost} Dust</span></p>
+                                 <button class="btn btn-primary btn-buy-upgrade" data-cost="${upgradeCost}" ${player.dust < upgradeCost ? 'disabled' : ''}>Buy Upgrade</button>
+                             </div>
+                         `;
+                         shopItemsDiv.appendChild(upgradeItem);
+                     }
+                 });
+
+                 shopItemsDiv.querySelectorAll('.btn-buy-upgrade').forEach(button => {
+                     button.addEventListener('click', (event) => {
+                         const cost = parseInt(event.target.dataset.cost);
+                         player.buyUpgrade(cost);
+                     });
+                 });
+             }
+
+        };
+
+        const inputHandler = {
+            init(canvasElement) {
+                canvasElement.addEventListener('mousemove', this.handleMouseMove);
+                canvasElement.addEventListener('mousedown', this.handleMouseDown);
+                canvasElement.addEventListener('mouseup', this.handleMouseUp);
+                canvasElement.addEventListener('click', this.handleClick);
+                 canvasElement.addEventListener('contextmenu', this.handleRightClick);
+            },
+
+            handleMouseMove(event) {
+                mousePos.x = event.clientX;
+                mousePos.y = event.clientY;
+            },
+
+            handleMouseDown(event) {
+                if (event.button === 0) {
+                    mousePos.isDown = true;
+                }
+            },
+
+            handleMouseUp(event) {
+                if (event.button === 0) {
+                    mousePos.isDown = false;
+                }
+            },
+
+            handleClick(event) {
+                 if (gameState.currentPhase === 'CHARTING') {
+                     const clickedStar = starChartRenderer.getStarAt(event.clientX, event.clientY, missionManager.getStarsForCurrentMission());
+
+                     if (clickedStar) {
+                         soundManager.play('uiClick');
+
+                         if (selectedStar === null) {
+                             selectedStar = clickedStar.id;
+                         } else if (selectedStar === clickedStar.id) {
+                             selectedStar = null;
+                         } else {
+                             const newLine = {
+                                 startStarId: selectedStar,
+                                 endStarId: clickedStar.id
+                             };
+
+                             const lineExists = playerLines.some(line =>
+                                 (line.startStarId === newLine.startStarId && line.endStarId === newLine.endStarId) ||
+                                 (line.startStarId === newLine.endStarId && line.endStarId === newLine.startStarId)
+                             );
+
+                             if (!lineExists) {
+                                 playerLines.push(newLine);
+                                 soundManager.play('starConnect');
+                                 if (playerLines.length >= missionManager.currentMission.requiredConnections.length) {
+                                      uiElements.btnSubmitChart.disabled = false;
+                                 }
+                             }
+
+                             selectedStar = null;
+                         }
+                     } else {
+                         selectedStar = null;
+                     }
+                 }
+            },
+             handleRightClick(event) {
+                 event.preventDefault();
+                 if (gameState.currentPhase === 'CHARTING') {
+                      if (playerLines.length > 0) {
+                           playerLines.pop();
+                           soundManager.play('uiClick');
+                            if (playerLines.length < missionManager.currentMission.requiredConnections.length) {
+                                 uiElements.btnSubmitChart.disabled = true;
+                            }
+                      }
+                 }
+             }
+        };
+
+
+        function createInitialGameState() {
+            return {
+                currentPhase: 'LOADING',
+                player: {
+                    rank: "Apprentice",
+                    xp: 0,
+                    dust: 0,
+                    observatoryLevel: 0,
+                    atlas: {},
+                    tools: []
+                },
+                missionManager: {
+                    currentMission: null,
+                    completedMissions: [],
+                },
+                sound: {
+                     isMuted: false
+                }
+            };
+        }
+
+        function saveGame() {
+            try {
+                const saveState = {
+                    player: player,
+                    missionManager: {
+                        completedMissions: missionManager.completedMissions,
+                    },
+                     sound: {
+                         isMuted: isSoundMuted
+                     }
+                };
+                localStorage.setItem('celestialCartographerSave', JSON.stringify(saveState));
+            } catch (e) {
+                console.error("Failed to save game:", e);
+            }
+        }
+
+        function loadGame() {
+            try {
+                const savedState = localStorage.getItem('celestialCartographerSave');
+                if (savedState) {
+                    const loadedState = JSON.parse(savedState);
+                    Object.assign(player, loadedState.player);
+                    Object.assign(missionManager, loadedState.missionManager);
+
+                    isSoundMuted = loadedState.sound.isMuted;
+                    Howler.mute(isSoundMuted);
+                     uiElements.btnToggleSound.textContent = isSoundMuted ? "Toggle Sound (Off)" : "Toggle Sound (On)";
+
+                    console.log("Game loaded successfully.");
+                    return true;
+                } else {
+                    console.log("No save data found.");
+                    Object.assign(gameState, createInitialGameState());
+                    Object.assign(player, gameState.player);
+                    Object.assign(missionManager, gameState.missionManager);
+                    return false;
+                }
+            } catch (e) {
+                console.error("Failed to load game:", e);
+                Object.assign(gameState, createInitialGameState());
+                Object.assign(player, gameState.player);
+                Object.assign(missionManager, gameState.missionManager);
+                return false;
+            }
+        }
+
+
+        function resizeGameCanvasMaintainAspectRatio() {
+            const gameWrapper = document.getElementById('game-wrapper');
+            const nativeAspectRatio = GAME_CONFIG.CANVAS_NATIVE_WIDTH / GAME_CONFIG.CANVAS_NATIVE_HEIGHT;
+            let windowWidth = window.innerWidth;
+            let windowHeight = window.innerHeight;
+            const windowAspectRatio = windowWidth / windowHeight;
+
+            let scaledWidth, scaledHeight;
+
+            if (windowAspectRatio > nativeAspectRatio) {
+                scaledHeight = windowHeight;
+                scaledWidth = scaledHeight * nativeAspectRatio;
+            } else {
+                scaledWidth = windowWidth;
+                scaledHeight = scaledWidth / nativeAspectRatio;
+            }
+
+            canvas.style.width = Math.floor(scaledWidth) + 'px';
+            canvas.style.height = Math.floor(scaledHeight) + 'px';
+
+            if (gameWrapper) {
+                 gameWrapper.style.width = canvas.style.width;
+                 gameWrapper.style.height = canvas.style.height;
+            }
+        }
+
+
+        function update(deltaTime) {
+            // No continuous updates needed for current game mechanics
+        }
+
+        function render() {
+            starChartRenderer.draw(
+                gameState.currentPhase,
+                mousePos.x,
+                mousePos.y,
+                missionManager.getStarsForCurrentMission(),
+                playerLines,
+                selectedStar
+            );
+        }
+
+        function gameLoop(timestamp) {
+            const deltaTime = Math.min(0.1, (timestamp - lastTime) / 1000);
+            lastTime = timestamp;
+
+            update(deltaTime);
+            render();
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            canvas = document.getElementById('gameCanvas');
+            canvas.width = GAME_CONFIG.CANVAS_NATIVE_WIDTH;
+            canvas.height = GAME_CONFIG.CANVAS_NATIVE_HEIGHT;
+            starChartRenderer.init(canvas);
+
+            uiManager.init({
+                gameContainer: document.getElementById('game-container'),
+                gameWrapper: document.getElementById('game-wrapper'),
+                gameCanvas: document.getElementById('gameCanvas'),
+                loadingScreen: document.getElementById('loading-screen'),
+                mainMenu: document.getElementById('main-menu'),
+                missionSelectScreen: document.getElementById('mission-select-screen'),
+                clueScreen: document.getElementById('clue-screen'),
+                hud: document.getElementById('hud'),
+                missionResultModal: document.getElementById('missionResultModal'),
+                atlasScreen: document.getElementById('atlas-screen'),
+                shopScreen: document.getElementById('shop-screen'),
+                settingsScreen: document.getElementById('settings-screen'),
+                playerRank: document.getElementById('player-rank'),
+                playerXP: document.getElementById('player-xp'),
+                playerDust: document.getElementById('player-dust'),
+                btnStartGame: document.getElementById('btn-start-game'),
+                 btnContinueGame: document.getElementById('btn-continue-game'),
+                btnAtlas: document.getElementById('btn-atlas'),
+                btnShop: document.getElementById('btn-shop'),
+                btnSettings: document.getElementById('btn-settings'),
+                missionList: document.getElementById('mission-list'),
+                btnBackToMain: document.getElementById('btn-back-to-main'),
+                clueScreenTitle: document.getElementById('clue-screen-title'),
+                headmasterIntro: document.getElementById('headmaster-intro'),
+                missionClues: document.getElementById('mission-clues'),
+                clueText: document.getElementById('clue-text'),
+                coordinateText: document.getElementById('coordinate-text'),
+                 aiLoadingClues: document.getElementById('ai-loading-clues'),
+                 aiErrorClues: document.getElementById('ai-error-clues'),
+                btnStartCharting: document.getElementById('btn-start-charting'),
+                 btnClueBack: document.getElementById('btn-clue-back'),
+                 chartingUi: document.getElementById('charting-ui'),
+                 btnSubmitChart: document.getElementById('btn-submit-chart'),
+                 resultMessage: document.getElementById('result-message'),
+                 aiFeedbackDisplay: document.getElementById('ai-feedback-display'),
+                 constellationImageContainer: document.getElementById('constellationImageContainer'),
+                 imageLoadingIndicator: document.getElementById('image-loading-indicator'),
+                 imageErrorMessage: document.getElementById('image-error-message'),
+                 generatedConstellationImage: document.getElementById('generated-constellation-image'),
+                 rewardText: document.getElementById('reward-text'),
+                 btnNextMission: document.getElementById('btn-next-mission'),
+                 atlasContent: document.getElementById('atlas-content'),
+                 atlasEmptyMessage: document.getElementById('atlas-empty-message'),
+                 btnAtlasBack: document.getElementById('btn-atlas-back'),
+                 currentObservatoryLevel: document.getElementById('current-observatory-level'),
+                 shopItems: document.getElementById('shop-items'),
+                 btnShopBack: document.getElementById('btn-shop-back'),
+                 btnToggleSound: document.getElementById('btn-toggle-sound'),
+                 btnResetProgress: document.getElementById('btn-reset-progress'),
+                 btnSettingsBack: document.getElementById('btn-settings-back')
+
+            });
+
+            const hasSave = loadGame();
+            uiManager.updateHUD();
+
+            window.addEventListener('resize', resizeGameCanvasMaintainAspectRatio);
+            inputHandler.init(canvas);
+
+            uiElements.btnStartGame.addEventListener('click', () => {
+                 soundManager.play('uiClick');
+                 localStorage.removeItem('celestialCartographerSave');
+                 gameState = createInitialGameState();
+                 Object.assign(player, gameState.player);
+                 Object.assign(missionManager, gameState.missionManager);
+                 uiManager.updateHUD();
+                 uiManager.showScreen('MISSION_SELECT');
+            });
+
+            uiElements.btnContinueGame.addEventListener('click', () => {
+                 soundManager.play('uiClick');
+                 uiManager.showScreen('MISSION_SELECT');
+            });
+
+            uiElements.btnAtlas.addEventListener('click', () => {
+                 soundManager.play('uiClick');
+                 uiManager.showScreen('ATLAS');
+            });
+
+            uiElements.btnShop.addEventListener('click', () => {
+
+                 soundManager.play('uiClick');
+                 uiManager.showScreen('SHOP');
+            });
+
+             uiElements.btnSettings.addEventListener('click', () => {
+                 soundManager.play('uiClick');
+                 uiManager.showScreen('SETTINGS');
+            });
+
+            uiElements.btnBackToMain.addEventListener('click', () => {
+                 soundManager.play('uiClick');
+                 uiManager.showScreen('MAIN_MENU');
+            });
+
+             uiElements.btnClueBack.addEventListener('click', () => {
+                 soundManager.play('uiClick');
+                 uiManager.showScreen('MISSION_SELECT');
+            });
+
+            uiElements.btnStartCharting.addEventListener('click', () => {
+                 soundManager.play('uiClick');
+                 uiManager.showScreen('CHARTING');
+                 playerLines = [];
+                 selectedStar = null;
+                 uiElements.btnSubmitChart.disabled = true;
+            });
+
+             uiElements.btnSubmitChart.addEventListener('click', () => {
+                 soundManager.play('uiClick');
+                 const success = missionManager.validateChart();
+                 uiManager.showMissionResult(success);
+             });
+
+             uiElements.btnNextMission.addEventListener('click', () => {
+                 soundManager.play('uiClick');
+                 uiManager.showScreen('MISSION_SELECT');
+             });
+
+             uiElements.btnAtlasBack.addEventListener('click', () => {
+                 soundManager.play('uiClick');
+                 uiManager.showScreen('MAIN_MENU');
+             });
+
+             uiElements.btnShopBack.addEventListener('click', () => {
+                 soundManager.play('uiClick');
+                 uiManager.showScreen('MAIN_MENU');
+             });
+
+             uiElements.btnSettingsBack.addEventListener('click', () => {
+                 soundManager.play('uiClick');
+                 uiManager.showScreen('MAIN_MENU');
+             });
+
+             uiElements.btnToggleSound.addEventListener('click', () => {
+                 soundManager.toggleMute();
+             });
+
+             uiElements.btnResetProgress.addEventListener('click', () => {
+                  if (confirm("Are you sure you want to reset all your progress? This cannot be undone.")) {
+                      player.resetProgress();
+                  }
+             });
+
+            soundManager.loadSounds();
+            resizeGameCanvasMaintainAspectRatio();
+            uiManager.showScreen(hasSave ? 'MAIN_MENU' : 'MAIN_MENU');
+            requestAnimationFrame(gameLoop);
+        });
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

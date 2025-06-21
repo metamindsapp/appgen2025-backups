@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lake Tyee Lot Owners Band</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link rel="icon" href="/generated_images/imagen3_FasjMy_49e641_be8abf08-857.png" type="image/png">
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            padding-top: 72px; 
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #f8f9fa; 
+            color: #212529;
+        }
+        section {
+            scroll-margin-top: 72px; 
+        }
+        .navbar-brand img#navbarLogo {
+            max-height: 50px;
+        }
+        .navbar-nav .nav-link {
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        .navbar-nav .nav-link.active,
+        .navbar-nav .nav-link:hover {
+            color: #0d6efd !important; 
+            font-weight: 700;
+        }
+        .hero-section {
+            background-size: cover;
+            background-position: center;
+            min-height: 85vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #212529;
+        }
+        .hero-section .container {
+            background-color: rgba(255, 255, 255, 0.85);
+            padding: 2.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        .member-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .member-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 1rem 1.5rem rgba(0,0,0,0.1);
+        }
+        .member-card img {
+            width: 180px;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            border: 5px solid #fff;
+            box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,0.1);
+        }
+        .gallery-item img {
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            border-radius: 0.375rem; 
+        }
+        .gallery-item img:hover {
+            transform: scale(1.05);
+            opacity: 0.8;
+        }
+        .modal-body img {
+            max-height: 80vh;
+        }
+        .audio-player-container {
+            background-color: #e9ecef;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            margin-bottom: 1rem;
+        }
+        .audio-player-container p {
+            margin-bottom: 0.5rem;
+        }
+        .audio-player-container audio {
+            width: 100%;
+        }
+        .list-group-item-action:hover {
+            background-color: #e9ecef;
+        }
+        footer.bg-dark a {
+            color: #adb5bd;
+            text-decoration: none;
+        }
+        footer.bg-dark a:hover {
+            color: #fff;
+        }
+        [data-aos] {
+            opacity: 0;
+            transition-property: transform, opacity;
+        }
+        .section-title {
+            margin-bottom: 3rem;
+            font-weight: 700;
+            color: #343a40;
+        }
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 3px;
+            background-color: #0d6efd;
+            margin: 0.5rem auto 0;
+        }
+    </style>
+</head>
+<body data-bs-spy="scroll" data-bs-target="#navbarNav" data-bs-offset="72">
+
+    <header class="sticky-top shadow-sm">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white py-3">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center" href="#home">
+                    <img src="/generated_images/imagen3_FasjMy_49e641_f5db8298-0e6.png" alt="Lake Tyee Lot Owners Band Logo" id="navbarLogo">
+                    <span class="ms-2 fw-bold fs-5">Lake Tyee Lot Owners Band</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#music">Music</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#events">Events</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#gallery">Gallery</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="home" class="hero-section text-center" style="background-image: url('/generated_images/imagen3_FasjMy_49e641_2254a3cc-703.png');">
+            <div class="container" data-aos="fade-up">
+                <h1 class="display-3 fw-bold">Lake Tyee Lot Owners Band</h1>
+                <p class="lead my-4">Rockin' the Shores of Lake Tyee and Beyond!</p>
+                <p class="mb-4">Welcome to the official home of the Lake Tyee Lot Owners Band! We're a five-piece classic rock band bringing high-energy performances and timeless tunes to our community and the surrounding areas. Dive in to learn more about us, listen to our music, and catch us at our next gig!</p>
+                <div>
+                    <a href="#music" class="btn btn-primary btn-lg mx-2 my-1">Listen to Our Music</a>
+                    <a href="#events" class="btn btn-outline-secondary btn-lg mx-2 my-1">Upcoming Gigs</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="py-5">
+            <div class="container">
+                <h2 class="text-center section-title" data-aos="fade-up">About Us</h2>
+                <div class="row align-items-center">
+                    <div class="col-lg-6" data-aos="fade-right" data-aos-delay="100">
+                        <h3 class="fw-light mb-3">Our Story</h3>
+                        <p>Born from a shared love for classic rock anthems and spontaneous jam sessions by the lake, the Lake Tyee Lot Owners Band officially formed in 2022. What started as a casual get-together of music-loving neighbors quickly evolved into a tight-knit group dedicated to recreating the magic of rock's golden era.</p>
+                        <p>From local community events to private parties, we bring passion, energy, and a whole lot of fun to every stage we play. Our sound is rooted in the iconic hits of the 60s, 70s, and 80s, delivered with our own unique flair. We're more than just a band; we're friends, neighbors, and fellow music enthusiasts committed to keeping the spirit of classic rock alive.</p>
+                    </div>
+                    <div class="col-lg-6 text-center" data-aos="fade-left" data-aos-delay="200">
+                        <img src="/generated_images/imagen3_FasjMy_49e641_5188dfef-4a2.png" alt="Lake Tyee Lot Owners Band group photo" class="img-fluid rounded shadow-lg">
+                    </div>
+                </div>
+
+                <h3 class="text-center fw-light mt-5 mb-4" data-aos="fade-up">Meet the Band</h3>
+                <div class="row text-center justify-content-center" id="bandMembersContainer">
+                </div>
+            </div>
+        </section>
+
+        <section id="music" class="py-5 bg-white">
+            <div class="container">
+                <h2 class="text-center section-title" data-aos="fade-up">Our Music</h2>
+                <p class="text-center lead mb-5" data-aos="fade-up" data-aos-delay="100">Check out some of our tunes! More coming soon. For actual audio, please replace the placeholder 'src' attributes in the HTML.</p>
+                <div class="row">
+                    <div class="col-md-6 col-lg-4 mb-4" data-aos="fade-up" data-aos-delay="200">
+                        <div class="audio-player-container shadow-sm">
+                            <h5 class="fw-bold">Lakeside Jammin'</h5>
+                            <p class="small text-muted">An original instrumental that captures the spirit of a summer evening by Lake Tyee.</p>
+                            <audio controls src="#">Your browser does not support the audio element.</audio>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4 mb-4" data-aos="fade-up" data-aos-delay="300">
+                        <div class="audio-player-container shadow-sm">
+                            <h5 class="fw-bold">Rockin' The Dock (Live)</h5>
+                            <p class="small text-muted">A raw, energetic live recording of one of our favorite covers, full of crowd energy.</p>
+                            <audio controls src="#">Your browser does not support the audio element.</audio>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4 mb-4" data-aos="fade-up" data-aos-delay="400">
+                        <div class="audio-player-container shadow-sm">
+                            <h5 class="fw-bold">Mountain High Groove</h5>
+                            <p class="small text-muted">A blues-infused rocker with a driving beat and soulful solos.</p>
+                            <audio controls src="#">Your browser does not support the audio element.</audio>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-4" data-aos="fade-up" data-aos-delay="500">
+                    <p class="mb-2">Find us on your favorite platforms (example links):</p>
+                    <a href="https://soundcloud.com" target="_blank" class="btn btn-outline-dark mx-1"><i class="bi bi-soundcloud me-2"></i>SoundCloud</a>
+                    <a href="https://bandcamp.com" target="_blank" class="btn btn-outline-dark mx-1"><i class="bi bi-bandcamp me-2"></i>Bandcamp</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="events" class="py-5">
+            <div class="container">
+                <h2 class="text-center section-title" data-aos="fade-up">Events & Gigs</h2>
+                <div class="row">
+                    <div class="col-lg-7 mb-4 mb-lg-0" data-aos="fade-right">
+                        <h3 class="fw-light mb-3">Upcoming Gigs</h3>
+                        <div id="upcomingGigsListContainer" class="list-group shadow">
+                        </div>
+                    </div>
+                    <div class="col-lg-5" data-aos="fade-left" data-aos-delay="100">
+                        <h3 class="fw-light mb-3">Past Highlights</h3>
+                        <ul class="list-group shadow-sm">
+                            <li class="list-group-item">Lake Tyee Community BBQ - July 2024</li>
+                            <li class="list-group-item">Concrete Town Fair - August 2024</li>
+                            <li class="list-group-item">New Year's Eve Bash at the Lodge - December 2023</li>
+                            <li class="list-group-item">Rock The Block Party - Sedro-Woolley - June 2023</li>
+                        </ul>
+                        <div class="mt-4 text-center text-lg-start">
+                             <a href="#contact" class="btn btn-primary">Book Us For Your Event!</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="gallery" class="py-5 bg-white">
+            <div class="container">
+                <h2 class="text-center section-title" data-aos="fade-up">Gallery</h2>
+                <p class="text-center lead mb-5" data-aos="fade-up" data-aos-delay="100">A glimpse into our world. Click on an image to see it larger.</p>
+                <div class="row g-4" id="photoGalleryContainer">
+                </div>
+            </div>
+        </section>
+
+        <div class="modal fade" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="photoModalLabel">Gallery Image</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <img src="" alt="" class="img-fluid rounded" id="modalImage">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section id="contact" class="py-5">
+            <div class="container">
+                <h2 class="text-center section-title" data-aos="fade-up">Get In Touch</h2>
+                <p class="text-center lead mb-5" data-aos="fade-up" data-aos-delay="100">We'd love to hear from you! Whether it's for bookings, questions, or just to say hi.</p>
+                <div class="row">
+                    <div class="col-lg-6 mb-4 mb-lg-0" data-aos="fade-right" data-aos-delay="200">
+                        <h4 class="fw-light mb-3">Contact Information</h4>
+                        <p><i class="bi bi-envelope-fill me-2 text-primary"></i>Email: <a href="mailto:info@laketyeeband.example.com">info@laketyeeband.example.com</a></p>
+                        <p><i class="bi bi-telephone-fill me-2 text-primary"></i>Phone: <a href="tel:+15551234567">(555) 123-4567</a> (Booking inquiries)</p>
+                        <p><i class="bi bi-geo-alt-fill me-2 text-primary"></i>Based in: Lake Tyee, WA</p>
+                        <h4 class="fw-light mt-4 mb-3">Follow Us</h4>
+                        <p>
+                            <a href="#" class="btn btn-outline-primary btn-lg me-2" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+                            <a href="#" class="btn btn-outline-primary btn-lg me-2" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                            <a href="#" class="btn btn-outline-primary btn-lg" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+                        </p>
+                    </div>
+                    <div class="col-lg-6" data-aos="fade-left" data-aos-delay="300">
+                        <h4 class="fw-light mb-3">Send Us a Message</h4>
+                        <form id="contactForm" action="mailto:info@laketyeeband.example.com?subject=Website Inquiry" method="post" enctype="text/plain">
+                            <div class="mb-3">
+                                <label for="contactName" class="form-label">Your Name</label>
+                                <input type="text" class="form-control" id="contactName" name="name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="contactEmail" class="form-label">Your Email</label>
+                                <input type="email" class="form-control" id="contactEmail" name="email" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="contactSubject" class="form-label">Subject</label>
+                                <input type="text" class="form-control" id="contactSubject" name="subject">
+                            </div>
+                            <div class="mb-3">
+                                <label for="contactMessage" class="form-label">Message</label>
+                                <textarea class="form-control" id="contactMessage" name="message" rows="5" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-lg">Send Message</button>
+                            <p class="form-text mt-2">Note: This form will open your default email client.</p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="py-4 bg-dark text-white text-center">
+        <div class="container">
+            <p class="mb-1">Connect with us on social media!</p>
+            <p class="mb-3">
+                <a href="#" class="mx-2" aria-label="Facebook"><i class="bi bi-facebook fs-4"></i></a>
+                <a href="#" class="mx-2" aria-label="Instagram"><i class="bi bi-instagram fs-4"></i></a>
+                <a href="#" class="mx-2" aria-label="YouTube"><i class="bi bi-youtube fs-4"></i></a>
+            </p>
+            <p class="mb-0">&copy; <span id="currentYear"></span> Lake Tyee Lot Owners Band. All Rights Reserved.</p>
+            <p class="small mb-0">Website designed with <i class="bi bi-heart-fill text-danger"></i> by AppGen2025</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        const bandMembersData = [
+            { id: 'rocky', name: "Rocky Roads", instrument: "Lead Vocals, Rhythm Guitar", bio: "The voice and heart of the band, Rocky's powerful vocals and driving rhythm guitar lay the foundation for our classic rock sound. He's been singing since before he could walk and brings an infectious energy to every performance.", image: "/generated_images/imagen3_FasjMy_49e641_e7a3e650-fe8.png", aosDelay: "0" },
+            { id: 'shreddy', name: "Shreddy Mercury", instrument: "Lead Guitar", bio: "With fingers that fly across the fretboard, Shreddy delivers those unforgettable guitar solos and blistering riffs that define classic rock. A true student of the greats, his passion for guitar is electrifying.", image: "/generated_images/imagen3_FasjMy_49e641_995bd8f5-a54.png", aosDelay: "100" },
+            { id: 'thunder', name: "Thunder Thumbs", instrument: "Bass Guitar", bio: "The master of the low-end, Thunder Thumbs lays down the solid, groovy basslines that get your feet tapping and your body moving. His calm demeanor belies a thundering presence on stage.", image: "/generated_images/imagen3_FasjMy_49e641_d777093c-55c.png", aosDelay: "200" },
+            { id: 'beatrix', name: "Beatrix Potter", instrument: "Drums", bio: "The powerhouse behind the kit, Beatrix drives the band with her dynamic drumming and infectious enthusiasm. Her beats are the backbone of our sound, keeping everything tight and energetic.", image: "/generated_images/imagen3_FasjMy_49e641_67eb7b2a-8db.png", aosDelay: "300" },
+            { id: 'keyshia', name: "Keyshia Coletrane", instrument: "Keyboard, Vocals", bio: "Adding rich textures, soulful melodies, and beautiful harmonies, Keyshia's keyboard wizardry and vocal talents elevate our sound. She brings a touch of class and a whole lot of soul to every song.", image: "/generated_images/imagen3_FasjMy_49e641_c994a81c-b83.png", aosDelay: "400" }
+        ];
+
+        const upcomingGigsData = [
+            { date: "July 26, 2025", venue: "Lake Tyee Summer Fest", city: "Lake Tyee, WA", notes: "Main Stage, 7 PM. Don't miss our biggest local show of the year!", aosDelay: "0" },
+            { date: "August 10, 2025", venue: "The Rusty Mug Pub", city: "Concrete, WA", notes: "Acoustic Night, 8 PM. An intimate evening of classic rock favorites.", aosDelay: "100" },
+            { date: "September 5, 2025", venue: "Private Party", city: "Mount Vernon, WA", notes: "Book us for your next event!", aosDelay: "200" },
+            { date: "October 12, 2025", venue: "Harvest Moon Brewery", city: "Bellingham, WA", notes: "Rocktoberfest! Special guest appearance.", aosDelay: "300" }
+        ];
+
+        const galleryData = [
+            { src: "/generated_images/imagen3_FasjMy_49e641_4dc9f0b7-967.png", alt: "Band playing live on stage", title: "Full Band Energy", aosDelay: "0" },
+            { src: "/generated_images/imagen3_FasjMy_49e641_e32a40a9-e53.png", alt: "Close up of guitar solo", title: "Shredding It", aosDelay: "100" },
+            { src: "/generated_images/imagen3_FasjMy_49e641_f6c21695-e9b.png", alt: "Appreciative crowd at a gig", title: "For The Fans", aosDelay: "200" },
+            { src: "/generated_images/imagen3_FasjMy_49e641_cc2ee0e8-a27.png", alt: "Band in a relaxed acoustic set", title: "Acoustic Vibes", aosDelay: "300" },
+            { src: "/generated_images/imagen3_FasjMy_49e641_9f2715b8-4aa.png", alt: "Serene view of Lake Tyee", title: "Our Inspiration - Lake Tyee", aosDelay: "400" },
+            { src: "/generated_images/imagen3_FasjMy_49e641_e8a24af4-4c8.png", alt: "Vintage band equipment", title: "Classic Gear", aosDelay: "500" }
+        ];
+
+        function populateBandMembers() {
+            const container = document.getElementById('bandMembersContainer');
+            if (!container) return;
+            let html = '';
+            bandMembersData.forEach(member => {
+                html += `
+                    <div class="col-lg col-md-4 col-sm-6 mb-4" data-aos="fade-up" data-aos-delay="${member.aosDelay}">
+                        <div class="card member-card h-100 text-center shadow-sm">
+                            <img src="${member.image}" alt="${member.name}" class="mt-4">
+                            <div class="card-body">
+                                <h4 class="card-title fw-bold">${member.name}</h4>
+                                <h6 class="card-subtitle mb-2 text-muted">${member.instrument}</h6>
+                                <p class="card-text small">${member.bio}</p>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+            container.innerHTML = html;
+        }
+        
+        function populateUpcomingGigs() {
+            const container = document.getElementById('upcomingGigsListContainer');
+            if (!container) return;
+            if (upcomingGigsData.length === 0) {
+                container.innerHTML = '<p class="text-muted">No upcoming gigs scheduled at the moment. Check back soon!</p>';
+                return;
+            }
+            let html = '';
+            upcomingGigsData.forEach(gig => {
+                html += `
+                    <div class="list-group-item list-group-item-action flex-column align-items-start" data-aos="fade-up" data-aos-delay="${gig.aosDelay}">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1 fw-bold">${gig.venue}</h5>
+                            <small class="text-muted">${gig.date}</small>
+                        </div>
+                        <p class="mb-1">${gig.city}</p>
+                        <small class="text-muted">${gig.notes}</small>
+                    </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function populateGallery() {
+            const container = document.getElementById('photoGalleryContainer');
+            if (!container) return;
+            let html = '';
+            galleryData.forEach(photo => {
+                html += `
+                    <div class="col-lg-4 col-md-6 gallery-item" data-aos="zoom-in" data-aos-delay="${photo.aosDelay}">
+                        <img src="${photo.src}" alt="${photo.alt}" title="${photo.title}" class="img-fluid shadow-sm w-100">
+                    </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function setupGalleryModal() {
+            const photoModalElement = document.getElementById('photoModal');
+            if (!photoModalElement) return;
+            const photoModal = new bootstrap.Modal(photoModalElement);
+            const modalImage = document.getElementById('modalImage');
+            const modalTitle = document.getElementById('photoModalLabel');
+
+            document.querySelectorAll('.gallery-item img').forEach(img => {
+                img.addEventListener('click', function() {
+                    modalImage.src = this.src;
+                    modalImage.alt = this.alt;
+                    modalTitle.textContent = this.title || this.alt;
+                    photoModal.show();
+                });
+            });
+        }
+        
+        function updateCopyrightYear() {
+            const yearSpan = document.getElementById('currentYear');
+            if (yearSpan) {
+                yearSpan.textContent = new Date().getFullYear();
+            }
+        }
+        
+        function handleContactForm() {
+            const form = document.getElementById('contactForm');
+            if (form) {
+                form.addEventListener('submit', function(event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                });
+            }
+        }
+
+        function setInitialActiveNavLink() {
+            if (!window.location.hash || window.location.hash === "#home" || window.location.hash === "#") {
+                const homeLink = document.querySelector('.nav-link[href="#home"]');
+                const navLinks = document.querySelectorAll('#navbarNav .nav-link');
+                if (homeLink) {
+                    navLinks.forEach(link => link.classList.remove('active'));
+                    homeLink.classList.add('active');
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            AOS.init({
+                duration: 800,
+                once: true,
+                offset: 100 
+            });
+            populateBandMembers();
+            populateUpcomingGigs();
+            populateGallery();
+            setupGalleryModal();
+            updateCopyrightYear();
+            handleContactForm();
+            setInitialActiveNavLink();
+
+            window.addEventListener('hashchange', setInitialActiveNavLink, false);
+        });
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "projectId": "f2bed103-0a59-4390-b697-3db46c17a532",
+  "revisionString": "3",
+  "projectNameDisplay": "awesome image",
+  "projectType": "webapp",
+  "ownerPublicKey": "EZxuU9mZRqgsYxoFgDEnwNvWu4DYVjWiCFnSB3jSj7Hq",
+  "userPromptForThisRevision": "An error occurred: Image generation failed. This is likely a temporary server issue, not a problem with your input or API key. The application uses an internal, keyless method. Please try again.",
+  "basedOnRevisionString": "2",
+  "savedAt": "2025-06-04T14:42:27.226Z",
+  "imageAssets": [],
+  "isPublished": false,
+  "isShowcased": false
+}

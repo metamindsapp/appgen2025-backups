@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dream Weaver's Loom</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Orbitron:wght@400;700&family=Exo+2:wght@400;700&family=Dancing+Script:wght@400;700&family=Georgia&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            font-family: 'Georgia', serif;
+            background-color: #0a0a0a;
+            color: #E0E0E0;
+        }
+
+        #appContainer {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app-title {
+            font-family: 'Cinzel Decorative', cursive;
+            color: #e6c37f;
+            text-shadow: 0 0 10px rgba(230, 195, 127, 0.5);
+        }
+
+        section {
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+            transform: translateY(20px);
+            display: none !important;
+            width: 100%;
+            flex-grow: 1;
+        }
+        section.screen-active {
+            opacity: 1;
+            transform: translateY(0);
+            display: flex !important;
+        }
+
+        #themeSelectionScreen {
+            background: radial-gradient(circle, #1e2a38 0%, #121212 70%);
+        }
+        .theme-portal {
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            border: 2px solid #333;
+            background-color: #1a1a1a;
+            overflow: hidden;
+        }
+        .theme-portal:hover {
+            transform: translateY(-12px) scale(1.03);
+            box-shadow: 0 12px 25px rgba(230, 195, 127, 0.2);
+            border-color: #e6c37f;
+        }
+        .theme-portal-img {
+            aspect-ratio: 16/10;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        .theme-portal:hover .theme-portal-img {
+            transform: scale(1.1);
+        }
+        .theme-portal .card-body {
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 100%);
+            color: #fff;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+        }
+        .theme-portal .card-title {
+            font-family: 'Cinzel Decorative', cursive;
+        }
+
+        #keywordScreen {
+            background: linear-gradient(135deg, #121828 0%, #1a202c 100%);
+        }
+        .keyword-suggestion-tag {
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.2s ease, filter 0.2s ease;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+        .keyword-suggestion-tag:hover {
+            transform: scale(1.05);
+            filter: brightness(1.2);
+        }
+        #selectedThemeTitleKeywordScreen {
+            font-family: 'Cinzel Decorative', cursive;
+            color: #e6c37f;
+        }
+
+        #storyWeavingScreen {
+            background-color: #101010;
+        }
+        .header-bar {
+            background-color: rgba(20, 20, 20, 0.7);
+            backdrop-filter: blur(5px);
+            border-bottom: 1px solid #2a2a2a;
+        }
+        #storyThemeTitleWeavingScreen {
+            font-family: 'Cinzel Decorative', cursive;
+            color: #e6c37f;
+        }
+        .panel-section {
+            background-color: #181818;
+            border: 1px solid #282828;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .generated-image-source-area .draggable-image {
+            width: 110px;
+            height: 75px;
+            object-fit: cover;
+            margin: 4px;
+            border: 2px solid #444;
+            border-radius: .3rem;
+            cursor: grab;
+            transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
+        }
+        .generated-image-source-area .draggable-image:hover {
+            border-color: #0dcaf0;
+            transform: scale(1.05);
+            box-shadow: 0 0 10px rgba(13, 202, 240, 0.5);
+        }
+        .generated-image-source-area .draggable-image.dragging {
+            opacity: 0.4;
+            cursor: grabbing;
+            box-shadow: none;
+        }
+        .generated-image-source-area .draggable-image.in-timeline {
+            opacity: 0.5;
+            cursor: not-allowed;
+            filter: grayscale(50%);
+            border-color: #6c757d;
+        }
+        .generated-image-source-area .draggable-image.in-timeline:hover {
+            transform: scale(1);
+            box-shadow: none;
+        }
+
+
+        .timeline-slot {
+            min-height: 160px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+            background-color: #222;
+            border-style: dashed !important;
+            border-width: 2px !important;
+            border-color: #555;
+            color: #777;
+            border-radius: .3rem;
+            position: relative;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        .timeline-slot.drag-over {
+            background-color: #333;
+            border-color: #0dcaf0 !important;
+            box-shadow: inset 0 0 15px rgba(13, 202, 240, 0.3);
+        }
+         .timeline-slot.filled {
+            border-style: solid !important;
+            border-color: #6c757d !important;
+            background-color: #1a1a1a;
+            color: #ccc;
+        }
+        .timeline-slot.filled.drag-over {
+            background-color: #333;
+            border-color: #0dcaf0 !important;
+            box-shadow: inset 0 0 15px rgba(13, 202, 240, 0.3);
+        }
+
+        .timeline-slot img.timeline-image {
+            max-width: 95%;
+            max-height: 150px;
+            object-fit: contain;
+            border-radius: .25rem;
+            border: 1px solid #444;
+        }
+        .timeline-slot .remove-image-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: rgba(0,0,0,0.7);
+            border: none;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 12px;
+            line-height: 20px;
+            text-align: center;
+            padding: 0;
+            opacity: 0.8;
+            transition: opacity 0.2s, background-color 0.2s;
+            z-index: 10;
+        }
+        .timeline-slot .remove-image-btn:hover {
+            opacity: 1;
+            background-color: rgba(220, 53, 69, 0.9);
+        }
+
+        .story-image-display {
+            max-height: 280px;
+            width: auto;
+            object-fit: contain;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            border: 1px solid #333;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        }
+        .narrative-text {
+            font-size: 1.05rem;
+            line-height: 1.75;
+            color: #e8e8e8;
+            white-space: pre-wrap;
+            background-color: rgba(30,30,30,0.7);
+            border-left: 3px solid #e6c37f;
+            min-height: 50px;
+        }
+        .annotation-input {
+            background-color: #252525;
+            color: #e0e0e0;
+            border-color: #404040;
+        }
+        .annotation-input::placeholder {
+            color: #6c757d;
+        }
+
+        #moodSlider {
+            accent-color: #e6c37f;
+        }
+        .mood-label-group span {
+            transition: color 0.2s ease, font-weight 0.2s ease;
+        }
+        .mood-label-group span.active-mood {
+            color: #0dcaf0 !important;
+            font-weight: bold !important;
+        }
+
+        .text-style-eldoria { font-family: 'Cinzel Decorative', serif; }
+        .text-style-cyberpunk { font-family: 'Orbitron', sans-serif; letter-spacing: 0.5px; }
+        .text-style-xylos { font-family: 'Exo 2', sans-serif; }
+        .text-style-feywild { font-family: 'Dancing Script', cursive; font-size: 1.2em; }
+
+        .modal-content {
+            background-color: #181818;
+            border: 1px solid #333;
+        }
+        .modal-header {
+            border-bottom: 1px solid #333;
+        }
+        .modal-footer {
+            border-top: 1px solid #333;
+        }
+        #modalPromptText {
+            font-family: monospace;
+            font-size: 0.9em;
+            background-color: #222;
+            padding: 10px;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+            word-break: break-all;
+            color: #ddd;
+        }
+
+        .btn:disabled {
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div id="appContainer">
+
+        <section id="themeSelectionScreen" class="container-fluid d-flex flex-column justify-content-center align-items-center p-md-5 p-3 text-center screen-active">
+            <h1 class="display-3 mb-4 fw-bold app-title">Dream Weaver's Loom</h1>
+            <p class="lead mb-5">Select a realm to begin your tale...</p>
+            <div class="row gx-lg-5 gy-4 justify-content-center">
+                <div class="col-sm-6 col-lg-3">
+                    <div class="card theme-portal h-100" data-theme="eldoria" data-theme-name="Lost City of Eldoria" data-ai-system-prompt="You are a master storyteller weaving tales of ancient fantasy, forgotten magic, and crumbling ruins in the style of the Lost City of Eldoria. Your tone is often mysterious and epic." data-text-style="text-style-eldoria">
+                        <img id="eldoriaPreview" src="/generated_images/dalle_4a77a31c-494.png" class="card-img-top theme-portal-img" alt="Lost City of Eldoria">
+                        <div class="card-body d-flex flex-column justify-content-center">
+                            <h5 class="card-title">Lost City of Eldoria</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <div class="card theme-portal h-100" data-theme="cyberpunk" data-theme-name="Neon Cyberpunk Rhapsody" data-ai-system-prompt="You are an AI chronicler of a high-tech, low-life future, narrating stories of neon-drenched streets and corporate intrigue in the style of a Neon Cyberpunk Rhapsody. Your tone is gritty, fast-paced, and often cynical." data-text-style="text-style-cyberpunk">
+                        <img id="cyberpunkPreview" src="/generated_images/dalle_7c667cf3-252.png" class="card-img-top theme-portal-img" alt="Neon Cyberpunk Rhapsody">
+                        <div class="card-body d-flex flex-column justify-content-center">
+                            <h5 class="card-title">Neon Cyberpunk Rhapsody</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <div class="card theme-portal h-100" data-theme="xylos" data-theme-name="Cosmic Opera of Xylos" data-ai-system-prompt="You are a galactic bard, singing sagas of star-spanning empires, alien wonders, and epic space battles in the style of the Cosmic Opera of Xylos. Your tone is grand, majestic, and filled with awe." data-text-style="text-style-xylos">
+                        <img id="xylosPreview" src="/generated_images/dalle_01dfb0e7-723.png" class="card-img-top theme-portal-img" alt="Cosmic Opera of Xylos">
+                        <div class="card-body d-flex flex-column justify-content-center">
+                            <h5 class="card-title">Cosmic Opera of Xylos</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <div class="card theme-portal h-100" data-theme="feywild" data-theme-name="Whispers of the Feywild" data-ai-system-prompt="You are a whimsical scribe from an enchanted realm, recounting tales of mischievous fairies, ancient forests, and hidden magic in the style of Whispers of the Feywild. Your tone is enchanting, playful, and sometimes subtly eerie." data-text-style="text-style-feywild">
+                        <img id="feywildPreview" src="/generated_images/dalle_3afaddd1-f15.png" class="card-img-top theme-portal-img" alt="Whispers of the Feywild">
+                        <div class="card-body d-flex flex-column justify-content-center">
+                            <h5 class="card-title">Whispers of the Feywild</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="keywordScreen" class="container-fluid d-flex flex-column justify-content-center align-items-center p-md-5 p-3">
+            <button id="backToThemeSelectionBtn" class="btn btn-outline-secondary position-absolute top-0 start-0 m-3">&laquo; Change Theme</button>
+            <h2 id="selectedThemeTitleKeywordScreen" class="mb-4 display-5 text-center"></h2>
+            <p class="lead text-center">Infuse your story with essence. Start with these AI-suggested keywords, or weave your own.</p>
+
+            <div id="keywordSpinner" class="spinner-border text-info mb-3 d-none" role="status"><span class="visually-hidden">Loading keywords...</span></div>
+            <div id="keywordSuggestionsContainer" class="d-flex flex-wrap justify-content-center gap-2 mb-4">
+            </div>
+            <div id="keywordError" class="alert alert-danger d-none mt-3 w-75 text-center" role="alert"></div>
+
+
+            <div class="row g-3 mb-4 w-100" style="max-width: 800px;">
+                <div class="col-md-4">
+                    <input type="text" id="keywordInput1" class="form-control form-control-lg keyword-input" placeholder="Keyword 1 (e.g., ancient)">
+                </div>
+                <div class="col-md-4">
+                    <input type="text" id="keywordInput2" class="form-control form-control-lg keyword-input" placeholder="Keyword 2 (e.g., artifact)">
+                </div>
+                <div class="col-md-4">
+                    <input type="text" id="keywordInput3" class="form-control form-control-lg keyword-input" placeholder="Keyword 3 (e.g., discovery)">
+                </div>
+            </div>
+            <button id="generateImagesBtn" class="btn btn-primary btn-lg mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-magic me-2" viewBox="0 0 16 16"><path d="M9.5 2.672a.5.5 0 1 0 1 0V.843a.5.5 0 0 0-1 0v1.829Zm4.5.035A.5.5 0 0 0 13.293 2L12 3.293a.5.5 0 1 0 .707.707L14 2.707ZM7.293 4A.5.5 0 1 0 8 3.293L6.707 2A.5.5 0 0 0 6 2.707L7.293 4Zm-.621 2.5a.5.5 0 0 0 0 .708l1.147 1.146a.5.5 0 0 0 .708 0L9.646 6.5a.5.5 0 0 0 0-.708L8.5 4.646a.5.5 0 0 0-.708 0L6.672 6.5Zm1.147-3.354a.5.5 0 0 0 0 .708L9.646 5.5a.5.5 0 0 0 .708 0L11.5 4.354a.5.5 0 0 0 0-.708L10.354 2.5a.5.5 0 0 0-.708 0L8.5 3.646ZM2 6.293A.5.5 0 1 0 2.707 7L4 5.707A.5.5 0 0 0 3.293 5L2 6.293Zm1.854-3.26a.5.5 0 0 0 0-.707L2.707.171a.5.5 0 0 0-.707 0L.171 1.293a.5.5 0 0 0 0 .707l1.146 1.147a.5.5 0 0 0 .708 0L3.854 3.033Z M10.829 10A.5.5 0 1 0 10 9.293L8.707 8A.5.5 0 0 0 8 8.707L10.829 10Z M8 12a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm0-1a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z M12.5 11.16A.5.5 0 0 0 12 11.829V13.5a.5.5 0 0 0 1 0v-1.671a.5.5 0 0 0-.5-.5Z M11.146 12.5a.5.5 0 0 0 0 .708l1.147 1.146a.5.5 0 0 0 .708 0L14.146 13.5a.5.5 0 0 0 0-.708L12.999 11.646a.5.5 0 0 0-.707 0l-1.147 1.147Z"/></svg>
+                Weave the Visions
+            </button>
+            <div id="imageGenerationSpinnerKeywordScreen" class="spinner-border text-primary d-none mb-3" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Generating images...</span>
+            </div>
+            <div id="imageGenerationErrorKeywordScreen" class="alert alert-danger d-none mt-3 w-75 text-center" role="alert"></div>
+        </section>
+
+        <section id="storyWeavingScreen" class="container-fluid d-flex flex-column p-md-4 p-2">
+            <header class="d-flex flex-wrap justify-content-between align-items-center mb-3 p-3 rounded header-bar">
+                <h2 id="storyThemeTitleWeavingScreen" class="text-light mb-2 mb-md-0 me-3"></h2>
+                <div class="d-flex gap-2">
+                    <button id="restartStoryBtn" class="btn btn-outline-warning">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-counterclockwise me-1" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466z"/></svg>
+                        New Tale
+                    </button>
+                    <button id="exportPdfBtn" class="btn btn-success">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download me-1" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
+                        Export PDF
+                    </button>
+                </div>
+            </header>
+
+            <div class="row flex-grow-1 g-3">
+                <div class="col-lg-4 d-flex flex-column">
+                    <div class="panel-section p-3 rounded mb-3">
+                        <h5>Generated Scenes</h5>
+                        <p class="small text-body-secondary">Drag these images to the timeline. Click an image to see its generation prompt.</p>
+                        <div id="generatedImagesContainer" class="d-flex flex-wrap justify-content-start align-items-center gap-2 generated-image-source-area">
+                        </div>
+                        <div id="imageGenSpinnerStoryScreen" class="spinner-border text-info my-3 d-none" role="status"><span class="visually-hidden">Loading images...</span></div>
+                        <div id="imageGenErrorStoryScreen" class="alert alert-warning d-none mt-2 p-2 small" role="alert"></div>
+                    </div>
+
+                    <div class="panel-section p-3 rounded flex-grow-1">
+                        <h5>Story Timeline</h5>
+                        <div id="timelineSlotsContainer" class="d-flex flex-column flex-md-row justify-content-between gap-2 timeline-area mt-2">
+                            <div class="timeline-slot p-2 border rounded text-center flex-fill" data-slot-id="0">Scene 1</div>
+                            <div class="timeline-slot p-2 border rounded text-center flex-fill" data-slot-id="1">Scene 2</div>
+                            <div class="timeline-slot p-2 border rounded text-center flex-fill" data-slot-id="2">Scene 3</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-8 d-flex flex-column">
+                    <div class="panel-section p-3 rounded flex-grow-1 overflow-auto mb-3 d-flex flex-column" id="storyPreviewContainerScrollableParent">
+                        <h4 class="mb-3 flex-shrink-0">Your Unfolding Tale...</h4>
+                        <div id="fullStoryOutput" class="flex-grow-1 overflow-auto">
+                            <div id="storySegment0" class="story-segment mb-4 d-none">
+                                <img id="segment0Image" src="#" alt="Scene 1" class="img-fluid rounded mb-2 story-image-display">
+                                <textarea id="segment0Annotation" class="form-control form-control-sm mb-2 annotation-input" rows="2" placeholder="Add a brief note or character name for this scene..."></textarea>
+                                <div class="d-flex align-items-center mb-2">
+                                    <button class="btn btn-sm btn-info regenerate-text-btn" data-segment-id="0">Refine Text</button>
+                                    <
+div id="segment0Spinner" class="spinner-border spinner-border-sm text-light ms-2 d-none" role="status"></div>
+                                </div>
+                                <div id="segment0Text" class="narrative-text p-3 rounded"></div>
+                                <div id="segment0Error" class="alert alert-warning d-none mt-2 p-2 small" role="alert"></div>
+                            </div>
+                            <div id="storySegment1" class="story-segment mb-4 d-none">
+                                <img id="segment1Image" src="#" alt="Scene 2" class="img-fluid rounded mb-2 story-image-display">
+                                <textarea id="segment1Annotation" class="form-control form-control-sm mb-2 annotation-input" rows="2" placeholder="Add a brief note or character name for this scene..."></textarea>
+                                <div class="d-flex align-items-center mb-2">
+                                    <button class="btn btn-sm btn-info regenerate-text-btn" data-segment-id="1">Refine Text</button>
+                                    <div id="segment1Spinner" class="spinner-border spinner-border-sm text-light ms-2 d-none" role="status"></div>
+                                </div>
+                                <div id="segment1Text" class="narrative-text p-3 rounded"></div>
+                                <div id="segment1Error" class="alert alert-warning d-none mt-2 p-2 small" role="alert"></div>
+
+                            </div>
+                            <div id="storySegment2" class="story-segment mb-4 d-none">
+                                <img id="segment2Image" src="#" alt="Scene 3" class="img-fluid rounded mb-2 story-image-display">
+                                <textarea id="segment2Annotation" class="form-control form-control-sm mb-2 annotation-input" rows="2" placeholder="Add a brief note or character name for this scene..."></textarea>
+                                <div class="d-flex align-items-center mb-2">
+                                    <button class="btn btn-sm btn-info regenerate-text-btn" data-segment-id="2">Refine Text</button>
+                                    <div id="segment2Spinner" class="spinner-border spinner-border-sm text-light ms-2 d-none" role="status"></div>
+                                </div>
+                                <div id="segment2Text" class="narrative-text p-3 rounded"></div>
+                                <div id="segment2Error" class="alert alert-warning d-none mt-2 p-2 small" role="alert"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-section p-3 rounded flex-shrink-0">
+                        <h5>Mood Modifier</h5>
+                        <input type="range" class="form-range" min="0" max="4" step="1" value="2" id="moodSlider">
+                        <div class="d-flex justify-content-between small text-body-secondary mt-1 mood-label-group">
+                            <span id="moodLabelOminous">Ominous</span>
+                            <span id="moodLabelTense">Tense</span>
+                            <span id="moodLabelNeutral" class="active-mood">Neutral</span>
+                            <span id="moodLabelHopeful">Hopeful</span>
+                            <span id="moodLabelHumorous">Humorous</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal fade" id="imagePromptModal" tabindex="-1" aria-labelledby="imagePromptModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imagePromptModalLabel">Image Generation Prompt</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="modalPromptText" class="text-break"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+    <script>
+    (function() {
+        let appState = {
+            currentScreen: 'themeSelectionScreen',
+            selectedTheme: {
+                id: null,
+                name: null,
+                aiSystemPrompt: null,
+                textStyleClass: null
+            },
+            keywords: ["", "", ""],
+            suggestedKeywordsWithTones: [],
+            generatedImages: [],
+            timelineSlots: [null, null, null],
+            storySegments: [
+                { imageId: null, imageUrl: null, annotation: '', text: '', status: 'empty', promptUsed: '' },
+                { imageId: null, imageUrl: null, annotation: '', text: '', status: 'empty', promptUsed: '' },
+                { imageId: null, imageUrl: null, annotation: '', text: '', status: 'empty', promptUsed: '' }
+            ],
+            mood: 'Neutral',
+            moodMap: ['Ominous', 'Tense', 'Neutral', 'Hopeful', 'Humorous'],
+            apiBaseUrl: '',
+            imagePromptModal: null,
+            draggedImageId: null
+        };
+
+        let domElements = {};
+
+        function cacheDOMElements() {
+            domElements.themeSelectionScreen = document.getElementById('themeSelectionScreen');
+            domElements.keywordScreen = document.getElementById('keywordScreen');
+            domElements.storyWeavingScreen = document.getElementById('storyWeavingScreen');
+            domElements.themePortals = document.querySelectorAll('.theme-portal');
+            domElements.backToThemeSelectionBtn = document.getElementById('backToThemeSelectionBtn');
+            domElements.selectedThemeTitleKeywordScreen = document.getElementById('selectedThemeTitleKeywordScreen');
+            domElements.keywordSpinner = document.getElementById('keywordSpinner');
+            domElements.keywordSuggestionsContainer = document.getElementById('keywordSuggestionsContainer');
+            domElements.keywordError = document.getElementById('keywordError');
+            domElements.keywordInputs = [
+                document.getElementById('keywordInput1'),
+                document.getElementById('keywordInput2'),
+                document.getElementById('keywordInput3')
+            ];
+            domElements.generateImagesBtn = document.getElementById('generateImagesBtn');
+            domElements.imageGenerationSpinnerKeywordScreen = document.getElementById('imageGenerationSpinnerKeywordScreen');
+            domElements.imageGenerationErrorKeywordScreen = document.getElementById('imageGenerationErrorKeywordScreen');
+
+            domElements.storyThemeTitleWeavingScreen = document.getElementById('storyThemeTitleWeavingScreen');
+            domElements.restartStoryBtn = document.getElementById('restartStoryBtn');
+            domElements.exportPdfBtn = document.getElementById('exportPdfBtn');
+            domElements.generatedImagesContainer = document.getElementById('generatedImagesContainer');
+            domElements.imageGenSpinnerStoryScreen = document.getElementById('imageGenSpinnerStoryScreen');
+            domElements.imageGenErrorStoryScreen = document.getElementById('imageGenErrorStoryScreen');
+            domElements.timelineSlotsContainer = document.getElementById('timelineSlotsContainer');
+            domElements.timelineSlots = document.querySelectorAll('.timeline-slot');
+
+            domElements.storySegments = [];
+            for (let i = 0; i < 3; i++) {
+                domElements.storySegments.push({
+                    container: document.getElementById(`storySegment${i}`),
+                    image: document.getElementById(`segment${i}Image`),
+                    annotation: document.getElementById(`segment${i}Annotation`),
+                    regenerateBtn: document.querySelector(`.regenerate-text-btn[data-segment-id="${i}"]`),
+                    spinner: document.getElementById(`segment${i}Spinner`),
+                    text: document.getElementById(`segment${i}Text`),
+                    error: document.getElementById(`segment${i}Error`),
+                });
+            }
+
+            domElements.moodSlider = document.getElementById('moodSlider');
+            domElements.moodLabels = [
+                document.getElementById('moodLabelOminous'),
+                document.getElementById('moodLabelTense'),
+                document.getElementById('moodLabelNeutral'),
+                document.getElementById('moodLabelHopeful'),
+                document.getElementById('moodLabelHumorous'),
+            ];
+            domElements.modalPromptText = document.getElementById('modalPromptText');
+            domElements.fullStoryOutput = document.getElementById('fullStoryOutput');
+        }
+
+        function init() {
+            cacheDOMElements();
+            setupEventListeners();
+            appState.imagePromptModal = new bootstrap.Modal(document.getElementById('imagePromptModal'));
+            navigateToScreen('themeSelectionScreen');
+        }
+
+        function navigateToScreen(screenId) {
+            appState.currentScreen = screenId;
+            [domElements.themeSelectionScreen, domElements.keywordScreen, domElements.storyWeavingScreen].forEach(screen => {
+                if (screen.id === screenId) {
+                    screen.classList.add('screen-active');
+                } else {
+                    screen.classList.remove('screen-active');
+                }
+            });
+            window.scrollTo(0, 0);
+        }
+
+        function setupEventListeners() {
+            domElements.themePortals.forEach(portal => {
+                portal.addEventListener('click', handleThemeSelection);
+            });
+
+            domElements.backToThemeSelectionBtn.addEventListener('click', () => {
+                resetKeywordScreen();
+                navigateToScreen('themeSelectionScreen');
+            });
+
+            domElements.keywordInputs.forEach((input, index) => {
+                input.addEventListener('input', () => {
+                    appState.keywords[index] = input.value.trim();
+                });
+            });
+
+            domElements.generateImagesBtn.addEventListener('click', handleGenerateImages);
+            domElements.restartStoryBtn.addEventListener('click', handleRestartStory);
+            domElements.exportPdfBtn.addEventListener('click', handleExportPdf);
+            domElements.moodSlider.addEventListener('input', handleMoodChange);
+
+            domElements.timelineSlots.forEach(slot => {
+                slot.addEventListener('dragover', handleDragOver);
+                slot.addEventListener('dragleave', handleDragLeave);
+                slot.addEventListener('drop', handleDrop);
+            });
+
+            domElements.generatedImagesContainer.addEventListener('click', (event) => {
+                const targetImage = event.target.closest('.draggable-image');
+                if (targetImage) {
+                    const imageId = targetImage.dataset.imageId;
+                    const image = appState.generatedImages.find(img => img.id === imageId);
+                    if (image && image.promptUsed) {
+                        domElements.modalPromptText.textContent = image.promptUsed;
+                        appState.imagePromptModal.show();
+                    }
+                }
+            });
+
+            domElements.storySegments.forEach((segmentUI, index) => {
+                segmentUI.annotation.addEventListener('blur', () => {
+                    const newAnnotation = segmentUI.annotation.value.trim();
+                    if (appState.storySegments[index].annotation !== newAnnotation) {
+                        appState.storySegments[index].annotation = newAnnotation;
+                        if (appState.storySegments[index].imageId && appState.storySegments[index].status !== 'empty') {
+                            generateNarrativeForSegment(index);
+                        }
+                    }
+                });
+                segmentUI.regenerateBtn.addEventListener('click', () => {
+                     if (appState.storySegments[index].imageId && (appState.storySegments[index].status === 'text_loaded' || appState.storySegments[index].status === 'text_error')) {
+                        generateNarrativeForSegment(index);
+                     }
+                });
+            });
+        }
+
+        function resetAppStateForNewStory() {
+            appState.selectedTheme = { id: null, name: null, aiSystemPrompt: null, textStyleClass: null };
+            appState.keywords = ["", "", ""];
+            appState.suggestedKeywordsWithTones = [];
+            appState.generatedImages = [];
+            appState.timelineSlots = [null, null, null];
+            appState.storySegments = [
+                { imageId: null, imageUrl: null, annotation: '', text: '', status: 'empty', promptUsed: '' },
+                { imageId: null, imageUrl: null, annotation: '', text: '', status: 'empty', promptUsed: '' },
+                { imageId: null, imageUrl: null, annotation: '', text: '', status: 'empty', promptUsed: '' }
+            ];
+            appState.mood = 'Neutral';
+            domElements.moodSlider.value = 2;
+            updateMoodLabels();
+        }
+
+        function resetKeywordScreen() {
+            domElements.keywordInputs.forEach(input => input.value = '');
+            appState.keywords = ["", "", ""];
+            domElements.keywordSuggestionsContainer.innerHTML = '';
+            domElements.keywordError.classList.add('d-none');
+            domElements.keywordError.textContent = '';
+            domElements.imageGenerationErrorKeywordScreen.classList.add('d-none');
+            domElements.imageGenerationErrorKeywordScreen.textContent = '';
+            domElements.selectedThemeTitleKeywordScreen.textContent = '';
+        }
+
+        function resetStoryWeavingScreen() {
+            domElements.generatedImagesContainer.innerHTML = '';
+            domElements.timelineSlots.forEach((slot, index) => {
+                slot.innerHTML = `Scene ${index + 1}`;
+                slot.classList.remove('drag-over');
+                slot.classList.remove('filled');
+            });
+            appState.storySegments.forEach(segment => {
+                segment.imageId = null;
+                segment.imageUrl = null;
+                segment.annotation = '';
+                segment.text = '';
+                segment.status = 'empty';
+                segment.promptUsed = '';
+            });
+             domElements.storySegments.forEach(segmentUI => {
+                segmentUI.container.classList.add('d-none');
+                segmentUI.image.src = '#';
+                segmentUI.annotation.value = '';
+                segmentUI.text.innerHTML = '';
+                segmentUI.text.className = 'narrative-text p-3 rounded';
+                segmentUI.error.classList.add('d-none');
+                segmentUI.error.textContent = '';
+            });
+            domElements.imageGenErrorStoryScreen.classList.add('d-none');
+            domElements.imageGenErrorStoryScreen.textContent = '';
+            domElements.storyThemeTitleWeavingScreen.textContent = '';
+        }
+
+        function handleThemeSelection(event) {
+            const portal = event.currentTarget;
+            appState.selectedTheme.id = portal.dataset.theme;
+            appState.selectedTheme.name = portal.dataset.themeName;
+            appState.selectedTheme.aiSystemPrompt = portal.dataset.aiSystemPrompt;
+            appState.selectedTheme.textStyleClass = portal.dataset.textStyle;
+
+            domElements.selectedThemeTitleKeywordScreen.textContent = appState.selectedTheme.name;
+            domElements.storyThemeTitleWeavingScreen.textContent = `Tale of ${appState.selectedTheme.name}`;
+
+            resetKeywordScreen();
+            fetchInitialKeywords();
+            navigateToScreen('keywordScreen');
+        }
+
+        async function fetchInitialKeywords() {
+            showSpinner(domElements.keywordSpinner, true);
+            domElements.keywordError.classList.add('d-none');
+            domElements.keywordSuggestionsContainer.innerHTML = '';
+
+            const prompt = `Based on the theme "${appState.selectedTheme.name}", suggest three distinct single keywords and a primary emotional tone for each. Format as a YAML array of objects, each object having "keyword" (string) and "tone" (string) properties. Example:\n- keyword: ancient\n  tone: mysterious\n- keyword: relic\n  tone: sacred\n- keyword: prophecy\n  tone: ominous\nOnly provide the YAML array. Do not include any extra text, markdown formatting (like \`\`\`yaml), or explanations before or after the YAML.`;
+
+            try {
+                const data = await callAIApi(appState.selectedTheme.aiSystemPrompt, prompt);
+                if (data.success) {
+                    try {
+                        const parsedResponse = jsyaml.load(data.response);
+                        if (Array.isArray(parsedResponse)) {
+                            appState.suggestedKeywordsWithTones = parsedResponse;
+                            displayKeywordSuggestions(appState.suggestedKeywordsWithTones);
+                        } else {
+                            throw new Error("Response is not a YAML array.");
+                        }
+                    } catch (e) {
+                        showError(domElements.keywordError, `AI returned invalid keyword format (expected YAML): ${e.message}. Please try again or enter manually. AI response was: "${data.response.substring(0, 200)}..."`);
+                    }
+                } else {
+                    showError(domElements.keywordError, `Failed to get keyword suggestions: ${data.error}`);
+                }
+            } catch (error) {
+                showError(domElements.keywordError, `Network error fetching keywords: ${error.message}`);
+            } finally {
+                showSpinner(domElements.keywordSpinner, false);
+            }
+        }
+
+        function displayKeywordSuggestions(suggestions) {
+            domElements.keywordSuggestionsContainer.innerHTML = '';
+            if (!suggestions || !Array.isArray(suggestions)) return;
+
+            suggestions.slice(0, 3).forEach((item, index) => {
+                if (item && item.keyword) {
+                    const badge = document.createElement('span');
+                    badge.classList.add('badge', 'bg-info', 'text-dark', 'p-2', 'm-1', 'keyword-suggestion-tag');
+                    badge.textContent = `${item.keyword}${item.tone ? ` (${item.tone})` : ''}`;
+                    badge.addEventListener('click', () => {
+                        let filled = false;
+                        for(let i=0; i<3; i++) {
+                            if (domElements.keywordInputs[i].value === '' || domElements.keywordInputs[i].value.trim() === item.keyword.trim()) {
+                                domElements.keywordInputs[i].value = item.keyword;
+                                appState.keywords[i] = item.keyword;
+                                filled = true;
+                                break;
+                            }
+                        }
+                        if (!filled && domElements.keywordInputs[index]) {
+                             domElements.keywordInputs[index].value = item.keyword;
+                             appState.keywords[index] = item.keyword;
+                        }
+                    });
+                    domElements.keywordSuggestionsContainer.appendChild(badge);
+                }
+            });
+        }
+
+        async function handleGenerateImages() {
+            appState.keywords = domElements.keywordInputs.map(input => input.value.trim()).filter(k => k);
+            if (appState.keywords.length === 0) {
+                appState.keywords = appState.suggestedKeywordsWithTones.slice(0,3).map(s => s.keyword).filter(k => k);
+                if(appState.keywords.length === 0) {
+                     showError(domElements.imageGenerationErrorKeywordScreen, 'Please enter at least one keyword or select/receive a suggestion.');
+                     return;
+                }
+            }
+
+            showSpinner(domElements.imageGenerationSpinnerKeywordScreen, true);
+            domElements.generateImagesBtn.disabled = true;
+            domElements.imageGenerationErrorKeywordScreen.classList.add('d-none');
+
+            resetStoryWeavingScreen();
+            domElements.storyThemeTitleWeavingScreen.textContent = `Tale of ${appState.selectedTheme.name}`;
+            appState.generatedImages = [];
+
+            const themeDetails = appState.selectedTheme.name;
+            const keywordStr = appState.keywords.join(', ');
+
+            const prompts = [
+                `Epic establishing shot for a story about ${keywordStr} in the world of ${themeDetails}. Style: ${appState.selectedTheme.id}, high detail, atmospheric, vivid colors.`,
+                `A key character, mysterious object, or significant creature related to ${keywordStr} in the world of ${themeDetails}. Focus on ${appState.keywords[0] || 'the unknown essence'}. Style: ${appState.selectedTheme.id}, cinematic lighting, intriguing detail.`,
+                `A climactic or intriguing scene hinting at discovery, conflict, or wonder, involving ${keywordStr} in the world of ${themeDetails}. Style: ${appState.selectedTheme.id}, dynamic composition, emotional depth.`
+            ];
+
+            try {
+                showSpinner(domElements.imageGenSpinnerStoryScreen, true);
+                const imagePromises = prompts.map(p => generateImageOnDemandApi(p));
+                const results = await Promise.all(imagePromises);
+
+                let successfulGenerations = 0;
+                results.forEach((result, index) => {
+                    if (result.success) {
+                        appState.generatedImages.push({
+                            id: `gen-img-${Date.now()}-${index}`,
+                            url: result.imageUrl,
+                            promptUsed: result.promptUsed,
+                            inTimeline: false
+                        });
+                        successfulGenerations++;
+                    } else {
+                        showError(domElements.imageGenErrorStoryScreen, `Failed to generate image ${index + 1}: ${result.error || 'Unknown error'}. Some images may be missing.`);
+                    }
+                });
+
+                if (successfulGenerations > 0) {
+                    populateGeneratedImagesContainer();
+                    navigateToScreen('storyWeavingScreen');
+                } else {
+                     showError(domElements.imageGenerationErrorKeywordScreen, 'Image generation failed for all images. Please try again.');
+                }
+
+            } catch (error) {
+                showError(domElements.imageGenerationErrorKeywordScreen, `Error during image generation process: ${error.message}`);
+            } finally {
+                showSpinner(domElements.imageGenerationSpinnerKeywordScreen, false);
+                showSpinner(domElements.imageGenSpinnerStoryScreen, false);
+                domElements.generateImagesBtn.disabled = false;
+            }
+        }
+
+        function populateGeneratedImagesContainer() {
+            domElements.generatedImagesContainer.innerHTML = '';
+            appState.generatedImages.forEach(imgData => {
+                const imgEl = document.createElement('img');
+                imgEl.src = imgData.url;
+                imgEl.alt = `Generated scene: ${imgData.promptUsed.substring(0,50)}...`;
+                imgEl.classList.add('img-thumbnail', 'draggable-image');
+                imgEl.draggable = true;
+                imgEl.dataset.imageId = imgData.id;
+                imgEl.dataset.promptUsed = imgData.promptUsed;
+
+                imgEl.addEventListener('dragstart', handleDragStart);
+                imgEl.addEventListener('dragend', handleDragEnd);
+                domElements.generatedImagesContainer.appendChild(imgEl);
+            });
+        }
+
+        function handleDragStart(event) {
+            const imageId = event.target.dataset.imageId;
+            const image = appState.generatedImages.find(img => img.id === imageId);
+            if (image && image.inTimeline) {
+                event.preventDefault();
+                return;
+            }
+            appState.draggedImageId = imageId;
+            event.target.classList.add('dragging');
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('text/plain', imageId);
+        }
+
+        function handleDragEnd(event) {
+            event.target.classList.remove('dragging');
+            appState.draggedImageId = null;
+        }
+
+        function handleDragOver(event) {
+            event.preventDefault();
+            const targetSlot = event.currentTarget;
+            const slotId = parseInt(targetSlot.dataset.slotId);
+            if (appState.timelineSlots[slotId] === null) {
+                 targetSlot.classList.add('drag-over');
+                 event.dataTransfer.dropEffect = 'move';
+            } else {
+                 event.dataTransfer.dropEffect = 'none';
+            }
+        }
+
+        function handleDragLeave(event) {
+            event.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(event) {
+            event.preventDefault();
+            const targetSlot = event.currentTarget;
+            targetSlot.classList.remove('drag-over');
+
+            const slotId = parseInt(targetSlot.dataset.slotId);
+            const draggedImageId = appState.draggedImageId || event.dataTransfer.getData('text/plain');
+            const draggedImage = appState.generatedImages.find(img => img.id === draggedImageId);
+            const sourceImageElement = document.querySelector(`.draggable-image[data-image-id="${draggedImageId}"]`);
+
+            if (draggedImage && !draggedImage.inTimeline && (appState.timelineSlots[slotId] === null)) {
+                appState.timelineSlots[slotId] = draggedImage.id;
+                draggedImage.inTimeline = true;
+                if(sourceImageElement) sourceImageElement.classList.add('in-timeline');
+                targetSlot.classList.add('filled');
+
+                appState.storySegments[slotId] = {
+                    ...appState.storySegments[slotId],
+                    imageId: draggedImage.id,
+                    imageUrl: draggedImage.url,
+                    promptUsed: draggedImage.promptUsed,
+                    status: 'image_placed',
+                    annotation: domElements.storySegments[slotId].annotation.value || ''
+                };
+
+                targetSlot.innerHTML = '';
+                const imgEl = document.createElement('img');
+                imgEl.src = draggedImage.url;
+                imgEl.alt = `Scene ${slotId + 1}`;
+                imgEl.classList.add('timeline-image');
+                targetSlot.appendChild(imgEl);
+
+                const removeBtn = document.createElement('button');
+                removeBtn.innerHTML = '&times;';
+                removeBtn.classList.add('btn', 'btn-sm', 'remove-image-btn');
+                removeBtn.title = "Remove image from timeline";
+                removeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    removeImageFromTimeline(slotId, draggedImage.id);
+                });
+                targetSlot.appendChild(removeBtn);
+
+                domElements.storySegments[slotId].container.classList.remove('d-none');
+                domElements.storySegments[slotId].image.src = draggedImage.url;
+                domElements.storySegments[slotId].image.alt = `Scene ${slotId + 1}: ${draggedImage.promptUsed.substring(0,50)}...`;
+                domElements.storySegments[slotId].text.innerHTML = '';
+                domElements.storySegments[slotId].text.className = `narrative-text p-3 rounded ${appState.selectedTheme.textStyleClass || ''}`;
+                generateNarrativeForSegment(slotId);
+            }
+            appState.draggedImageId = null;
+        }
+
+        function removeImageFromTimeline(slotId, imageId) {
+            appState.timelineSlots[slotId] = null;
+            const image = appState.generatedImages.find(img => img.id === imageId);
+            if (image) image.inTimeline = false;
+
+            const sourceImageElement = document.querySelector(`.draggable-image[data-image-id="${imageId}"]`);
+            if(sourceImageElement) sourceImageElement.classList.remove('in-timeline');
+
+            domElements.timelineSlots[slotId].innerHTML = `Scene ${slotId + 1}`;
+            domElements.timelineSlots[slotId].classList.remove('filled');
+
+            appState.storySegments[slotId] = {
+                ...appState.storySegments[slotId],
+                imageId: null,
+                imageUrl: null,
+                text: '',
+                status: 'empty',
+                promptUsed: ''
+            };
+            domElements.storySegments[slotId].container.classList.add('d-none');
+            domElements.storySegments[slotId].image.src = '#';
+            domElements.storySegments[slotId].image.alt = `Scene ${slotId + 1}`;
+            domElements.storySegments[slotId].text.innerHTML = '';
+            domElements.storySegments[slotId].error.classList.add('d-none');
+        }
+
+        async function generateNarrativeForSegment(segmentIndex) {
+            const segment = appState.storySegments[segmentIndex];
+            if (!segment.imageId) return;
+
+            showSpinner(domElements.storySegments[segmentIndex].spinner, true);
+            domElements.storySegments[segmentIndex].error.classList.add('d-none');
+            domElements.storySegments[segmentIndex].text.innerHTML = '';
+            segment.status = 'loading_text';
+
+            const keywordsStr = appState.keywords.join(', ');
+            let previousTextContext = "";
+            if (segmentIndex > 0 && appState.storySegments[segmentIndex-1].text && appState.storySegments[segmentIndex-1].status === 'text_loaded') {
+                previousTextContext = `The story so far (previous scene): "${appState.storySegments[segmentIndex-1].text.substring(0, 300).replace(/\n/g, ' ')}..."\n\n`;
+            }
+
+            const userMessage = `
+You are continuing a story.
+Theme: ${appState.selectedTheme.name} (${appState.selectedTheme.id} style)
+Keywords: ${keywordsStr || 'not specified'}
+Current Mood: ${appState.mood}
+
+This segment is for an image that was generated with the DALL-E prompt: "${segment.promptUsed}"
+User's note for this scene: "${segment.annotation || 'No specific note.'}"
+
+${previousTextContext}
+Now, write a descriptive paragraph (around 70-120 words) for this scene. Maintain the theme's style and the current mood. Focus on vivid imagery and sensory details. Make it engaging and flow naturally from any previous text. Ensure the paragraph directly relates to the image prompt and user's note. Do not start with "In this scene...", "The image depicts...", or similar meta-commentary. Just provide the narrative paragraph.
+ONLY provide the narrative paragraph. Do not include any other text, titles, or formatting.
+`;
+
+            try {
+                const data = await callAIApi(appState.selectedTheme.aiSystemPrompt, userMessage.trim());
+                if (data.success && data.response) {
+                    segment.text = data.response.trim();
+                    domElements.storySegments[segmentIndex].text.innerHTML = data.response.trim();
+                    segment.status = 'text_loaded';
+                } else {
+                    segment.text = 'Error generating narrative.';
+                    domElements.storySegments[segmentIndex].text.innerHTML = `<em>Narrative generation failed. ${data.error || ''}</em>`;
+                    showError(domElements.storySegments[segmentIndex].error, `AI Error: ${data.error || 'Could not generate text.'}`);
+                    segment.status = 'text_error';
+                }
+            } catch (error) {
+                 segment.text = 'Network error generating narrative.';
+                 domElements.storySegments[segmentIndex].text.innerHTML = '<em>Network error generating narrative.</em>';
+                 showError(domElements.storySegments[segmentIndex].error, `Network Error: ${error.message}`);
+                 segment.status = 'text_error';
+            } finally {
+                showSpinner(domElements.storySegments[segmentIndex].spinner, false);
+            }
+        }
+
+        function handleMoodChange() {
+            const newMoodIndex = parseInt(domElements.moodSlider.value);
+            appState.mood = appState.moodMap[newMoodIndex];
+            updateMoodLabels();
+
+            appState.storySegments.forEach((segment, index) => {
+                if (segment.imageId && (segment.status === 'text_loaded' || segment.status === 'text_error')) {
+                    generateNarrativeForSegment(index);
+                }
+            });
+        }
+
+        function updateMoodLabels() {
+            domElements.moodLabels.forEach((label, index) => {
+                if (index === parseInt(domElements.moodSlider.value)) {
+                    label.classList.add('active-mood');
+                } else {
+                    label.classList.remove('active-mood');
+                }
+            });
+        }
+
+        function handleRestartStory() {
+            if (confirm("Are you sure you want to start a new tale? All current progress will be lost.")) {
+                resetAppStateForNewStory();
+                resetKeywordScreen();
+                resetStoryWeavingScreen();
+                navigateToScreen('themeSelectionScreen');
+            }
+        }
+
+        async function handleExportPdf() {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'pt', 'a4');
+            const storyOutputElement = domElements.fullStoryOutput;
+            const pdfExportButton = domElements.exportPdfBtn;
+            const originalButtonHTML = pdfExportButton.innerHTML;
+
+            pdfExportButton.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Exporting...`;
+            pdfExportButton.disabled = true;
+
+            try {
+                const canvas = await html2canvas(storyOutputElement, {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    backgroundColor: '#181818',
+                    onclone: (documentClone) => {
+                        Array.from(documentClone.querySelectorAll('.regenerate-text-btn, .spinner-border, .alert, .annotation-input, .remove-image-btn')).forEach(el => el.style.display = 'none');
+                        Array.from(documentClone.querySelectorAll('.story-segment')).forEach(el => {
+                           if(el.classList.contains('d-none')) el.style.display = 'none';
+                        });
+                         Array.from(documentClone.querySelectorAll('.narrative-text')).forEach(el => {
+                           el.style.borderLeft = '2px solid #e6c37f';
+                           el.style.backgroundColor = 'rgba(40,40,40,0.8)';
+                           el.style.color = '#E0E0E0';
+                           el.style.padding = '10px';
+                           el.style.borderRadius = '4px';
+                        });
+                        Array.from(documentClone.querySelectorAll('.story-image-display')).forEach(el => {
+                           el.style.border = '1px solid #555';
+                        });
+                        documentClone.body.style.fontFamily = 'Georgia, serif';
+                        documentClone.body.style.color = '#E0E0E0';
+                    }
+                });
+                const imgData = canvas.toDataURL('image/png');
+
+                const pageMargin = 40;
+                const contentWidth = pdf.internal.pageSize.getWidth() - (2 * pageMargin);
+
+                pdf.setFontSize(24);
+                pdf.setFont("Helvetica", "bold");
+                pdf.setTextColor('#e6c37f');
+                pdf.text(
+`Tale of ${appState.selectedTheme.name}`, pdf.internal.pageSize.getWidth() / 2, pageMargin + 10, { align: 'center' });
+
+                const imgProps = pdf.getImageProperties(imgData);
+                const imgHeight = (imgProps.height * contentWidth) / imgProps.width;
+                let heightLeft = imgHeight;
+                let position = pageMargin + 40;
+
+                pdf.addImage(imgData, 'PNG', pageMargin, position, contentWidth, imgHeight);
+                heightLeft -= (pdf.internal.pageSize.getHeight() - position - pageMargin);
+
+                while (heightLeft > 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', pageMargin, position, contentWidth, imgHeight);
+                    heightLeft -= pdf.internal.pageSize.getHeight() - pageMargin * 2;
+                }
+
+                pdf.save(`DreamWeaversLoom-${appState.selectedTheme.id}-${Date.now()}.pdf`);
+            } catch (error) {
+                console.error("PDF Export Error:", error);
+                alert(`Failed to export PDF: ${error.message}. Check console for details.`);
+            } finally {
+                pdfExportButton.innerHTML = originalButtonHTML;
+                pdfExportButton.disabled = false;
+            }
+        }
+
+        async function callAIApi(systemPrompt, userMessage) {
+            try {
+                const response = await fetch(`${appState.apiBaseUrl}/api/ai`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        aiguide: systemPrompt,
+                        msgforai: userMessage,
+                        llmSettings: { temperature: 0.75 }
+                    })
+                });
+
+                if (!response.ok) {
+                    let errorMsg = `HTTP error! status: ${response.status}`;
+                    try {
+                        const errorData = await response.json();
+                        errorMsg = errorData.error || errorMsg;
+                    } catch (e) { errorMsg = response.statusText || errorMsg; }
+                    return { success: false, error: errorMsg };
+                }
+
+                const data = await response.json();
+                if (typeof data.success === 'undefined') {
+                     return { success: false, error: "Malformed API response from /api/ai." };
+                }
+                return data;
+            } catch (networkError) {
+                return { success: false, error: `Network error calling /api/ai: ${networkError.message}` };
+            }
+        }
+
+        async function generateImageOnDemandApi(promptText) {
+            try {
+                const response = await fetch(`${appState.apiBaseUrl}/api/generate-image-on-demand`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: promptText, aspectRatio: "16:9", style: "hd" })
+                });
+
+                if (!response.ok) {
+                    let errorMsg = `HTTP error! status: ${response.status}`;
+                    try {
+                        const errorData = await response.json();
+                        errorMsg = errorData.error || errorMsg;
+                    } catch (e) { errorMsg = response.statusText || errorMsg; }
+                    return { success: false, error: errorMsg, promptUsed: promptText };
+                }
+
+                const data = await response.json();
+                if (data.success) {
+                    return { success: true, imageUrl: data.imageUrl, promptUsed: promptText };
+                } else {
+                    return { success: false, error: data.error || 'API reported failure but no error message.', promptUsed: promptText };
+                }
+            } catch (networkError) {
+                return { success: false, error: `Network error calling /api/generate-image-on-demand: ${networkError.message}`, promptUsed: promptText };
+            }
+        }
+
+        function showSpinner(spinnerElement, show) {
+            if (show) {
+                spinnerElement.classList.remove('d-none');
+            } else {
+                spinnerElement.classList.add('d-none');
+            }
+        }
+
+        function showError(errorElement, message) {
+            errorElement.textContent = message;
+            errorElement.classList.remove('d-none');
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    })();
+    </script>
+
+
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

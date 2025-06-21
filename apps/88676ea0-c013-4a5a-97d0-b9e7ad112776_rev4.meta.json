@@ -1,0 +1,13 @@
+{
+  "projectId": "88676ea0-c013-4a5a-97d0-b9e7ad112776",
+  "revisionString": "4",
+  "projectNameDisplay": "Sentience Spectrum",
+  "projectType": "webapp",
+  "ownerPublicKey": "EZxuU9mZRqgsYxoFgDEnwNvWu4DYVjWiCFnSB3jSj7Hq",
+  "userPromptForThisRevision": "ok its showing the graph accurately but now it shows all of them at once no matter which one you pick.   lets have it only show the results for whichever one is selected like we did before.   again, accurate representations now so thats good. ",
+  "basedOnRevisionString": "3",
+  "savedAt": "2025-06-13T12:54:03.840Z",
+  "imageAssets": [],
+  "isPublished": false,
+  "isShowcased": false
+}

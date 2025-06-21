@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfect Egg Timer</title>
+    <meta name="description" content="The perfect egg timer to get your eggs just right, every time. Choose a preset or set a custom time.">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" href="/generated_images/imagen3_FasjMy_dc6848_f48d212e-d44.png" type="image/png">
+    <style>
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        background-color: #f8f9fa;
+    }
+
+    #mainEggImage {
+        transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    }
+
+    #mainEggImage.cooking {
+        transform: scale(1.05) rotate(3deg);
+    }
+    #mainEggImage.done {
+        transform: scale(1.1) rotate(-5deg);
+    }
+
+    #timeDisplay {
+        font-size: clamp(3rem, 10vw, 5.5rem);
+        letter-spacing: -0.05em;
+        color: #212529;
+    }
+
+    .progress {
+        border-radius: 0.5rem;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .progress-bar {
+        transition: width 0.25s ease-out !important;
+        color: #333 !important;
+    }
+
+    .timer-icon {
+        height: 20px;
+        width: 20px;
+        vertical-align: text-bottom;
+        margin-bottom: 2px;
+        filter: saturate(0.9);
+    }
+    .preset-btn:hover .timer-icon,
+    #customTimeToggleBtn:hover .timer-icon {
+        filter: saturate(1.2);
+    }
+
+    .preset-btn, #customTimeToggleBtn {
+        font-weight: 500;
+        transition: all 0.2s ease-in-out;
+    }
+    .preset-btn:hover, #customTimeToggleBtn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    #customTimeInputSection input[type="number"] {
+        font-weight: 500;
+    }
+
+    #timerControlsSection .btn {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+        font-weight: 500;
+    }
+    #timerControlsSection .btn svg {
+        vertical-align: -3px;
+    }
+
+    #funFactSection {
+        background-color: #ffffff;
+    }
+    #funFactSection .text-primary {
+        color: #fd7e14 !important;
+    }
+
+    .btn:focus-visible, .form-control:focus-visible {
+        outline: 2px solid var(--bs-primary);
+        outline-offset: 2px;
+        box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+    }
+
+    @media (max-width: 576px) {
+        .display-5 { font-size: calc(1.5rem + 2vw); }
+        .lead { font-size: calc(0.9rem + 0.5vw); }
+        #timerControlsSection .btn { width: 100%; margin-bottom: 0.5rem; }
+        #timerControlsSection .btn:last-child { margin-bottom: 0; }
+        .row-cols-2 > * { flex: 0 0 auto; width: 50%; }
+    }
+    </style>
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+    <header class="bg-white py-3 border-bottom shadow-sm sticky-top">
+        <div class="container text-center">
+            <h1 class="display-5 fw-bold">
+                <img id="headerEggIcon" src="/generated_images/imagen3_FasjMy_dc6848_f48d212e-d44.png" alt="Egg Icon" style="height: 40px; margin-right: 10px; vertical-align: -5px;">
+                Perfect Egg Timer
+            </h1>
+            <p class="lead text-muted mb-0">Get your eggs just right, every time!</p>
+        </div>
+    </header>
+
+    <main class="container mt-4 mb-5 flex-grow-1">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-xl-7">
+
+                <section id="eggIllustrationSection" class="text-center mb-4">
+                    <img id="mainEggImage" src="/generated_images/imagen3_FasjMy_dc6848_9f788da8-0e8.png" alt="A happy cartoon egg, ready to be timed" class="img-fluid" style="max-height: 180px;">
+                </section>
+
+                <section id="timerDisplaySection" class="text-center mb-3">
+                    <h2 id="timeDisplay" class="display-1 fw-bolder text-dark">00:00</h2>
+                    <div class="progress mx-auto" style="height: 30px; max-width: 400px;" role="progressbar" aria-label="Timer progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                        <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated fs-6 fw-semibold" style="width: 0%; background-color: #ffc107;"></div>
+                    </div>
+                </section>
+
+                <section id="presetTimersSection" class="mb-4">
+                    <h3 class="text-center mb-3 h4 text-secondary">Choose Your Doneness:</h3>
+                    <div class="row row-cols-2 row-cols-sm-3 g-3 text-center">
+                        <div class="col"><button class="btn btn-outline-primary w-100 py-3 preset-btn" data-time="180"><img src="/generated_images/imagen3_FasjMy_dc6848_1aefe537-d5d.png" alt="Soft boiled egg icon" class="timer-icon me-2">Soft (3m)</button></div>
+                        <div class="col"><button class="btn btn-outline-primary w-100 py-3 preset-btn" data-time="240"><img src="/generated_images/imagen3_FasjMy_dc6848_268414b8-887.png" alt="Dippy egg icon" class="timer-icon me-2">Dippy (4m)</button></div>
+                        <div class="col"><button class="btn btn-outline-primary w-100 py-3 preset-btn" data-time="300"><img src="/generated_images/imagen3_FasjMy_dc6848_9cfadf62-7a7.png" alt="Medium boiled egg icon" class="timer-icon me-2">Medium (5m)</button></div>
+                        <div class="col"><button class="btn btn-outline-primary w-100 py-3 preset-btn" data-time="420"><img src="/generated_images/imagen3_FasjMy_dc6848_3eb84399-f8e.png" alt="Medium-Hard boiled egg icon" class="timer-icon me-2">Med-Hard (7m)</button></div>
+                        <div class="col"><button class="btn btn-outline-primary w-100 py-3 preset-btn" data-time="600"><img src="/generated_images/imagen3_FasjMy_dc6848_5f714901-87f.png" alt="Hard boiled egg icon" class="timer-icon me-2">Hard (10m)</button></div>
+                        <div class="col"><button id="customTimeToggleBtn" class="btn btn-outline-secondary w-100 py-3"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square me-2 timer-icon" viewBox="0 0 16 16"><path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.813z"/><path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/></svg>Custom</button></div>
+                    </div>
+                </section>
+
+                <section id="customTimeInputSection" class="mb-4 p-3 border rounded bg-white shadow-sm d-none">
+                    <h3 class="text-center mb-3 h5 text-secondary">Set Custom Time:</h3>
+                    <form id="customTimeForm">
+                        <div class="row g-2 justify-content-center align-items-center">
+                            <div class="col-auto">
+                                <label for="customMinutes" class="form-label visually-hidden">Minutes</label>
+                                <input type="number" class="form-control form-control-lg text-center" id="customMinutes" placeholder="MM" min="0" max="99" value="0" style="width: 80px;">
+                            </div>
+                            <div class="col-auto fs-3 pb-1 text-muted">:</div>
+                            <div class="col-auto">
+                                <label for="customSeconds" class="form-label visually-hidden">Seconds</label>
+                                <input type="number" class="form-control form-control-lg text-center" id="customSeconds" placeholder="SS" min="0" max="59" value="0" style="width: 80px;">
+                            </div>
+                            <div class="col-12 col-sm-auto mt-2 mt-sm-0 text-center">
+                                <button type="submit" class="btn btn-primary btn-lg w-100 w-sm-auto">Set & Start</button>
+                            </div>
+                        </div>
+                    </form>
+                </section>
+
+                <section id="timerControlsSection" class="text-center mb-4 d-grid gap-2 d-sm-block">
+                    <button id="startTimerBtn" class="btn btn-success btn-lg mx-sm-1 px-4"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-play-fill me-1" viewBox="0 0 16 16"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>Start</button>
+                    <button id="stopTimerBtn" class="btn btn-danger btn-lg mx-sm-1 px-4" disabled><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-pause-fill me-1" viewBox="0 0 16 16"><path d="M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5m5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5"/></svg>Stop</button>
+                    <button id="resetTimerBtn" class="btn btn-secondary btn-lg mx-sm-1 px-4" disabled><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-arrow-clockwise me-1" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/></svg>Reset</button>
+                </section>
+
+                <section id="funFactSection" class="text-center p-3 bg-white border rounded shadow-sm">
+                    <h4 class="h5 text-primary">Eggcellent Tip!</h4>
+                    <p id="funFactText" class="fst-italic text-muted mb-0">The color of an eggshell has no bearing on its nutritional value or taste!</p>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-white py-3 mt-auto border-top">
+        <div class="container text-center">
+            <p class="mb-0 text-muted small">&copy; <span id="currentYear"></span> Perfect Egg Timer. Cooked up with AI assistance.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    (function() {
+        'use strict';
+
+        let currentTimeInSeconds = 0;
+        let totalTimeInSeconds = 0;
+        let timerIntervalId = null;
+        let isTimerRunning = false;
+        let originalPageTitle = document.title;
+
+        const eggFunFacts = [
+            "The color of an eggshell doesn't affect its nutritional value or taste.",
+            "A large egg has about 70 calories and 6 grams of high-quality protein.",
+            "To tell if an egg is raw or hard-boiled, spin it! Hard-boiled eggs spin easily, raw ones wobble.",
+            "Store eggs pointed-end down to keep yolks centered and fresher longer.",
+            "The stringy white bits in raw eggs are chalazae; they anchor the yolk.",
+            "Most hens lay an egg every 24-26 hours.",
+            "The Araucana chicken lays blue or green eggs!",
+            "Egg yolks are one of the few natural foods containing Vitamin D."
+        ];
+
+        let timeDisplayEl, progressBarEl, startTimerBtnEl, stopTimerBtnEl, resetTimerBtnEl;
+        let presetButtonEls, customTimeToggleBtnEl, customTimeInputSectionEl, customMinutesInputEl, customSecondsInputEl, customTimeFormEl;
+        let mainEggImageEl, funFactTextEl, currentYearEl;
+
+        document.addEventListener('DOMContentLoaded', init);
+
+        function init() {
+            timeDisplayEl = document.getElementById('timeDisplay');
+            progressBarEl = document.getElementById('progressBar');
+            startTimerBtnEl = document.getElementById('startTimerBtn');
+            stopTimerBtnEl = document.getElementById('stopTimerBtn');
+            resetTimerBtnEl = document.getElementById('resetTimerBtn');
+            presetButtonEls = document.querySelectorAll('.preset-btn');
+            customTimeToggleBtnEl = document.getElementById('customTimeToggleBtn');
+            customTimeInputSectionEl = document.getElementById('customTimeInputSection');
+            customMinutesInputEl = document.getElementById('customMinutes');
+            customSecondsInputEl = document.getElementById('customSeconds');
+            customTimeFormEl = document.getElementById('customTimeForm');
+            mainEggImageEl = document.getElementById('mainEggImage');
+            funFactTextEl = document.getElementById('funFactText');
+            currentYearEl = document.getElementById('currentYear');
+
+            startTimerBtnEl.addEventListener('click', startTimer);
+            stopTimerBtnEl.addEventListener('click', stopTimer);
+            resetTimerBtnEl.addEventListener('click', () => resetTimer(true));
+
+            presetButtonEls.forEach(btn => btn.addEventListener('click', handlePresetClick));
+            customTimeToggleBtnEl.addEventListener('click', toggleCustomTimeInput);
+            customTimeFormEl.addEventListener('submit', handleCustomTimeSubmit);
+
+            if (currentYearEl) currentYearEl.textContent = new Date().getFullYear();
+            updateTimerDisplay();
+            updateButtonStates();
+            displayRandomFunFact();
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(currentTimeInSeconds / 60);
+            const seconds = currentTimeInSeconds % 60;
+            const formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            timeDisplayEl.textContent = formattedTime;
+
+            let progressPercent = 0;
+            if (totalTimeInSeconds > 0) {
+                progressPercent = ((totalTimeInSeconds - currentTimeInSeconds) / totalTimeInSeconds) * 100;
+            }
+            progressBarEl.style.width = `${progressPercent}%`;
+            progressBarEl.setAttribute('aria-valuenow', progressPercent);
+            progressBarEl.textContent = `${Math.round(progressPercent)}%`;
+
+
+            if (isTimerRunning) {
+                document.title = `${formattedTime} - ${originalPageTitle}`;
+            } else if (currentTimeInSeconds === 0 && totalTimeInSeconds === 0) {
+                document.title = originalPageTitle;
+            }
+        }
+
+        function startTimer() {
+            if (isTimerRunning || currentTimeInSeconds <= 0) return;
+
+            isTimerRunning = true;
+            mainEggImageEl.classList.add('cooking');
+            mainEggImageEl.classList.remove('done');
+            timerIntervalId = setInterval(tick, 1000);
+            updateButtonStates();
+        }
+
+        function stopTimer() {
+            clearInterval(timerIntervalId);
+            isTimerRunning = false;
+            mainEggImageEl.classList.remove('cooking');
+            updateButtonStates();
+            if (currentTimeInSeconds > 0) {
+                 const minutes = Math.floor(currentTimeInSeconds / 60);
+                 const seconds = currentTimeInSeconds % 60;
+                 document.title = `Paused ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')} - ${originalPageTitle}`;
+            } else {
+                 document.title = originalPageTitle;
+            }
+        }
+
+        function resetTimer(fullReset = false) {
+            stopTimer();
+            if (fullReset) {
+                totalTimeInSeconds = 0;
+                customTimeInputSectionEl.classList.add('d-none');
+            }
+            currentTimeInSeconds = totalTimeInSeconds;
+            mainEggImageEl.classList.remove('done', 'cooking');
+            updateTimerDisplay();
+            updateButtonStates();
+            document.title = originalPageTitle;
+        }
+
+        function tick() {
+            currentTimeInSeconds--;
+            updateTimerDisplay();
+            if (currentTimeInSeconds <= 0) {
+                timerFinished();
+            }
+        }
+
+        function timerFinished() {
+            stopTimer();
+            mainEggImageEl.classList.add('done');
+            mainEggImageEl.classList.remove('cooking');
+            alert("Time's up! Your egg is ready!");
+            document.title = `Egg Ready! - ${originalPageTitle}`;
+            totalTimeInSeconds = 0;
+            currentTimeInSeconds = 0;
+            updateTimerDisplay();
+            updateButtonStates();
+            displayRandomFunFact();
+        }
+
+        function handlePresetClick(event) {
+            const time = parseInt(event.currentTarget.dataset.time, 10);
+            if (isTimerRunning) stopTimer();
+            totalTimeInSeconds = time;
+            currentTimeInSeconds = totalTimeInSeconds;
+            customTimeInputSectionEl.classList.add('d-none');
+            mainEggImageEl.classList.remove('done', 'cooking');
+            updateTimerDisplay();
+            updateButtonStates();
+        }
+
+        function toggleCustomTimeInput() {
+            if (isTimerRunning) stopTimer();
+            resetTimer(true);
+            customTimeInputSectionEl.classList.toggle('d-none');
+            if (!customTimeInputSectionEl.classList.contains('d-none')) {
+                customMinutesInputEl.value = "0";
+                customSecondsInputEl.value = "0";
+                customMinutesInputEl.focus();
+            }
+            updateButtonStates();
+        }
+
+        function handleCustomTimeSubmit(event) {
+            event.preventDefault();
+            if (isTimerRunning) stopTimer();
+
+            const minutes = parseInt(customMinutesInputEl.value, 10) || 0;
+            const seconds = parseInt(customSecondsInputEl.value, 10) || 0;
+
+            if (minutes < 0 || minutes > 99 || seconds < 0 || seconds > 59 || (minutes === 0 && seconds === 0)) {
+                alert("Please enter a valid time (1 second to 99 minutes and 59 seconds).");
+                return;
+            }
+            totalTimeInSeconds = (minutes * 60) + seconds;
+            currentTimeInSeconds = totalTimeInSeconds;
+            mainEggImageEl.classList.remove('done', 'cooking');
+            updateTimerDisplay();
+            startTimer();
+            customTimeInputSectionEl.classList.add('d-none');
+        }
+
+        function updateButtonStates() {
+            startTimerBtnEl.disabled = isTimerRunning || currentTimeInSeconds <= 0;
+            stopTimerBtnEl.disabled = !isTimerRunning;
+            resetTimerBtnEl.disabled = (currentTimeInSeconds === 0 && !isTimerRunning && totalTimeInSeconds === 0);
+
+            presetButtonEls.forEach(btn => btn.disabled = isTimerRunning);
+            customTimeToggleBtnEl.disabled = isTimerRunning;
+            customMinutesInputEl.disabled = isTimerRunning;
+            customSecondsInputEl.disabled = isTimerRunning;
+            customTimeFormEl.querySelector('button[type="submit"]').disabled = isTimerRunning;
+        }
+
+        function displayRandomFunFact() {
+            if (funFactTextEl && eggFunFacts.length > 0) {
+                const randomIndex = Math.floor(Math.random() * eggFunFacts.length);
+                funFactTextEl.textContent = eggFunFacts[randomIndex];
+            }
+        }
+
+    })();
+    </script>
+<!-- Injectable Console Log Copier Snippet --><div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab"><button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button></div><script>(function() { const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil'); if (utilContainer) { const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug; const logs = []; function formatLog(type, args) { const timestamp = new Date().toISOString(); const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' '); return `[${timestamp}] [${type.toUpperCase()}] ${message}`; } console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); }; console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); }; console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); }; console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); }; console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); }; window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; }; window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); }; const copyButton = utilContainer.querySelector('button'); if (copyButton) { copyButton.addEventListener('click', function(e) { e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; } const logText = logs.join('\n'); navigator.clipboard.writeText(logText).then(function() { const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745'; setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000); originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.'); }).catch(function(err) { originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message); alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.'); const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545'; setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000); }); }); } } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); } })();</script><!-- End of Injectable Snippet -->
+</body>
+</html>

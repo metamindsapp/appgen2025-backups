@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Idea Inc.</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #1a202c;
+            color: #e2e8f0;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: sans-serif;
+        }
+        .container-fluid[data-bs-theme="dark"],
+        .modal-content[data-bs-theme="dark"],
+        .card[data-bs-theme="dark"] {
+             background-color: #2d3748;
+             color: #e2e8f0;
+        }
+        .card-header {
+            background-color: #4a5568 !important;
+            color: #e2e8f0 !important;
+        }
+        .btn-primary {
+             background-color: #667eea !important;
+             border-color: #667eea !important;
+        }
+         .btn-primary:hover {
+             background-color: #7f9cf5 !important;
+             border-color: #7f9cf5 !important;
+         }
+         .btn-success {
+             background-color: #48bb78 !important;
+             border-color: #48bb78 !important;
+         }
+         .btn-success:hover {
+             background-color: #68d391 !important;
+             border-color: #68d391 !important;
+         }
+         .btn-info {
+             background-color: #4299e1 !important;
+             border-color: #4299e1 !important;
+         }
+         .btn-info:hover {
+             background-color: #63b3ed !important;
+             border-color: #63b3ed !important;
+         }
+         .btn-warning {
+             background-color: #ecc94b !important;
+             border-color: #ecc94b !important;
+             color: #1a202c !important;
+         }
+         .btn-warning:hover {
+             background-color: #f6e05e !important;
+             border-color: #f6e05e !important;
+         }
+         .btn-secondary {
+             background-color: #718096 !important;
+             border-color: #718096 !important;
+         }
+         .btn-secondary:hover {
+             background-color: #a0aec0 !important;
+             border-color: #a0aec0 !important;
+         }
+         .btn-close-white {
+            filter: invert(1) grayscale(100%) brightness(200%);
+         }
+
+        #game-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        #gameCanvas {
+            display: block;
+            background-color: #000;
+            touch-action: none;
+        }
+        #game-ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+        }
+        #game-ui > div {
+            pointer-events: auto;
+        }
+        #stats-panel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 20;
+            width: 250px;
+        }
+        #action-buttons-panel {
+             position: absolute;
+             bottom: 10px;
+             left: 50%;
+             transform: translateX(-50%);
+             z-index: 20;
+             display: flex;
+             gap: 10px;
+             flex-wrap: wrap;
+             justify-content: center;
+        }
+        #ai-log-panel {
+             position: absolute;
+             top: 10px;
+             right: 10px;
+             z-index: 20;
+             width: 300px;
+             max-height: 40vh;
+             overflow-y: auto;
+        }
+        @media (max-width: 768px) {
+            #stats-panel, #ai-log-panel {
+                position: static;
+                width: 95%;
+                margin: 10px auto;
+                max-height: 20vh;
+            }
+             #game-ui {
+                 flex-direction: column;
+                 justify-content: flex-start;
+             }
+             #action-buttons-panel {
+                 position: static;
+                 transform: none;
+                 margin: 10px auto;
+                 width: 95%;
+             }
+        }
+         .ai-log-entry {
+             margin-bottom: 5px;
+             padding-bottom: 5px;
+             border-bottom: 1px solid #4a5568;
+             font-size: 0.9em;
+         }
+         .ai-log-entry strong {
+             color: #90cdf4;
+         }
+         .upgrade-item {
+             margin-bottom: 10px;
+             padding: 10px;
+             border: 1px solid #4a5568;
+             border-radius: 5px;
+             background-color: #4a5568;
+             display: flex;
+             justify-content: space-between;
+             align-items: center;
+         }
+         .upgrade-item .btn {
+             margin-left: 10px;
+         }
+         .upgrade-item.purchased {
+             opacity: 0.6;
+             text-decoration: line-through;
+         }
+         #ai-progress-bar-container {
+             width: 100%;
+             margin-top: 10px;
+             display: none;
+         }
+         #gameOverModal .modal-content {
+             text-align: center;
+         }
+    </style>
+</head>
+<body data-bs-theme="dark">
+
+    <div id="game-wrapper">
+        <canvas id="gameCanvas"></canvas>
+
+        <div id="game-ui">
+            <div id="stats-panel" class="card text-white bg-secondary mb-3">
+                <div class="card-header">Stats</div>
+                <div class="card-body">
+                    <p>Currency: <span id="currency-stat">0</span></p>
+                    <p>Sparks: <span id="sparks-stat">0</span></p>
+                    <p>Concepts: <span id="concepts-stat">0</span></p>
+                    <p>Apps: <span id="apps-stat">0</span></p>
+                    <div id="ai-progress-bar-container">
+                        AI Processing:
+                        <div class="progress">
+                            <div id="ai-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated bg-info" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="action-buttons-panel">
+                <button id="btn-generate-spark" class="btn btn-primary" title="Generate raw creative energy (Sparks)">Generate Spark</button>
+                <button id="btn-process-ai" class="btn btn-success" disabled title="Use the AI Core to turn Sparks into Concepts">Process with AI (<span id="sparks-needed-ai"></span> Sparks)</button>
+                <button id="btn-create-app" class="btn btn-info" disabled title="Refine Concepts into deployable Apps">Create App (<span id="concepts-needed-app"></span> Concepts)</button>
+                <button id="btn-deploy-app" class="btn btn-warning" disabled title="Deploy Apps to market for Currency">Deploy App (<span id="apps-available-deploy"></span> Apps)</button>
+                <button id="btn-upgrades" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#upgradesModal" title="Upgrade your factory">Upgrades</button>
+            </div>
+
+            <div id="ai-log-panel" class="card text-white bg-secondary mb-3">
+                <div class="card-header">AI Log</div>
+                <div class="card-body" id="ai-log-body">
+                    <!-- AI generated concepts will appear here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal fade" id="mainMenuModal" tabindex="-1" aria-labelledby="mainMenuModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" data-bs-theme="dark">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="mainMenuModalLabel">Idea Inc.</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Welcome to Idea Inc.! Your mission is to generate raw sparks of creativity, process them into fully formed concepts using the AI Core, refine concepts into deployable apps, and launch them to earn currency. Use currency to upgrade your factory's efficiency and output!</p>
+                    <p>Goal: Earn <span id="win-currency-goal"></span> Currency!</p>
+                     <p><em>"Know Theyself, Build Better"</em></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btn-start-game" data-bs-dismiss="modal">Start Game</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="upgradesModal" tabindex="-1" aria-labelledby="upgradesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" data-bs-theme="dark">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="upgradesModalLabel">Upgrades</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="upgrades-list">
+                    <!-- Upgrades will be listed here by JS -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+     <div class="modal fade" id="gameOverModal" tabindex="-1" aria-labelledby="gameOverModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" data-bs-theme="dark">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="gameOverModalLabel">Game Over!</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="game-over-message"></p>
+                    <p>Final Currency: <span id="final-currency">0</span></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btn-restart-game" data-bs-dismiss="modal">Restart Game</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function() {
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+
+            const currencyStat = document.getElementById('currency-stat');
+            const sparksStat = document.getElementById('sparks-stat');
+            const conceptsStat = document.getElementById('concepts-stat');
+            const appsStat = document.getElementById('apps-stat');
+            const btnGenerateSpark = document.getElementById('btn-generate-spark');
+            const btnProcessAI = document.getElementById('btn-process-ai');
+            const sparksNeededAI = document.getElementById('sparks-needed-ai');
+            const btnCreateApp = document.getElementById('btn-create-app');
+            const conceptsNeededApp = document.getElementById('concepts-needed-app');
+            const btnDeployApp = document.getElementById('btn-deploy-app');
+            const appsAvailableDeploy = document.getElementById('apps-available-deploy');
+            const btnUpgrades = document.getElementById('btn-upgrades');
+            const aiLogBody = document.getElementById('ai-log-body');
+            const mainMenuModal = new bootstrap.Modal(document.getElementById('mainMenuModal'));
+            const upgradesModal = new bootstrap.Modal(document.getElementById('upgradesModal'));
+            const gameOverModal = new bootstrap.Modal(document.getElementById('gameOverModal'));
+            const btnStartGame = document.getElementById('btn-start-game');
+            const btnRestartGame = document.getElementById('btn-restart-game');
+            const upgradesList = document.getElementById('upgrades-list');
+            const winCurrencyGoalSpan = document.getElementById('win-currency-goal');
+            const finalCurrencySpan = document.getElementById('final-currency');
+            const gameOverMessage = document.getElementById('game-over-message');
+            const aiProgressBarContainer = document.getElementById('ai-progress-bar-container');
+            const aiProgressBar = document.getElementById('ai-progress-bar');
+
+            const GAME_NATIVE_WIDTH = 960;
+            const GAME_NATIVE_HEIGHT = 600;
+            canvas.width = GAME_NATIVE_WIDTH;
+            canvas.height = GAME_NATIVE_HEIGHT;
+            ctx.imageSmoothingEnabled = false;
+
+            const GAME_CONFIG = {
+                WIN_GOAL: 5000,
+                SPARKS_PER_CLICK: 1,
+                SPARKS_PER_AI_PROCESS: 10,
+                CONCEPTS_PER_APP: 5,
+                BASE_APP_VALUE: 100,
+                AI_PROCESS_DURATION: 5000,
+                LOG_MAX_ENTRIES: 10,
+                AUTO_SPARK_RATE: 0,
+                AUTO_DEPLOY_RATE: 0,
+                PARTICLE_DECAY_RATE: 1,
+                SPARK_COLOR: '#f6e05e', // Yellow
+                CONCEPT_COLOR: '#48bb78', // Green
+                APP_COLOR: '#ecc94b', // Orange
+                CURRENCY_COLOR: '#667eea', // Blue
+                ERROR_COLOR: '#f56565', // Red
+                UPGRADES: {
+                    sparkEfficiency1: { name: "Spark Efficiency I", cost: 50, effect: { sparksPerClick: 2 }, description: "Double sparks per click." },
+                    autoSpark1: { name: "Auto Spark I", cost: 150, effect: { autoSparkRate: 0.5 }, description: "Generate 0.5 sparks per second automatically." },
+                    aiEfficiency1: { name: "AI Efficiency I", cost: 200, effect: { sparksPerAIProcess: 5 }, description: "Halve sparks needed for AI processing." },
+                    aiSpeed1: { name: "AI Speed I", cost: 300, effect: { aiProcessDuration: 3000 }, description: "Reduce AI processing time." },
+                    appEfficiency1: { name: "App Efficiency I", cost: 100, effect: { conceptsPerApp: 3 }, description: "Reduce concepts needed per app." },
+                    appValue1: { name: "App Value I", cost: 250, effect: { baseAppValue: 200 }, description: "Double base app deployment value." },
+                    autoDeploy1: { name: "Auto Deploy I", cost: 400, effect: { autoDeployRate: 0.2 }, description: "Deploy 0.2 apps per second automatically." },
+                    sparkEfficiency2: { name: "Spark Efficiency II", cost: 600, effect: { sparksPerClick: 5 }, description: "Generate 5 sparks per click." },
+                    autoSpark2: { name: "Auto Spark II", cost: 800, effect: { autoSparkRate: 1.5 }, description: "Generate 1.5 sparks per second automatically." },
+                    aiEfficiency2: { name: "AI Efficiency II", cost: 1000, effect: { sparksPerAIProcess: 3 }, description: "Further reduce sparks needed for AI." },
+                    aiSpeed2: { name: "AI Speed II", cost: 1200, effect: { aiProcessDuration: 1500 }, description: "Significantly reduce AI processing time." },
+                     appEfficiency2: { name: "App Efficiency II", cost: 700, effect: { conceptsPerApp: 2 }, description: "Further reduce concepts needed per app." },
+                     appValue2: { name: "App Value II", cost: 900, effect: { baseAppValue: 400 }, description: "Significantly increase app deployment value." },
+                     autoDeploy2: { name: "Auto Deploy II", cost: 1500, effect: { autoDeployRate: 0.5 }, description: "Deploy 0.5 apps per second automatically." },
+                }
+            };
+
+            let gameState = {
+                currency: 0,
+                sparks: 0,
+                concepts: [],
+                apps: 0,
+                upgrades: {},
+                currentPhase: 'mainMenu',
+                aiProcessing: false,
+                aiProcessTimer: 0,
+                aiFetchResult: null,
+                gameTime: 0,
+                config: JSON.parse(JSON.stringify(GAME_CONFIG))
+            };
+
+            let lastTime = 0;
+            let particles = [];
+
+            const sounds = {};
+            let soundsLoaded = false;
+
+            function loadSounds() {
+                 try {
+                    sounds.click = new Howl({ src: ['https://cdn.jsdelivr.net/gh/dmorse/clicker-game-assets@main/click.wav'] });
+                    sounds.spark = new Howl({ src: ['https://cdn.jsdelivr.net/gh/dmorse/clicker-game-assets@main/spark.wav'] });
+                    sounds.processStart = new Howl({ src: ['https://cdn.jsdelivr.net/gh/dmorse/clicker-game-assets@main/process_start.wav'] });
+                    sounds.processEnd = new Howl({ src: ['https://cdn.jsdelivr.net/gh/dmorse/clicker-game-assets@main/process_end.wav'] });
+                    sounds.concept = new Howl({ src: ['https://cdn.jsdelivr.net/gh/dmorse/clicker-game-assets@main/concept.wav'] });
+                    sounds.app = new Howl({ src: ['https://cdn.jsdelivr.net/gh/dmorse/clicker-game-assets@main/app.wav'] });
+                    sounds.deploy = new Howl({ src: ['https://cdn.jsdelivr.net/gh/dmorse/clicker-game-assets@main/deploy.wav'] });
+                    sounds.upgrade = new Howl({ src: ['https://cdn.jsdelivr.net/gh/dmorse/clicker-game-assets@main/upgrade.wav'] });
+                    sounds.gameOver = new Howl({ src: ['https://cdn.jsdelivr.net/gh/dmorse/clicker-game-assets@main/game_over.wav'] });
+                    soundsLoaded = true;
+                 } catch (e) {
+                     console.error("Error loading sounds:", e);
+                     soundsLoaded = false;
+                 }
+            }
+
+            function playSound(soundName) {
+                if (soundsLoaded && sounds[soundName]) {
+                    try {
+                        sounds[soundName].play();
+                    } catch (e) {
+                        console.error(`Error playing sound ${soundName}:`, e);
+                    }
+                }
+            }
+
+            function initGame() {
+                gameState = {
+                    currency: 0,
+                    sparks: 0,
+                    concepts: [],
+                    apps: 0,
+                    upgrades: {},
+                    currentPhase: 'mainMenu',
+                    aiProcessing: false,
+                    aiProcessTimer: 0,
+                    aiFetchResult: null,
+                    gameTime: 0,
+                    config: JSON.parse(JSON.stringify(GAME_CONFIG))
+                };
+                for (const upgradeId in gameState.config.UPGRADES) {
+                    gameState.upgrades[upgradeId] = { purchased: false, ...gameState.config.UPGRADES[upgradeId] };
+                }
+                aiLogBody.innerHTML = '';
+                winCurrencyGoalSpan.textContent = GAME_CONFIG.WIN_GOAL;
+                resizeGameCanvasMaintainAspectRatio();
+                mainMenuModal.show();
+            }
+
+            function startGame() {
+                gameState.currentPhase = 'playing';
+                lastTime = performance.now();
+                requestAnimationFrame(gameLoop);
+            }
+
+            function gameLoop(timestamp) {
+                const deltaTime = Math.min(0.1, (timestamp - lastTime) / 1000);
+                lastTime = timestamp;
+
+                if (gameState.currentPhase === 'playing' || gameState.currentPhase === 'processingAI') {
+                    update(deltaTime);
+                    render();
+                }
+
+                if (gameState.currentPhase !== 'gameOver') {
+                     requestAnimationFrame(gameLoop);
+                }
+            }
+
+            function update(deltaTime) {
+                gameState.gameTime += deltaTime;
+                updateParticles(deltaTime);
+
+                if (gameState.currentPhase === 'playing') {
+                    if (gameState.config.AUTO_SPARK_RATE > 0) {
+                        gameState.sparks += gameState.config.AUTO_SPARK_RATE * deltaTime;
+                    }
+                     if (gameState.config.AUTO_DEPLOY_RATE > 0 && gameState.apps > 0) {
+                         const appsToDeploy = gameState.config.AUTO_DEPLOY_RATE * deltaTime;
+                         if (appsToDeploy >= 0.1) { // Deploy if we accumulate at least 0.1 app worth over time
+                             const wholeApps = Math.floor(gameState.apps);
+                             if (wholeApps > 0) {
+                                 const deployCount = Math.min(wholeApps, Math.floor(appsToDeploy + (gameState.apps - wholeApps))); // Deploy whole apps up to auto rate
+                                 if (deployCount > 0) {
+                                      gameState.apps -= deployCount;
+                                      gameState.currency += deployCount * gameState.config.BASE_APP_VALUE;
+                                      playSound('deploy');
+                                      createParticles(deployCount * 15, getElementCanvasCoords('btn-deploy-app').x, getElementCanvasCoords('btn-deploy-app').y, GAME_CONFIG.CURRENCY_COLOR, 70);
+                                      checkWinCondition();
+                                 }
+                             }
+                         }
+                     }
+
+                    btnProcessAI.disabled = gameState.sparks < gameState.config.SPARKS_PER_AI_PROCESS || gameState.aiProcessing;
+                    btnCreateApp.disabled = gameState.concepts.length < gameState.config.CONCEPTS_PER_APP;
+                    btnDeployApp.disabled = gameState.apps < 1;
+
+                } else if (gameState.currentPhase === 'processingAI') {
+                    gameState.aiProcessTimer += deltaTime * 1000;
+                    const progress = Math.min(100, (gameState.aiProcessTimer / gameState.config.AI_PROCESS_DURATION) * 100);
+                    aiProgressBar.style.width = `${progress}%`;
+                    aiProgressBar.setAttribute('aria-valuenow', progress);
+
+                    if (gameState.aiProcessTimer >= gameState.config.AI_PROCESS_DURATION && gameState.aiFetchResult !== null) {
+                        const result = gameState.aiFetchResult;
+                        finishAIProcessing();
+                        if (result.success && result.response) {
+                            processAIResponse(result.response);
+                        } else {
+                             addLogEntry("AI Core Error: " + (result.error || "Unknown error."), true);
+                        }
+                         gameState.aiFetchResult = null;
+                    }
+                }
+            }
+
+            function render() {
+                currencyStat.textContent = Math.floor(gameState.currency);
+                sparksStat.textContent = Math.floor(gameState.sparks);
+                conceptsStat.textContent = gameState.concepts.length;
+                appsStat.textContent = Math.floor(gameState.apps);
+
+                sparksNeededAI.textContent = gameState.config.SPARKS_PER_AI_PROCESS;
+                conceptsNeededApp.textContent = gameState.config.CONCEPTS_PER_APP;
+                appsAvailableDeploy.textContent = Math.floor(gameState.apps);
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = '#111';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                const aiCoreSize = 100;
+                const aiCoreX = canvas.width / 2 - aiCoreSize / 2;
+                const aiCoreY = canvas.height / 2 - aiCoreSize / 2;
+                ctx.fillStyle = gameState.aiProcessing ? '#4299e1' : '#718096';
+                ctx.fillRect(aiCoreX, aiCoreY, aiCoreSize, aiCoreSize);
+                ctx.strokeStyle = '#e2e8f0';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(aiCoreX, aiCoreY, aiCoreSize, aiCoreSize);
+
+                const conceptSize = 8;
+                 const conceptsToDraw = Math.min(gameState.concepts.length, 15);
+                 for (let i = 0; i < conceptsToDraw; i++) {
+                     const angle = (i / conceptsToDraw) * Math.PI * 2 + gameState.gameTime * 0.1;
+                     const radius = 80;
+                     const x = aiCoreX + aiCoreSize / 2 + Math.cos(angle) * radius;
+                     const y = aiCoreY + aiCoreSize / 2 + Math.sin(angle) * radius;
+                     ctx.fillStyle = GAME_CONFIG.CONCEPT_COLOR;
+                     ctx.fillRect(x - conceptSize / 2, y - conceptSize / 2, conceptSize, conceptSize);
+                 }
+
+                 const appSize = 10;
+                 const appsToDraw = Math.min(Math.floor(gameState.apps), 10);
+                 const deployAreaCoords = getElementCanvasCoords('btn-deploy-app');
+
+                 for (let i = 0; i < appsToDraw; i++) {
+                     const angle = (i / appsToDraw) * Math.PI * 2 + gameState.gameTime * 0.2;
+                     const radius = 40;
+                     const x = deployAreaCoords.x + Math.cos(angle) * radius;
+                     const y = deployAreaCoords.y + Math.sin(angle) * radius;
+
+                     ctx.fillStyle = GAME_CONFIG.APP_COLOR;
+                     ctx.beginPath();
+                     ctx.moveTo(x, y - appSize);
+                     ctx.lineTo(x + appSize, y + appSize);
+                     ctx.lineTo(x - appSize, y + appSize);
+                     ctx.closePath();
+                     ctx.fill();
+                 }
+
+                 renderParticles(ctx);
+            }
+
+            function getElementCanvasCoords(elementId) {
+                const element = document.getElementById(elementId);
+                if (!element) return { x: 0, y: 0 };
+                const rect = element.getBoundingClientRect();
+                const canvasRect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / canvasRect.width;
+                const scaleY = canvas.height / canvasRect.height;
+                const x = (rect.left + rect.width / 2 - canvasRect.left) * scaleX;
+                const y = (rect.top + rect.height / 2 - canvasRect.top) * scaleY;
+                return { x, y };
+            }
+
+             function createParticles(count, x, y, color, speed = 50) {
+                for (let i = 0; i < count; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const velocity = Math.random() * speed;
+                    particles.push({
+                        x: x,
+                        y: y,
+                        vx: Math.cos(angle) * velocity,
+                        vy: Math.sin(angle) * velocity,
+                        color: color,
+                        life: 1
+                    });
+                }
+            }
+
+            function updateParticles(deltaTime) {
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    const p = particles[i];
+                    p.x += p.vx * deltaTime;
+                    p.y += p.vy * deltaTime;
+                    p.life -= deltaTime * GAME_CONFIG.PARTICLE_DECAY_RATE;
+                    if (p.life <= 0) {
+                        particles.splice(i, 1);
+                    }
+                }
+            }
+
+            function renderParticles(ctx) {
+                particles.forEach(p => {
+                    ctx.fillStyle = p.color;
+                    ctx.globalAlpha = Math.max(0, p.life);
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+                ctx.globalAlpha = 1;
+            }
+
+
+            function handleInput(event) {
+                if (gameState.currentPhase === 'playing') {
+                    if (event.target === btnGenerateSpark) {
+                        generateSpark();
+                    } else if (event.target === btnProcessAI && !btnProcessAI.disabled) {
+                        startAIProcessing();
+                    } else if (event.target === btnCreateApp && !btnCreateApp.disabled) {
+                        createApp();
+                    } else if (event.target === btnDeployApp && !btnDeployApp.disabled) {
+                        deployApp();
+                    }
+                }
+            }
+
+            function generateSpark() {
+                gameState.sparks += gameState.config.SPARKS_PER_CLICK;
+                playSound('spark');
+                createParticles(10, getElementCanvasCoords('btn-generate-spark').x, getElementCanvasCoords('btn-generate-spark').y, GAME_CONFIG.SPARK_COLOR, 50);
+                render();
+            }
+
+            async function startAIProcessing() {
+                if (gameState.sparks < gameState.config.SPARKS_PER_AI_PROCESS || gameState.aiProcessing) {
+                    return;
+                }
+
+                gameState.sparks -= gameState.config.SPARKS_PER_AI_PROCESS;
+                gameState.currentPhase = 'processingAI';
+                gameState.aiProcessing = true;
+                gameState.aiProcessTimer = 0;
+                gameState.aiFetchResult = null;
+
+                aiProgressBarContainer.style.display = 'block';
+                aiProgressBar.style.width = '0%';
+                aiProgressBar.setAttribute('aria-valuenow', 0);
+
+                btnGenerateSpark.disabled = true;
+                btnProcessAI.disabled = true;
+                btnCreateApp.disabled = true;
+                btnDeployApp.disabled = true;
+                btnUpgrades.disabled = true;
+
+                playSound('processStart');
+                render();
+
+                const prompt = "Generate a concise, single-sentence idea for a simple web applet that AppGen could create. Focus on a unique mechanic or concept. Ensure the idea is creative and fits within the scope of a small, single-file HTML/JS/CSS applet. Examples: 'A tool that generates random fantasy character names.', 'A simple game where you avoid falling objects.', 'A utility to convert text to ASCII art.', 'An interactive visualizer for sorting algorithms.', 'A simple drawing canvas with limited tools.', 'A countdown timer with customizable background animations.'";
+
+                try {
+                    const response = await fetch('/api/ai', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            aiguide: "You are a creative assistant tasked with generating simple web app ideas suitable for a single-file HTML/JS/CSS applet.",
+                            msgforai: prompt,
+                            llmSettings: { temperature: 0.9, model: "gemini-1.5-flash-latest" }
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    gameState.aiFetchResult = data;
+
+                } catch (error) {
+                    console.error("AI Processing Fetch Error:", error);
+                    gameState.aiFetchResult = { success: false, error: error.message };
+                }
+            }
+
+            function finishAIProcessing() {
+                 gameState.aiProcessing = false;
+                 gameState.aiProcessTimer = 0;
+                 aiProgressBarContainer.style.display = 'none';
+
+                 btnGenerateSpark.disabled = false;
+                 btnUpgrades.disabled = false;
+                 gameState.currentPhase = 'playing';
+                 playSound('processEnd');
+                 render();
+            }
+
+            function processAIResponse(aiText) {
+                const concept = aiText.trim();
+                if (concept) {
+                    gameState.concepts.push(concept);
+                    addLogEntry(`<strong>New Concept:</strong> ${concept}`);
+                    playSound('concept');
+                     createParticles(15, canvas.width / 2, canvas.height / 2, GAME_CONFIG.CONCEPT_COLOR, 60);
+                } else {
+                     addLogEntry("AI Core returned an empty concept.", true);
+                }
+                 render();
+            }
+
+            function createApp() {
+                if (gameState.concepts.length < gameState.config.CONCEPTS_PER_APP) {
+                    return;
+                }
+                gameState.concepts.splice(0, gameState.config.CONCEPTS_PER_APP);
+                gameState.apps++;
+                playSound('app');
+                 createParticles(20, getElementCanvasCoords('btn-create-app').x, getElementCanvasCoords('btn-create-app').y, GAME_CONFIG.APP_COLOR, 60);
+                render();
+            }
+
+            function deployApp() {
+                if (gameState.apps < 1) {
+                    return;
+                }
+                gameState.apps--;
+                gameState.currency += gameState.config.BASE_APP_VALUE;
+                playSound('deploy');
+                 createParticles(20, getElementCanvasCoords('btn-deploy-app').x, getElementCanvasCoords('btn-deploy-app').y, GAME_CONFIG.CURRENCY_COLOR, 70);
+                checkWinCondition();
+                render();
+            }
+
+            function addLogEntry(message, isError = false) {
+                const entryDiv = document.createElement('div');
+                entryDiv.classList.add('ai-log-entry');
+                if (isError) {
+                    entryDiv.style.color = GAME_CONFIG.ERROR_COLOR;
+                }
+                entryDiv.innerHTML = message;
+                aiLogBody.prepend(entryDiv);
+
+                while (aiLogBody.children.length > GAME_CONFIG.LOG_MAX_ENTRIES) {
+                    aiLogBody.lastChild.remove();
+                }
+            }
+
+            function showUpgrades() {
+                upgradesList.innerHTML = '';
+                for (const upgradeId in gameState.upgrades) {
+                    const upgrade = gameState.upgrades[upgradeId];
+                    const upgradeDiv = document.createElement('div');
+                    upgradeDiv.classList.add('upgrade-item');
+                    if (upgrade.purchased) {
+                        upgradeDiv.classList.add('purchased');
+                    }
+
+                    upgradeDiv.innerHTML = `
+                        <div>
+                            <strong>${upgrade.name}</strong><br>
+                            <small>${upgrade.description}</small>
+                        </div>
+                        ${upgrade.purchased ?
+                            '<span class="badge bg-success">Purchased</span>' :
+                            `<button class="btn btn-sm btn-success" data-upgrade-id="${upgradeId}" ${gameState.currency < upgrade.cost ? 'disabled' : ''}>Buy (${upgrade.cost} Currency)</button>`
+                        }
+                    `;
+                    upgradesList.appendChild(upgradeDiv);
+                }
+
+                upgradesList.querySelectorAll('.upgrade-item button').forEach(button => {
+                    button.addEventListener('click', handleBuyUpgrade);
+                });
+            }
+
+            function handleBuyUpgrade(event) {
+                const upgradeId = event.target.dataset.upgradeId;
+                buyUpgrade(upgradeId);
+            }
+
+            function buyUpgrade(upgradeId) {
+                const upgrade = gameState.upgrades[upgradeId];
+                if (!upgrade || upgrade.purchased || gameState.currency < upgrade.cost) {
+                    return;
+                }
+
+                gameState.currency -= upgrade.cost;
+                upgrade.purchased = true;
+
+                for (const effectKey in upgrade.effect) {
+                    if (gameState.config.hasOwnProperty(effectKey)) {
+                         if (effectKey.startsWith('auto')) {
+                              gameState.config[effectKey] += upgrade.effect[effectKey];
+                         } else {
+                            gameState.config[effectKey] = upgrade.effect[effectKey];
+                         }
+                    }
+                }
+
+                playSound('upgrade');
+                showUpgrades();
+                render();
+            }
+
+            function checkWinCondition() {
+                if (gameState.currency >= GAME_CONFIG.WIN_GOAL) {
+                    gameOver(true);
+                }
+            }
+
+            function gameOver(isWin) {
+                gameState.currentPhase = 'gameOver';
+                btnGenerateSpark.disabled = true;
+                btnProcessAI.disabled = true;
+                btnCreateApp.disabled = true;
+                btnDeployApp.disabled = true;
+                btnUpgrades.disabled = true;
+
+                gameOverMessage.textContent = isWin ? "Congratulations! You've built a thriving Idea Inc. and reached your goal!" : "Game Over! You ran out of ideas.";
+                finalCurrencySpan.textContent = Math.floor(gameState.currency);
+                playSound('gameOver');
+                gameOverModal.show();
+            }
+
+            function restartGame() {
+                 gameOverModal.hide();
+                 initGame();
+            }
+
+            function resizeGameCanvasMaintainAspectRatio() {
+                const nativeAspectRatio = GAME_NATIVE_WIDTH / GAME_NATIVE_HEIGHT;
+                let windowWidth = window.innerWidth;
+                let windowHeight = window.innerHeight;
+                const windowAspectRatio = windowWidth / windowHeight;
+
+                let scaledWidth, scaledHeight;
+
+                if (windowAspectRatio > nativeAspectRatio) {
+                    scaledHeight = windowHeight;
+                    scaledWidth = scaledHeight * nativeAspectRatio;
+                } else {
+                    scaledWidth = windowWidth;
+                    scaledHeight = scaledWidth / nativeAspectRatio;
+                }
+
+                canvas.style.width = Math.floor(scaledWidth) + 'px';
+                canvas.style.height = Math.floor(scaledHeight) + 'px';
+            }
+
+            btnStartGame.addEventListener('click', startGame);
+            btnRestartGame.addEventListener('click', restartGame);
+            btnGenerateSpark.addEventListener('click', handleInput);
+            btnProcessAI.addEventListener('click', handleInput);
+            btnCreateApp.addEventListener('click', handleInput);
+            btnDeployApp.addEventListener('click', handleInput);
+            document.getElementById('upgradesModal').addEventListener('show.bs.modal', showUpgrades);
+            window.addEventListener('resize', resizeGameCanvasMaintainAspectRatio);
+
+            document.addEventListener('DOMContentLoaded', () => {
+                loadSounds();
+                initGame();
+            });
+
+        })();
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

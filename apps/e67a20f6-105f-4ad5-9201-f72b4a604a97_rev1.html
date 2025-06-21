@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Douglas Crossing Band: Road to Rockstar</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap');
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Nunito', 'Arial', sans-serif;
+            background-color: #dee2e6; /* Light gray for letterboxing, Bootstrap's $gray-300 */
+        }
+
+        #game-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            width: 100%;
+            padding: 0;
+            background-color: #dee2e6; /* Matches body for consistent letterboxing */
+        }
+
+        #game-wrapper {
+            position: relative;
+            box-shadow: 0 0 25px rgba(0,0,0,0.3);
+            background-color: #000; /* Fallback if canvas is transparent or not fully drawn */
+        }
+
+        #gameCanvas {
+            display: block;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -webkit-crisp-edges;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            touch-action: none;
+        }
+        
+        .modal-content {
+           border: 1px solid #ccc;
+        }
+
+        .modal-header {
+            border-bottom: 1px solid #dee2e6;
+        }
+        .modal-title img {
+            max-height: 60px; /* Adjusted for proportion */
+            width: auto;
+        }
+        
+        #adventureMapScreen {
+            background-color: rgba(255, 255, 255, 0.97); /* Mostly opaque light background */
+            color: #212529; /* Dark text */
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        #adventureMapScreen h3 {
+            color: #0d6efd; /* Bootstrap primary */
+        }
+        .location-btn {
+            min-width: 280px; /* Slightly wider */
+        }
+
+        #inGameHud {
+            background-color: rgba(33, 37, 41, 0.75); /* Darker, semi-transparent bg for contrast */
+            padding: 10px 15px;
+            border-radius: 8px;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+            font-size: 1rem;
+            width: 100%; 
+            max-width: 1024px; 
+            box-sizing: border-box;
+            z-index: 10;
+        }
+        #inGameHud .progress {
+            background-color: rgba(255,255,255,0.3);
+            height: 22px; /* Slightly taller */
+        }
+        #hudGrooveMeter {
+            transition: width 0.25s ease-out, background-color 0.3s linear;
+            font-weight: bold;
+        }
+        .hit-feedback-particle {
+            position: absolute; /* Will be appended to game-wrapper */
+            font-size: 2.5em; /* Larger feedback */
+            font-weight: bold;
+            color: yellow;
+            text-shadow: 2px 2px 3px #000;
+            opacity: 0;
+            animation: fadeUpAndOut 0.8s ease-out forwards;
+            pointer-events: none;
+            z-index: 20;
+        }
+        @keyframes fadeUpAndOut {
+            0% { opacity: 1; transform: translateY(0) scale(0.8); }
+            20% { transform: translateY(-10px) scale(1.1); }
+            100% { opacity: 0; transform: translateY(-70px) scale(0.5); }
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(248, 249, 250, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: #212529;
+        }
+        .loading-overlay .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+
+        .btn {
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="game-wrapper">
+            <canvas id="gameCanvas"></canvas>
+            <div id="inGameHud" class="position-absolute top-0 start-50 translate-middle-x p-2 d-none">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <div>Score: <span id="hudScore">0</span></div>
+                    <div>Combo: <span id="hudCombo">0</span></div>
+                    <div>Song: <span id="hudSongName">N/A</span></div>
+                </div>
+                <div class="d-flex align-items-center my-1">
+                     <img id="hudGrooveMeterImage" src="/generated_images/dalle_4e5715a7-edb.png" alt="Groove Meter Icon" style="height: 28px; margin-right: 8px;">
+                     <span style="font-weight: bold; margin-right: 8px;">Groove:</span>
+                     <div class="progress flex-grow-1" style="height: 22px;">
+                        <div id="hudGrooveMeter" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="mainMenuModal" tabindex="-1" aria-labelledby="mainMenuModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content shadow-lg">
+                    <div class="modal-header justify-content-center">
+                        <h5 class="modal-title" id="mainMenuModalLabel">
+                            <img src="/generated_images/dalle_d82f6a54-699.png" alt="Douglas Crossing Band: Road to Rockstar" >
+                        </h5>
+                    </div>
+                    <div class="modal-body text-center p-4">
+                        <img src="/generated_images/dalle_b067ae37-400.png" alt="The Band" class="img-fluid rounded mb-4 shadow-sm" style="max-height: 220px;">
+                        <button id="startGameBtn" class="btn btn-primary btn-lg w-100 mb-3">Start Adventure</button>
+                        <button id="songPracticeBtn" class="btn btn-info btn-lg w-100 mb-3 text-white">Song Practice</button>
+                        <button id="bandInfoBtn" class="btn btn-secondary btn-lg w-100 mb-3">Band Info</button>
+                        <button id="optionsBtn" class="btn btn-outline-primary btn-lg w-100">Options</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="songSelectionModal" tabindex="-1" aria-labelledby="songSelectionModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content shadow-lg">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="songSelectionModalLabel">Select a Song</h5>
+                        <button type="button" class="btn-close" aria-label="Close" id="closeSongSelectionBtn"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="card mb-3 hover-shadow">
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="card-title text-primary">Rockin' Riff Challenge</h5>
+                                    <p class="card-text mb-1"><small>Inspired by "R.O.C.K in the USA"</small></p>
+                                    <p class="card-text mb-0">Venue: Crescent Beach Legion</p>
+                                    <p class="card-text"><small class="text-muted">Difficulty: Medium</small></p>
+                                </div>
+                                <button class="btn btn-success playSongBtn fs-5 px-4 py-2" data-song-id="rockin_riff">Play!</button>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" id="songSelectionBackToMainBtn">Back to Main Menu</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="bandInfoModal" tabindex="-1" aria-labelledby="bandInfoModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
+                <div class="modal-content shadow-lg">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="bandInfoModalLabel">About Douglas Crossing Band</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="row">
+                            <div class="col-md-4 text-center">
+                                <img src="/generated_images/dalle_b067ae37-400.png" alt="The Band Posing" class="img-fluid rounded shadow mb-3" style="max-height: 350px;">
+                                <h4 class="text-primary">SOUTH SURREY'S VERY OWN</h4>
+                                <p>Come experience the spectacle!</p>
+                            </div>
+                            <div class="col-md-8">
+                                <h5>What We Play</h5>
+                                <p>60s through today including Mellencamp, The Doors, Poison, T-Rex, Guns&Roses, Smash Mouth, Trooper, AC/DC and so much more.</p>
+                                <hr>
+                                <h5>Our Song List (Partial)</h5>
+                                <ul id="songListDisplay" class="list-group list-group-flush mb-3" style="max-height: 250px; overflow-y: auto;">
+                                </ul>
+                                <hr>
+                                <h5>See Us Live</h5>
+                                <p>We keep the dance floor moving by playing great dance tunes. Find out when we're playing next.</p>
+                                <div class="card bg-light-subtle p-3 mb-3 border">
+                                    <h6 class="text-primary">Past Event Example:</h6>
+                                    <strong>Saturday Feb 24, 2024 - Live at Crescent Beach Legion, South Surrey</strong><br>
+                                    Hear us live at The Crescent Beach Legion for an evening of dancing & good times. $10 cover charge.<br>
+                                    7:30 pm - 11:00 pm<br>
+                                    Crescent Beach Legion South Surrey, BC
+                                </div>
+                                <hr>
+                                <h5>Have Us Play Your Event</h5>
+                                <p>Get in touch to find out about featuring Douglas Crossing Band at your event or venue.</p>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="modal fade" id="optionsModal" tabindex="-1" aria-labelledby="optionsModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content shadow-lg">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="optionsModalLabel">Options</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="form-check form-switch mb-3 py-2">
+                            <input class="form-check-input" type="checkbox" role="switch" id="muteSoundSwitch" style="transform: scale(1.3);">
+                            <label class="form-check-label ps-2" for="muteSoundSwitch">Mute All Sounds</label>
+                        </div>
+                        <p class="text-muted"><small>More game options coming soon!</small></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Save & Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="resultsModal" tabindex="-1" aria-labelledby="resultsModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content shadow-lg">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="resultsModalLabel">Performance Results!</h5>
+                    </div>
+                    <div class="modal-body text-center p-4">
+                        <h2 id="songResultTitle" class="mb-3">Song Cleared!</h2>
+                        <p class="fs-4">Score: <strong id="resultScore" class="text-primary">0</strong></p>
+                        <p class="fs-4">Max Combo: <strong id="resultMaxCombo" class="text-info">0</strong></p>
+                        <p class="fs-4 mb-4">Rank: <strong id="resultRank" class="text-success display-3">S</strong></p>
+                        <div class="mt-4">
+                            <button id="resultsContinueBtn" class="btn btn-primary btn-lg mx-1 px-4">Continue</button>
+                            <button id="resultsRetryBtn" class="btn btn-warning btn-lg mx-1 px-4">Retry Song</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="adventureMapScreen" class="position-absolute top-0 start-0 w-100 h-100 d-none flex-column justify-content-center align-items-center p-3">
+             <div class="text-center bg-light p-4 rounded shadow-lg" style="max-width: 600px;">
+                <h3 class="mb-3 display-6">South Surrey Tour</h3>
+                <img src="/generated_images/dalle_04111a59-cd8.png" alt="Band Van" class="my-3" style="max-height: 120px;">
+                <div id="mapLocations" class="d-grid gap-3 col-md-10 mx-auto">
+                    <button class="btn btn-success btn-lg location-btn py-3" data-location-id="crescentLegion" data-song-id="rockin_riff">
+                        Crescent Beach Legion <span class="badge bg-danger ms-2">New Gig!</span>
+                    </button>
+                </div>
+                <button id="backToMainMenuFromMapBtn" class="btn btn-secondary mt-4 px-4">Back to Main Menu</button>
+            </div>
+        </div>
+    </div>
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-3 fs-5">Loading Game Assets...</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    (function() {
+        'use strict';
+
+        const GAME_CONFIG = {
+            CANVAS_NATIVE_WIDTH: 1024,
+            CANVAS_NATIVE_HEIGHT: 576,
+            NOTE_LANES: 4,
+            NOTE_SIZE: 32, 
+            HIT_ZONE_Y_RATIO: 0.83, 
+            NOTE_SPEED_PPS: 280, 
+            KEY_BINDINGS: ['d', 'f', 'j', 'k'],
+            TIMING_WINDOWS_MS: {
+                PERFECT: 60,
+                GOOD: 120,
+                OK: 180, 
+            },
+            SCORE_VALUES: {
+                PERFECT: 100,
+                GOOD: 50,
+                OK: 25,
+                MISS: 0
+            },
+            GROOVE_MAX: 100,
+            GROOVE_PER_PERFECT: 4,
+            GROOVE_PER_GOOD: 2,
+            GROOVE_PER_OK: 1,
+            GROOVE_PENALTY_MISS: -12,
+            GROOVE_PENALTY_BAD_HIT: -3,
+            NOTE_SPAWN_OFFSET_Y: -64, 
+            PARTICLE_LIFESPAN_SECONDS: 0.8,
+        };
+
+        const gameState = {
+            currentScreen: 'LoadingAssets', 
+            score: 0,
+            combo: 0,
+            maxCombo: 0,
+            groove: GAME_CONFIG.GROOVE_MAX,
+            currentSongId: null,
+            isPaused: false,
+            lastTime: 0,
+            activeNotes: [],
+            noteHitLaneTimers: [0,0,0,0], 
+            songElapsedTime: 0,
+        };
+
+        const ASSETS = {
+            images: {
+                crescentLegionBg: null,
+                noteSprites: null,
+                bandCharacters: null,
+                gameLogo: null,
+                bandVanIcon: null,
+                grooveMeterIcon: null,
+            },
+            sounds: {
+                hitPerfect: null,
+                hitGood: null,
+                miss: null,
+                uiClick: null,
+                menuMusic: null,
+                gameMusic: null,
+            },
+            loaded: {
+                images: 0,
+                sounds: 0,
+                totalImages: 6, 
+                totalSounds: 4, 
+            }
+        };
+        
+        const NOTE_SPRITE_INFO = {
+            size: 32, 
+            map: [ 
+                { x: 0, y: 0 },   // Green (Lane 0)
+                { x: 32, y: 0 },  // Red (Lane 1)
+                { x: 64, y: 0 },  // Yellow (Lane 2)
+                { x: 96, y: 0 }   // Blue (Lane 3)
+            ],
+            sparkle: { x: 128, y: 0 } 
+        };
+
+        let canvas, ctx;
+        let mainMenuModal, songSelectionModal, bandInfoModal, optionsModal, resultsModal;
+        let adventureMapScreenDiv, inGameHudDiv, loadingOverlayDiv, gameWrapperDiv;
+        let muteSoundSwitch;
+
+        const SONG_DATA = {
+            'rockin_riff': {
+                name: "Rockin' Riff Challenge",
+                venue: "Crescent Beach Legion",
+                bpm: 125, 
+                durationSeconds: 75, 
+                audioSrc: 'placeholder_rock_track.mp3', 
+                notes: [] 
+            }
+        };
+
+        function generateSongNotes(songId) {
+            const song = SONG_DATA[songId];
+            if (!song) return;
+            song.notes = [];
+            const beatsPerSecond = song.bpm / 60;
+            const totalBeats = song.durationSeconds * beatsPerSecond;
+            
+            let lastLane = -1;
+            for (let i = 0; i < totalBeats; i += 0.5) { 
+                 if (Math.random() < 0.65) { 
+                    let lane = Math.floor(Math.random() * GAME_CONFIG.NOTE_LANES);
+                    if(Math.random() < 0.3 && lastLane !== -1) lane = lastLane; // Chance to repeat lane for chords/streams
+                    song.notes.push({ time: i / beatsPerSecond, lane: lane });
+                    lastLane = lane;
+                 } else {
+                    lastLane = -1;
+                 }
+            }
+            song.notes.sort((a,b) => a.time - b.time);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+            gameWrapperDiv = document.getElementById('game-wrapper');
+
+            mainMenuModal = new bootstrap.Modal(document.getElementById('mainMenuModal'));
+            songSelectionModal = new bootstrap.Modal(document.getElementById('songSelectionModal'));
+            bandInfoModal = new bootstrap.Modal(document.getElementById('bandInfoModal'));
+            optionsModal = new bootstrap.Modal(document.getElementById('optionsModal'));
+            resultsModal = new bootstrap.Modal(document.getElementById('resultsModal'));
+
+            adventureMapScreenDiv = document.getElementById('adventureMapScreen');
+            inGameHudDiv = document.getElementById('inGameHud');
+            loadingOverlayDiv = document.getElementById('loadingOverlay');
+            muteSoundSwitch = document.getElementById('muteSoundSwitch');
+
+            setupEventListeners();
+            loadAssets();
+            populateBandInfoSongList();
+            GameManager.resizeCanvas(); 
+            GameManager.init();
+        });
+
+        function loadAssets() {
+            let imagesToLoad = [
+                { name: 'crescentLegionBg', src: '/generated_images/dalle_74f8fbc5-ea4.png' },
+                { name: 'noteSprites', src: '/generated_images/dalle_2830f0a6-9cf.png' },
+                { name: 'bandCharacters', src: '/generated_images/dalle_b067ae37-400.png'},
+                { name: 'gameLogo', src: '/generated_images/dalle_d82f6a54-699.png' },
+                { name: 'bandVanIcon', src: '/generated_images/dalle_04111a59-cd8.png' },
+                { name: 'grooveMeterIcon', src: '/generated_images/dalle_4e5715a7-edb.png' },
+            ];
+            ASSETS.loaded.totalImages = imagesToLoad.length;
+
+            imagesToLoad.forEach(imgData => {
+                ASSETS.images[imgData.name] = new Image();
+                ASSETS.images[imgData.name].onload = () => { ASSETS.loaded.images++; checkAllAssetsLoaded(); };
+                ASSETS.images[imgData.name].onerror = (e) => { console.error(`Failed to load image: ${imgData.name}`, e); ASSETS.loaded.images++; checkAllAssetsLoaded(); };
+                ASSETS.images[imgData.name].src = imgData.src;
+            });
+
+            const soundBaseConfig = { volume: 0.6, onload: soundLoaded, onloaderror: soundLoadError };
+            ASSETS.sounds.hitPerfect = new Howl({ ...soundBaseConfig, src: ['placeholder_hit_perfect.wav'], volume: 0.7 });
+            ASSETS.sounds.hitGood = new Howl({ ...soundBaseConfig, src: ['placeholder_hit_good.wav'] });
+            ASSETS.sounds.miss = new Howl({ ...soundBaseConfig, src: ['placeholder_miss.wav'], volume: 0.8 });
+            ASSETS.sounds.uiClick = new Howl({ ...soundBaseConfig, src: ['placeholder_ui_click.wav'], volume: 0.5 });
+            
+            function soundLoaded() { ASSETS.loaded.sounds++; checkAllAssetsLoaded(); }
+            function soundLoadError(id, err) { console.error(`Failed to load sound. ID: ${id}`, err); ASSETS.loaded.sounds++; checkAllAssetsLoaded(); }
+        }
+
+        function checkAllAssetsLoaded() {
+            if (gameState.currentScreen === 'LoadingAssets' && ASSETS.loaded.images >= ASSETS.loaded.totalImages && ASSETS.loaded.sounds >= ASSETS.loaded.totalSounds) {
+                loadingOverlayDiv.classList.add('d-none');
+                GameManager.changeScreen('MainMenu');
+            }
+        }
+        
+        function populateBandInfoSongList() {
+            const songList = [ "Ain't my Fault", "Bang a Gong", "Blue Suede Shoes", "Breakup Song", "Cherry Bomb", "Cinnamon Girl", "Come & Get Your Love", "Comfortably Numb", "Could Have Been a Lady", "Crazy Little Thing Called Love", "Day After Day", "Dead Flowers", "Dear Mr. Fantasy", "Every Rose Has Its Thorns", "Friday I'm in Love", "Have You Ever Seen the Rain", "Here for a Good Time", "Hungry Heart", "Hurts so Good", "I won't Back Down", "I Would Walk 500 Miles", "It's Only Rock & Roll", "Johnny B Good", "Keep Your Hands to Yourself", "Knockin' on Heaven's Door", "Little Bones", "Little Sister", "Little Wing", "Losing My Religion", "Maggie May", "Margaritaville", "Mary Jane's Last Dance", "Midnight Special", "Mustang Sally", "New Orleans is Sinking", "No Matter What", "Pink Houses", "Pretty Woman", "Pride & Joy", "Proud Mary", "Raise a Little Hell", "Roadhouse Blues", "R.O.C.K in the USA", "Run to You", "Running Down a Dream", "Satisfaction", "Shook me all Night Long", "Some Kind of Wonderful", "Stray Cat Strut", "Stuck in the Middle with You", "Tennessee Whisky", "The Way", "This One Goes Out to the One I Love", "Tonight is a Wonderful Night to Fall in Love", "Under My Thumb", "Under the Boardwalk", "Wagon Wheel", "What I Like About You", "What's Up", "White Wedding", "Who'll Stop the Rain", "You May be Right", "You Wreck Me" ];
+            const ul = document.getElementById('songListDisplay');
+            ul.innerHTML = '';
+            songList.forEach(songTitle => {
+                const li = document.createElement('li');
+                li.classList.add('list-group-item', 'bg-light-subtle');
+                li.textContent = songTitle;
+                ul.appendChild(li);
+            });
+        }
+
+        const GameManager = {
+            init: function() {
+                gameState.lastTime = performance.now();
+                generateSongNotes('rockin_riff'); 
+                if (gameState.currentScreen === 'LoadingAssets' && (ASSETS.loaded.images < ASSETS.loaded.totalImages || ASSETS.loaded.sounds < ASSETS.loaded.totalSounds)) {
+                    loadingOverlayDiv.classList.remove('d-none');
+                } else if (gameState.currentScreen === 'LoadingAssets') {
+                     checkAllAssetsLoaded(); // Potentially transition if assets loaded super fast
+                }
+                this.gameLoop();
+            },
+            gameLoop: function(timestamp) {
+                try {
+                    const deltaTime = Math.min(0.1, (timestamp - gameState.lastTime) / 1000);
+                    gameState.lastTime = timestamp;
+
+                    InputManager.process(deltaTime);
+                    GameManager.update(deltaTime);
+                    GameManager.render(deltaTime);
+                } catch (e) {
+                    console.error("Error in game loop:", e);
+                    // Consider stopping the loop or showing an error message
+                }
+                requestAnimationFrame(GameManager.gameLoop.bind(GameManager));
+            },
+            update: function(dt) {
+                if (gameState.currentScreen === 'RhythmGamePlay' && !gameState.isPaused) {
+                    RhythmGameController.update(dt);
+                }
+                 for(let i=0; i<GAME_CONFIG.NOTE_LANES; i++) {
+                    if(gameState.noteHitLaneTimers[i] > 0) {
+                        gameState.noteHitLaneTimers[i] = Math.max(0, gameState.noteHitLaneTimers[i] - dt);
+                    }
+                }
+            },
+            render: function(dt) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                if (gameState.currentScreen === 'RhythmGamePlay' || gameState.currentScreen === 'SongPaused') {
+                    RhythmGameController.render(ctx, dt);
+                } else if (gameState.currentScreen === 'LoadingAssets') {
+                    ctx.fillStyle = '#000000';
+                    ctx.fillRect(0,0, canvas.width, canvas.height);
+                } else {
+                     ctx.fillStyle = '#212529'; // Dark background for non-gameplay canvas
+                     ctx.fillRect(0,0, canvas.width, canvas.height);
+                     if(ASSETS.images.gameLogo && ASSETS.images.gameLogo.complete) {
+                        const img = ASSETS.images.gameLogo;
+                        const aspectRatio = img.width / img.height;
+                        let h = canvas.height * 0.3;
+                        let w = h * aspectRatio;
+                        if (w > canvas.width * 0.7) { w = canvas.width * 0.7; h = w / aspectRatio; }
+                        ctx.drawImage(img, (canvas.width - w)/2, (canvas.height - h)/2 * 0.8, w, h);
+                     }
+                     ctx.fillStyle = 'rgba(255,255,255,0.8)';
+                     ctx.font = `bold ${canvas.height * 0.05}px Nunito`;
+                     ctx.textAlign = 'center';
+                     ctx.fillText('Select an option from the menu', canvas.width/2, canvas.height*0.75);
+                }
+            },
+            changeScreen: function(newScreen) {
+                gameState.currentScreen = newScreen;
+                UIManager.hideAllModals();
+                adventureMapScreenDiv.classList.add('d-none');
+                inGameHudDiv.classList.add('d-none');
+                canvas.focus(); // For keyboard input
+
+                switch(newScreen) {
+                    case 'MainMenu':
+                        mainMenuModal.show();
+                        SoundManager.playMusic('menuMusic', true);
+                        break;
+                    case 'SongSelection':
+                        songSelectionModal.show();
+                        break;
+                    case 'BandInfo':
+                        bandInfoModal.show();
+                        break;
+                    case 'Options':
+                        optionsModal.show();
+                        break;
+                    case 'AdventureMap':
+                        adventureMapScreenDiv.classList.remove('d-none');
+                        SoundManager.playMusic('menuMusic', true);
+                        break;
+                    case 'RhythmGameLoading':
+                        SoundManager.stopMusic();
+                        RhythmGameController.reset();
+                        RhythmGameController.loadSong(gameState.currentSongId);
+                        UIManager.updateHUD();
+                        loadingOverlayDiv.classList.remove('d-none');
+                        setTimeout(() => { // Simulate loading/setup
+                            loadingOverlayDiv.classList.add('d-none');
+                            GameManager.changeScreen('RhythmGamePlay');
+                        }, 750); 
+                        break;
+                    case 'RhythmGamePlay':
+                        inGameHudDiv.classList.remove('d-none');
+                        SoundManager.playMusic('gameMusic', true, SONG_DATA[gameState.currentSongId]?.audioSrc);
+                        gameState.isPaused = false;
+                        gameState.songElapsedTime = 0;
+                        RhythmGameController.songStartTime = performance.now();
+                        break;
+                    case 'SongPaused':
+                        inGameHudDiv.classList.remove('d-none'); 
+                        SoundManager.pauseMusic('gameMusic');
+                        break;
+                    case 'ResultsScreen':
+                        resultsModal.show();
+                        UIManager.updateResultsScreen();
+                        SoundManager.playMusic('menuMusic', true); // Or a results jingle
+                        break;
+                }
+            },
+            resizeCanvas: function() {
+                const nativeAspectRatio = GAME_CONFIG.CANVAS_NATIVE_WIDTH / GAME_CONFIG.CANVAS_NATIVE_HEIGHT;
+                let windowWidth = window.innerWidth;
+                let windowHeight = window.innerHeight;
+                const windowAspectRatio = windowWidth / windowHeight;
+                let scaledWidth, scaledHeight;
+
+                if (windowAspectRatio > nativeAspectRatio) {
+                    scaledHeight = windowHeight;
+                    scaledWidth = scaledHeight * nativeAspectRatio;
+                } else {
+                    scaledWidth = windowWidth;
+                    scaledHeight = scaledWidth / nativeAspectRatio;
+                }
+                
+                canvas.width = GAME_CONFIG.CANVAS_NATIVE_WIDTH;
+                canvas.height = GAME_CONFIG.CANVAS_NATIVE_HEIGHT;
+                canvas.style.width = Math.floor(scaledWidth) + 'px';
+                canvas.style.height = Math.floor(scaledHeight) + 'px';
+
+                if (gameWrapperDiv) {
+                  gameWrapperDiv.style.width = canvas.style.width;
+                  gameWrapperDiv.style.height = canvas.style.height;
+                }
+                if(inGameHudDiv) {
+                    inGameHudDiv.style.maxWidth = canvas.style.width;
+                }
+            }
+        };
+
+        const UIManager = {
+            hideAllModals: function() {
+                [mainMenuModal, songSelectionModal, bandInfoModal, optionsModal, resultsModal].forEach(modal => {
+                    if (modal && modal._isShown) modal.hide();
+                });
+            },
+            updateHUD: function() {
+                document.getElementById('hudScore').textContent = gameState.score;
+                document.getElementById('hudCombo').textContent = gameState.combo;
+                document.getElementById('hudSongName').textContent = SONG_DATA[gameState.currentSongId]?.name || 'N/A';
+                
+                const groovePercent = Math.max(0, (gameState.groove / GAME_CONFIG.GROOVE_MAX) * 100);
+                const grooveBar = document.getElementById('hudGrooveMeter');
+                grooveBar.style.width = groovePercent + '%';
+                grooveBar.textContent = `${Math.round(groovePercent)}%`;
+                grooveBar.setAttribute('aria-valuenow', groovePercent);
+
+                if (groovePercent > 66) grooveBar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-success';
+                else if (groovePercent > 33) grooveBar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-warning text-dark';
+                else grooveBar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-danger';
+            },
+            showHitFeedback: function(text, quality) {
+                const feedbackElement = document.createElement('div');
+                feedbackElement.className = 'hit-feedback-particle';
+                feedbackElement.textContent = text;
+                
+                const hitZoneCenterX = canvas.width / 2;
+                const hitZoneBaseY = canvas.height * GAME_CONFIG.HIT_ZONE_Y_RATIO;
+                feedbackElement.style.left = `${hitZoneCenterX - 50}px`; // Adjust based on text width
+                feedbackElement.style.top = `${hitZoneBaseY - 80}px`; // Position above hit zone
+
+                if (quality === 'PERFECT') feedbackElement.style.color = '#39FF14'; // Neon Green
+                else if (quality === 'GOOD') feedbackElement.style.color = '#FFFF00'; // Yellow
+                else if (quality === 'OK') feedbackElement.style.color = '#FFA500'; // Orange
+                else if (quality === 'MISS') {
+                    feedbackElement.style.color = '#FF0000'; // Red
+                    feedbackElement.style.fontSize = "2em";
+                }
+                
+                gameWrapperDiv.appendChild(feedbackElement);
+                setTimeout(() => {
+                    if (feedbackElement.parentNode) feedbackElement.parentNode.removeChild(feedbackElement);
+                }, GAME_CONFIG.PARTICLE_LIFESPAN_SECONDS * 1000);
+            },
+            updateResultsScreen: function() {
+                document.getElementById('songResultTitle').textContent = gameState.groove <= 0 ? "Gig Failed!" : "Gig Cleared!";
+                document.getElementById('resultScore').textContent = gameState.score;
+                document.getElementById('resultMaxCombo').textContent = gameState.maxCombo;
+                let rank = 'C';
+                const notesInSong = SONG_DATA[gameState.currentSongId]?.notes.length || 100;
+                const perfectScoreTotal = notesInSong * GAME_CONFIG.SCORE_VALUES.PERFECT;
+
+                if (gameState.groove <=0) rank = 'F';
+                else if (gameState.score >= perfectScoreTotal * 0.95) rank = 'S+';
+                else if (gameState.score >= perfectScoreTotal * 0.9) rank = 'S';
+                else if (gameState.score >= perfectScoreTotal * 0.8) rank = 'A';
+                else if (gameState.score >= perfectScoreTotal * 0.7) rank = 'B';
+                else if (gameState.score >= perfectScoreTotal * 0.6) rank = 'C';
+                else rank = 'D';
+                document.getElementById('resultRank').textContent = rank;
+            }
+        };
+
+        const SoundManager = {
+            isMuted: false,
+            play: function(soundName) {
+                if (this.isMuted || !ASSETS.sounds[soundName] || typeof ASSETS.sounds[soundName].play !== 'function') return;
+                try { ASSETS.sounds[soundName].play(); } catch(e) { console.error("Error playing sound:", soundName, e); }
+            },
+            playMusic: function(musicName, loop = false, customSrc = null) {
+                this.stopMusic(); 
+                if (this.isMuted) return;
+                
+                try {
+                    if (musicName === 'menuMusic') {
+                        if(!ASSETS.sounds.menuMusic) ASSETS.sounds.menuMusic = new Howl({src: ['placeholder_menu_music.mp3'], loop: true, volume: 0.2, html5: true});
+                        if(ASSETS.sounds.menuMusic) ASSETS.sounds.menuMusic.play();
+                    } else if (musicName === 'gameMusic') {
+                        const srcToPlay = customSrc || 'placeholder_game_music.mp3';
+                        if(ASSETS.sounds.gameMusic && ASSETS.sounds.gameMusic._src !== srcToPlay) { ASSETS.sounds.gameMusic.unload(); ASSETS.sounds.gameMusic = null; }
+                        if(!ASSETS.sounds.gameMusic) ASSETS.sounds.gameMusic = new Howl({src: [srcToPlay], loop: loop, volume: 0.4, html5: true});
+                        if(ASSETS.sounds.gameMusic) ASSETS.sounds.gameMusic.play();
+                    }
+                } catch (e) { console.error("Error playing music:", musicName, e); }
+            },
+            stopMusic: function() {
+                if (ASSETS.sounds.menuMusic && ASSETS.sounds.menuMusic.playing()) ASSETS.sounds.menuMusic.stop();
+                if (ASSETS.sounds.gameMusic && ASSETS.sounds.gameMusic.playing()) ASSETS.sounds.gameMusic.stop();
+            },
+            pauseMusic: function(musicName) {
+                if (musicName === 'gameMusic' && ASSETS.sounds.gameMusic && ASSETS.sounds.gameMusic.playing()) {
+                    ASSETS.sounds.gameMusic.pause();
+                }
+            },
+            resumeMusic: function(musicName) {
+                 if (this.isMuted) return;
+                 if (musicName === 'gameMusic' && ASSETS.sounds.gameMusic && !ASSETS.sounds.gameMusic.playing()) {
+                    ASSETS.sounds.gameMusic.play();
+                }
+            },
+            toggleMute: function(muteState) {
+                this.isMuted = muteState;
+                Howler.mute(this.isMuted);
+                if (muteSoundSwitch) muteSoundSwitch.checked = this.isMuted;
+                if (!this.isMuted && gameState.currentScreen === 'MainMenu') { // Resume menu music if unmuted on main menu
+                    this.playMusic('menuMusic', true);
+                }
+            }
+        };
+
+        const RhythmGameController = {
+            songStartTime: 0,
+            nextNoteIndex: 0,
+
+            reset: function() {
+                gameState.score = 0;
+                gameState.combo = 0;
+                gameState.maxCombo = 0;
+                gameState.groove = GAME_CONFIG.GROOVE_MAX;
+                gameState.activeNotes = [];
+                this.songStartTime = 0;
+                this.nextNoteIndex = 0;
+                gameState.songElapsedTime = 0;
+                UIManager.updateHUD();
+            },
+            loadSong: function(songId) {
+                gameState.currentSongId = songId;
+                this.nextNoteIndex = 0;
+                UIManager.updateHUD();
+            },
+            update: function(dt) {
+                gameState.songElapsedTime += dt;
+                const song = SONG_DATA[gameState.currentSongId];
+                if (!song) return;
+
+                while(this.nextNoteIndex < song.notes.length && song.notes[this.nextNoteIndex].time <= gameState.songElapsedTime) {
+                    const noteData = song.notes[this.nextNoteIndex];
+                    this.spawnNote(noteData.lane, noteData.time);
+                    this.nextNoteIndex++;
+                }
+
+                const hitZoneY = canvas.height * GAME_CONFIG.HIT_ZONE_Y_RATIO;
+                gameState.activeNotes.forEach(note => note.y += GAME_CONFIG.NOTE_SPEED_PPS * dt);
+                
+                for (let i = gameState.activeNotes.length - 1; i >= 0; i--) {
+                    const note = gameState.activeNotes[i];
+                    if (note.y > hitZoneY + GAME_CONFIG.NOTE_SIZE) { 
+                        this.handleMiss(note);
+                        gameState.activeNotes.splice(i, 1);
+                    }
+                }
+                UIManager.updateHUD();
+                if (gameState.groove <= 0) {
+                    GameManager.changeScreen('ResultsScreen');
+                }
+                if (gameState.songElapsedTime > song.durationSeconds + 2 && gameState.activeNotes.length === 0) { // +2s buffer
+                     GameManager.changeScreen('ResultsScreen');
+                }
+            },
+            spawnNote: function(lane, time) {
+                const note = {
+                    lane: lane,
+                    spawnTime: time,
+                    x: (canvas.width / GAME_CONFIG.NOTE_LANES) * (lane + 0.5) - GAME_CONFIG.NOTE_SIZE / 2,
+                    y: GAME_CONFIG.NOTE_SPAWN_OFFSET_Y,
+                    isHit: false
+                };
+                gameState.activeNotes.push(note);
+            },
+            handleHit: function(lane) {
+                if (gameState.isPaused) return;
+                const hitZoneY = canvas.height * GAME_CONFIG.HIT_ZONE_Y_RATIO;
+                
+                let bestNote = null;
+                let smallestTimeDiffMs = Infinity;
+
+                for (let note of gameState.activeNotes) {
+                    if (note.lane === lane && !note.isHit) {
+                        const yDiff = Math.abs(note.y - hitZoneY);
+                        const timeDiffMs = (yDiff / GAME_CONFIG.NOTE_SPEED_PPS) * 1000;
+
+                        if (timeDiffMs < GAME_CONFIG.TIMING_WINDOWS_MS.OK + 50 && timeDiffMs < smallestTimeDiffMs) { // +50ms buffer for early/late OK
+                            smallestTimeDiffMs = timeDiffMs;
+                            bestNote = note;
+                        }
+                    }
+                }
+                gameState.noteHitLaneTimers[lane] = 0.12; // Visual feedback for lane press
+
+                if (bestNote) {
+                    bestNote.isHit = true; 
+                    gameState.activeNotes = gameState.activeNotes.filter(n => n !== bestNote);
+                    let quality = '';
+
+                    if (smallestTimeDiffMs <= GAME_CONFIG.TIMING_WINDOWS_MS.PERFECT) {
+                        gameState.score += GAME_CONFIG.SCORE_VALUES.PERFECT;
+                        gameState.combo++;
+                        gameState.groove = Math.min(GAME_CONFIG.GROOVE_MAX, gameState.groove + GAME_CONFIG.GROOVE_PER_PERFECT);
+                        quality = 'PERFECT'; SoundManager.play('hitPerfect');
+                    } else if (smallestTimeDiffMs <= GAME_CONFIG.TIMING_WINDOWS_MS.GOOD) {
+                        gameState.score += GAME_CONFIG.SCORE_VALUES.GOOD;
+                        gameState.combo++;
+                        gameState.groove = Math.min(GAME_CONFIG.GROOVE_MAX, gameState.groove + GAME_CONFIG.GROOVE_PER_GOOD);
+                        quality = 'GOOD!'; SoundManager.play('hitGood');
+                    } else if (smallestTimeDiffMs <= GAME_CONFIG.TIMING_WINDOWS_MS.OK) {
+                        gameState.score += GAME_CONFIG.SCORE_VALUES.OK;
+                        gameState.combo = 0; 
+                        gameState.groove = Math.min(GAME_CONFIG.GROOVE_MAX, gameState.groove + GAME_CONFIG.GROOVE_PER_OK);
+                        quality = 'OK'; SoundManager.play('hitGood');
+                    } else { // This case should ideally not be reached if TIMING_WINDOWS_MS.OK + 50 is the selection boundary
+                         this.handleMiss(bestNote, true); 
+                         return; // Exit early as it's a miss
+                    }
+                    UIManager.showHitFeedback(quality, quality.replace('!',''));
+                    if (gameState.combo > gameState.maxCombo) gameState.maxCombo = gameState.combo;
+                } else { // Pressed key but no note in acceptable window
+                     gameState.groove = Math.max(0, gameState.groove + GAME_CONFIG.GROOVE_PENALTY_BAD_HIT);
+                }
+                UIManager.updateHUD();
+            },
+            handleMiss: function(note, isBadHit = false) { // isBadHit means key pressed at wrong time, not note passing by
+                if (note.isHit && !isBadHit) return; // Already processed as a hit, unless it's a bad key press
+                note.isHit = true; // Mark as processed
+                
+                if (!isBadHit) UIManager.showHitFeedback('MISS', 'MISS');
+                // else: Bad hits don't show "MISS", just deduct groove.
+
+                gameState.combo = 0;
+                gameState.groove = Math.max(0, gameState.groove + GAME_CONFIG.GROOVE_PENALTY_MISS);
+                SoundManager.play('miss');
+                UIManager.updateHUD();
+            },
+            render: function(ctx, dt) {
+                if (ASSETS.images.crescentLegionBg && ASSETS.images.crescentLegionBg.complete) {
+                    ctx.drawImage(ASSETS.images.crescentLegionBg, 0, 0, canvas.width, canvas.height);
+                } else {
+                    ctx.fillStyle = '#181030'; // Dark purple-ish fallback
+                    ctx.fillRect(0,0,canvas.width, canvas.height);
+                }
+                
+                if (ASSETS.images.bandCharacters && ASSETS.images.bandCharacters.complete) {
+                    const img = ASSETS.images.bandCharacters;
+                    const stageFloorRatio = 0.65; // Where band's feet would be
+                    const bandHeightRatio = 0.45; // How much of canvas height they take
+                    
+                    let h = canvas.height * bandHeightRatio;
+                    let w = h * (img.width / img.height);
+                    if (w > canvas.width * 0.6) { w = canvas.width * 0.6; h = w / (img.width / img.height); }
+                    
+                    const bobAmount = gameState.combo > 5 ? Math.sin(performance.now()/180) * (Math.min(canvas.height * 0.01, gameState.combo/10)) : 0;
+                    const characterY = canvas.height * stageFloorRatio - h * 0.5 + bobAmount; // Centering them on stage floor
+                    
+                    ctx.globalAlpha = 0.85; // Slightly transparent to blend
+                    ctx.drawImage(img, (canvas.width - w)/2, characterY, w, h);
+                    ctx.globalAlpha = 1;
+                }
+
+                const laneWidth = canvas.width / GAME_CONFIG.NOTE_LANES;
+                const hitZoneY = canvas.height * GAME_CONFIG.HIT_ZONE_Y_RATIO;
+
+                for (let i = 0; i < GAME_CONFIG.NOTE_LANES; i++) {
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)'; // Lane track color
+                    ctx.fillRect(i * laneWidth, 0, laneWidth -1, canvas.height); // -1 for slight separation
+
+                    ctx.fillStyle = gameState.noteHitLaneTimers[i] > 0 ? 'rgba(255,255,255,0.25)' : 'rgba(255, 255, 255, 0.1)';
+                    ctx.fillRect(i * laneWidth, hitZoneY - GAME_CONFIG.NOTE_SIZE, laneWidth-1, GAME_CONFIG.NOTE_SIZE * 2); // Hit zone taller
+                    
+                    if (ASSETS.images.noteSprites && ASSETS.images.noteSprites.complete) {
+                        const spriteData = NOTE_SPRITE_INFO.map[i];
+                        ctx.globalAlpha = 0.4; // Dimmer hit zone targets
+                        ctx.drawImage(ASSETS.images.noteSprites, 
+                            spriteData.x, spriteData.y, NOTE_SPRITE_INFO.size, NOTE_SPRITE_INFO.size,
+                            i * laneWidth + (laneWidth - GAME_CONFIG.NOTE_SIZE) / 2, 
+                            hitZoneY - GAME_CONFIG.NOTE_SIZE / 2, 
+                            GAME_CONFIG.NOTE_SIZE, GAME_CONFIG.NOTE_SIZE
+                        );
+                        ctx.globalAlpha = 1;
+                    }
+                }
+
+                gameState.activeNotes.forEach(note => {
+                    if (ASSETS.images.noteSprites && ASSETS.images.noteSprites.complete) {
+                        const spriteData = NOTE_SPRITE_INFO.map[note.lane];
+                         ctx.drawImage(ASSETS.images.noteSprites, 
+                            spriteData.x, spriteData.y, NOTE_SPRITE_INFO.size, NOTE_SPRITE_INFO.size,
+                            note.x, note.y - GAME_CONFIG.NOTE_SIZE / 2, 
+                            GAME_CONFIG.NOTE_SIZE, GAME_CONFIG.NOTE_SIZE
+                        );
+                        if (note.isHit && (note.quality === 'PERFECT' || note.quality === 'GOOD')) { // Assuming quality is stored on note
+                             ctx.drawImage(ASSETS.images.noteSprites,
+                                NOTE_SPRITE_INFO.sparkle.x, NOTE_SPRITE_INFO.sparkle.y, NOTE_SPRITE_INFO.size, NOTE_SPRITE_INFO.size,
+                                note.x, note.y - GAME_CONFIG.NOTE_SIZE / 2, 
+                                GAME_CONFIG.NOTE_SIZE, GAME_CONFIG.NOTE_SIZE
+                            );
+                        }
+                    } else { // Fallback drawing if sprites fail
+                        ctx.fillStyle = ['#86E259', '#E25959', '#E2C359', '#59B2E2'][note.lane];
+                        ctx.fillRect(note.x, note.y - GAME_CONFIG.NOTE_SIZE / 2, GAME_CONFIG.NOTE_SIZE, GAME_CONFIG.NOTE_SIZE);
+                    }
+                });
+                
+                if (gameState.isPaused) {
+                    ctx.fillStyle = 'rgba(0,0,0,0.8)';
+                    ctx.fillRect(0,0,canvas.width, canvas.height);
+                    ctx.fillStyle = 'white';
+                    ctx.font = `bold ${canvas.height * 0.1}px Nunito`;
+                    ctx.textAlign = 'center';
+                    ctx.fillText('PAUSED', canvas.width/2, canvas.height/2);
+                    ctx.font = `${canvas.height * 0.04}px Nunito`;
+                    ctx.fillText('Press P to Resume, Q to Quit to Map', canvas.width/2, canvas.height/2 + canvas.height * 0.06);
+                }
+            }
+        };
+        
+        const InputManager = {
+            keysPressed: {},
+            init: function() {
+                window.addEventListener('keydown', (e) => {
+                    const key = e.key.toLowerCase();
+                    if (!this.keysPressed[key]) { // Process only on initial press for rhythm game
+                        if (gameState.currentScreen === 'RhythmGamePlay' && !gameState.isPaused) {
+                            if (GAME_CONFIG.KEY_BINDINGS.includes(key)) {
+                                RhythmGameController.handleHit(GAME_CONFIG.KEY_BINDINGS.indexOf(key));
+                                e.preventDefault();
+                            }
+                        }
+                    }
+                    this.keysPressed[key] = true;
+
+                    // Handle non-rhythm game inputs that can be held or repeated
+                    if (gameState.currentScreen === 'RhythmGamePlay') { // Pause/Quit check
+                         if (key === 'p') {
+                            gameState.isPaused = !gameState.isPaused;
+                            if(gameState.isPaused) SoundManager.pauseMusic('gameMusic'); else SoundManager.resumeMusic('gameMusic');
+                            e.preventDefault();
+                        }
+                        if (key === 'q' && gameState.isPaused) {
+                            GameManager.changeScreen('AdventureMap'); 
+                            e.preventDefault();
+                        }
+                    }
+                });
+                window.addEventListener('keyup', (e) => {
+                    this.keysPressed[e.key.toLowerCase()] = false;
+                });
+            },
+            process: function(dt) {} // Not used for discrete key presses currently
+        };
+
+        function setupEventListeners() {
+            window.addEventListener('resize', GameManager.resizeCanvas);
+            InputManager.init();
+
+            document.getElementById('startGameBtn').addEventListener('click', () => { SoundManager.play('uiClick'); GameManager.changeScreen('AdventureMap'); });
+            document.getElementById('songPracticeBtn').addEventListener('click', () => { SoundManager.play('uiClick'); GameManager.changeScreen('SongSelection'); });
+            document.getElementById('bandInfoBtn').addEventListener('click', () => { SoundManager.play('uiClick'); bandInfoModal.show(); }); // Bootstrap handles showing
+            document.getElementById('optionsBtn').addEventListener('click', () => { SoundManager.play('uiClick'); optionsModal.show(); }); // Bootstrap handles showing
+            
+            document.getElementById('closeSongSelectionBtn').addEventListener('click', () => { SoundManager.play('uiClick'); songSelectionModal.hide(); GameManager.changeScreen('MainMenu');});
+            document.getElementById('songSelectionBackToMainBtn').addEventListener('click', () => { SoundManager.play('uiClick'); songSelectionModal.hide(); GameManager.changeScreen('MainMenu');});
+            
+            document.querySelectorAll('.playSongBtn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    SoundManager.play('uiClick');
+                    gameState.currentSongId = e.target.dataset.songId;
+                    GameManager.changeScreen('RhythmGameLoading');
+                });
+            });
+            
+            document.querySelectorAll('.location-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    SoundManager.play('uiClick');
+                    gameState.currentSongId = e.currentTarget.dataset.songId;
+                    GameManager.changeScreen('RhythmGameLoading');
+                });
+            });
+
+            document.getElementById('backToMainMenuFromMapBtn').addEventListener('click', () => { SoundManager.play('uiClick'); GameManager.changeScreen('MainMenu'); });
+            
+            document.getElementById('resultsContinueBtn').addEventListener('click', () => { SoundManager.play('uiClick'); GameManager.changeScreen('AdventureMap'); });
+            document.getElementById('resultsRetryBtn').addEventListener('click', () => { SoundManager.play('uiClick'); GameManager.changeScreen('RhythmGameLoading'); });
+
+            muteSoundSwitch.addEventListener('change', (e) => {
+                SoundManager.toggleMute(e.target.checked);
+            });
+
+            // Ensure modals correctly trigger state changes if closed via backdrop or ESC
+            document.getElementById('songSelectionModal').addEventListener('hidden.bs.modal', () => {
+                if (gameState.currentScreen === 'SongSelection') GameManager.changeScreen('MainMenu');
+            });
+        }
+    })();
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

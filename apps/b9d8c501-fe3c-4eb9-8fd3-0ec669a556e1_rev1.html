@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio Kaffee - Coffee Shop Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        #game-container {
+            background-color: #1a1a1a;
+        }
+
+        #game-header {
+            background-color: #000000;
+            border-bottom: 3px solid #ffc107; /* Coffee gold accent */
+        }
+
+        #game-header h1 {
+            color: #ffc107;
+            font-weight: bold;
+        }
+
+        #logo-icon {
+            font-size: 1.5em;
+            vertical-align: middle;
+        }
+
+        .card {
+            background-color: #2c2c2c !important;
+            border: 1px solid #444 !important;
+            color: #f0f0f0;
+        }
+
+        .card-header {
+            background-color: #383838 !important;
+            color: #ffc107;
+            border-bottom: 1px solid #444 !important;
+        }
+
+        #orders-list .list-group-item {
+            background-color: #333;
+            border-color: #444;
+            color: #e0e0e0;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+        }
+
+        #orders-list .list-group-item:hover {
+            background-color: #4d4d4d;
+            color: #fff;
+            border-color: #555;
+        }
+        
+        #orders-list .list-group-item.active {
+            background-color: #ffc107 !important;
+            color: #000 !important;
+            border-color: #e0ac00 !important;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background-color: #ffc107;
+            border-color: #e0ac00;
+            color: #000;
+        }
+        .btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+            background-color: #e0ac00 !important;
+            border-color: #c79800 !important;
+            color: #000 !important;
+            box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.5) !important;
+        }
+         .btn-primary:disabled {
+            background-color: #7d620c;
+            border-color: #634e0a;
+            color: #aaa;
+        }
+
+
+        .btn-success {
+            background-color: #28a745;
+            border-color: #1e7e34;
+        }
+        .btn-success:hover, .btn-success:focus, .btn-success:active {
+            background-color: #1e7e34 !important;
+            border-color: #155d27 !important;
+            box-shadow: 0 0 0 0.25rem rgba(40, 167, 69, 0.5) !important;
+        }
+         .btn-success:disabled {
+            background-color: #135223;
+            border-color: #0e3b19;
+            color: #aaa;
+        }
+        
+        .btn-outline-info {
+            color: #0dcaf0;
+            border-color: #0dcaf0;
+        }
+        .btn-outline-info:hover, .btn-outline-info:focus, .btn-outline-info:active {
+            color: #000 !important;
+            background-color: #0dcaf0 !important;
+            border-color: #0dcaf0 !important;
+            box-shadow: 0 0 0 0.25rem rgba(13, 202, 240, 0.5) !important;
+        }
+
+        .coffee-icon-placeholder {
+            width: 40px;
+            height: 40px;
+            background-color: #6c757d;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            border-radius: 50%;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+
+        #top-coffees-list .list-group-item {
+            background-color: transparent;
+            border-bottom: 1px solid #444;
+            padding: 0.75rem 1rem;
+        }
+        #top-coffees-list .list-group-item:last-child {
+            border-bottom: none;
+        }
+
+        #barista-status {
+            min-height: 24px;
+        }
+
+        #customer-feedback {
+            min-height: 21px;
+            font-size: 0.9em;
+            color: #28a745; 
+            font-weight: bold;
+        }
+        #customer-feedback.unlock {
+            color: #ffc107; /* Gold for unlock messages */
+        }
+
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #2c2c2c;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #666;
+        }
+
+        .new-order-appear {
+            animation: fadeInScale 0.5s ease-out;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        .modal-header, .modal-footer {
+             border-color: #444 !important;
+        }
+
+        .stat-flash-container {
+            transition: transform 0.1s ease-out, background-color 0.3s ease-out;
+            padding: 2px 5px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .stat-flash-container.flash-active {
+            transform: scale(1.1);
+            background-color: rgba(255, 193, 7, 0.3); /* Gold flash */
+        }
+    </style>
+</head>
+<body class="bg-dark text-light">
+
+    <div id="game-container" class="container-fluid d-flex flex-column min-vh-100 p-0">
+
+        <header id="game-header" class="py-3 bg-black text-center shadow-sm">
+            <h1><span id="logo-icon" class="me-2">☕</span>Studio Kaffee</h1>
+            <p class="mb-0 lead">Your Cozy Corner for Digital Brews & Podcast Fuel!</p>
+        </header>
+
+        <main id="game-main" class="flex-grow-1 d-flex flex-column flex-lg-row p-3 gap-3 overflow-hidden">
+
+            <section id="interactive-area" class="col-lg-7 d-flex flex-column gap-3">
+                <div id="shop-controls" class="card bg-dark border-secondary shadow">
+                    <div class="card-body text-center">
+                        <button id="start-day-btn" class="btn btn-success btn-lg me-2">Start New Day</button>
+                        <span id="game-time" class="ms-2 badge bg-primary p-2 fs-6 align-middle">Day: 1 | Time: 08:00 AM</span>
+                    </div>
+                </div>
+
+                <div id="orders-section" class="card bg-dark border-secondary shadow flex-grow-1 d-flex flex-column">
+                    <div class="card-header bg-secondary">
+                        <h5 class="mb-0">Incoming Orders</h5>
+                    </div>
+                    <div id="orders-list" class="card-body overflow-auto p-2" style="max-height: 300px; min-height:150px;">
+                        <p class="text-muted text-center p-3" id="no-orders-message">Waiting for new orders...</p>
+                    </div>
+                </div>
+
+                <div id="barista-station" class="card bg-dark border-secondary shadow">
+                    <div class="card-header bg-secondary">
+                        <h5 class="mb-0">Barista Station</h5>
+                    </div>
+                    <div class="card-body text-center" style="min-height: 120px;">
+                        <p id="barista-status" class="lead">Ready to brew!</p>
+                        <div id="preparation-progress-container" class="progress mt-2 d-none" style="height: 20px;">
+                            <div id="preparation-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated bg-info" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                        </div>
+                        <div id="customer-feedback" class="mt-2 fst-italic"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="info-area" class="col-lg-5 d-flex flex-column gap-3">
+                <div id="shop-stats" class="card bg-dark border-secondary shadow">
+                    <div class="card-header bg-secondary">
+                        <h5 class="mb-0">Shop Performance</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="fs-5"><strong>💰 Money:</strong> <span class="stat-flash-container" id="money-stat-container">$<span id="money-stat">0</span></span></p>
+                        <p class="mb-0 fs-5"><strong>⭐ Reputation:</strong> <span class="stat-flash-container" id="reputation-stat-container"><span id="reputation-stat">0</span> (<span id="reputation-title">Newbie</span>)</span></p>
+                        <div class="progress mt-1" style="height: 10px;">
+                            <div id="reputation-progress" class="progress-bar bg-warning" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="top-coffees-section" class="card bg-dark border-secondary shadow">
+                    <div class="card-header bg-secondary">
+                        <h5 class="mb-0">Our Top 5 Brews!</h5>
+                    </div>
+                    <div id="top-coffees-list" class="list-group list-group-flush">
+                    </div>
+                </div>
+
+                <div id="podcast-package-section" class="card bg-dark border-secondary shadow">
+                    <div class="card-header bg-secondary">
+                        <h5 class="mb-0">Special: Podcast Power Pack!</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Fuel your creative sessions! Includes 2 Large Coffees of choice & a selection of pastries.</p>
+                        <p><strong>Price:</strong> $<span id="podcast-package-price">25.00</span></p>
+                        <button id="order-podcast-package-btn" class="btn btn-primary w-100">Order Podcast Pack</button>
+                    </div>
+                </div>
+
+                 <div id="help-section" class="card bg-dark border-secondary shadow mt-auto">
+                    <div class="card-body text-center py-2">
+                        <button id="help-btn" class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#helpModal">How to Play</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <div class="modal fade" id="orderDetailModal" tabindex="-1" aria-labelledby="orderDetailModalLabel" aria-hidden="true" data-bs-theme="dark">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content bg-dark border-light">
+                    <div class="modal-header bg-secondary">
+                        <h5 class="modal-title" id="orderDetailModalLabel">Order Details</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div id="orderDetailModalBody" class="modal-body">
+                    </div>
+                    <div class="modal-footer bg-secondary">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" id="fulfill-order-btn" class="btn btn-success">Prepare & Fulfill Order</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true" data-bs-theme="dark">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content bg-dark border-light">
+                    <div class="modal-header bg-secondary">
+                        <h5 class="modal-title" id="helpModalLabel">How to Play Studio Kaffee</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Welcome to Studio Kaffee! Your goal is to become the city's top digital barista.</p>
+                        <ul>
+                            <li><strong>Start New Day:</strong> Click this to open the shop and start receiving orders. Each day lasts for a simulated 8 hours.</li>
+                            <li><strong>Incoming Orders:</strong> New orders will appear in the "Incoming Orders" list. Click an order to view its details. Max 5 pending orders at a time.</li>
+                            <li><strong>Fulfill Orders:</strong> In the order detail popup, click "Prepare & Fulfill Order". The barista station will show progress.</li>
+                            <li><strong>Earn Money & Reputation:</strong> Successful orders give you money and reputation points.</li>
+                            <li><strong>Reputation:</strong> Higher reputation unlocks new coffee types and makes your shop more popular! Watch the reputation bar grow.</li>
+                            <li><strong>Top 5 Brews:</strong> Check out our most popular coffees. New ones might appear as you gain reputation!</li>
+                            <li><strong>Podcast Power Pack:</strong> A special high-value order. Try to fulfill these when they come up!</li>
+                            <li><strong>End of Day:</strong> The day ends when time runs out, or when you've fulfilled the maximum daily orders and cleared the queue. You'll get a summary.</li>
+                        </ul>
+                        <p>Good luck, Barista!</p>
+                    </div>
+                    <div class="modal-footer bg-secondary">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got it!</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="endOfDayModal" tabindex="-1" aria-labelledby="endOfDayModalLabel" aria-hidden="true" data-bs-theme="dark">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content bg-dark border-light">
+                    <div class="modal-header bg-secondary">
+                        <h5 class="modal-title" id="endOfDayModalLabel">End of Day Summary</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div id="endOfDayModalBody" class="modal-body">
+                    </div>
+                    <div class="modal-footer bg-secondary">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Okay</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const COFFEE_TYPES = [
+            { id: 'c1', name: 'Classic Espresso', price: 3.00, prepTime: 2000, reputationUnlock: 0, icon: '☕' },
+            { id: 'c2', name: 'Creamy Latte', price: 4.50, prepTime: 3000, reputationUnlock: 0, icon: '🥛' },
+            { id: 'c3', name: 'Bold Americano', price: 3.50, prepTime: 2500, reputationUnlock: 50, icon: '💧' },
+            { id: 'c4', name: 'Sweet Mocha', price: 5.00, prepTime: 3500, reputationUnlock: 100, icon: '🍫' },
+            { id: 'c5', name: 'Iced Coffee', price: 4.00, prepTime: 2000, reputationUnlock: 150, icon: '🧊' },
+            { id: 'c6', name: 'Deluxe Cappuccino', price: 4.75, prepTime: 3200, reputationUnlock: 200, icon: '☁️' }
+        ];
+
+        const PODCAST_PACKAGE_PRICE = 25.00;
+        const PODCAST_PACKAGE_PREP_TIME = 5000;
+        const MAX_ORDERS_IN_QUEUE = 5;
+        const MAX_ORDERS_PER_DAY = 10;
+        const ORDER_GENERATION_INTERVAL = 7000; 
+        const REPUTATION_LEVELS = [
+            { threshold: 0, title: 'Newbie Barista' },
+            { threshold: 50, title: 'Coffee Apprentice' },
+            { threshold: 150, title: 'Skilled Brewer' },
+            { threshold: 300, title: 'Latte Artist' },
+            { threshold: 500, title: 'Caffeine Connoisseur' },
+            { threshold: 1000, title: 'Master Barista' }
+        ];
+        const DAILY_OPERATING_TIME_SECONDS = 8 * 60 * 60; 
+        const GAME_TIME_INCREMENT_MS = 1000; 
+        const TIME_SCALE = 360; 
+
+        let gameState = {
+            money: 50.00,
+            reputation: 0,
+            currentDay: 1,
+            ordersToday: 0,
+            dailyEarnings: 0,
+            orders: [],
+            currentOrderSelection: null,
+            availableCoffees: [],
+            isDayActive: false,
+            gameTimeSeconds: 0, 
+        };
+
+        let orderIdCounter = 0;
+        let gameTickInterval = null;
+        let gameTimeInterval = null;
+
+        const moneyStatEl = document.getElementById('money-stat');
+        const reputationStatEl = document.getElementById('reputation-stat');
+        const reputationTitleEl = document.getElementById('reputation-title');
+        const reputationProgressEl = document.getElementById('reputation-progress');
+        const ordersListEl = document.getElementById('orders-list');
+        const noOrdersMessageEl = document.getElementById('no-orders-message');
+        const baristaStatusEl = document.getElementById('barista-status');
+        const prepProgressContainerEl = document.getElementById('preparation-progress-container');
+        const prepProgressBarEl = document.getElementById('preparation-progress-bar');
+        const customerFeedbackEl = document.getElementById('customer-feedback');
+        const startDayBtn = document.getElementById('start-day-btn');
+        const orderDetailModal = document.getElementById('orderDetailModal');
+        const orderDetailModalInstance = new bootstrap.Modal(orderDetailModal);
+        const orderDetailModalBodyEl = document.getElementById('orderDetailModalBody');
+        const fulfillOrderBtn = document.getElementById('fulfill-order-btn');
+        const topCoffeesListEl = document.getElementById('top-coffees-list');
+        const podcastPackagePriceEl = document.getElementById('podcast-package-price');
+        const orderPodcastPackageBtn = document.getElementById('order-podcast-package-btn');
+        const gameTimeEl = document.getElementById('game-time');
+        const endOfDayModalInstance = new bootstrap.Modal(document.getElementById('endOfDayModal'));
+        const endOfDayModalBodyEl = document.getElementById('endOfDayModalBody');
+        const moneyStatContainerEl = document.getElementById('money-stat-container');
+        const reputationStatContainerEl = document.getElementById('reputation-stat-container');
+
+
+        const UIManager = {
+            updateStats: () => {
+                moneyStatEl.textContent = gameState.money.toFixed(2);
+                reputationStatEl.textContent = gameState.reputation;
+
+                let currentLevel = REPUTATION_LEVELS[0];
+                let nextLevel = REPUTATION_LEVELS[1] || { ...currentLevel }; 
+
+                for (let i = REPUTATION_LEVELS.length - 1; i >= 0; i--) {
+                    if (gameState.reputation >= REPUTATION_LEVELS[i].threshold) {
+                        currentLevel = REPUTATION_LEVELS[i];
+                        if (i < REPUTATION_LEVELS.length - 1) {
+                            nextLevel = REPUTATION_LEVELS[i+1];
+                        } else { 
+                            nextLevel = { ...currentLevel, title: "Max Level (Internal)"}; 
+                        }
+                        break;
+                    }
+                }
+                
+                reputationTitleEl.textContent = currentLevel.title;
+                if (REPUTATION_LEVELS.indexOf(currentLevel) === REPUTATION_LEVELS.length - 1 && gameState.reputation >= currentLevel.threshold) {
+                    reputationTitleEl.textContent += " (Max)";
+                }
+                
+                const progressToNextLevel = (nextLevel.threshold > currentLevel.threshold) ? 
+                    ((gameState.reputation - currentLevel.threshold) / (nextLevel.threshold - currentLevel.threshold)) * 100 : 
+                    (gameState.reputation >= currentLevel.threshold ? 100 : 0) ;
+
+                reputationProgressEl.style.width = `${Math.min(100, Math.max(0, progressToNextLevel))}%`;
+                reputationProgressEl.setAttribute('aria-valuenow', Math.round(progressToNextLevel));
+            },
+
+            renderOrders: () => {
+                ordersListEl.innerHTML = '';
+                if (gameState.orders.length === 0) {
+                    noOrdersMessageEl.classList.remove('d-none');
+                    if (gameState.isDayActive) {
+                         noOrdersMessageEl.textContent = "All quiet... waiting for new orders!";
+                    } else {
+                         noOrdersMessageEl.textContent = "Shop closed. Start a new day to get orders!";
+                    }
+                } else {
+                    noOrdersMessageEl.classList.add('d-none');
+                }
+
+                gameState.orders.forEach(order => {
+                    const orderDiv = document.createElement('div');
+                    orderDiv.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center new-order-appear';
+                    if(order.id === gameState.currentOrderSelection) {
+                        orderDiv.classList.add('active');
+                    }
+                    orderDiv.innerHTML = `
+                        <span>Order #${order.id} (${order.items.length} item(s)) - ${order.customerName}</span>
+                        <span class="badge bg-warning text-dark">$${order.total.toFixed(2)}</span>
+                    `;
+                    orderDiv.addEventListener('click', () => {
+                        if (!fulfillOrderBtn.disabled) { 
+                            GameManager.selectOrder(order.id); 
+                            Array.from(ordersListEl.querySelectorAll('.list-group-item')).forEach(item => item.classList.remove('active'));
+                            orderDiv.classList.add('active');
+                        }
+                    });
+                    ordersListEl.appendChild(orderDiv);
+                });
+            },
+
+            showBaristaStatus: (message, isPreparing = false, duration = 0) => {
+                baristaStatusEl.textContent = message;
+                if (isPreparing) {
+                    prepProgressContainerEl.classList.remove('d-none');
+                    prepProgressBarEl.textContent = '0%';
+                } else {
+                    prepProgressContainerEl.classList.add('d-none');
+                    prepProgressBarEl.style.width = '0%';
+                    prepProgressBarEl.setAttribute('aria-valuenow', 0);
+                    prepProgressBarEl.textContent = '0%';
+                }
+                if (duration > 0) {
+                    setTimeout(() => {
+                        if (baristaStatusEl.textContent === message) { 
+                            baristaStatusEl.textContent = 'Ready to brew!';
+                        }
+                    }, duration);
+                }
+            },
+            
+            updatePreparationProgress: (percentage) => {
+                const roundedPercentage = Math.round(percentage);
+                prepProgressBarEl.style.width = `${roundedPercentage}%`;
+                prepProgressBarEl.setAttribute('aria-valuenow', roundedPercentage);
+                prepProgressBarEl.textContent = `${roundedPercentage}%`;
+            },
+
+            displayCustomerFeedback: (message, isUnlock = false) => {
+                customerFeedbackEl.textContent = message;
+                customerFeedbackEl.className = 'mt-2 fst-italic'; 
+                if (isUnlock) {
+                    customerFeedbackEl.classList.add('unlock');
+                }
+                setTimeout(() => { 
+                    customerFeedbackEl.textContent = ''; 
+                    customerFeedbackEl.className = 'mt-2 fst-italic';
+                }, isUnlock ? 4000 : 3000);
+            },
+
+            populateOrderDetailModal: (order) => {
+                let itemsHtml = order.items.map(item => `<li>${item.name} - $${item.price.toFixed(2)}</li>`).join('');
+                orderDetailModalBodyEl.innerHTML = `
+                    <p><strong>Customer:</strong> ${order.customerName}</p>
+                    <p><strong>Order ID:</strong> ${order.id}</p>
+                    <h6>Items:</h6>
+                    <ul>${itemsHtml}</ul>
+                    <hr>
+                    <p class="fs-5"><strong>Total: $${order.total.toFixed(2)}</strong></p>
+                `;
+                orderDetailModalInstance.show();
+            },
+
+            renderTopCoffees: () => {
+                topCoffeesListEl.innerHTML = '';
+                const sortedCoffees = [...COFFEE_TYPES].sort((a,b) => a.reputationUnlock - b.reputationUnlock || a.name.localeCompare(b.name));
+                const top5 = sortedCoffees.slice(0, 5);
+                
+                top5.forEach(coffee => {
+                    const isAvailable = gameState.availableCoffees.some(ac => ac.id === coffee.id);
+                    const coffeeEl = document.createElement('div');
+                    coffeeEl.className = 'list-group-item d-flex align-items-center';
+                    coffeeEl.innerHTML = `
+                        <div class="coffee-icon-placeholder">${coffee.icon}</div>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-0 ${isAvailable ? '' : 'text-muted'}">${coffee.name}</h6>
+                            <small class="${isAvailable ? 'text-white-50' : 'text-muted'}">$${coffee.price.toFixed(2)}${!isAvailable ? ` (Unlocks at ${coffee.reputationUnlock} rep)` : ''}</small>
+                        </div>
+                        ${isAvailable ? '<span class="badge bg-success">Available</span>' : '<span class="badge bg-secondary">Locked</span>'}
+                    `;
+                    topCoffeesListEl.appendChild(coffeeEl);
+                });
+            },
+            updateGameTimeDisplay: () => {
+                const totalMinutes = Math.floor(gameState.gameTimeSeconds / 60);
+                const gameHours = 8 + Math.floor(totalMinutes / 60); 
+                const gameMinutes = totalMinutes % 60;
+                const ampm = gameHours >= 12 && gameHours < 24 ? 'PM' : 'AM';
+                let displayHour = gameHours % 12;
+                if (displayHour === 0) displayHour = 12; 
+                
+                gameTimeEl.textContent = `Day: ${gameState.currentDay} | Time: ${String(displayHour).padStart(2, '0')}:${String(gameMinutes).padStart(2, '0')} ${ampm}`;
+            },
+            showEndOfDaySummary: () => {
+                endOfDayModalBodyEl.innerHTML = `
+                    <h4>Day ${gameState.currentDay} Complete!</h4>
+                    <p>Total Orders Fulfilled: ${gameState.ordersToday}</p>
+                    <p>Daily Earnings: $${gameState.dailyEarnings.toFixed(2)}</p>
+                    <p>Shop Reputation: ${gameState.reputation}</p>
+                    <hr>
+                    <p class="fst-italic">Ready for another busy day tomorrow?</p>
+                `;
+                endOfDayModalInstance.show();
+            },
+            flashStat: (elementContainer) => {
+                if (!elementContainer) return;
+                elementContainer.classList.add('flash-active');
+                setTimeout(() => elementContainer.classList.remove('flash-active'), 700);
+            }
+        };
+
+        const GameManager = {
+            init: () => {
+                podcastPackagePriceEl.textContent = PODCAST_PACKAGE_PRICE.toFixed(2);
+                GameManager.updateAvailableCoffees();
+                UIManager.updateStats();
+                UIManager.renderOrders();
+                UIManager.renderTopCoffees();
+                UIManager.updateGameTimeDisplay();
+                startDayBtn.addEventListener('click', GameManager.startDay);
+                fulfillOrderBtn.addEventListener('click', GameManager.fulfillCurrentOrder);
+                orderPodcastPackageBtn.addEventListener('click', GameManager.orderPodcastPackage);
+                UIManager.showBaristaStatus('Shop closed. Click "Start New Day"!', false);
+
+                orderDetailModal.addEventListener('hidden.bs.modal', () => {
+                    const activeOrderItem = ordersListEl.querySelector('.list-group-item.active');
+                    if (activeOrderItem && gameState.currentOrderSelection !== null) { 
+                        activeOrderItem.classList.remove('active');
+                    }
+                    gameState.currentOrderSelection = null; 
+                });
+            },
+
+            startDay: () => {
+                if (gameState.isDayActive) return; 
+
+                gameState.isDayActive = true;
+                gameState.ordersToday = 0;
+                gameState.dailyEarnings = 0;
+                gameState.gameTimeSeconds = 0; 
+                UIManager.updateGameTimeDisplay();
+                startDayBtn.disabled = true;
+                startDayBtn.textContent = "Day in Progress...";
+                UIManager.showBaristaStatus('Shop is open! Waiting for orders...', false);
+                GameManager.clearOrders(); 
+
+                if (gameTickInterval) clearInterval(gameTickInterval);
+                gameTickInterval = setInterval(GameManager.gameTick, ORDER_GENERATION_INTERVAL);
+                
+                if (gameTimeInterval) clearInterval(gameTimeInterval);
+                gameTimeInterval = setInterval(GameManager.updateGameTime, GAME_TIME_INCREMENT_MS);
+
+                GameManager.tryGenerateOrder(); 
+            },
+            
+            endDay: () => {
+                if (!gameState.isDayActive) return;
+
+                gameState.isDayActive = false;
+                clearInterval(gameTickInterval);
+                gameTickInterval = null;
+                clearInterval(gameTimeInterval);
+                gameTimeInterval = null;
+                
+                startDayBtn.disabled = false;
+                startDayBtn.textContent = "Start New Day";
+                UIManager.showBaristaStatus('Day ended. Click "Start New Day"!', false, 5000);
+                UIManager.showEndOfDaySummary();
+                
+                gameState.currentDay++;
+                gameState.currentOrderSelection = null; 
+                UIManager.renderOrders(); 
+            },
+
+            updateGameTime: () => {
+                if (!gameState.isDayActive) return;
+                gameState.gameTimeSeconds += TIME_SCALE; 
+                UIManager.updateGameTimeDisplay();
+
+                if (gameState.gameTimeSeconds >= DAILY_OPERATING_TIME_SECONDS) {
+                    GameManager.endDay();
+                }
+            },
+
+            gameTick: () => {
+                if (!gameState.isDayActive || gameState.orders.length >= MAX_ORDERS_IN_QUEUE || gameState.ordersToday >= MAX_ORDERS_PER_DAY) {
+                     if (gameState.ordersToday >= MAX_ORDERS_PER_DAY && gameState.orders.length === 0 && gameState.isDayActive) {
+                        GameManager.endDay(); 
+                    }
+                    return;
+                }
+                GameManager.tryGenerateOrder();
+            },
+
+            tryGenerateOrder: () => {
+                if (Math.random() < 0.75) { 
+                    GameManager.generateOrder();
+                }
+            },
+            
+            updateAvailableCoffees: () => {
+                gameState.availableCoffees = COFFEE_TYPES.filter(coffee => gameState.reputation >= coffee.reputationUnlock);
+            },
+            
+            checkForUnlocks: (oldRep, newRep) => {
+                COFFEE_TYPES.forEach(coffee => {
+                    if (oldRep < coffee.reputationUnlock && newRep >= coffee.reputationUnlock) {
+                        UIManager.displayCustomerFeedback(`✨ New Brew Unlocked: ${coffee.name}! ✨`, true);
+                    }
+                });
+            },
+
+            generateOrder: () => {
+                if (gameState.availableCoffees.length === 0) return; 
+
+                const numItems = Math.floor(Math.random() * 3) + 1; 
+                let items = [];
+                let total = 0;
+
+                for (let i = 0; i < numItems; i++) {
+                    const randomCoffee = gameState.availableCoffees[Math.floor(Math.random() * gameState.availableCoffees.length)];
+                    items.push({ coffeeId: randomCoffee.id, name: randomCoffee.name, price: randomCoffee.price });
+                    total += randomCoffee.price;
+                }
+                
+                const customerNames = ["Alex P.", "Jamie K.", "Casey L.", "Morgan B.", "Riley S.", "Devin M.", "Skyler T.", "Jordan F.", "Taylor G."];
+                const customerName = customerNames[Math.floor(Math.random() * customerNames.length)];
+
+                const newOrder = {
+                    id: ++orderIdCounter,
+                    items: items,
+                    total: total,
+                    customerName: customerName,
+                    status: 'pending'
+                };
+                gameState.orders.push(newOrder);
+                UIManager.renderOrders();
+            },
+            
+            orderPodcastPackage: () => {
+                if (!gameState.isDayActive) {
+                    UIManager.displayCustomerFeedback("Shop is closed! Start a new day first.");
+                    return;
+                }
+                if (gameState.orders.length >= MAX_ORDERS_IN_QUEUE) {
+                    UIManager.displayCustomerFeedback("Too many pending orders! Clear some first.");
+                    return;
+                }
+                if (gameState.ordersToday >= MAX_ORDERS_PER_DAY) {
+                    UIManager.displayCustomerFeedback("Max orders for the day reached!");
+                    return;
+                }
+
+                const podcastOrder = {
+                    id: ++orderIdCounter,
+                    items: [{ coffeeId: 'podcast_pack', name: 'Podcast Power Pack', price: PODCAST_PACKAGE_PRICE }],
+                    total: PODCAST_PACKAGE_PRICE,
+                    customerName: "Podcast Producer",
+                    status: 'pending',
+                    isSpecial: true,
+                    prepTime: PODCAST_PACKAGE_PREP_TIME
+                };
+                gameState.orders.push(podcastOrder);
+                UIManager.renderOrders();
+                UIManager.displayCustomerFeedback("Podcast Power Pack order received!");
+            },
+
+            selectOrder: (orderId) => {
+                const order = gameState.orders.find(o => o.id === orderId);
+                if (order) {
+                    gameState.currentOrderSelection = orderId;
+                    UIManager.populateOrderDetailModal(order);
+                }
+            },
+
+            fulfillCurrentOrder: async () => {
+                if (gameState.currentOrderSelection === null) return;
+                const orderIndex = gameState.orders.findIndex(o => o.id === gameState.currentOrderSelection);
+                if (orderIndex === -1) return;
+
+                const order = gameState.orders[orderIndex];
+                orderDetailModalInstance.hide(); 
+                fulfillOrderBtn.disabled = true; 
+
+                let totalPrepTime = 0;
+                if (order.isSpecial) {
+                    totalPrepTime = order.prepTime;
+                } else {
+                    order.items.forEach(item => {
+                        const coffeeType = COFFEE_TYPES.find(ct => ct.id === item.coffeeId);
+                        totalPrepTime += coffeeType ? coffeeType.prepTime : 2000; 
+                    });
+                }
+                
+                UIManager.showBaristaStatus(`Preparing Order #${order.id}...`, true);
+                
+                let currentProgress = 0;
+                const progressInterval = 50; 
+                const steps = Math.max(1, totalPrepTime / progressInterval);
+                const increment = 100 / steps;
+
+                for (let i = 0; i <= steps; i++) {
+                    await new Promise(resolve => setTimeout(resolve, progressInterval));
+                    currentProgress = Math.min(100, i * increment);
+                    UIManager.updatePreparationProgress(currentProgress);
+                }
+                
+                const oldReputation = gameState.reputation;
+                gameState.money += order.total;
+                gameState.reputation += order.items.length * 5 + (order.isSpecial ? 25 : 0); 
+                
+                gameState.orders.splice(orderIndex, 1);
+                gameState.currentOrderSelection = null; 
+                gameState.ordersToday++;
+                gameState.dailyEarnings += order.total;
+
+                GameManager.checkForUnlocks(oldReputation, gameState.reputation);
+                GameManager.updateAvailableCoffees(); 
+                UIManager.updateStats();
+                UIManager.renderOrders();
+                UIManager.renderTopCoffees(); 
+                UIManager.flashStat(moneyStatContainerEl);
+                UIManager.flashStat(reputationStatContainerEl);
+                
+                UIManager.showBaristaStatus(`Order #${order.id} for ${order.customerName} fulfilled!`, false, 3000);
+                
+                const feedbackMessages = ["Delicious!", "Just what I needed!", "Perfect brew!", "You're the best!", "Amazing coffee!", "Top quality!", "My favorite spot!"];
+                UIManager.displayCustomerFeedback(feedbackMessages[Math.floor(Math.random() * feedbackMessages.length)]);
+                
+                fulfillOrderBtn.disabled = false;
+
+                if (gameState.ordersToday >= MAX_ORDERS_PER_DAY && gameState.orders.length === 0 && gameState.isDayActive) {
+                    GameManager.endDay();
+                }
+            },
+            clearOrders: () => {
+                gameState.orders = [];
+                UIManager.renderOrders();
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', GameManager.init);
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

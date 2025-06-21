@@ -1,0 +1,13 @@
+{
+  "projectId": "f2bed103-0a59-4390-b697-3db46c17a532",
+  "revisionString": "2",
+  "projectNameDisplay": "awesome image",
+  "projectType": "webapp",
+  "ownerPublicKey": "EZxuU9mZRqgsYxoFgDEnwNvWu4DYVjWiCFnSB3jSj7Hq",
+  "userPromptForThisRevision": "\"An error occurred: No API key provided.\"\r\n\r\nwe shouldnt need an api key you should be able to ping generative ai text or image with internal methods. \r\n",
+  "basedOnRevisionString": "1",
+  "savedAt": "2025-06-04T14:19:43.383Z",
+  "imageAssets": [],
+  "isPublished": false,
+  "isShowcased": false
+}

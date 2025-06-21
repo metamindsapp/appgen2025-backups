@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Art Prophecy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #0A0A0F; 
+        }
+
+        #pixelBackgroundEffect {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            width: 100vw; height: 100vh;
+            z-index: 0;
+            background-image: 
+                repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(100, 100, 220, 0.03) 1px, rgba(100, 100, 220, 0.03) 2px),
+                repeating-linear-gradient(90deg, transparent, transparent 1px, rgba(100, 100, 220, 0.03) 1px, rgba(100, 100, 220, 0.03) 2px);
+            background-size: 3px 3px;
+            animation: pulseGlow 12s infinite ease-in-out;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { background-color: #05050D; }
+            50% { background-color: #0A0A1A; }
+        }
+
+        .app-container {
+            position: relative;
+            z-index: 1;
+            color: #E0E0E0;
+        }
+
+        .retro-font {
+            font-family: 'Press Start 2P', monospace;
+            text-shadow: 1px 1px 0px #00000080;
+            color: #00FFFF;
+        }
+        .app-title {
+             font-size: 2.2rem;
+             color: #FF00FF; 
+        }
+        .app-subtitle {
+            font-size: 0.9rem;
+            color: #32CD32; 
+            letter-spacing: 1px;
+        }
+
+        .retro-font-small {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.7rem;
+            color: #AAAAAA;
+            text-shadow: 1px 1px 0px #00000060;
+        }
+        
+        .retro-text-body {
+            font-family: 'Lucida Console', 'Courier New', monospace;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #C0C0C0;
+        }
+
+        .retro-input, .retro-card, .retro-alert {
+            background-color: #1A1A26;
+            border: 2px solid #404050;
+            box-shadow: 2px 2px 0px #00000090;
+            color: #E0E0E0;
+        }
+        .retro-input::placeholder {
+            color: #6c757d;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+        .retro-input:focus {
+            background-color: #20202C;
+            border-color: #00FFFF;
+            box-shadow: 2px 2px 0px #00000090, 0 0 0 0.2rem rgba(0, 255, 255, 0.25);
+            color: #FFFFFF;
+        }
+
+        .retro-card {
+            border-color: #FF00FF;
+        }
+        .retro-card .card-title {
+            color: #00FFFF;
+        }
+        .retro-card .card-body {
+            padding: 1.25rem;
+        }
+
+        .retro-alert {
+            border-color: #FFA500; 
+        }
+        .retro-alert .alert-heading {
+             color: #FFA500;
+        }
+
+        .retro-btn {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.8rem;
+            border-width: 2px;
+            border-style: solid;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 10px 20px;
+            box-shadow: 3px 3px 0px #000000A0;
+            transition: all 0.07s ease-out;
+            text-shadow: none;
+        }
+        .retro-btn:hover {
+            transform: translate(-1px, -1px);
+            box-shadow: 4px 4px 0px #000000B0;
+        }
+        .retro-btn:active {
+            transform: translate(1px, 1px);
+            box-shadow: 1px 1px 0px #000000B0;
+        }
+        .retro-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            box-shadow: 2px 2px 0px #00000060;
+            transform: none;
+        }
+
+        .btn-primary-custom { background-color: #00FFFF; border-color: #00DDDD; color: #0A0A0F !important; }
+        .btn-primary-custom:hover { background-color: #00DDDD; border-color: #00CCCC; color: #0A0A0F !important; }
+        
+        .btn-success-custom { background-color: #32CD32; border-color: #28B428; color: #0A0A0F !important; }
+        .btn-success-custom:hover { background-color: #28B428; border-color: #229A22; color: #0A0A0F !important; }
+
+        .btn-warning-custom { background-color: #FFA500; border-color: #E09000; color: #0A0A0F !important;}
+        .btn-warning-custom:hover { background-color: #E09000; border-color: #C07C00; color: #0A0A0F !important;}
+        
+        .btn-secondary-custom { background-color: #FF00FF; border-color: #DD00DD; color: #0A0A0F !important; }
+        .btn-secondary-custom:hover { background-color: #DD00DD; border-color: #CC00CC; color: #0A0A0F !important; }
+
+        #loadingSpinner {
+            image-rendering: pixelated;
+            -ms-interpolation-mode: nearest-neighbor;
+            animation: spinEffect 1.5s linear infinite, pulseSizeEffect 1.5s ease-in-out infinite alternate;
+            transform-origin: center center;
+        }
+        @keyframes spinEffect { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes pulseSizeEffect { 0% { scale: 1; } 100% { scale: 1.1; } }
+        
+        .retro-progress {
+            background-color: #2A2A36;
+            border: 1px solid #404050;
+            padding: 2px;
+            box-shadow: inset 1px 1px 0px #00000060;
+        }
+        .retro-progress .progress-bar {
+            background-color: #00FFFF;
+        }
+        
+        #imageContainer {
+            min-height: 250px;
+            background-color: #101018;
+            border-bottom: 2px solid #FF00FF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .prophecy-image {
+            display: block;
+            max-width: 100%;
+            max-height: 400px;
+            height: auto;
+            image-rendering: pixelated;
+            -ms-interpolation-mode: nearest-neighbor;
+            border: 2px solid #00FFFF40;
+            background-color: #000;
+        }
+
+        .glitch-active {
+            animation: glitchVisualEffect 1.2s infinite steps(8, end) alternate;
+        }
+        @keyframes glitchVisualEffect {
+            0% { clip-path: inset(10% 0 85% 0); transform: translate(-4px, -1px); opacity: 0.85; }
+            12.5% { clip-path: inset(75% 0 5% 0); transform: translate(4px, 1px); }
+            25% { clip-path: inset(30% 0 45% 0); transform: translate(-3px, 2px); opacity: 0.7; }
+            37.5% { clip-path: inset(55% 0 20% 0); transform: translate(3px, -2px); }
+            50% { clip-path: inset(8% 0 70% 0); transform: translate(-4px, 3px); opacity: 0.9; }
+            62.5% { clip-path: inset(65% 0 15% 0); transform: translate(4px, -3px); }
+            75% { clip-path: inset(45% 0 35% 0); transform: translate(-2px, -1px); opacity: 0.75; }
+            87.5% { clip-path: inset(20% 0 60% 0); transform: translate(2px, 1px); }
+            100% { clip-path: inset(12% 0 78% 0); transform: translate(-3px, 0px); opacity: 0.8; }
+        }
+        
+        #mainContent {
+            scrollbar-width: thin;
+            scrollbar-color: #00FFFF #1A1A26;
+        }
+        #mainContent::-webkit-scrollbar {
+            width: 8px;
+        }
+        #mainContent::-webkit-scrollbar-track {
+            background: #1A1A26;
+        }
+        #mainContent::-webkit-scrollbar-thumb {
+            background-color: #00FFFF;
+            border-radius: 4px;
+            border: 1px solid #1A1A26;
+        }
+        .form-label.retro-font {
+            font-size: 0.9rem;
+        }
+
+    </style>
+</head>
+<body class="d-flex flex-column">
+
+    <div id="pixelBackgroundEffect"></div>
+
+    <div class="container-fluid d-flex flex-column align-items-center min-vh-100 p-3 app-container">
+
+        <header class="text-center my-3 my-md-4 retro-font">
+            <h1 class="app-title">Pixel Art Prophecy</h1>
+            <p class="app-subtitle">Glimpse the Glitched Future</p>
+        </header>
+
+        <main id="mainContent" class="flex-grow-1 d-flex flex-column align-items-center justify-content-center w-100 py-3" style="max-width: 700px; overflow-y: auto;">
+
+            <section id="inputSection" class="w-100 text-center p-2">
+                <form id="questionForm" class="w-100">
+                    <div class="mb-3">
+                        <label for="userQuestion" class="form-label retro-font mb-2">Peer into the digital void... Ask your question:</label>
+                        <textarea id="userQuestion" class="form-control retro-input" rows="3" placeholder="e.g., What does my future hold?" required></textarea>
+                    </div>
+                    <button type="submit" id="submitQuestionBtn" class="btn retro-btn btn-primary-custom">Divine My Fate</button>
+                </form>
+            </section>
+
+            <section id="loadingSection" class="w-100 text-center d-none p-2">
+                <img id="loadingSpinner" src="" alt="Consulting the Oracles..." class="my-4" style="width: 100px; height: 100px;">
+                <p class="retro-font-small">Consulting the digital oracles... please wait.</p>
+                <div class="progress retro-progress mt-2 mb-3 mx-auto" style="height: 8px; width: 80%;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+            </section>
+
+            <section id="prophecySection" class="w-100 d-none mt-4 p-2">
+                <div id="prophecyOutput" class="card retro-card text-white shadow">
+                    <div id="imageContainer" class="card-img-top-container">
+                        <img id="prophecyImage" src="#" alt="Prophetic Vision" class="prophecy-image">
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title retro-font border-bottom border-secondary pb-2 mb-3">The Oracle Speaks:</h5>
+                        <p id="prophecyPoem" class="card-text retro-text-body" style="min-height: 80px; white-space: pre-wrap;"></p>
+                    </div>
+                </div>
+                <div class="text-center mt-3">
+                    <button id="saveImageBtn" class="btn retro-btn btn-success-custom me-2">Save Vision</button>
+                    <button id="askAnotherBtn" class="btn retro-btn btn-secondary-custom">Ask Anew</button>
+                </div>
+            </section>
+
+             <section id="errorSection" class="w-100 text-center d-none mt-4 p-2">
+                <div class="alert retro-alert" role="alert">
+                    <h5 class="alert-heading retro-font">Transmission Error!</h5>
+                    <p id="errorMessage" class="retro-text-body"></p>
+                    <button id="errorRetryBtn" class="btn retro-btn btn-warning-custom mt-2">Try Again</button>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="text-center py-3 retro-font-small app-footer mt-auto">
+            <p>&copy; <span id="currentYear"></span> Pixel Art Prophecy. The future is bits.</p>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
+    <script>
+        const PixelProphecyApp = {
+            config: {
+                API_AI_URL: '/api/ai',
+                API_IMAGE_URL: '/api/generate-image-on-demand',
+                IMAGE_ASPECT_RATIO: "1:1", 
+                SOUNDS_ENABLED: true, 
+                TYPEWRITER_ENABLED: true,
+                TYPEWRITER_SPEED: 40, 
+                SPINNER_IMAGE_PATH: "/generated_images/dalle_999dda73-e48.png"
+            },
+            elements: {},
+            state: {
+                isLoading: false,
+                currentQuestion: null,
+                currentPoem: null,
+                currentImageUrl: null,
+                currentImageKeywords: null,
+                imageFailedToLoad: false,
+                typewriterInterval: null
+            },
+            sounds: {
+                click: null,
+                reveal: null,
+                error: null
+            },
+
+            init() {
+                this.elements.mainContent = document.getElementById('mainContent');
+                this.elements.inputSection = document.getElementById('inputSection');
+                this.elements.loadingSection = document.getElementById('loadingSection');
+                this.elements.prophecySection = document.getElementById('prophecySection');
+                this.elements.errorSection = document.getElementById('errorSection');
+                
+                this.elements.questionForm = document.getElementById('questionForm');
+                this.elements.userQuestion = document.getElementById('userQuestion');
+                this.elements.submitQuestionBtn = document.getElementById('submitQuestionBtn');
+                
+                this.elements.loadingSpinner = document.getElementById('loadingSpinner');
+                this.elements.loadingSpinner.src = this.config.SPINNER_IMAGE_PATH;
+
+                this.elements.prophecyOutput = document.getElementById('prophecyOutput');
+                this.elements.imageContainer = document.getElementById('imageContainer');
+                this.elements.prophecyImage = document.getElementById('prophecyImage');
+                this.elements.prophecyPoem = document.getElementById('prophecyPoem');
+                
+                this.elements.saveImageBtn = document.getElementById('saveImageBtn');
+                this.elements.askAnotherBtn = document.getElementById('askAnotherBtn');
+                
+                this.elements.errorMessage = document.getElementById('errorMessage');
+                this.elements.errorRetryBtn = document.getElementById('errorRetryBtn');
+
+                this.elements.currentYear = document.getElementById('currentYear');
+                this.elements.currentYear.textContent = new Date().getFullYear();
+
+                this.elements.questionForm.addEventListener('submit', this.handleQuestionSubmit.bind(this));
+                this.elements.saveImageBtn.addEventListener('click', this.handleSaveImage.bind(this));
+                this.elements.askAnotherBtn.addEventListener('click', this.handleAskAnother.bind(this));
+                this.elements.errorRetryBtn.addEventListener('click', this.handleErrorRetry.bind(this));
+                
+                this.loadSounds();
+                this.updateUIState('input');
+            },
+
+            loadSounds() {
+                if (typeof Howl === 'undefined' || !this.config.SOUNDS_ENABLED) {
+                    this.config.SOUNDS_ENABLED = false;
+                    return;
+                }
+                try {
+                    this.sounds.click = new Howl({ src: ['data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU'+Array(100).join('A')], volume: 0.3 });
+                    this.sounds.reveal = new Howl({ src: ['data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU'+Array(150).join('A')], volume: 0.4 });
+                    this.sounds.error = new Howl({ src: ['data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU'+Array(80).join('A')], volume: 0.4 });
+                } catch (e) {
+                    this.config.SOUNDS_ENABLED = false;
+                }
+            },
+
+            playSound(soundName) {
+                if (this.config.SOUNDS_ENABLED && this.sounds[soundName] && this.sounds[soundName].play) {
+                    try {
+                        this.sounds[soundName].play();
+                    } catch (e) {
+                        /* Gracefully fail on sound play error */
+                    }
+                }
+            },
+            
+            updateUIState(targetState, errorMessage = '') {
+                this.state.isLoading = (targetState === 'loading');
+                
+                this.elements.inputSection.classList.toggle('d-none', targetState !== 'input');
+                this.elements.loadingSection.classList.toggle('d-none', targetState !== 'loading');
+                this.elements.prophecySection.classList.toggle('d-none', targetState !== 'prophecy');
+                this.elements.errorSection.classList.toggle('d-none', targetState !== 'error');
+
+                this.elements.submitQuestionBtn.disabled = this.state.isLoading;
+                this.elements.userQuestion.disabled = this.state.isLoading;
+
+                if (targetState === 'error') {
+                    this.elements.errorMessage.textContent = errorMessage;
+                    this.playSound('error');
+                }
+                if (targetState === 'prophecy') {
+                     this.elements.imageContainer.classList.remove('glitch-active'); 
+                     setTimeout(() => {
+                        if (this.elements.imageContainer && this.elements.prophecySection.classList.contains('d-none') === false) {
+                           this.elements.imageContainer.classList.add('glitch-active');
+                        }
+                     }, 100);
+                } else {
+                    this.elements.imageContainer.classList.remove('glitch-active');
+                }
+            },
+
+            async handleQuestionSubmit(event) {
+                event.preventDefault();
+                this.playSound('click');
+                const question = this.elements.userQuestion.value.trim();
+                if (!question) {
+                    this.updateUIState('error', 'Please ask a question to the digital void.');
+                    return;
+                }
+                this.state.currentQuestion = question;
+                this.updateUIState('loading');
+                
+                try {
+                    await this.fetchProphecy(question);
+                } catch (error) {
+                    this.updateUIState('error', error.message || 'The Oracle is unusually silent. A connection disturbance occurred.');
+                }
+            },
+
+            async fetchProphecy(question) {
+                const aiguide = `You are Oracle_Interface_v3.7, a cryptic AI from a decaying retro-futuristic cyberpunk datasphere.
+The Seeker asks: "${question}"
+Generate:
+1. A short, enigmatic, symbolic poem (4-8 lines, free verse). This is the 'Prophecy'. It must have a dark, mysterious, slightly unsettling tone, reflecting an 8-bit pixel art, glitchy reality.
+2. After the poem, on a NEW line, provide 'Vision Keywords:' followed by 3-5 comma-separated keywords or a very short descriptive phrase (max 10 words) from the poem's core imagery. These keywords MUST be suitable for an AI image generator to create a surreal, 8-bit pixel art representation.
+
+Example Output:
+Shadows dance on fractured code,
+A forgotten truth, a heavy load.
+Neon tears on circuits rust,
+In digital dust, all futures bust.
+Vision Keywords: fractured code, neon tears, digital dust
+
+Respond ONLY with the poem and the 'Vision Keywords:' line. Do not add any other text or conversational filler.`;
+
+                let response;
+                try {
+                    response = await fetch(this.config.API_AI_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ aiguide, msgforai: question, llmSettings: { temperature: 0.75 } })
+                    });
+                } catch (networkError) {
+                    throw new Error('Network error: Could not reach the AI Oracle.');
+                }
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({error: "Unknown AI communication error"}));
+                    throw new Error(`AI Oracle communication failed (Status: ${response.status}). ${errorData.error}`);
+                }
+                const data = await response.json();
+                if (!data.success || !data.response) {
+                    throw new Error(data.error || 'AI Oracle returned an empty vision.');
+                }
+                
+                this.parseAIResponse(data.response);
+                if (!this.state.currentPoem || !this.state.currentImageKeywords) {
+                    throw new Error('AI Oracle spoke in riddles too complex to parse. Try rephrasing.');
+                }
+
+                await this.fetchProphecyImage(this.state.currentImageKeywords);
+            },
+
+            parseAIResponse(aiResponseText) {
+                let poem = '';
+                let keywords = '';
+                const lines = aiResponseText.split('\n');
+                let keywordLineIndex = -1;
+
+                for (let i = lines.length - 1; i >= 0; i--) {
+                    if (lines[i].toLowerCase().startsWith('vision keywords:')) {
+                        keywordLineIndex = i;
+                        keywords = lines[i].substring(lines[i].toLowerCase().indexOf('vision keywords:') + 'vision keywords:'.length).trim();
+                        break;
+                    }
+                }
+
+                if (keywordLineIndex !== -1) {
+                    poem = lines.slice(0, keywordLineIndex).join('\n').trim();
+                } else {
+                    poem = aiResponseText.trim();
+                }
+                
+                if (!poem) {
+                    poem = lines.filter((line, index) => index !== keywordLineIndex).join('\n').trim();
+                }
+                if (!keywords) {
+                     keywords = poem.split(' ').slice(0,5).join(' ') || "mystic vision, digital prophecy, abstract signals";
+                }
+                if (keywords.split(',').length > 5) keywords = keywords.split(',').slice(0,5).join(',');
+
+
+                this.state.currentPoem = poem || "The oracle's words are lost in static...";
+                this.state.currentImageKeywords = keywords || "cyberpunk dream, pixelated fate, unknown path";
+            },
+            
+            async fetchProphecyImage(keywords) {
+                const imagePrompt = `Surreal, dark, and unsettling 8-bit pixel art. Retro video game aesthetic, cyberpunk themes with vibrant neon highlights on a dark background. Highly detailed pixel art. Depicting: ${keywords}.`;
+                
+                let response;
+                try {
+                    response = await fetch(this.config.API_IMAGE_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prompt: imagePrompt, aspectRatio: this.config.IMAGE_ASPECT_RATIO, style: "standard" })
+                    });
+                } catch (networkError) {
+                     this.state.imageFailedToLoad = true;
+                     this.displayProphecyContent();
+                     this.updateUIState('prophecy');
+                     throw new Error('Network error: Could not generate the prophetic vision.');
+                }
+
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({error: "Unknown image generation error"}));
+                    this.state.imageFailedToLoad = true;
+                    this.displayProphecyContent();
+                    this.updateUIState('prophecy');
+                    throw new Error(`Image generation failed (Status: ${response.status}). ${errorData.error}`);
+                }
+                const data = await response.json();
+                if (!data.success || !data.imageUrl) {
+                    this.state.imageFailedToLoad = true;
+                    this.displayProphecyContent();
+                    this.updateUIState('prophecy');
+                    throw new Error(data.error || 'Failed to retrieve the prophetic image URL.');
+                }
+                
+                this.state.imageFailedToLoad = false;
+                this.state.currentImageUrl = data.imageUrl;
+                
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        this.displayProphecyContent();
+                        this.updateUIState('prophecy');
+                        resolve();
+                    };
+                    img.onerror = () => {
+                        this.state.imageFailedToLoad = true;
+                        this.displayProphecyContent(); 
+                        this.updateUIState('prophecy'); 
+                        resolve(); 
+                    };
+                    img.src = data.imageUrl;
+                });
+            },
+
+            async displayProphecyContent() {
+                if (this.state.typewriterInterval) {
+                    clearInterval(this.state.typewriterInterval);
+                    this.state.typewriterInterval = null;
+                }
+                if (this.config.TYPEWRITER_ENABLED && this.state.currentPoem) {
+                    await this.typeOut(this.elements.prophecyPoem, this.state.currentPoem, this.config.TYPEWRITER_SPEED);
+                } else {
+                    this.elements.prophecyPoem.textContent = this.state.currentPoem || "The vision is unclear...";
+                }
+                
+                this.elements.imageContainer.innerHTML = ''; 
+                if (this.state.imageFailedToLoad) {
+                    const errorP = document.createElement('p');
+                    errorP.className = 'retro-font-small p-3 text-center';
+                    errorP.textContent = 'Vision obscured... image failed to load.';
+                    this.elements.imageContainer.appendChild(errorP);
+                    this.elements.prophecyImage.src = ''; 
+                    this.elements.prophecyImage.alt = 'Vision obscured... image failed to load.';
+                } else {
+                    this.elements.prophecyImage.src = this.state.currentImageUrl;
+                    this.elements.prophecyImage.alt = this.state.currentImageKeywords || "Prophetic Vision";
+                    this.elements.imageContainer.appendChild(this.elements.prophecyImage);
+                }
+                this.playSound('reveal');
+            },
+            
+            async typeOut(element, text, speed) {
+                return new Promise(resolve => {
+                    element.textContent = '';
+                    let i = 0;
+                    if (this.state.typewriterInterval) clearInterval(this.state.typewriterInterval);
+                    this.state.typewriterInterval = setInterval(() => {
+                        if (i < text.length) {
+                            element.textContent += text.charAt(i);
+                            i++;
+                        } else {
+                            clearInterval(this.state.typewriterInterval);
+                            this.state.typewriterInterval = null;
+                            resolve();
+                        }
+                    }, speed);
+                });
+            },
+
+            handleSaveImage() {
+                this.playSound('click');
+                if (!this.state.currentImageUrl || this.state.imageFailedToLoad) {
+                    this.updateUIState('error', 'No vision to save, or vision is obscured.');
+                    return;
+                }
+                const link = document.createElement('a');
+                link.href = this.state.currentImageUrl;
+                const filenameKeywords = (this.state.currentImageKeywords || "prophecy").replace(/[^a-z0-9]/gi, '_').substring(0,30);
+                link.download = `PixelProphecy_${filenameKeywords}_${new Date().getTime()}.png`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            },
+
+            handleAskAnother() {
+                this.playSound('click');
+                if (this.state.typewriterInterval) {
+                    clearInterval(this.state.typewriterInterval);
+                    this.state.typewriterInterval = null;
+                }
+                this.state.currentQuestion = null;
+                this.state.currentPoem = null;
+                this.state.currentImageUrl = null;
+                this.state.currentImageKeywords = null;
+                this.state.imageFailedToLoad = false;
+                this.elements.userQuestion.value = '';
+                this.elements.prophecyPoem.textContent = '';
+                
+                this.elements.imageContainer.innerHTML = ''; 
+                this.elements.prophecyImage.src = '#'; 
+                this.elements.prophecyImage.alt = 'Prophetic Vision';
+                this.elements.imageContainer.appendChild(this.elements.prophecyImage);
+
+
+                this.updateUIState('input');
+            },
+
+            async handleErrorRetry() {
+                this.playSound('click');
+                if (this.state.currentQuestion) {
+                    this.updateUIState('loading');
+                    try {
+                        await this.fetchProphecy(this.state.currentQuestion);
+                    } catch (error) {
+                        this.updateUIState('error', error.message || 'Retry failed. The Oracle remains silent.');
+                    }
+                } else {
+                    this.updateUIState('input');
+                }
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            PixelProphecyApp.init();
+        });
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

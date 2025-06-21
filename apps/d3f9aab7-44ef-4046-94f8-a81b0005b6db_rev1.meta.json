@@ -1,0 +1,18 @@
+{
+  "projectId": "d3f9aab7-44ef-4046-94f8-a81b0005b6db",
+  "revisionString": "1",
+  "projectNameDisplay": "Dashboard to the internet",
+  "projectType": "webapp",
+  "userPromptForThisRevision": "Full featured dashboard with lots of data sources including some customizable ones, and tonnes of synthesis and visualization.",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-05-29T14:51:46.506Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/imagen3_17cb29ee-9aa.png",
+      "url": "/generated_images/imagen3_17cb29ee-9aa.png",
+      "description": "A sleek, abstract logo icon for a 'Dashboard to the Internet'. Style: modern flat design with a subtle blue gradient, evoking connectivity and data. Subject: A stylized representation of interconnected nodes or a dynamic data stream forming an abstract globe shape. Dominant colors: shades of Bootstrap primary blue (approx #0d6efd), with accents of a lighter cyan or teal. Background: transparent for versatile use, or a very light grey (#f8f9fa) if transparency is an issue. Clean lines, professional, tech-forward aesthetic. Should be suitable for a small header logo (e.g., 32x32 or 40x40 pixels).",
+      "purpose": "Header logo for the dashboard, to be displayed next to the 'Dashboard to the Internet' title. The target HTML path will be /generated_images/placeholder_logo.png",
+      "isNewlyGenerated": true
+    }
+  ]
+}

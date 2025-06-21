@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flatulence Token ($FLAT) - The Most Explosive Memecoin!</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="icon" href="/generated_images/dalle_aad0fe81-396.png" type="image/png">
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0a0a0a;
+            color: #e0e0e0;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        a {
+            color: #0d6efd;
+            text-decoration: none;
+        }
+        a:hover {
+            color: #3b8bff;
+        }
+
+        .bg-black-custom {
+            background-color: #0a0a0a !important;
+        }
+
+        .bg-dark-custom {
+            background-color: #1a1a1a !important;
+        }
+
+        .navbar {
+            transition: background-color 0.3s ease-in-out;
+        }
+        
+        .navbar-brand img {
+            animation: subtlePulse 2s infinite alternate;
+            max-height: 40px;
+        }
+        .navbar-nav .nav-link.active {
+            color: #ffffff !important;
+            font-weight: 500;
+        }
+
+
+        #hero {
+            background-image: url('/generated_images/dalle_48c8e1e6-014.png');
+            background-size: cover;
+            background-position: center;
+            background-blend-mode: overlay;
+            background-color: rgba(0,0,0,0.6);
+            min-height: 90vh;
+            padding: 3rem 1rem;
+        }
+
+        #hero .hero-logo {
+            max-width: 150px;
+            margin-bottom: 1.5rem;
+            animation: subtleFloat 3s ease-in-out infinite alternate;
+        }
+
+        #hero h1 {
+            font-size: calc(2.3rem + 2vw);
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+        }
+
+        .section-heading {
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .card {
+            border: 1px solid #333;
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.3);
+        }
+        .card.bg-dark, .card.bg-black-custom {
+             border: 1px solid #444;
+        }
+
+        .pie-chart-container {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            margin: 1.5rem auto;
+        }
+
+        .pie-chart {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background-image: conic-gradient(
+                #28a745 0% 30%,      /* Presale 30% */
+                #007bff 30% 60%,     /* Liquidity 30% */
+                #ffc107 60% 75%,     /* Marketing 15% */
+                #17a2b8 75% 90%,     /* Team 15% */
+                #6f42c1 90% 100%     /* Airdrops 10% */
+            );
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        .legend-color-box {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            border: 1px solid #555;
+            flex-shrink: 0;
+        }
+
+        .roadmap-card {
+            min-height: 100%;
+            transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+        }
+        .roadmap-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 1rem 1.5rem rgba(0,0,0,0.4) !important;
+        }
+
+        .sound-btn {
+            background-color: #60bf6c !important;
+            border-color: #50a05c !important;
+            color: #fff !important;
+            transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, transform 0.1s ease-out, filter 0.1s ease-out;
+        }
+        .sound-btn:hover {
+            background-color: #50a05c !important;
+            border-color: #40904c !important;
+        }
+        .sound-btn-active {
+            transform: scale(0.95);
+            filter: brightness(1.2);
+        }
+
+        #fartOMeterSection .progress {
+            height: 2.5rem;
+            font-size: 1rem;
+            background-color: #343a40 !important;
+        }
+        #fartOMeterBar {
+            transition: width 0.5s ease-in-out, background-color 0.3s ease;
+        }
+        
+        .social-icon {
+            font-size: 2rem;
+            margin: 0 0.75rem;
+            color: #adb5bd;
+            transition: color 0.2s ease-in-out, transform 0.2s ease-in-out;
+        }
+        .social-icon:hover {
+            color: #0d6efd;
+            transform: scale(1.1);
+        }
+
+        @keyframes subtlePulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.03); }
+        }
+
+        @keyframes subtleFloat {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+    </style>
+</head>
+<body data-bs-spy="scroll" data-bs-target="#navbarNav" data-bs-offset="80">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-black-custom sticky-top shadow-sm" id="mainNav">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">
+                <img src="/generated_images/dalle_aad0fe81-396.png" alt="$FLAT Logo" class="d-inline-block align-text-top me-2">
+                $FLAT
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#hero">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#tokenomics">Tokenomics</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#roadmap">Roadmap</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#how-to-buy">How to Buy</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#soundboard">Soundboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#fart-o-meter-section">Fart-o-Meter</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#community">Community</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <section id="hero" class="container-fluid d-flex align-items-center justify-content-center text-center flex-column">
+            <img src="/generated_images/dalle_aad0fe81-396.png" alt="$FLAT Logo" class="hero-logo">
+            <h1 class="display-3 text-white mb-3">Flatulence Token ($FLAT)</h1>
+            <p class="lead text-white-50 mb-4 col-lg-6 col-md-8">The Most Explosively Hilarious Coin on the Blockchain! Get Ready to Toot Your Own Horn!</p>
+            <div>
+                <a href="#how-to-buy" class="btn btn-primary btn-lg me-2 mb-2 px-4 py-2">Buy $FLAT Now</a>
+                <a href="#tokenomics" class="btn btn-outline-light btn-lg mb-2 px-4 py-2">View Tokenomics</a>
+            </div>
+        </section>
+
+        <section id="about" class="py-5 bg-dark-custom text-white">
+            <div class="container">
+                <h2 class="display-5 text-center section-heading mb-5">Our Gaseous Origins</h2>
+                <div class="row align-items-center">
+                    <div class="col-md-4 text-center mb-4 mb-md-0">
+                        <img src="/generated_images/dalle_6de6d3f5-c35.png" alt="About $FLAT Illustration" class="img-fluid rounded shadow-lg" style="max-height: 300px;">
+                    </div>
+                    <div class="col-md-8">
+                        <p class="lead mb-3">Legend has it that $FLAT was conceived during a particularly potent brainstorming session (fueled by beans, naturally). We realized the world needed a cryptocurrency that wasn't afraid to let one rip, a coin that embraces the lighter, airier side of decentralized finance.</p>
+                        <p class="mb-3">Born from a desire to inject humor and genuine community spirit into the often too-serious crypto space, Flatulence Token is more than just a memecoin – it's a movement. A fragrant, sometimes surprising, but always entertaining movement. We're here to prove that even the most... *elemental*... of human experiences can be a source of joy, laughter, and maybe, just maybe, some explosive gains.</p>
+                        <p>So, loosen your belts, take a deep breath (or don't, depending on your proximity to the source), and join us on this odorous adventure!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tokenomics" class="py-5 bg-black-custom text-white">
+            <div class="container">
+                <h2 class="display-5 text-center section-heading mb-5">Tokenomics: The Winds of Fortune</h2>
+                <div class="row g-4 justify-content-center">
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card bg-dark text-white h-100">
+                            <div class="card-body text-center d-flex flex-column justify-content-center">
+                                <h5 class="card-title mb-3"><i class="bi bi-gem me-2 fs-4 text-primary"></i>Total Supply</h5>
+                                <p class="card-text display-6 fw-bold">1 Trillion</p>
+                                <small class="text-white-50">A whole lot of $FLAT!</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card bg-dark text-white h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-center mb-3"><i class="bi bi-percent me-2 fs-4 text-primary"></i>Transaction Tax</h5>
+                                <p class="card-text fs-4 fw-bold text-center">5% Buy / 5% Sell</p>
+                                <ul class="list-unstyled text-start mt-2 small">
+                                    <li><i class="bi bi-wind text-info me-2"></i>2% Liquidity Pool (The "Silent But Deadly" Sustainer)</li>
+                                    <li><i class="bi bi-megaphone-fill text-warning me-2"></i>2% Marketing (The "Loud and Proud" Promoter)</li>
+                                    <li><i class="bi bi-tree-fill text-success me-2"></i>1% Air Freshener Fund (Charity & Dev)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12 col-lg-6">
+                        <div class="card bg-dark text-white h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-center mb-3"><i class="bi bi-pie-chart-fill me-2 fs-4 text-primary"></i>Distribution</h5>
+                                <div class="row align-items-center">
+                                    <div class="col-md-5 text-center">
+                                        <div class="pie-chart-container">
+                                            <div class="pie-chart"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <ul class="list-unstyled text-start mt-2 small">
+                                            <li class="legend-item"><span class="legend-color-box" style="background-color: #28a745;"></span>30% Presale</li>
+                                            <li class="legend-item"><span class="legend-color-box" style="background-color: #007bff;"></span>30% Liquidity Pool</li>
+                                            <li class="legend-item"><span class="legend-color-box" style="background-color: #ffc107;"></span>15% Marketing & Partnerships</li>
+                                            <li class="legend-item"><span class="legend-color-box" style="background-color: #17a2b8;"></span>15% Team & Advisors (Vested)</li>
+                                            <li class="legend-item"><span class="legend-color-box" style="background-color: #6f42c1;"></span>10% Airdrops & Community Rewards</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="roadmap" class="py-5 bg-dark-custom text-white">
+            <div class="container">
+                <h2 class="display-5 text-center section-heading mb-5">Roadmap: Following the Scent</h2>
+                <div class="row g-4">
+                    <div class="col-md-6 col-lg-3 d-flex">
+                        <div class="card bg-black-custom text-white border-secondary roadmap-card w-100">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title text-info">Phase 1: The Initial Emission</h5>
+                                <p class="card-text small flex-grow-1">
+                                    <i class="bi bi-check-circle-fill text-success me-1"></i> Token Launch & Fair Distribution<br>
+                                    <i class="bi bi-check-circle-fill text-success me-1"></i> Website V1 Live (You are here!)<br>
+                                    <i class="bi bi-check-circle-fill text-success me-1"></i> Initial Social Media Blast<br>
+                                    <i class="bi bi-hourglass-split text-warning me-1"></i> CoinGecko & CMC Listing Applications
+                                </p>
+                                <div class="mt-auto text-center"><span class="badge bg-success">Completed</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3 d-flex">
+                        <div class="card bg-black-custom text-white border-secondary roadmap-card w-100">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title text-info">Phase 2: Building Pressure</h5>
+                                <p class="card-text small flex-grow-1">
+                                    <i class="bi bi-arrow-repeat text-primary me-1"></i> Community Growth Initiatives<br>
+                                    <i class="bi bi-arrow-repeat text-primary me-1"></i> Influencer Marketing ("Celebri-toots")<br>
+                                    <i class="bi bi-arrow-repeat text-primary me-1"></i> First Charity Donation (Air Freshener Fund)<br>
+                                    <i class="bi bi-arrow-repeat text-primary me-1"></i> Fart NFT Collection Teaser
+                                </p>
+                                <div class="mt-auto text-center"><span class="badge bg-warning text-dark">In Progress</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3 d-flex">
+                        <div class="card bg-black-custom text-white border-secondary roadmap-card w-100">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title text-info">Phase 3: The Perfect Storm</h5>
+                                <p class="card-text small flex-grow-1">
+                                    <i class="bi bi-clock text-secondary me-1"></i> Fart NFT Collection Launch<br>
+                                    <i class="bi bi-clock text-secondary me-1"></i> Partnerships with... other smelly things?<br>
+                                    <i class="bi bi-clock text-secondary me-1"></i> Exchange Listing Applications (Tier 2/3)<br>
+                                    <i class="bi bi-clock text-secondary me-1"></i> $FLAT Utility Dev (Fart-to-Earn Game?)
+                                </p>
+                                 <div class="mt-auto text-center"><span class="badge bg-secondary">Upcoming</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3 d-flex">
+                        <div class="card bg-black-custom text-white border-secondary roadmap-card w-100">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title text-info">Phase 4: Global Air Dominance</h5>
+                                <p class="card-text small flex-grow-1">
+                                    <i class="bi bi-rocket-takeoff text-danger me-1"></i> Major Exchange Listings<br>
+                                    <i class="bi bi-cart3 text-danger me-1"></i> $FLAT Merchandise ("Wear Your Wind")<br>
+                                    <i class="bi bi-trophy text-danger me-1"></i> World Record Attempt (Most synchronized farts?)<br>
+                                    <i class="bi bi-question-circle text-danger me-1"></i> To The Moon... or just clear the room?
+                                </p>
+                                <div class="mt-auto text-center"><span class="badge bg-danger">Future Plans</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="how-to-buy" class="py-5 bg-black-custom text-white">
+            <div class="container">
+                <h2 class="display-5 text-center section-heading mb-5">How to Catch the Wind ($FLAT)</h2>
+                <div class="row justify-content-center">
+                    <div class="col-lg-8 col-md-10">
+                        <ol class="list-group list-group-numbered list-group-flush">
+                            <li class="list-group-item bg-transparent text-white border-secondary py-3 fs-5"><strong>Get a Wallet:</strong> Download MetaMask or Trust Wallet. This is where your $FLAT tokens will reside, safely wafting.</li>
+                            <li class="list-group-item bg-transparent text-white border-secondary py-3 fs-5"><strong>Add BNB (BSC):</strong> You'll need BNB (Binance Smart Chain) to swap for $FLAT. Purchase BNB on an exchange, then send it to your wallet.</li>
+                            <li class="list-group-item bg-transparent text-white border-secondary py-3 fs-5"><strong>Go to PancakeSwap:</strong> Connect your wallet to PancakeSwap. Ensure you're on the Binance Smart Chain network.</li>
+                            <li class="list-group-item bg-transparent text-white border-secondary py-3 fs-5"><strong>Import $FLAT:</strong> Paste the official $FLAT contract address (see below) into PancakeSwap to find the token. Double-check the source!</li>
+                            <li class="list-group-item bg-transparent text-white border-secondary py-3 fs-5"><strong>Swap BNB for $FLAT:</strong> Enter the amount, set slippage (e.g., 6-12%), and confirm. Smell that? That's $FLAT!</li>
+                        </ol>
+                        <p class="text-center mt-4">
+                            <strong>Official $FLAT Contract Address:</strong><br>
+                            <code class="fs-5 p-2 bg-dark rounded d-block mt-1 user-select-all text-break">0xTOOT_TOOT_YOUR_FLAT_ADDRESS_WILL_BE_HERE_SOON_STAY_TUNED_WOW</code>
+                            <small class="text-warning d-block mt-1">(Address will be revealed upon official launch! Don't get gassy waiting!)</small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="soundboard" class="py-5 bg-dark-custom text-white">
+            <div class="container text-center">
+                <h2 class="display-5 section-heading mb-4">The $FLAT Soundboard Symphony</h2>
+                <p class="lead mb-5 col-lg-8 mx-auto">Click the buttons below to experience the diverse soundscape of $FLAT. Handle with care... and maybe open a window. Please ensure your speakers are on (or off, depending on your company).</p>
+                <div id="soundboard-controls" class="d-flex flex-wrap justify-content-center gap-3">
+                </div>
+                <div id="audio-players" class="d-none"></div>
+                 <div id="sound-error-toast-container" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+                    <div id="soundErrorToast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="d-flex">
+                            <div class="toast-body">
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="fart-o-meter-section" class="py-5 bg-black-custom text-white">
+            <div class="container text-center">
+                <h2 class="display-5 section-heading mb-4">Fart-o-Meter</h2>
+                <p class="lead mb-4 col-lg-8 mx-auto">How gassy is the $FLAT community feeling today? Give the meter a boost and let the world know we're building pressure!</p>
+                <div class="progress mb-3 mx-auto" style="max-width: 700px;">
+                    <div id="fartOMeterBar" class="progress-bar fw-bold" role="progressbar" style="width: 15%;" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100">Just a Whiff</div>
+                </div>
+                <button id="boostMeterBtn" class="btn btn-warning btn-lg px-4 py-2"><i class="bi bi-wind me-2"></i>Boost the Meter!</button>
+            </div>
+        </section>
+
+        <section id="community" class="py-5 bg-dark-custom text-white">
+            <div class="container text-center">
+                <h2 class="display-5 section-heading mb-4">Join Our Wind Farm!</h2>
+                <p class="lead mb-5 col-lg-8 mx-auto">Connect with fellow $FLAT enthusiasts, share your best fart jokes, and stay updated on all the latest emissions! We're a breezy bunch.</p>
+                <div>
+                    <a href="#" target="_blank" rel="noopener noreferrer" class="social-icon" title="Telegram"><i class="bi bi-telegram"></i></a>
+                    <a href="#" target="_blank" rel="noopener noreferrer" class="social-icon" title="Twitter / X"><i class="bi bi-twitter-x"></i></a>
+                    <a href="#" target="_blank" rel="noopener noreferrer" class="social-icon" title="Discord"><i class="bi bi-discord"></i></a>
+                    <a href="#" target="_blank" rel="noopener noreferrer" class="social-icon" title="Reddit"><i class="bi bi-reddit"></i></a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="py-4 bg-black-custom text-white-50 text-center border-top border-secondary mt-auto">
+        <div class="container">
+            <p class="mb-1">&copy; <span id="currentYear"></span> Flatulence Token ($FLAT). All Rights Reserved (or are they?).</p>
+            <p class="small mb-0">Disclaimer: $FLAT is a memecoin created for entertainment and comedic purposes. It is not a financial investment. Invest responsibly and only what you can afford to lose if you choose to acquire any. This is not financial advice, just a bit of gas. Past performance is not indicative of future smells. DYOR (Do Your Own Research... and maybe hold your nose).</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function() {
+            'use strict';
+
+            const SCRIPT_CONSTANTS = {
+                SOUNDS: [
+                    { id: 'fart_classic', name: 'Classic Puff', file: 'sounds/classic_puff.mp3' },
+                    { id: 'fart_squeaky', name: 'Squeaky Breezer', file: 'sounds/squeaky_breezer.mp3' },
+                    { id: 'fart_wet', name: 'The Ripple', file: 'sounds/the_ripple.mp3' },
+                    { id: 'fart_short', name: 'Short Snort', file: 'sounds/short_snort.mp3' },
+                    { id: 'fart_long', name: 'Long Hauler', file: 'sounds/long_hauler.mp3' },
+                    { id: 'fart_atomic', name: 'Atomic Blast', file: 'sounds/atomic_blast.mp3' }
+                ],
+                FART_O_METER_INITIAL: 15,
+            };
+            
+            let soundErrorToastInstance = null;
+
+            function initApp() {
+                updateCopyrightYear();
+                setupSmoothScrollAndMobileNavClose();
+                setupSoundboard();
+                setupFartOMeter();
+                initSoundErrorToast();
+            }
+            
+            function initSoundErrorToast() {
+                const toastEl = document.getElementById('soundErrorToast');
+                if (toastEl) {
+                    soundErrorToastInstance = new bootstrap.Toast(toastEl, { delay: 5000 });
+                }
+            }
+
+            function showSoundErrorToast(soundName, soundFile) {
+                if (soundErrorToastInstance) {
+                    const toastBody = document.querySelector('#soundErrorToast .toast-body');
+                    if(toastBody) {
+                        toastBody.textContent = `Could not play '${soundName}'. Sound file (${soundFile}) might be missing or there was a playback error. (Note: Sound files are not auto-generated).`;
+                    }
+                    soundErrorToastInstance.show();
+                } else {
+                     alert(`Could not play sound: ${soundName}. This website expects sound files (e.g. ${soundFile}) in a 'sounds' folder relative to the HTML file. These files were not included in the generation.`);
+                }
+            }
+
+            function updateCopyrightYear() {
+                const yearEl = document.getElementById('currentYear');
+                if (yearEl) yearEl.textContent = new Date().getFullYear();
+            }
+
+            function setupSmoothScrollAndMobileNavClose() {
+                const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+                const navbarCollapseEl = document.getElementById('navbarNav');
+                let bsCollapseInstance;
+                if (navbarCollapseEl) {
+                    bsCollapseInstance = new bootstrap.Collapse(navbarCollapseEl, { toggle: false });
+                }
+
+                navLinks.forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        if (this.hash !== "") {
+                            if (navbarCollapseEl && navbarCollapseEl.classList.contains('show') && bsCollapseInstance) {
+                                bsCollapseInstance.hide();
+                            }
+                        }
+                    });
+                });
+            }
+
+            function setupSoundboard() {
+                const soundboardControls = document.getElementById('soundboard-controls');
+                const audioPlayersContainer = document.getElementById('audio-players');
+                if (!soundboardControls || !audioPlayersContainer) return;
+
+                SCRIPT_CONSTANTS.SOUNDS.forEach(sound => {
+                    const button = document.createElement('button');
+                    button.className = 'btn btn-lg sound-btn m-1 fw-bold px-3 py-2';
+                    button.textContent = sound.name;
+                    button.dataset.soundId = sound.id;
+                    soundboardControls.appendChild(button);
+
+                    const audio = document.createElement('audio');
+                    audio.id = sound.id + '_audio';
+                    audio.src = sound.file; 
+                    audio.preload = "auto";
+                    audioPlayersContainer.appendChild(audio);
+
+                    button.addEventListener('click', () => {
+                        button.classList.add('sound-btn-active');
+                        setTimeout(() => {
+                            button.classList.remove('sound-btn-active');
+                        }, 150);
+
+                        const soundToPlay = document.getElementById(sound.id + '_audio');
+                        if (soundToPlay) {
+                            soundToPlay.currentTime = 0;
+                            soundToPlay.play().catch(e => {
+                                console.error("Error playing sound '" + sound.name + "':", e.message);
+                                showSoundErrorToast(sound.name, sound.file);
+                            });
+                        }
+                    });
+                });
+            }
+            
+            function setupFartOMeter() {
+                const meterBar = document.getElementById('fartOMeterBar');
+                const boostButton = document.getElementById('boostMeterBtn');
+                if (!meterBar || !boostButton) return;
+
+                let currentValue = SCRIPT_CONSTANTS.FART_O_METER_INITIAL;
+
+                const updateMeterVisuals = (value) => {
+                    value = Math.max(0, Math.min(100, value));
+                    currentValue = value;
+                    meterBar.style.width = value + '%';
+                    meterBar.setAttribute('aria-valuenow', value);
+                    
+                    meterBar.classList.remove('bg-success', 'bg-warning', 'bg-danger', 'bg-info', 'progress-bar-striped', 'progress-bar-animated', 'text-dark');
+                    let meterText = "Low Wind";
+
+                    if (value < 20) { meterText = "Just a Whiff..."; meterBar.classList.add('bg-info'); meterBar.classList.add('text-dark');}
+                    else if (value < 40) { meterText = "Gentle Breeze"; meterBar.classList.add('bg-success'); }
+                    else if (value < 60) { meterText = "Strong Gust!"; meterBar.classList.add('bg-warning'); meterBar.classList.add('text-dark');}
+                    else if (value < 80) { meterText = "Gale Force Winds!"; meterBar.classList.add('bg-danger'); }
+                    else { meterText = "BIOHAZARD!!!"; meterBar.classList.add('bg-danger', 'progress-bar-striped', 'progress-bar-animated'); }
+                    
+                    meterBar.textContent = meterText;
+                };
+
+                boostButton.addEventListener('click', () => {
+                    let boostAmount = Math.floor(Math.random() * 15) + 5;
+                    updateMeterVisuals(currentValue + boostAmount);
+                });
+                updateMeterVisuals(currentValue);
+            }
+
+            document.addEventListener('DOMContentLoaded', initApp);
+        })();
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

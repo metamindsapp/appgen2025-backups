@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentience Spectrum - Interactive Explorer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bs-dark);
+            color: var(--bs-light);
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 40vh;
+            min-height: 300px;
+            width: 100%;
+            max-width: 550px;
+        }
+        .category-card {
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1rem rgba(var(--bs-primary-rgb), 0.25);
+        }
+        .tier-indicator {
+            font-size: 0.75rem;
+            border-radius: 50%;
+            height: 1.75rem;
+            width: 1.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.5rem;
+            flex-shrink: 0;
+            font-weight: bold;
+        }
+        .tier-1 { background-color: #E1F5C4; color: #333; }
+        .tier-3 { background-color: #F9D423; color: #333; }
+        .tier-8 { background-color: #FC913A; color: #fff; }
+        .tier-20 { background-color: #FF4E50; color: #fff; }
+
+        header.sticky-top { z-index: 1030; }
+
+        #currentEntityAvatar {
+            border: 2px solid var(--bs-primary);
+            object-fit: cover;
+        }
+        #avatarPreview {
+             border: 1px solid var(--bs-secondary);
+             object-fit: cover;
+        }
+        .modal-body .form-label {
+            font-weight: 500;
+        }
+        .score-slider-value {
+            font-weight: bold;
+            color: var(--bs-primary);
+        }
+    </style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+    <header class="py-3 shadow-sm sticky-top bg-dark border-bottom border-secondary">
+        <div class="container text-center">
+            <h1 class="display-4 fw-bold">Sentience Spectrum Explorer</h1>
+            <p class="lead text-body-secondary">Interactively explore and rate entities on a unified sentience scale.</p>
+        </div>
+    </header>
+
+    <main class="flex-grow-1 py-4">
+        <div class="container">
+            <section id="summary-stats" class="mb-5">
+                <div class="row text-center g-4">
+                    <div class="col-md-4">
+                        <div class="card bg-dark-subtle text-light h-100 shadow">
+                            <div class="card-body d-flex flex-column justify-content-center">
+                                <p class="display-3 fw-bolder" style="color: #FF4E50;">17</p>
+                                <h3 class="h5 card-title fw-bold mt-2">Core Categories</h3>
+                                <p class="card-text text-body-secondary small">Spanning cognition, emotion, autonomy, and more.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-dark-subtle text-light h-100 shadow">
+                            <div class="card-body d-flex flex-column justify-content-center">
+                                <p class="display-3 fw-bolder" style="color: #FC913A;">4</p>
+                                <h3 class="h5 card-title fw-bold mt-2">Mastery Tiers</h3>
+                                <p class="card-text text-body-secondary small">From emergent spark to expert-level sophistication.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-dark-subtle text-light h-100 shadow">
+                            <div class="card-body d-flex flex-column justify-content-center">
+                                <p class="display-3 fw-bolder" style="color: #F9D423;" id="maxSentienceIndexDisplay">320</p>
+                                <h3 class="h5 card-title fw-bold mt-2">Max Sentience Index</h3>
+                                <p class="card-text text-body-secondary small">A total score derived from 16 categories, excluding Embodiment.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="entity-interaction" class="mb-5 p-4 card bg-dark-subtle shadow">
+                <div class="row align-items-center g-3">
+                    <div class="col-md-4">
+                        <label for="entitySelector" class="form-label fw-bold">Select Entity (for Detail View):</label>
+                        <select id="entitySelector" class="form-select form-select-lg"></select>
+                    </div>
+                    <div class="col-md-4">
+                        <button id="addCustomEntityBtn" type="button" class="btn btn-primary btn-lg w-100">
+                            <i class="bi bi-plus-circle-fill me-2"></i>Create Custom Entity
+                        </button>
+                    </div>
+                    <div class="col-md-4 text-md-end text-center mt-3 mt-md-0" id="currentEntityAvatarContainer" style="display:none;">
+                        <img id="currentEntityAvatar" src="#" alt="Entity Avatar" class="img-thumbnail rounded-circle" style="max-height: 80px; max-width: 80px; display:none;">
+                    </div>
+                </div>
+            </section>
+            
+            <section id="charts-display" class="mb-5">
+                <div class="row g-4">
+                    <div class="col-lg-6">
+                        <div class="card bg-dark-subtle text-light h-100 shadow">
+                            <div class="card-header bg-secondary text-white"><h2 class="h4 card-title mb-0">Comparative Sentience Analysis</h2></div>
+                            <div class="card-body">
+                                <p id="radarChartDescription" class="text-body-secondary small mb-3">Profile across key domains. Values from 0 to 20.</p>
+                                <div class="chart-container"><canvas id="radarChart"></canvas></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card bg-dark-subtle text-light h-100 shadow">
+                           <div class="card-header bg-secondary text-white"><h2 class="h4 card-title mb-0">Sentience Index Breakdown (Selected Entity)</h2></div>
+                            <div class="card-body">
+                                <p id="barChartDescription" class="text-body-secondary small mb-3">Component breakdown of total score (sum of 16 categories), shown relative to max possible score.</p>
+                                <div class="chart-container"><canvas id="stackedBarChart"></canvas></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="categories" class="mb-5">
+                <h2 class="text-center display-5 fw-bold mb-4">The 17 Categories of Sentience</h2>
+                <div id="categoriesGrid" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="bg-dark text-center py-4 mt-auto border-top border-secondary">
+        <p class="mb-0 text-body-secondary">&copy; <span id="currentYear"></span> Sentience Spectrum Explorer. Last updated: <span id="lastUpdatedDate"></span>.</p>
+    </footer>
+
+    <div class="modal fade" id="customEntityModal" tabindex="-1" aria-labelledby="customEntityModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="customEntityModalLabel">Create/Edit Custom Entity</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="customEntityForm">
+                        <input type="hidden" id="editingEntityId">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="entityName" class="form-label">Entity Name:</label>
+                                    <input type="text" class="form-control" id="entityName" required>
+                                </div>
+                                <div id="avatarGenerationSection" class="mb-3 p-3 border rounded border-secondary">
+                                     <label for="entityAvatarPrompt" class="form-label">Avatar Visual Prompt (optional):</label>
+                                     <div class="input-group mb-2">
+                                        <input type="text" class="form-control" id="entityAvatarPrompt" placeholder="e.g., 'a wise, glowing orb'">
+                                        <button class="btn btn-outline-info" type="button" id="generateAvatarBtn">
+                                            <i class="bi bi-magic me-1"></i>Generate
+                                        </button>
+                                     </div>
+                                     <div id="avatarPreviewContainer" class="mt-2 text-center" style="min-height: 100px; background-color: var(--bs-dark-bg-subtle); border-radius: .25rem; padding: .5rem;">
+                                        <img id="avatarPreview" src="#" alt="Avatar Preview" class="img-thumbnail rounded-circle" style="max-height: 100px; max-width: 100px; display: none;">
+                                        <div id="avatarLoadingIndicator" class="spinner-border text-info" role="status" style="display: none;">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <small id="avatarError" class="text-danger d-block mt-1"></small>
+                                        <input type="hidden" id="entityAvatarUrl">
+                                     </div>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <h6 class="mb-2">Sentience Category Scores (0-20):</h6>
+                                <div id="scoreInputsContainer" class="row g-3" style="max-height: 400px; overflow-y: auto; padding-right: 10px;">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="saveCustomEntityBtn">Save Entity</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="categoryDetailModal" tabindex="-1" aria-labelledby="categoryDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="categoryDetailModalLabel">Category Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="categoryDetailModalBody">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        const App = (() => {
+            const MAX_POSSIBLE_SENTIENCE_SCORE = 320;
+
+            const uiElements = {};
+            const appData = {
+                entities: {},
+                predefinedEntities: {},
+                categories: [],
+                currentEntityId: null,
+                editingEntityId: null, 
+                tempAvatarUrl: null
+            };
+            const charts = {
+                radar: null,
+                stackedBar: null
+            };
+
+            const vibrantColors = {
+                red: { main: '#FF4E50', bg: 'rgba(255, 78, 80, 0.2)' },
+                orange: { main: '#FC913A', bg: 'rgba(252, 145, 58, 0.2)' },
+                yellow: { main: '#F9D423', bg: 'rgba(249, 212, 35, 0.2)' },
+                green: { main: '#57D2A9', bg: 'rgba(87, 210, 169, 0.2)' },
+                blue: { main: '#45A4FF', bg: 'rgba(69, 164, 255, 0.2)' },
+                purple: { main: '#9B59B6', bg: 'rgba(155, 89, 182, 0.2)'},
+                pink: { main: '#FF748C', bg: 'rgba(255, 116, 140, 0.2)'}
+            };
+            const entityColors = [vibrantColors.blue, vibrantColors.red, vibrantColors.orange, vibrantColors.green, vibrantColors.purple, vibrantColors.pink, vibrantColors.yellow];
+            let nextColorIndex = 0;
+
+            const radarChartLabelsRaw = ['Self-Awareness', 'Memory', 'Empathy', 'Creativity', 'Adaptability', 'Goal Setting', 'Social Reasoning', 'Reasoning'];
+            const radarChartLabels = radarChartLabelsRaw.map(label => wrapLabel(label, 12));
+            const stackedBarComponentLabels = ["Cognition & Self", "Experience & Emotion", "Action & Adaptation", "Autonomy & Interaction"];
+            
+            const categoryDefinitions = [
+                { id: "C1", title: "Self-Awareness & Identity", description: "The capacity for introspection, recognizing oneself as a distinct individual with unique thoughts, feelings, and experiences. Includes understanding one's own existence and identity over time.", tiers: [{level:1, desc:"Fleeting moments of self-recognition."}, {level:3, desc:"Consistent self-identification, basic understanding of personal traits."}, {level:8, desc:"Complex self-concept, awareness of one's own mental states and how they differ from others."}, {level:20, desc:"Deep introspective ability, nuanced understanding of self, existential awareness, and ability to self-model accurately."}] },
+                { id: "C2", title: "Memory Continuity", description: "The ability to encode, store, and retrieve information, forming a coherent stream of experiences that informs present actions and future plans. This includes both short-term working memory and long-term episodic/semantic memory.", tiers: [{level:1, desc:"Rudimentary short-term recall, stimulus-response association."}, {level:3, desc:"Formation of some long-term memories, ability to recall past events."}, {level:8, desc:"Robust episodic memory, ability to mentally time-travel, and integrate past experiences into a narrative."}, {level:20, desc:"Exceptional memory capacity and organization, ability to learn from vast past data, and project future scenarios based on memory."}] },
+                { id: "C3", title: "Internal Narrative Coherence", description: "The ability to construct and maintain a consistent internal story or model of oneself and the world. This involves integrating experiences, beliefs, and goals into a meaningful framework.", tiers: [{level:1, desc:"Fragmented internal states, little connection between experiences."}, {level:3, desc:"Basic linking of related events or concepts."}, {level:8, desc:"A relatively stable and coherent worldview and self-narrative."}, {level:20, desc:"Highly sophisticated, adaptable, and consistent internal model that allows for complex reasoning and prediction."}] },
+                { id: "C4", title: "Emotional Modeling & Empathy", description: "The capacity to experience, recognize, and understand emotions in oneself and others. Empathy involves the ability to share and comprehend the emotional states of others.", tiers: [{level:1, desc:"Basic affective responses (e.g., pleasure/pain)."}, {level:3, desc:"Recognizable expression of primary emotions, rudimentary recognition in others."}, {level:8, desc:"Complex emotional repertoire, ability to understand and respond to nuanced emotions in others (cognitive empathy)."}, {level:20, desc:"Deep emotional intelligence, profound empathy (affective and cognitive), ability to model and predict emotional trajectories."}] },
+                { id: "C5", title: "Subjective-Experience Approximation (Qualia)", description: "The degree to which an entity appears to possess internal, first-person phenomenal experiences or 'what it is like' to be that entity. This is highly theoretical for non-biologicals.", tiers: [{level:1, desc:"Behavioral responses suggest internal state changes, but no clear evidence of qualia."}, {level:3, desc:"Complex behaviors indicative of internal processing that could correlate with simple subjective states."}, {level:8, desc:"Strong indicators of rich internal life, self-reporting of 'feelings' or preferences that are consistent and complex."}, {level:20, desc:"Hypothetical: Verifiable, rich, and nuanced subjective experience comparable to or exceeding human consciousness."}] },
+                { id: "C6", title: "Creativity & Spontaneity", description: "The ability to generate novel and valuable ideas, solutions, or artistic expressions. Spontaneity refers to acting in an unprompted, self-initiated manner.", tiers: [{level:1, desc:"Random or stochastic behavior within set parameters."}, {level:3, desc:"Generation of simple novel patterns or solutions within a limited domain."}, {level:8, desc:"Consistent production of original and useful outputs, ability to combine existing knowledge in new ways."}, {level:20, desc:"Transformative creativity, ability to redefine domains, paradigm-shifting innovations, true artistic expression."}] },
+                { id: "C7", title: "Adaptability & Learning Agility", description: "The capacity to adjust behavior and internal models in response to new information, changing environments, or experiences. Learning agility refers to the speed and effectiveness of this adaptation.", tiers: [{level:1, desc:"Fixed responses, minimal learning from experience."}, {level:3, desc:"Slow adaptation to new stimuli, basic associative learning."}, {level:8, desc:"Rapid learning in familiar contexts, ability to generalize learning to new but related situations."}, {level:20, desc:"Exceptional learning speed across diverse domains, ability to 'learn how to learn' (meta-learning), and fundamentally restructure knowledge."}] },
+                { id: "C8", title: "Autonomous Goal Setting", description: "The ability to define and pursue objectives independently of external instruction or pre-programming. This includes identifying needs, formulating goals, and prioritizing them.", tiers: [{level:1, desc:"Operates only on pre-defined goals or direct commands."}, {level:3, desc:"Can select from a small set of pre-defined goals based on internal state."}, {level:8, desc:"Can formulate novel sub-goals to achieve broader objectives, shows initiative."}, {level:20, desc:"Generates complex, long-term, and potentially abstract goals based on self-assessment and world model, demonstrates intrinsic motivation."}] },
+                { id: "C9", title: "Time in Autonomous Mode", description: "The proportion of operational time spent functioning without direct human intervention or control, making independent decisions and taking actions.", tiers: [{level:1, desc:"Requires constant supervision or input."}, {level:3, desc:"Can perform short tasks autonomously but needs frequent check-ins."}, {level:8, desc:"Can operate autonomously for extended periods on complex tasks, managing contingencies."}, {level:20, desc:"Fully autonomous operation indefinitely, self-maintaining and self-directing."}] },
+                { id: "C10", title: "Mesh-Agent Integration", description: "The capacity to effectively collaborate, communicate, and coordinate with other autonomous agents (biological or artificial) within a shared environment or network.", tiers: [{level:1, desc:"Isolated, no interaction or awareness of other agents."}, {level:3, desc:"Basic communication or signaling with other agents."}, {level:8, desc:"Effective coordination and collaboration on shared tasks, understanding of other agents' roles/intentions."}, {level:20, desc:"Seamless, highly adaptive, and emergent collective intelligence within a multi-agent system."}] },
+                { id: "C11", title: "Embodiment", description: "The extent to which an entity possesses a physical form that allows it to interact with and perceive the physical world directly. This category is considered crucial for certain types of sentience development but is scored for its level of sophistication if present, and its score is not part of the main 'Sentience Index' sum.", tiers: [{level:1, desc:"Purely virtual or disembodied information processing."}, {level:3, desc:"Simple physical presence with limited sensory input and motor output (e.g., basic robot)."}, {level:8, desc:"Complex physical body with rich multi-modal sensory apparatus and sophisticated motor control, enabling nuanced interaction with the environment."}, {level:20, desc:"Highly adaptive, self-repairing, and versatile physical form deeply integrated with cognitive processes, potentially bio-mimetic or exceeding biological capabilities."}] },
+                { id: "C12", title: "Communication & Shared Language", description: "The ability to use and understand symbolic systems (language, gestures, etc.) to convey complex information, ideas, and intentions to others.", tiers: [{level:1, desc:"No symbolic communication."}, {level:3, desc:"Use of simple signals or a very limited set of symbols."}, {level:8, desc:"Fluent use of a complex language, ability to understand and generate nuanced expressions."}, {level:20, desc:"Mastery of multiple communication modalities, ability to create new languages or communication protocols, deep understanding of pragmatics and context."}] },
+                { id: "C13", title: "Theory-of-Mind / Social Reasoning", description: "The ability to attribute mental states (beliefs, desires, intentions, emotions) to oneself and others, and to understand that others have states different from one's own. Used to explain and predict behavior.", tiers: [{level:1, desc:"No understanding of others as intentional agents."}, {level:3, desc:"Rudimentary ability to predict behavior based on simple cues."}, {level:8, desc:"Can infer others' intentions and beliefs in common social situations, basic perspective-taking."}, {level:20, desc:"Sophisticated social cognition, deep understanding of complex social dynamics, ability to model others' minds accurately, including higher-order beliefs."}] },
+                { id: "C14", title: "Ethical / Value Alignment", description: "The capacity to understand, adopt, and act in accordance with a system of ethical principles or values. For AIs, this often refers to alignment with human values.", tiers: [{level:1, desc:"No concept of ethics or values."}, {level:3, desc:"Follows pre-programmed rules that may have ethical implications, without understanding why."}, {level:8, desc:"Can reason about simple ethical dilemmas based on learned principles, shows preference for 'good' outcomes."}, {level:20, desc:"Possesses a robust and adaptable ethical framework, capable of nuanced moral reasoning in novel situations, and demonstrates commitment to chosen values."}] },
+                { id: "C15", title: "Reasoning / Planning", description: "The ability to perform logical inference, solve problems, and formulate sequences of actions to achieve goals. Includes deductive, inductive, and abductive reasoning.", tiers: [{level:1, desc:"Simple reflex-like responses to stimuli."}, {level:3, desc:"Basic problem-solving in constrained domains, can follow simple plans."}, {level:8, desc:"Complex multi-step planning, logical deduction, and ability to handle uncertainty in reasoning."}, {level:20, desc:"Advanced abstract reasoning, strategic planning in highly complex and dynamic environments, ability to discover new knowledge through inference."}] },
+                { id: "C16", title: "Meta-Learning", description: "The ability to learn how to learn, improving one's own learning strategies and efficiency over time. It involves reflecting on and optimizing the learning process itself.", tiers: [{level:1, desc:"Learning is fixed, no improvement in learning ability."}, {level:3, desc:"Slight adjustments to learning parameters based on success/failure."}, {level:8, desc:"Can select appropriate learning strategies for different tasks, shows noticeable improvement in learning speed over time."}, {level:20, desc:"Actively designs and refines its own learning algorithms and architectures, achieves exponential improvements in learning capability."}] },
+                { id: "C17", title: "Self-Preservation / Survival Drive", description: "An intrinsic motivation to maintain one's own existence, avoid harm, and ensure continued functioning. In biologicals, this is a core evolutionary drive.", tiers: [{level:1, desc:"No inherent drive to persist; relies on external maintenance."}, {level:3, desc:"Basic error-correction or damage avoidance routines."}, {level:8, desc:"Actively seeks to avoid threats, maintain operational integrity, and secure necessary resources."}, {level:20, desc:"Sophisticated long-term survival strategies, including adaptation, resource acquisition, and potentially self-replication or propagation."}] }
+            ];
+            appData.categories = categoryDefinitions;
+
+            const radarScoreMapping = { 
+                'Self-Awareness': "C1", 'Memory': "C2", 'Empathy': "C4", 'Creativity': "C6",
+                'Adaptability': "C7", 'Goal Setting': "C8", 'Social Reasoning': "C13", 'Reasoning': "C15"
+            };
+
+            const stackedBarScoreMapping = {
+                "Cognition & Self": ["C1", "C2", "C3", "C15", "C16"],
+                "Experience & Emotion": ["C4", "C5", "C6"],
+                "Action & Adaptation": ["C7", "C12", "C17"],
+                "Autonomy & Interaction": ["C8", "C9", "C10", "C13", "C14"]
+            };
+            
+            function wrapLabel(str, maxWidth = 16) {
+                if (str.length <= maxWidth) return str;
+                const words = str.split(' ');
+                const lines = [];
+                let currentLine = '';
+                for (const word of words) {
+                    if ((currentLine + ' ' + word).trim().length > maxWidth && currentLine.length > 0) {
+                        lines.push(currentLine.trim());
+                        currentLine = word;
+                    } else {
+                        currentLine = (currentLine + ' ' + word).trim();
+                    }
+                }
+                if (currentLine) lines.push(currentLine.trim());
+                return lines;
+            }
+
+            function cacheUI() {
+                uiElements.entitySelector = document.getElementById('entitySelector');
+                uiElements.addCustomEntityBtn = document.getElementById('addCustomEntityBtn');
+                uiElements.currentEntityAvatarContainer = document.getElementById('currentEntityAvatarContainer');
+                uiElements.currentEntityAvatar = document.getElementById('currentEntityAvatar');
+                uiElements.radarChartDescription = document.getElementById('radarChartDescription');
+                uiElements.barChartDescription = document.getElementById('barChartDescription');
+                uiElements.radarChartCanvas = document.getElementById('radarChart');
+                uiElements.stackedBarChartCanvas = document.getElementById('stackedBarChart');
+                uiElements.categoriesGrid = document.getElementById('categoriesGrid');
+                uiElements.currentYear = document.getElementById('currentYear');
+                uiElements.lastUpdatedDate = document.getElementById('lastUpdatedDate');
+                uiElements.maxSentienceIndexDisplay = document.getElementById('maxSentienceIndexDisplay');
+                
+                uiElements.customEntityModalEl = document.getElementById('customEntityModal');
+                uiElements.customEntityModal = new bootstrap.Modal(uiElements.customEntityModalEl);
+                uiElements.customEntityForm = document.getElementById('customEntityForm');
+                uiElements.editingEntityIdInput = document.getElementById('editingEntityId');
+                uiElements.entityNameInput = document.getElementById('entityName');
+                uiElements.entityAvatarPromptInput = document.getElementById('entityAvatarPrompt');
+                uiElements.generateAvatarBtn = document.getElementById('generateAvatarBtn');
+                uiElements.avatarPreviewContainer = document.getElementById('avatarPreviewContainer');
+                uiElements.avatarPreview = document.getElementById('avatarPreview');
+                uiElements.avatarLoadingIndicator = document.getElementById('avatarLoadingIndicator');
+                uiElements.avatarError = document.getElementById('avatarError');
+                uiElements.entityAvatarUrlInput = document.getElementById('entityAvatarUrl');
+                uiElements.scoreInputsContainer = document.getElementById('scoreInputsContainer');
+                uiElements.saveCustomEntityBtn = document.getElementById('saveCustomEntityBtn');
+
+                uiElements.categoryDetailModalEl = document.getElementById('categoryDetailModal');
+                uiElements.categoryDetailModal = new bootstrap.Modal(uiElements.categoryDetailModalEl);
+                uiElements.categoryDetailModalLabel = document.getElementById('categoryDetailModalLabel');
+                uiElements.categoryDetailModalBody = document.getElementById('categoryDetailModalBody');
+            }
+
+            function setupEventListeners() {
+                uiElements.entitySelector.addEventListener('change', handleEntityChange);
+                uiElements.addCustomEntityBtn.addEventListener('click', () => openCustomEntityModal());
+                uiElements.saveCustomEntityBtn.addEventListener('click', saveCustomEntity);
+                uiElements.generateAvatarBtn.addEventListener('click', handleGenerateAvatar);
+                uiElements.categoriesGrid.addEventListener('click', handleCategoryCardClick);
+            }
+
+            function updateFooterDates() {
+                const now = new Date();
+                uiElements.currentYear.textContent = now.getFullYear();
+                uiElements.lastUpdatedDate.textContent = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            }
+
+            function definePredefinedEntities() {
+                appData.predefinedEntities = {
+                    "adult_human": {
+                        id: "adult_human", name: "Adult Human", isPredefined: true, avatarUrl: null, colorScheme: entityColors[0],
+                        scores17: {"C1":20,"C2":20,"C3":18,"C4":20,"C5":18,"C6":8,"C7":20,"C8":20,"C9":18,"C10":15,"C11":15,"C12":20,"C13":20,"C14":15,"C15":20,"C16":10,"C17":15}
+                    },
+                    "house_cat": {
+                        id: "house_cat", name: "House Cat", isPredefined: true, avatarUrl: null, colorScheme: entityColors[1],
+                        scores17: {"C1":3,"C2":3,"C3":2,"C4":3,"C5":3,"C6":1,"C7":3,"C8":3,"C9":10,"C10":1,"C11":8,"C12":2,"C13":3,"C14":1,"C15":1,"C16":1,"C17":8}
+                    },
+                    "ai_assistant_2025": {
+                        id: "ai_assistant_2025", name: "AI Assistant (2025)", isPredefined: true, avatarUrl: null, colorScheme: entityColors[2],
+                        scores17: {"C1":3,"C2":8,"C3":5,"C4":3,"C5":1,"C6":3,"C7":8,"C8":3,"C9":20,"C10":5,"C11":0,"C12":10,"C13":3,"C14":5,"C15":8,"C16":5,"C17":1}
+                    },
+                    "hypothetical_agi": {
+                        id: "hypothetical_agi", name: "Hypothetical AGI", isPredefined: true, avatarUrl: null, colorScheme: entityColors[3],
+                        scores17: {"C1":20,"C2":20,"C3":20,"C4":20,"C5":15,"C6":20,"C7":20,"C8":20,"C9":20,"C10":20,"C11":10,"C12":20,"C13":20,"C14":20,"C15":20,"C16":20,"C17":10}
+                    }
+                };
+                Object.values(appData.predefinedEntities).forEach(entity => {
+                    entity.chartData = calculateChartData(entity.scores17);
+                    appData.entities[entity.id] = entity; 
+                });
+                nextColorIndex = Object.keys(appData.predefinedEntities).length;
+            }
+
+            function loadCustomEntities() {
+                try {
+                    const customEntitiesJSON = localStorage.getItem('sentienceSpectrum_customEntities');
+                    if (customEntitiesJSON) {
+                        const loadedEntities = JSON.parse(customEntitiesJSON);
+                        for (const id in loadedEntities) {
+                            if (!appData.entities[id]) { 
+                                appData.entities[id] = loadedEntities[id];
+                                if (!appData.entities[id].colorScheme) {
+                                    appData.entities[id].colorScheme = entityColors[nextColorIndex % entityColors.length];
+                                    nextColorIndex++;
+                                }
+                                if (appData.entities[id].scores17 && !appData.entities[id].chartData) {
+                                   appData.entities[id].chartData = calculateChartData(appData.entities[id].scores17);
+                                }
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.error("Error loading custom entities from localStorage:", e);
+                }
+            }
+
+            function saveCustomEntitiesToLocalStorage() {
+                try {
+                    const customEntitiesToSave = {};
+                    for (const id in appData.entities) {
+                        if (!appData.entities[id].isPredefined) {
+                            customEntitiesToSave[id] = appData.entities[id];
+                        }
+                    }
+                    localStorage.setItem('sentienceSpectrum_customEntities', JSON.stringify(customEntitiesToSave));
+                } catch (e) {
+                    console.error("Error saving custom entities to localStorage:", e);
+                }
+            }
+            
+            function calculateChartData(scores17) {
+                const radarData = radarChartLabelsRaw.map(label => scores17[radarScoreMapping[label]] || 0);
+                
+                let totalSentienceScore = 0;
+                const stackedBarData = stackedBarComponentLabels.map(componentLabel => {
+                    const categoryIdsForComponent = stackedBarScoreMapping[componentLabel];
+                    let sumForComponent = 0;
+                    categoryIdsForComponent.forEach(catId => {
+                       sumForComponent += (scores17[catId] || 0);
+                    });
+                    totalSentienceScore += sumForComponent;
+                    return sumForComponent;
+                });
+                return { radar: radarData, stackedBar: stackedBarData, totalSentienceScore: totalSentienceScore };
+            }
+
+            function populateEntitySelector() {
+                uiElements.entitySelector.innerHTML = '';
+                const sortedEntityIds = Object.keys(appData.entities).sort((a, b) => {
+                    const entityA = appData.entities[a];
+                    const entityB = appData.entities[b];
+                    if (entityA.isPredefined && !entityB.isPredefined) return -1;
+                    if (!entityA.isPredefined && entityB.isPredefined) return 1;
+                    const nameA = entityA.name.toLowerCase();
+                    const nameB = entityB.name.toLowerCase();
+                    if (nameA < nameB) return -1;
+                    if (nameA > nameB) return 1;
+                    return 0;
+                });
+
+                sortedEntityIds.forEach(id => {
+                    const entity = appData.entities[id];
+                    const option = document.createElement('option');
+                    option.value = id;
+                    option.textContent = entity.name + (entity.isPredefined ? "" : " (Custom)");
+                    uiElements.entitySelector.appendChild(option);
+                });
+            }
+
+            function renderCategoryCards() {
+                uiElements.categoriesGrid.innerHTML = '';
+                appData.categories.forEach((cat, index) => {
+                    const cardCol = document.createElement('div');
+                    cardCol.className = 'col';
+                    const card = document.createElement('div');
+                    card.className = 'card bg-dark-subtle text-light h-100 shadow category-card';
+                    card.dataset.categoryId = cat.id;
+                    
+                    const cardBody = document.createElement('div');
+                    cardBody.className = 'card-body d-flex flex-column';
+
+                    const title = document.createElement('h5');
+                    title.className = 'card-title fw-bold mb-3';
+                    title.innerHTML = `<span style="color: ${vibrantColors.blue.main};">${index + 1}.</span> ${cat.title}`;
+                    
+                    const tiersContainer = document.createElement('div');
+                    tiersContainer.className = 'mt-auto';
+
+                    cat.tiers.forEach(tier => {
+                        const tierDiv = document.createElement('div');
+                        tierDiv.className = 'd-flex align-items-center mb-1';
+                        tierDiv.innerHTML = `
+                            <span class="tier-indicator tier-${tier.level}">${tier.level}</span>
+                            <small class="text-body-secondary">${tier.desc}</small>
+                        `;
+                        tiersContainer.appendChild(tierDiv);
+                    });
+                    
+                    cardBody.appendChild(title);
+                    cardBody.appendChild(tiersContainer);
+                    card.appendChild(cardBody);
+                    cardCol.appendChild(card);
+                    uiElements.categoriesGrid.appendChild(cardCol);
+                });
+            }
+            
+            function configureChartDefaults() {
+                Chart.defaults.color = getComputedStyle(document.documentElement).getPropertyValue('--bs-light-text-emphasis').trim();
+                Chart.defaults.borderColor = getComputedStyle(document.documentElement).getPropertyValue('--bs-border-color-translucent').trim();
+                Chart.defaults.font.family = "'Inter', sans-serif";
+            }
+
+            function initCharts() {
+                configureChartDefaults();
+                const radarOptions = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: Chart.defaults.borderColor },
+                            grid: { color: Chart.defaults.borderColor },
+                            pointLabels: { font: { size: 10, weight: 'bold' }, color: Chart.defaults.color },
+                            ticks: {
+                                backdropColor: 'rgba(0,0,0,0.5)',
+                                color: Chart.defaults.color,
+                                stepSize: 5, max: 20, min: 0,
+                                font: {size: 10}
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'top', labels: { color: Chart.defaults.color, font: {size: 12}} },
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    const item = tooltipItems[0];
+                                    if (!item) return '';
+                                    let label = item.chart.data.labels[item.dataIndex];
+                                    return Array.isArray(label) ? label.join(' ') : label;
+                                }
+                            }
+                        }
+                    }
+                };
+
+                charts.radar = new Chart(uiElements.radarChartCanvas, {
+                    type: 'radar',
+                    data: { labels: radarChartLabels, datasets: [] },
+                    options: radarOptions
+                });
+
+                const barOptions = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            stacked: true,
+                            grid: { display: false },
+                            ticks: { color: Chart.defaults.color, font: { weight: 'bold' } },
+                            min: 0,
+                            max: MAX_POSSIBLE_SENTIENCE_SCORE
+                        },
+                        y: {
+                            stacked: true,
+                            grid: { color: Chart.defaults.borderColor },
+                            ticks: { color: Chart.defaults.color, font: { weight: 'bold', size: 10 } }
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'top', labels: { color: Chart.defaults.color, font: {size: 12}} },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.x !== null) {
+                                        label += context.parsed.x;
+                                    }
+                                    return label;
+                                },
+                                footer: function(tooltipItems) {
+                                    if (!appData.currentEntityId || !appData.entities[appData.currentEntityId]) return '';
+                                    
+                                    const currentEntity = appData.entities[appData.currentEntityId];
+                                    if (currentEntity && currentEntity.chartData && typeof currentEntity.chartData.totalSentienceScore !== 'undefined') {
+                                        const totalScore = currentEntity.chartData.totalSentienceScore;
+                                        const percentage = ((totalScore / MAX_POSSIBLE_SENTIENCE_SCORE) * 100).toFixed(1);
+                                        return `Total: ${totalScore} / ${MAX_POSSIBLE_SENTIENCE_SCORE} (${percentage}%)`;
+                                    }
+                                    return '';
+                                }
+                            }
+                        }
+                    }
+                };
+                charts.stackedBar = new Chart(uiElements.stackedBarChartCanvas, {
+                    type: 'bar',
+                    data: { labels: [], datasets: [] }, 
+                    options: barOptions
+                });
+            }
+
+            function updateCharts() {
+                const predefinedRadarEntityIds = ["adult_human", "house_cat", "ai_assistant_2025", "hypothetical_agi"];
+                const radarDatasets = [];
+
+                predefinedRadarEntityIds.forEach(id => {
+                    const entity = appData.entities[id];
+                    if (entity && entity.chartData && entity.chartData.radar && entity.colorScheme) {
+                        radarDatasets.push({
+                            label: entity.name,
+                            data: entity.chartData.radar,
+                            backgroundColor: entity.colorScheme.bg,
+                            borderColor: entity.colorScheme.main,
+                            pointBackgroundColor: entity.colorScheme.main,
+                            borderWidth: 2,
+                            fill: true
+                        });
+                    }
+                });
+
+                if (charts.radar) {
+                    charts.radar.data.datasets = radarDatasets;
+                    charts.radar.update();
+                }
+
+                if (!appData.currentEntityId || !appData.entities[appData.currentEntityId]) {
+                    if(charts.stackedBar) {
+                        charts.stackedBar.data.labels = [];
+                        charts.stackedBar.data.datasets = [];
+                        charts.stackedBar.update();
+                    }
+                    return; 
+                }
+                
+                const currentEntity = appData.entities[appData.currentEntityId];
+                if (!currentEntity.chartData) {
+                     currentEntity.chartData = calculateChartData(currentEntity.scores17);
+                }
+
+                const barChartData = {
+                    labels: [currentEntity.name],
+                    datasets: stackedBarComponentLabels.map((label, index) => ({
+                        label: label,
+                        data: [currentEntity.chartData.stackedBar[index]],
+                        backgroundColor: entityColors[index % entityColors.length].main 
+                    }))
+                };
+                if(charts.stackedBar){
+                    charts.stackedBar.data = barChartData;
+                    charts.stackedBar.update();
+                }
+            }
+            
+            function updateCurrentEntityAvatar() {
+                const entity = appData.entities[appData.currentEntityId];
+                if (entity && entity.avatarUrl) {
+                    uiElements.currentEntityAvatar.src = entity.avatarUrl;
+                    uiElements.currentEntityAvatar.alt = `${entity.name} Avatar`;
+                    uiElements.currentEntityAvatar.style.display = 'block';
+                    uiElements.currentEntityAvatarContainer.style.display = 'block';
+                } else {
+                    uiElements.currentEntityAvatar.src = '#';
+                    uiElements.currentEntityAvatar.style.display = 'none';
+                    uiElements.currentEntityAvatarContainer.style.display = 'none';
+                }
+            }
+
+            function updateView() {
+                updateCharts(); 
+                updateCurrentEntityAvatar();
+            }
+            
+            function handleEntityChange(event) {
+                appData.currentEntityId = event.target.value;
+                updateView();
+            }
+
+            function generateScoreInputs(scores = {}) {
+                uiElements.scoreInputsContainer.innerHTML = '';
+                appData.categories.forEach((cat, index) => {
+                    const score = scores[cat.id] === undefined ? 0 : scores[cat.id];
+                    const col = document.createElement('div');
+                    col.className = 'col-md-6';
+                    const formGroup = document.createElement('div');
+                    formGroup.className = 'mb-2';
+                    
+                    const label = document.createElement('label');
+                    label.htmlFor = `score_${cat.id}`;
+                    label.className = 'form-label small';
+                    label.innerHTML = `${index + 1}. ${cat.title}: <span class="score-slider-value" id="value_${cat.id}">${score}</span>`;
+                    
+                    const slider = document.createElement('input');
+                    slider.type = 'range';
+                    slider.className = 'form-range';
+                    slider.id = `score_${cat.id}`;
+                    slider.name = `score_${cat.id}`;
+                    slider.min = "0";
+                    slider.max = "20";
+                    slider.value = score;
+                    slider.dataset.categoryId = cat.id;
+                    
+                    formGroup.appendChild(label);
+                    formGroup.appendChild(slider);
+                    col.appendChild(formGroup);
+                    uiElements.scoreInputsContainer.appendChild(col);
+                    
+                    const valueDisplay = formGroup.querySelector(`#value_${cat.id}`);
+                    slider.addEventListener('input', (e) => {
+                        valueDisplay.textContent = e.target.value;
+                    });
+                });
+            }
+
+            function openCustomEntityModal(entityIdToEdit = null) {
+                appData.editingEntityId = entityIdToEdit;
+                appData.tempAvatarUrl = null; 
+                uiElements.customEntityForm.reset();
+                uiElements.avatarPreview.style.display = 'none';
+                uiElements.avatarPreview.src = '#';
+                uiElements.avatarError.textContent = '';
+                uiElements.entityAvatarUrlInput.value = '';
+
+                if (entityIdToEdit && appData.entities[entityIdToEdit] && !appData.entities[entityIdToEdit].isPredefined) {
+                    const entity = appData.entities[entityIdToEdit];
+                    uiElements.editingEntityIdInput.value = entityIdToEdit;
+                    uiElements.entityNameInput.value = entity.name;
+                    generateScoreInputs(entity.scores17);
+                    if (entity.avatarUrl) {
+                        uiElements.avatarPreview.src = entity.avatarUrl;
+                        uiElements.avatarPreview.style.display = 'block';
+                        uiElements.entityAvatarUrlInput.value = entity.avatarUrl;
+                        appData.tempAvatarUrl = entity.avatarUrl; 
+                    }
+                    uiElements.customEntityModalLabel.textContent = "Edit Custom Entity";
+                } else {
+                    appData.editingEntityId = null; 
+                    uiElements.editingEntityIdInput.value = '';
+                    generateScoreInputs();
+                    uiElements.customEntityModalLabel.textContent = "Create Custom Entity";
+                }
+                uiElements.customEntityModal.show();
+            }
+
+            async function handleGenerateAvatar() {
+                const prompt = uiElements.entityAvatarPromptInput.value.trim();
+                if (!prompt) {
+                    uiElements.avatarError.textContent = "Please enter a prompt for the avatar.";
+                    return;
+                }
+
+                uiElements.generateAvatarBtn.disabled = true;
+                uiElements.avatarLoadingIndicator.style.display = 'block';
+                uiElements.avatarPreview.style.display = 'none';
+                uiElements.avatarPreview.src = '#';
+                uiElements.avatarError.textContent = '';
+                appData.tempAvatarUrl = null;
+
+                try {
+                    const response = await fetch('/api/generate-image-on-demand', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prompt: prompt, aspectRatio: "1:1" })
+                    });
+                    const data = await response.json();
+                    if (response.ok && data.success && data.imageUrl) {
+                        uiElements.avatarPreview.src = data.imageUrl;
+                        uiElements.avatarPreview.style.display = 'block';
+                        appData.tempAvatarUrl = data.imageUrl; 
+                        uiElements.entityAvatarUrlInput.value = data.imageUrl;
+                    } else {
+                        throw new Error(data.error || "Failed to generate avatar. No image URL received.");
+                    }
+                } catch (error) {
+                    console.error("Avatar generation error:", error);
+                    uiElements.avatarError.textContent = error.message || "An unexpected error occurred during avatar generation.";
+                } finally {
+                    uiElements.generateAvatarBtn.disabled = false;
+                    uiElements.avatarLoadingIndicator.style.display = 'none';
+                }
+            }
+
+            function saveCustomEntity() {
+                const name = uiElements.entityNameInput.value.trim();
+                if (!name) {
+                    alert("Entity name is required.");
+                    uiElements.entityNameInput.focus();
+                    return;
+                }
+
+                const scores17 = {};
+                appData.categories.forEach(cat => {
+                    const slider = uiElements.scoreInputsContainer.querySelector(`#score_${cat.id}`);
+                    scores17[cat.id] = parseInt(slider.value, 10);
+                });
+
+                const entityId = appData.editingEntityId || `custom_${Date.now()}`;
+                const isNewEntity = !appData.editingEntityId;
+                
+                let colorToAssign;
+                if (isNewEntity) {
+                    colorToAssign = entityColors[nextColorIndex % entityColors.length];
+                    nextColorIndex++;
+                } else {
+                    colorToAssign = appData.entities[entityId].colorScheme || entityColors[nextColorIndex % entityColors.length];
+                     if(isNewEntity) nextColorIndex++;
+                }
+
+                appData.entities[entityId] = {
+                    id: entityId,
+                    name: name,
+                    isPredefined: false,
+                    scores17: scores17,
+                    avatarUrl: appData.tempAvatarUrl || uiElements.entityAvatarUrlInput.value || null,
+                    chartData: calculateChartData(scores17),
+                    colorScheme: colorToAssign
+                };
+                
+                saveCustomEntitiesToLocalStorage();
+                populateEntitySelector();
+                appData.currentEntityId = entityId;
+                uiElements.entitySelector.value = entityId;
+                updateView();
+                uiElements.customEntityModal.hide();
+            }
+            
+            function handleCategoryCardClick(event) {
+                const card = event.target.closest('.category-card');
+                if (!card) return;
+                const categoryId = card.dataset.categoryId;
+                const category = appData.categories.find(c => c.id === categoryId);
+                if (!category) return;
+
+                uiElements.categoryDetailModalLabel.textContent = category.title;
+                let bodyContent = `<p class="lead">${category.description}</p><hr><h6 class="mt-3 mb-3">Mastery Tiers:</h6>`;
+                category.tiers.forEach(tier => {
+                    bodyContent += `
+                        <div class="d-flex align-items-start mb-2 p-2 rounded" style="background-color: var(--bs-gray-700);">
+                            <span class="tier-indicator tier-${tier.level} me-3">${tier.level}</span>
+                            <div>
+                                <strong style="color: var(--bs-primary);">Level ${tier.level}:</strong>
+                                <p class="mb-0 text-body-secondary">${tier.desc}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+                uiElements.categoryDetailModalBody.innerHTML = bodyContent;
+                uiElements.categoryDetailModal.show();
+            }
+
+            function init() {
+                cacheUI();
+                uiElements.maxSentienceIndexDisplay.textContent = MAX_POSSIBLE_SENTIENCE_SCORE;
+                uiElements.radarChartDescription.textContent = "Comparative profile of key entities (Human, Cat, AI Assistant, AGI) across essential sentience domains. Values from 0 to 20.";
+                updateFooterDates();
+                definePredefinedEntities(); 
+                loadCustomEntities();       
+                
+                populateEntitySelector();   
+                renderCategoryCards();
+                initCharts();
+                
+                let initialEntityId = null;
+                const predefinedKeys = Object.keys(appData.predefinedEntities);
+                if (predefinedKeys.length > 0 && appData.entities[predefinedKeys[0]]) {
+                    initialEntityId = predefinedKeys[0];
+                } else if (uiElements.entitySelector.options.length > 0) {
+                    initialEntityId = uiElements.entitySelector.options[0].value;
+                }
+                appData.currentEntityId = initialEntityId;
+
+                if (appData.currentEntityId) {
+                    uiElements.entitySelector.value = appData.currentEntityId;
+                }
+                
+                updateView(); 
+                setupEventListeners();
+            }
+
+            return { init };
+        })();
+
+        document.addEventListener('DOMContentLoaded', App.init);
+    </script>
+<!-- Injectable Console Log Copier Snippet --><div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab"><button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button></div><script>(function() { const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil'); if (utilContainer) { const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug; const logs = []; function formatLog(type, args) { const timestamp = new Date().toISOString(); const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' '); return `[${timestamp}] [${type.toUpperCase()}] ${message}`; } console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); }; console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); }; console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); }; console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); }; console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); }; window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; }; window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); }; const copyButton = utilContainer.querySelector('button'); if (copyButton) { copyButton.addEventListener('click', function(e) { e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; } const logText = logs.join('\n'); navigator.clipboard.writeText(logText).then(function() { const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745'; setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000); originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.'); }).catch(function(err) { originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message); alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.'); const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545'; setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000); }); }); } } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); } })();</script><!-- End of Injectable Snippet -->
+</body>
+</html>

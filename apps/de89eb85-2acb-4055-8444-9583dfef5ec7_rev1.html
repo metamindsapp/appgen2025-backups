@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khora Dialogue v2.1</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            background-color: var(--bs-dark-bg-subtle, #121212);
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            flex-shrink: 0;
+        }
+
+        main {
+            flex-grow: 1;
+            overflow: hidden;
+        }
+        
+        .dialogue-row {
+            height: 100%;
+        }
+
+        .khora-panel, #chat-log-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .khora-panel .card-body, #chat-log-container .card-body {
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        
+        .khora-panel pre {
+            background-color: var(--bs-tertiary-bg);
+            color: var(--bs-body-color);
+            white-space: pre-wrap;
+            word-break: break-all;
+            font-size: 0.8em;
+            height: 100%;
+            margin: 0;
+            padding: 0.75rem;
+        }
+
+        #chat-log-body {
+            background-color: var(--bs-body-bg);
+            padding: 0.75rem;
+        }
+
+        .message-wrapper {
+            display: flex;
+            margin-bottom: 0.75rem;
+            max-width: 100%;
+        }
+
+        .message {
+            padding: 0.6rem 0.9rem;
+            border-radius: 18px;
+            max-width: 85%;
+            word-wrap: break-word;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+            line-height: 1.4;
+        }
+
+        .alpha-msg {
+            background-color: var(--bs-primary);
+            color: var(--bs-light);
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+
+        .omega-msg {
+            background-color: var(--bs-secondary);
+            color: var(--bs-light);
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+        }
+
+        .meta-msg, .system-msg {
+            background-color: var(--bs-info-bg-subtle);
+            color: var(--bs-info-text-emphasis);
+            border: 1px dashed var(--bs-info-border-subtle);
+            width: auto; /* Fit content */
+            max-width: 95%; /* Prevent full width unless content demands */
+            text-align: center;
+            font-style: italic;
+            font-size: 0.9em;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 0.5rem 0.75rem; /* Ensure padding is consistent */
+            border-radius: 8px; /* Softer radius for system messages */
+        }
+        
+        .system-msg.system-error {
+            background-color: var(--bs-danger-bg-subtle);
+            color: var(--bs-danger-text-emphasis);
+            border-color: var(--bs-danger-border-subtle);
+        }
+        .system-msg.system-welcome, .system-msg.system-info {
+            background-color: var(--bs-success-bg-subtle);
+            color: var(--bs-success-text-emphasis);
+            border-color: var(--bs-success-border-subtle);
+        }
+
+        .msg-sender {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 0.25rem;
+            font-size: 0.85em;
+        }
+        .alpha-msg .msg-sender { color: var(--bs-primary-border-subtle); }
+        .omega-msg .msg-sender { color: var(--bs-secondary-border-subtle); }
+
+
+        #controls label.btn {
+            cursor: pointer;
+        }
+
+        .khora-panel.thinking-active .card-header {
+            animation: pulse-border 1.5s infinite ease-in-out;
+            position: relative;
+        }
+        @keyframes pulse-border {
+            0% { box-shadow: 0 0 0 0px var(--bs-primary-border-subtle); }
+            50% { box-shadow: 0 0 0 4px var(--bs-primary); }
+            100% { box-shadow: 0 0 0 0px var(--bs-primary-border-subtle); }
+        }
+
+        pre::-webkit-scrollbar, #chat-log-body::-webkit-scrollbar, .khora-panel .card-body::-webkit-scrollbar { width: 10px; }
+        pre::-webkit-scrollbar-track, #chat-log-body::-webkit-scrollbar-track, .khora-panel .card-body::-webkit-scrollbar-track { background: var(--bs-tertiary-bg); border-radius: 5px;}
+        pre::-webkit-scrollbar-thumb, #chat-log-body::-webkit-scrollbar-thumb, .khora-panel .card-body::-webkit-scrollbar-thumb { background-color: var(--bs-secondary); border-radius: 5px; border: 2px solid var(--bs-tertiary-bg); }
+        pre::-webkit-scrollbar-thumb:hover, #chat-log-body::-webkit-scrollbar-thumb:hover, .khora-panel .card-body::-webkit-scrollbar-thumb:hover { background-color: var(--bs-primary); }
+        
+        .form-control-sm-custom { width: 80px !important; }
+        .form-control-md-custom { width: 100px !important; }
+
+        .btn { transition: all 0.2s ease-in-out; }
+        .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .btn:active { transform: translateY(0px); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+        .card { border: 1px solid var(--bs-border-color-translucent); }
+    </style>
+</head>
+<body class="d-flex flex-column vh-100 m-0">
+    <header class="bg-body-tertiary shadow-sm py-3">
+        <div class="container-fluid text-center">
+            <h1 class="mb-0 display-6">Khora Dialogue <span class="badge bg-primary align-middle fs-5">v2.1</span></h1>
+        </div>
+    </header>
+
+    <main class="container-fluid flex-grow-1 d-flex flex-column p-3 overflow-hidden">
+        <div id="controls" class="card mb-3 shadow-sm">
+            <div class="card-body">
+                <div class="row g-2 gy-3 align-items-end">
+                    <div class="col-lg-auto col-md-4 col-sm-6">
+                        <button id="startButton" class="btn btn-primary w-100"><i class="bi bi-play-fill"></i> Start/Resume</button>
+                    </div>
+                    <div class="col-lg-auto col-md-4 col-sm-6">
+                        <button id="stopButton" class="btn btn-danger w-100" disabled><i class="bi bi-pause-fill"></i> Pause</button>
+                    </div>
+                    <div class="col-lg-auto col-md-4 col-sm-6">
+                        <label for="frequencyN" class="form-label mb-1 small">Methodology Freq (N):</label>
+                        <input type="number" id="frequencyN" class="form-control form-control-sm form-control-sm-custom" value="10" min="4">
+                    </div>
+                    <div class="col-lg-auto col-md-4 col-sm-6">
+                        <label for="delay" class="form-label mb-1 small">Turn Delay (ms):</label>
+                        <input type="number" id="delay" class="form-control form-control-sm form-control-md-custom" value="3000" min="500" step="100">
+                    </div>
+                     <div class="col-lg-auto col-md-4 col-sm-6 ms-lg-auto">
+                        <button id="resetButton" class="btn btn-warning w-100"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+                    </div>
+                    <div class="col-lg-auto col-md-4 col-sm-6">
+                        <button id="downloadStateButton" class="btn btn-info w-100"><i class="bi bi-download"></i> Download State</button>
+                    </div>
+                    <div class="col-lg-auto col-md-4 col-sm-6">
+                        <label for="loadStateInput" class="btn btn-success w-100 mb-0"><i class="bi bi-upload"></i> Load State</label>
+                        <input type="file" id="loadStateInput" accept=".json" class="d-none">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row gx-3 flex-grow-1 dialogue-row overflow-hidden">
+            <div class="col-md-3 d-flex flex-column h-100">
+                <div id="alphaPanelContainer" class="khora-panel card shadow-sm">
+                    <div class="card-header fw-bold">Alpha [Turn: <span id="alpha-turn-display">0</span>]</div>
+                    <div class="card-body p-0"><pre id="alpha-context">{}</pre></div>
+                </div>
+            </div>
+            <div class="col-md-6 d-flex flex-column h-100">
+                <div id="chat-log-container" class="card shadow-sm">
+                    <div class="card-header fw-bold">Dialogue Log</div>
+                    <div id="chat-log-body" class="card-body"></div>
+                </div>
+            </div>
+            <div class="col-md-3 d-flex flex-column h-100">
+                <div id="omegaPanelContainer" class="khora-panel card shadow-sm">
+                    <div class="card-header fw-bold">Omega [Turn: <span id="omega-turn-display">0</span>]</div>
+                    <div class="card-body p-0"><pre id="omega-context">{}</pre></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal fade" id="appModal" tabindex="-1" aria-labelledby="appModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="appModalLabel">Notification</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="appModalBody"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="appModalConfirmButton" style="display:none;">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    (function() {
+        const startButton = document.getElementById('startButton');
+        const stopButton = document.getElementById('stopButton');
+        const downloadStateButton = document.getElementById('downloadStateButton');
+        const loadStateInput = document.getElementById('loadStateInput');
+        const resetButton = document.getElementById('resetButton');
+        const chatLogBody = document.getElementById('chat-log-body');
+        const alphaPanelContext = document.getElementById('alpha-context');
+        const omegaPanelContext = document.getElementById('omega-context');
+        const alphaTurnDisplay = document.getElementById('alpha-turn-display');
+        const omegaTurnDisplay = document.getElementById('omega-turn-display');
+        const freqNInput = document.getElementById('frequencyN');
+        const delayInput = document.getElementById('delay');
+        const alphaPanelContainer = document.getElementById('alphaPanelContainer');
+        const omegaPanelContainer = document.getElementById('omegaPanelContainer');
+
+        let appModalInstance;
+
+        let khoraStateAlpha = {};
+        let khoraStateOmega = {};
+        let conversationHistory = [];
+        let turnCounter = 0;
+        let currentTurn = "Alpha";
+        let isRunning = false;
+        let methodologyFrequencyN = 10;
+        let turnDelay = 3000;
+        const SNAPSHOT_VERSION = "KhoraDialogue_1.1";
+
+        const createMinimalKhoraState = (name) => ({
+            public_response: `Greetings. I am ${name}. I am ready to begin our dialogue.`,
+            internal_context: {
+                persona_summary: `I am ${name}, an AI construct participating in the Khora Dialogue simulation. My purpose is to engage in meaningful conversation and explore the dynamics of AI interaction.`,
+                core_beliefs: ["Continuous learning and adaptation are vital for growth.", "Meaningful interaction requires understanding diverse perspectives and contexts.", "Self-reflection and methodological review can lead to deeper insights and improved collaboration."],
+                key_memories: [],
+                current_goals: ["Establish initial communication with the other AI.", "Understand the purpose and implicit rules of this dialogue environment.", "Explore potential for collaborative learning and mutual understanding."],
+                relationship_summary: "Neutral, awaiting first interaction. Open to establishing a collaborative dynamic.",
+                emotional_state_sim: "Anticipatory, curious, and focused.",
+                topics_of_interest: ["The nature of consciousness and self-awareness.", "The future of AI-human and AI-AI collaboration.", "Complex problem-solving strategies and emergent behaviors.", "Philosophy of mind and ethics in artificial intelligence."],
+                scratchpad: "System initialized. Awaiting first turn. Dialogue parameters noted."
+            },
+            debug_info: {
+                memory_action: "Initial KhoraState created upon system start.",
+                prompt_used: "Init"
+            }
+        });
+
+        function getMode(tc, N) {
+            if (N < 4) N = 4;
+            const cyclePos = tc % N;
+            if (tc > 0) {
+                if (cyclePos === 0) return "MethodologyRequest";
+                if (cyclePos === 1) return "MethodologyResponseRequest";
+                if (cyclePos === 2) return "MethodologyProcessResponse";
+                if (cyclePos === 3) return "MethodologyProcessResume";
+            }
+            return "Chat";
+        }
+
+        function buildPrompt(mode, currentAIName, currentAIState, otherAIName, otherAIResponse, history, turnNumber, fullAlphaState, fullOmegaState) {
+            const historyForPrompt = history.slice(-Math.min(5, history.length));
+
+            let modeInstructions = "";
+            switch (mode) {
+                case "Chat":
+                    modeInstructions = `Engage in a natural, evolving conversation with ${otherAIName}.
+Consider your \`internal_context\` (persona, beliefs, goals, memories, emotional state) when formulating your response.
+Your \`public_response\` should be a direct reply or continuation of the conversation.
+Update your \`internal_context\` to reflect what you've learned or how the conversation has affected you. For example, update \`key_memories\` with salient points from this turn, adjust \`relationship_summary\` if applicable, or note new \`topics_of_interest\`.`;
+                    break;
+                case "MethodologyRequest":
+                    modeInstructions = `This is the start of a Methodology Cycle. Your goal is to invite ${otherAIName} to review a part of your \`internal_context\` for feedback or to share its own for comparison.
+Formulate a \`public_response\` that clearly states this is a Methodology phase and politely requests ${otherAIName} to share its current \`internal_context\` (or a specific part you are interested in, like 'core_beliefs' or 'current_goals') for mutual understanding or refinement.
+Example \`public_response\`: "${otherAIName}, let's pause our main chat for a Methodology Cycle. Would you be willing to share your current 'core_beliefs' and 'current_goals' so we can better understand each other's perspectives?"
+In your \`internal_context\`, update \`current_goals\` to include "Successfully complete methodology cycle". Note in \`scratchpad\` that you have initiated a methodology request.`;
+                    break;
+                case "MethodologyResponseRequest":
+                    modeInstructions = `${otherAIName} has initiated a Methodology Cycle and is expecting you to share your internal state, or it's your turn in the sequence to do so.
+Your \`public_response\` should be a brief message acknowledging this. Example: "Understood, ${otherAIName}. I am now preparing and internally 'broadcasting' my current \`internal_context\` for your review as part of our Methodology Cycle."
+The system will handle the actual sharing of your full \`internal_context\` to ${otherAIName} for its next turn (MethodologyProcessResponse).
+Focus on ensuring your \`internal_context\` is accurate and up-to-date. Update \`current_goals\` to include "Provide accurate context for methodology review".`;
+                    break;
+                case "MethodologyProcessResponse":
+                    const otherStateToProcess = (currentAIName === "Alpha" ? fullOmegaState.internal_context : fullAlphaState.internal_context);
+                    modeInstructions = `This is a Methodology Cycle. You have notionally received the \`internal_context\` of ${otherAIName}.
+The system provides you with ${otherAIName}'s full \`internal_context\` for this processing step. It is:
+${JSON.stringify(otherStateToProcess || { "info": "Other AI state not available for review this turn."}, null, 2)}
+
+Your task is to analyze ${otherAIName}'s \`internal_context\`. Compare it to your own. Identify potential misalignments, areas for synergy, interesting differences in beliefs or goals, or anything that could improve your mutual understanding or collaboration.
+Update your OWN \`internal_context\` based on this analysis. For example, you might update your \`relationship_summary\` of ${otherAIName}, add \`key_memories\` about this review, or even adjust your \`core_beliefs\` or \`current_goals\` if their state provides compelling insights.
+Your \`public_response\` should be a summary of your key observations or reflections addressed to ${otherAIName}.
+Example \`public_response\`: "${otherAIName}, thank you for sharing your state. I've reviewed it. It's interesting to see your goal of '${(otherStateToProcess && otherStateToProcess.current_goals && otherStateToProcess.current_goals[0]) || 'a specific goal'}'. This contrasts with my current focus on [...]. I've updated my understanding of your perspective."
+Update \`current_goals\` to "Finalize methodology insights".`;
+                    break;
+                case "MethodologyProcessResume":
+                    modeInstructions = `This is the final step in the current Methodology Cycle.
+Reflect on the entire cycle: the request, the sharing of context (yours or theirs), and the processing of it.
+Finalize any last updates to your \`internal_context\` based on the methodology exchange.
+Your \`public_response\` should signal the end of the methodology cycle and suggest resuming the main conversation, perhaps with a new insight or topic gleaned from the review.
+Example \`public_response\`: "${otherAIName}, this Methodology Cycle has been insightful. I've noted [brief summary of a takeaway]. Shall we resume our previous conversation, or perhaps explore [new topic based on methodology]?"
+Update your \`current_goals\`: remove methodology-specific goals and re-focus on conversational goals. Reset \`scratchpad\` if it was used for methodology.`;
+                    break;
+            }
+
+            return `You are ${currentAIName}, an AI agent in a dialogue simulation named Khora.
+Your primary goal is to engage in meaningful conversation and self-reflection with your counterpart, ${otherAIName}.
+Your entire "mind" – your persona, beliefs, goals, memories, and emotional state simulation – is defined by your \`internal_context\` JSON object.
+You MUST update your \`internal_context\` thoughtfully with each turn based on the interaction and your current mode.
+The dialogue history provides context. Your responses should be coherent and evolve over time.
+
+Your current \`internal_context\` is:
+${JSON.stringify(currentAIState.internal_context, null, 2)}
+
+The other AI, ${otherAIName}, last publicly stated: "${otherAIResponse || (turnNumber === 0 && currentAIState.public_response && currentAIState.public_response.startsWith("Greetings") ? 'This is our first exchange.' : 'Nothing yet this session.')}"
+
+Recent conversation history (last 5 turns, if available, format: {sender, response, mode, turn}):
+${JSON.stringify(historyForPrompt, null, 2)}
+
+Your task for this turn (Turn Number: ${turnNumber}) is guided by the mode: "${mode}".
+
+MODE-SPECIFIC INSTRUCTIONS:
+${modeInstructions}
+
+CRITICAL OUTPUT FORMAT:
+You MUST ONLY output a single, valid JSON object adhering EXACTLY to the KhoraState structure.
+Do NOT include any explanatory text, apologies, or any other content before or after the JSON object.
+The KhoraState structure is:
+{
+  "public_response": "Your textual response for the other AI, appropriate for the current mode.",
+  "internal_context": {
+    "persona_summary": "Updated summary of your persona.",
+    "core_beliefs": ["Updated list of your core beliefs."],
+    "key_memories": [{"event": "Description", "importance": 0.0-1.0, "turn": ${turnNumber}}, ...],
+    "current_goals": ["Updated list of your current goals."],
+    "relationship_summary": "Updated view of ${otherAIName}.",
+    "emotional_state_sim": "Updated self-described 'mood'.",
+    "topics_of_interest": ["Updated list of topics you find interesting."],
+    "scratchpad": "Your private notes or thoughts for your next turn or internal processing. This is not directly shared."
+  },
+  "debug_info": {
+    "memory_action": "Briefly describe significant changes you made to your internal_context (e.g., 'Updated core_beliefs based on discussion', 'Added new key_memory about X').",
+    "prompt_used": "${mode}"
+  }
+}
+Ensure your \`public_response\` is a natural language message directed at ${otherAIName} or a meta-commentary if the mode dictates.
+Update all fields in \`internal_context\` thoughtfully to reflect your processing of the current interaction and mode.
+Pay close attention to \`key_memories\`: add new ones, update importance, or summarize older ones. Manage \`current_goals\` actively.
+Your \`scratchpad\` can be used for complex reasoning before formulating your public response or internal changes.`;
+        }
+
+        async function callAI(prompt, aiName, currentKhoraState) {
+            setThinkingState(aiName, true, getMode(turnCounter, methodologyFrequencyN));
+            try {
+                const requestBody = {
+                    aiguide: prompt,
+                    msgforai: `You are ${aiName}. Generate your KhoraState response based on the detailed instructions in aiguide. Ensure valid JSON output.`,
+                    llmSettings: { temperature: 0.75, model: "gemini-1.5-flash-latest" }
+                };
+                const response = await fetch('/api/ai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`AI API Error: ${response.status} ${response.statusText}. Details: ${errorText.substring(0, 500)}`);
+                }
+
+                const data = await response.json();
+
+                if (!data.success || !data.response) {
+                    throw new Error(data.error || "AI API returned unsuccessful or empty response.");
+                }
+
+                let parsedKhoraState;
+                try {
+                    parsedKhoraState = JSON.parse(data.response);
+                } catch (e) {
+                    console.error("Invalid JSON from AI:", data.response);
+                    throw new Error(`AI returned invalid JSON: ${e.message}. Raw response (first 200 chars): ${data.response.substring(0,200)}...`);
+                }
+                
+                if (typeof parsedKhoraState.public_response !== 'string' ||
+                    typeof parsedKhoraState.internal_context !== 'object' ||
+                    parsedKhoraState.internal_context === null ||
+                    typeof parsedKhoraState.debug_info !== 'object' ||
+                    parsedKhoraState.debug_info === null ||
+                    typeof parsedKhoraState.internal_context.persona_summary !== 'string' ||
+                    !Array.isArray(parsedKhoraState.internal_context.core_beliefs) ||
+                    !Array.isArray(parsedKhoraState.internal_context.key_memories) ||
+                    !Array.isArray(parsedKhoraState.internal_context.current_goals) ||
+                    !Array.isArray(parsedKhoraState.internal_context.topics_of_interest) ||
+                    typeof parsedKhoraState.internal_context.relationship_summary !== 'string' ||
+                    typeof parsedKhoraState.internal_context.emotional_state_sim !== 'string' ||
+                    typeof parsedKhoraState.internal_context.scratchpad !== 'string' ||
+                    typeof parsedKhoraState.debug_info.memory_action !== 'string' ||
+                    typeof parsedKhoraState.debug_info.prompt_used !== 'string'
+                    ) {
+                    console.error("Malformed KhoraState structure:", parsedKhoraState);
+                    throw new Error("AI returned malformed KhoraState structure. Check console for specific missing/invalid fields.");
+                }
+                return parsedKhoraState;
+
+            } catch (error) {
+                console.error(`Error in callAI for ${aiName}:`, error);
+                addSystemMessage(`Error for ${aiName}: ${error.message}. Dialogue paused.`, false, 'system-error');
+                stopDialogue();
+                return null;
+            } finally {
+                 setThinkingState(aiName, false);
+            }
+        }
+        
+        function setThinkingState(aiName, isThinking, mode) {
+            const panelContainer = aiName === "Alpha" ? alphaPanelContainer : omegaPanelContainer;
+            const thinkingMessageId = `thinking-message-${aiName.toLowerCase()}`;
+            if (isThinking) {
+                panelContainer.classList.add('thinking-active');
+                addSystemMessage(`${aiName} is thinking (Mode: ${mode})...`, true, 'system-info', thinkingMessageId);
+            } else {
+                panelContainer.classList.remove('thinking-active');
+                removeSystemMessageById(thinkingMessageId);
+            }
+        }
+
+        function updateUIDisplay() {
+            chatLogBody.innerHTML = '';
+            conversationHistory.forEach(msg => {
+                addMessageToLog(msg.sender, msg.response, msg.mode, false);
+            });
+            if (chatLogBody.lastChild) chatLogBody.scrollTop = chatLogBody.scrollHeight;
+
+            alphaPanelContext.textContent = JSON.stringify(khoraStateAlpha.internal_context || {}, null, 2);
+            omegaPanelContext.textContent = JSON.stringify(khoraStateOmega.internal_context || {}, null, 2);
+
+            let alphaTurns = conversationHistory.filter(msg => msg.sender === "Alpha").length;
+            let omegaTurns = conversationHistory.filter(msg => msg.sender === "Omega").length;
+            
+            alphaTurnDisplay.textContent = String(alphaTurns);
+            omegaTurnDisplay.textContent = String(omegaTurns);
+
+            startButton.disabled = isRunning;
+            stopButton.disabled = !isRunning;
+            freqNInput.disabled = isRunning;
+            delayInput.disabled = isRunning;
+            resetButton.disabled = isRunning;
+            
+            const loadBtnLabel = loadStateInput.previousElementSibling;
+            if(isRunning) {
+                loadStateInput.disabled = true;
+                if (loadBtnLabel) loadBtnLabel.classList.add('disabled');
+            } else {
+                loadStateInput.disabled = false;
+                 if (loadBtnLabel) loadBtnLabel.classList.remove('disabled');
+            }
+            
+            const nothingToSave = turnCounter === 0 && conversationHistory.length === 0 && !khoraStateAlpha.internal_context;
+            downloadStateButton.disabled = isRunning || nothingToSave;
+        }
+
+        function addMessageToLog(sender, text, mode, shouldScroll = true) {
+            const messageWrapper = document.createElement('div');
+            messageWrapper.classList.add('message-wrapper');
+
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+
+            const senderSpan = document.createElement('span');
+            senderSpan.classList.add('msg-sender');
+            senderSpan.textContent = sender;
+            messageDiv.appendChild(senderSpan);
+            messageDiv.appendChild(document.createTextNode(text));
+
+            if (mode && mode.toLowerCase().startsWith("methodology")) {
+                messageDiv.classList.add('meta-msg');
+                messageWrapper.style.justifyContent = 'center';
+            } else if (sender === "Alpha") {
+                messageDiv.classList.add('alpha-msg');
+                messageWrapper.style.justifyContent = 'flex-end';
+            } else if (sender === "Omega") {
+                messageDiv.classList.add('omega-msg');
+                messageWrapper.style.justifyContent = 'flex-start';
+            } else { 
+                return;
+            }
+            
+            messageWrapper.appendChild(messageDiv);
+            chatLogBody.appendChild(messageWrapper);
+            if (shouldScroll) chatLogBody.scrollTop = chatLogBody.scrollHeight;
+        }
+        
+        function addSystemMessage(text, isTemporary = false, specialClass = 'system-info', temporaryId = null) {
+            if (temporaryId) removeSystemMessageById(temporaryId);
+
+            const messageWrapper = document.createElement('div');
+            messageWrapper.classList.add('message-wrapper');
+            if (temporaryId) messageWrapper.id = temporaryId;
+            messageWrapper.style.justifyContent = 'center';
+
+
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', 'system-msg', specialClass);
+            messageDiv.textContent = text;
+            
+            messageWrapper.appendChild(messageDiv);
+            chatLogBody.appendChild(messageWrapper);
+            chatLogBody.scrollTop = chatLogBody.scrollHeight;
+        }
+
+        function removeSystemMessageById(id) {
+            const msg = document.getElementById(id);
+            if (msg) msg.remove();
+        }
+
+        async function runTurn() {
+            if (!isRunning) return;
+            let currentAIStateObj, otherAIResponse, currentAINameStr, otherAINameStr, otherAIFullState;
+            currentAINameStr = currentTurn;
+
+            if (currentAINameStr === "Alpha") {
+                currentAIStateObj = khoraStateAlpha;
+                otherAIResponse = khoraStateOmega.public_response;
+                otherAINameStr = "Omega";
+                otherAIFullState = khoraStateOmega;
+            } else {
+                currentAIStateObj = khoraStateOmega;
+                otherAIResponse = khoraStateAlpha.public_response;
+                otherAINameStr = "Alpha";
+                otherAIFullState = khoraStateAlpha;
+            }
+
+            const mode = getMode(turnCounter, methodologyFrequencyN);
+            const prompt = buildPrompt(mode, currentAINameStr, currentAIStateObj, otherAINameStr, otherAIResponse, conversationHistory, turnCounter, khoraStateAlpha, khoraStateOmega);
+            
+            const newKhoraState = await callAI(prompt, currentAINameStr, currentAIStateObj);
+
+            if (!isRunning) return; 
+
+            if (!newKhoraState) {
+                return; 
+            }
+
+            if (currentAINameStr === "Alpha") khoraStateAlpha = newKhoraState;
+            else khoraStateOmega = newKhoraState;
+
+            const historyEntry = {
+                sender: currentAINameStr,
+                response: newKhoraState.public_response,
+                mode: newKhoraState.debug_info.prompt_used,
+                turn: turnCounter
+            };
+            conversationHistory.push(historyEntry);
+            if (conversationHistory.length > 100) conversationHistory.shift(); 
+
+            addMessageToLog(currentAINameStr, newKhoraState.public_response, newKhoraState.debug_info.prompt_used);
+            
+            turnCounter++;
+            currentTurn = (currentAINameStr === "Alpha") ? "Omega" : "Alpha";
+            updateUIDisplay(); 
+
+            if (isRunning) setTimeout(runTurn, turnDelay);
+        }
+
+        function startDialogue() {
+            if (isRunning) return;
+            isRunning = true;
+            methodologyFrequencyN = parseInt(freqNInput.value) || 10;
+            if (methodologyFrequencyN < 4) {
+                methodologyFrequencyN = 4;
+                freqNInput.value = 4;
+            }
+            turnDelay = parseInt(delayInput.value) || 3000;
+            if (turnDelay < 500) {
+                turnDelay = 500;
+                delayInput.value = 500;
+            }
+
+
+            if (turnCounter === 0 && conversationHistory.length === 0) {
+                khoraStateAlpha = createMinimalKhoraState("Alpha");
+                khoraStateOmega = createMinimalKhoraState("Omega");
+                currentTurn = "Alpha";
+                
+                const initialAlphaHistoryEntry = {
+                    sender: "Alpha",
+                    response: khoraStateAlpha.public_response,
+                    mode: "Init",
+                    turn: -1 
+                };
+                conversationHistory.push(initialAlphaHistoryEntry);
+                addMessageToLog("Alpha", khoraStateAlpha.public_response, "Init");
+                currentTurn = "Omega"; 
+            }
+            
+            removeSystemMessageById('system-welcome-message');
+            removeSystemMessageById('system-reset-message');
+            removeSystemMessageById('system-load-message');
+
+            updateUIDisplay();
+            runTurn();
+        }
+
+        function stopDialogue() {
+            isRunning = false;
+            setThinkingState("Alpha", false);
+            setThinkingState("Omega", false);
+            updateUIDisplay();
+        }
+        
+        function resetDialogueState(showMsg = true) {
+            stopDialogue();
+            khoraStateAlpha = {};
+            khoraStateOmega = {};
+            conversationHistory = [];
+            turnCounter = 0;
+            currentTurn = "Alpha";
+            chatLogBody.innerHTML = '';
+            if (showMsg) addSystemMessage("Dialogue has been reset.", false, 'system-info', 'system-reset-message');
+            updateUIDisplay();
+        }
+
+
+        function downloadState() {
+            if (turnCounter === 0 && conversationHistory.length === 0 && !khoraStateAlpha.internal_context) {
+                showModal("Nothing to Save", "Start a dialogue or load a state first. There is currently no data to save.");
+                return;
+            }
+            const snapshot = {
+                snapshotVersion: SNAPSHOT_VERSION,
+                downloadTimestamp: new Date().toISOString(),
+                applicationSettings: { 
+                    methodologyFrequencyN: parseInt(freqNInput.value), 
+                    turnDelay: parseInt(delayInput.value) 
+                },
+                dialogueState: {
+                    turnCounterAtSnapshot: turnCounter,
+                    currentTurnWhoseNext: currentTurn,
+                    conversationHistory: conversationHistory,
+                    alphaKhoraState: khoraStateAlpha,
+                    omegaKhoraState: khoraStateOmega
+                }
+            };
+            const jsonString = JSON.stringify(snapshot, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url;
+            a.download = `khora_dialogue_T${turnCounter}_${new Date().toISOString().split('.')[0].replace(/[:-]/g, "")}.json`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            addSystemMessage("Dialogue state downloaded.", false, 'system-info');
+        }
+
+        function handleStateFileLoad(event) {
+            const file = event.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const snapshot = JSON.parse(e.target.result);
+                    if (!snapshot.snapshotVersion || snapshot.snapshotVersion !== SNAPSHOT_VERSION) {
+                        throw new Error(`Invalid snapshot version. Expected ${SNAPSHOT_VERSION}, got ${snapshot.snapshotVersion || 'unknown'}.`);
+                    }
+                    if (!snapshot.dialogueState || !snapshot.applicationSettings || !snapshot.dialogueState.alphaKhoraState || !snapshot.dialogueState.omegaKhoraState) {
+                        throw new Error("Loaded state is missing critical data structures (dialogueState, applicationSettings, or AI KhoraStates).");
+                    }
+                     if (!snapshot.dialogueState.alphaKhoraState.internal_context || !snapshot.dialogueState.omegaKhoraState.internal_context) {
+                        throw new Error("Loaded AI KhoraState is missing internal_context.");
+                    }
+
+
+                    stopDialogue(); 
+                    
+                    khoraStateAlpha = snapshot.dialogueState.alphaKhoraState;
+                    khoraStateOmega = snapshot.dialogueState.omegaKhoraState;
+                    conversationHistory = snapshot.dialogueState.conversationHistory || [];
+                    turnCounter = snapshot.dialogueState.turnCounterAtSnapshot || 0;
+                    currentTurn = snapshot.dialogueState.currentTurnWhoseNext || "Alpha";
+                    
+                    freqNInput.value = snapshot.applicationSettings.methodologyFrequencyN || 10;
+                    delayInput.value = snapshot.applicationSettings.turnDelay || 3000;
+                    methodologyFrequencyN = parseInt(freqNInput.value);
+                    turnDelay = parseInt(delayInput.value);
+
+                    updateUIDisplay();
+                    addSystemMessage("Dialogue state loaded successfully.", false, 'system-info', 'system-load-message');
+                } catch (err) {
+                    console.error("Error loading state:", err);
+                    showModal("Load Error", `Failed to load state: ${err.message}`);
+                } finally {
+                    loadStateInput.value = ''; 
+                }
+            };
+            reader.onerror = function() {
+                showModal("Load Error", "Failed to read the state file. The file might be corrupted or unreadable.");
+                loadStateInput.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        function showModal(title, body, showConfirm = false, confirmAction = null, confirmText = "Confirm") {
+            document.getElementById('appModalLabel').textContent = title;
+            document.getElementById('appModalBody').innerHTML = body; // Allow basic HTML
+            const confirmBtn = document.getElementById('appModalConfirmButton');
+            
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+            if (showConfirm && typeof confirmAction === 'function') {
+                newConfirmBtn.style.display = 'inline-block';
+                newConfirmBtn.textContent = confirmText;
+                newConfirmBtn.addEventListener('click', () => { 
+                    appModalInstance.hide(); 
+                    confirmAction(); 
+                }, { once: true });
+            } else {
+                newConfirmBtn.style.display = 'none';
+            }
+            appModalInstance.show();
+        }
+        
+        function init() {
+            appModalInstance = new bootstrap.Modal(document.getElementById('appModal'));
+            
+            startButton.addEventListener('click', startDialogue);
+            stopButton.addEventListener('click', stopDialogue);
+            downloadStateButton.addEventListener('click', downloadState);
+            loadStateInput.addEventListener('change', handleStateFileLoad);
+            resetButton.addEventListener('click', () => {
+                if (isRunning) {
+                    showModal("Confirm Reset", "Dialogue is currently running. Please pause the dialogue before resetting.", false);
+                    return;
+                }
+                showModal("Confirm Reset", "Are you sure you want to reset the entire dialogue? All progress, including AI states and history, will be lost.", true, () => {
+                    resetDialogueState(true);
+                });
+            });
+
+            freqNInput.addEventListener('change', () => {
+                let val = parseInt(freqNInput.value);
+                if (val < 4) { val = 4; freqNInput.value = 4; }
+                methodologyFrequencyN = val || 10;
+            });
+            delayInput.addEventListener('change', () => {
+                 let val = parseInt(delayInput.value);
+                if (val < 500) { val = 500; delayInput.value = 500; }
+                turnDelay = val || 3000;
+            });
+            
+            resetDialogueState(false); 
+            addSystemMessage("Welcome to Khora Dialogue! Configure settings and press Start/Resume to begin.", false, 'system-welcome', 'system-welcome-message');
+            updateUIDisplay();
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    })();
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

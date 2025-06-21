@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cute Robot Photobombs</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        main {
+            flex-grow: 1;
+        }
+        #headerIcon {
+            height: 40px;
+            margin-right: 15px;
+        }
+        #generatedImage {
+            max-height: 60vh;
+            object-fit: contain;
+            border: 1px solid var(--bs-border-color);
+            background-color: var(--bs-tertiary-bg); 
+            transition: opacity 0.3s ease-in-out;
+        }
+        #imagePlaceholder {
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 2px dashed var(--bs-border-color-translucent);
+            border-radius: var(--bs-border-radius);
+            padding: 2rem;
+            background-color: var(--bs-tertiary-bg);
+        }
+        .gallery-thumbnail {
+            aspect-ratio: 1/1;
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out;
+            border: 2px solid var(--bs-border-color);
+        }
+        .gallery-thumbnail:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--bs-primary);
+            border-color: var(--bs-primary);
+        }
+        .card.bg-body-tertiary .card-img-top {
+            border-bottom: 1px solid var(--bs-border-color);
+        }
+        #loadingSpinnerContainer p {
+            font-size: 0.9rem;
+            color: var(--bs-secondary-color);
+        }
+        .btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.65;
+        }
+        #errorDisplay {
+            word-break: break-word;
+        }
+    </style>
+</head>
+<body class="bg-dark text-light">
+
+    <div class="container-fluid d-flex flex-column min-vh-100 p-0">
+
+        <header class="bg-dark-subtle py-3 shadow-sm border-bottom border-secondary-subtle">
+            <div class="container d-flex align-items-center">
+                <img id="headerIcon" src="/generated_images/dalle3_EZxuU9_4b2560_90e34af4-617.png" alt="Cute Robot Icon">
+                <h1 class="h3 mb-0">Cute Robot Photobombs</h1>
+            </div>
+        </header>
+
+        <main class="flex-grow-1 d-flex flex-column align-items-center p-3 p-md-4">
+            <div class="row w-100 justify-content-center">
+                <div class="col-xl-5 col-lg-6 col-md-10 col-sm-12 mb-4 mb-lg-0">
+                    <section id="controlsSection" class="p-4 bg-body-tertiary rounded shadow-lg h-100">
+                        <div class="mb-3">
+                            <label for="promptInput" class="form-label fw-medium">What scene do you envision? (A cute robot will join!)</label>
+                            <textarea id="promptInput" class="form-control" rows="3" placeholder="e.g., A majestic dragon flying over a castle"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="aspectRatioSelect" class="form-label fw-medium">Aspect Ratio:</label>
+                            <select id="aspectRatioSelect" class="form-select">
+                                <option value="1:1" selected>Square (1:1)</option>
+                                <option value="16:9">Landscape (16:9)</option>
+                                <option value="9:16">Portrait (9:16)</option>
+                                <option value="4:3">Standard (4:3)</option>
+                                <option value="3:4">Tall (3:4)</option>
+                            </select>
+                        </div>
+                        <button id="generateButton" class="btn btn-primary w-100 mb-2 py-2 fw-bold">
+                            <i class="bi bi-magic"></i> Generate Photobomb!
+                        </button>
+                        <button id="surpriseMeButton" class="btn btn-outline-info w-100 py-2">
+                            <i class="bi bi-shuffle"></i> Surprise Me!
+                        </button>
+                        <div id="errorDisplay" class="alert alert-danger mt-3 d-none" role="alert"></div>
+                    </section>
+                </div>
+
+                <div class="col-xl-7 col-lg-6 col-md-10 col-sm-12">
+                    <section id="imageDisplaySection" class="text-center p-4 bg-body-tertiary rounded shadow-lg h-100 d-flex flex-column justify-content-center align-items-center">
+                        <div id="imagePlaceholder" class="text-muted w-100">
+                            <i class="bi bi-image" style="font-size: 4rem;"></i>
+                            <p class="mt-2">Your photobombed image will appear here!</p>
+                        </div>
+                        <div id="loadingSpinnerContainer" class="d-none my-3 text-center">
+                            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2">Robot deploying to photobomb...</p>
+                        </div>
+                        <div id="imageContainer" class="mt-3 position-relative w-100 d-flex justify-content-center">
+                            <img id="generatedImage" src="#" alt="Generated image with a cute robot" class="img-fluid rounded shadow d-none">
+                        </div>
+                        <button id="downloadButton" class="btn btn-success mt-3 d-none">
+                            <i class="bi bi-download"></i> Download Image
+                        </button>
+                    </section>
+                </div>
+            </div>
+
+            <section id="gallerySection" class="w-100 mt-5 pt-4 border-top border-secondary-subtle" style="max-width: 1140px;">
+                <h2 class="text-center mb-4 h4">Recent Photobombs</h2>
+                <div id="galleryGrid" class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-3">
+                </div>
+                <p id="emptyGalleryText" class="text-center text-muted d-none mt-3">No photobombs created yet in this session. Get generating!</p>
+            </section>
+        </main>
+
+        <footer class="bg-dark-subtle text-center py-3 mt-auto border-top border-secondary-subtle">
+            <p class="mb-0 small text-body-secondary">Powered by AI & Mischievous Robots &copy; <span id="currentYear"></span></p>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function() {
+            const MAX_GALLERY_ITEMS = 10;
+            const ROBOT_PROMPT_SUFFIX = ", featuring a small, adorable, friendly robot photobombing the scene in a charming and whimsical way. The robot should be clearly visible, well-integrated into the scene's lighting and style, but not obscure the main subject. Style: vibrant, high quality digital art.";
+            const RANDOM_PROMPTS = [
+                "A mystical forest with glowing mushrooms at twilight",
+                "A retro-futuristic cityscape at sunset with flying cars",
+                "A steampunk airship navigating stormy clouds above a vast ocean",
+                "A tranquil beach with bioluminescent waves under a starry sky",
+                "An alien marketplace on a distant desert planet, bustling with strange creatures",
+                "A cozy medieval tavern with a roaring fireplace and adventurers sharing tales",
+                "A surreal dreamscape with floating islands and waterfalls that flow upwards",
+                "A secret agent in a tuxedo skiing down a snowy mountain",
+                "A giant bookshelf library that stretches to infinity",
+                "A colorful coral reef teeming with exotic fish",
+                "A serene Japanese garden with a koi pond and cherry blossoms",
+                "A bustling Victorian street fair with curious inventions"
+            ];
+
+            let currentImageUrl = null;
+            let currentImagePrompt = "";
+            let currentImageAspectRatio = "1:1";
+            let recentCreations = [];
+
+            let promptInput, aspectRatioSelect, generateButton, surpriseMeButton, 
+                errorDisplay, imagePlaceholder, loadingSpinnerContainer, 
+                generatedImage, downloadButton, galleryGrid, emptyGalleryText, currentYear,
+                imageDisplaySection;
+
+            function cacheDOMElements() {
+                promptInput = document.getElementById('promptInput');
+                aspectRatioSelect = document.getElementById('aspectRatioSelect');
+                generateButton = document.getElementById('generateButton');
+                surpriseMeButton = document.getElementById('surpriseMeButton');
+                errorDisplay = document.getElementById('errorDisplay');
+                imagePlaceholder = document.getElementById('imagePlaceholder');
+                loadingSpinnerContainer = document.getElementById('loadingSpinnerContainer');
+                generatedImage = document.getElementById('generatedImage');
+                downloadButton = document.getElementById('downloadButton');
+                galleryGrid = document.getElementById('galleryGrid');
+                emptyGalleryText = document.getElementById('emptyGalleryText');
+                currentYear = document.getElementById('currentYear');
+                imageDisplaySection = document.getElementById('imageDisplaySection');
+            }
+
+            function init() {
+                cacheDOMElements();
+                
+                currentYear.textContent = new Date().getFullYear();
+                
+                generatedImage.onerror = () => {
+                    showError("Failed to load the generated image. The image might be corrupted or the URL is invalid.");
+                    imagePlaceholder.classList.remove('d-none');
+                    generatedImage.classList.add('d-none');
+                    downloadButton.classList.add('d-none');
+                    currentImageUrl = null; 
+                };
+
+                loadGallery();
+                attachEventListeners();
+            }
+
+            function attachEventListeners() {
+                generateButton.addEventListener('click', () => handleGenerateImageRequest(false));
+                surpriseMeButton.addEventListener('click', () => handleGenerateImageRequest(true));
+                downloadButton.addEventListener('click', handleDownloadImage);
+                galleryGrid.addEventListener('click', handleGalleryClick);
+            }
+
+            function setUILoadingState(isLoading) {
+                if (isLoading) {
+                    errorDisplay.classList.add('d-none');
+                    errorDisplay.textContent = '';
+                    loadingSpinnerContainer.classList.remove('d-none');
+                    imagePlaceholder.classList.add('d-none');
+                    generatedImage.classList.add('d-none');
+                    generatedImage.src = '#'; 
+                    downloadButton.classList.add('d-none');
+                    generateButton.disabled = true;
+                    surpriseMeButton.disabled = true;
+                } else {
+                    loadingSpinnerContainer.classList.add('d-none');
+                    generateButton.disabled = false;
+                    surpriseMeButton.disabled = false;
+                }
+            }
+
+            async function handleGenerateImageRequest(isSurprise) {
+                setUILoadingState(true);
+
+                let userPrompt;
+                if (isSurprise) {
+                    userPrompt = RANDOM_PROMPTS[Math.floor(Math.random() * RANDOM_PROMPTS.length)];
+                    promptInput.value = userPrompt;
+                } else {
+                    userPrompt = promptInput.value.trim();
+                }
+
+                if (!userPrompt) {
+                    showError("Please enter a prompt for the scene!");
+                    setUILoadingState(false);
+                    imagePlaceholder.classList.remove('d-none');
+                    return;
+                }
+
+                const aspectRatio = aspectRatioSelect.value;
+                const finalPrompt = userPrompt + ROBOT_PROMPT_SUFFIX;
+                
+                try {
+                    const response = await fetch('/api/generate-image-on-demand', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prompt: finalPrompt, aspectRatio: aspectRatio })
+                    });
+                    
+                    if (!response.ok) {
+                        let errorMsg = `HTTP error! status: ${response.status}`;
+                        try {
+                            const errorData = await response.json();
+                            errorMsg = errorData.error || errorMsg;
+                        } catch (e) {
+                           
+                        }
+                        throw new Error(errorMsg);
+                    }
+                    
+                    const data = await response.json();
+
+                    if (data.success && data.imageUrl) {
+                        currentImageUrl = data.imageUrl;
+                        currentImagePrompt = userPrompt;
+                        currentImageAspectRatio = aspectRatio;
+
+                        generatedImage.src = currentImageUrl;
+                        generatedImage.alt = `Generated image for: ${userPrompt} with a cute robot`;
+                        generatedImage.classList.remove('d-none');
+                        downloadButton.classList.remove('d-none');
+                        imagePlaceholder.classList.add('d-none');
+                        
+                        addCreationToGallery(currentImageUrl, userPrompt, aspectRatio);
+                    } else {
+                        throw new Error(data.error || "Image generation failed for an unknown reason.");
+                    }
+                } catch (error) {
+                    console.error('Image generation error:', error);
+                    showError(`Robot deployment failed! ${error.message}. Please try again.`);
+                    imagePlaceholder.classList.remove('d-none');
+                } finally {
+                    setUILoadingState(false);
+                }
+            }
+            
+            function showError(message) {
+                errorDisplay.textContent = message;
+                errorDisplay.classList.remove('d-none');
+            }
+
+            function loadGallery() {
+                try {
+                    const storedCreations = localStorage.getItem('cuteRobotPhotobombsGallery');
+                    if (storedCreations) {
+                        recentCreations = JSON.parse(storedCreations);
+                    }
+                } catch (e) {
+                    console.error("Error loading gallery from localStorage:", e);
+                    recentCreations = []; 
+                }
+                renderGallery();
+            }
+
+            function addCreationToGallery(url, prompt, aspectRatio) {
+                recentCreations.unshift({ url, prompt, aspectRatio });
+                if (recentCreations.length > MAX_GALLERY_ITEMS) {
+                    recentCreations.pop();
+                }
+                try {
+                    localStorage.setItem('cuteRobotPhotobombsGallery', JSON.stringify(recentCreations));
+                } catch (e) {
+                    console.error("Error saving gallery to localStorage:", e);
+                }
+                renderGallery();
+            }
+
+            function renderGallery() {
+                galleryGrid.innerHTML = '';
+                if (recentCreations.length === 0) {
+                    emptyGalleryText.classList.remove('d-none');
+                } else {
+                    emptyGalleryText.classList.add('d-none');
+                    recentCreations.forEach(item => {
+                        const col = document.createElement('div');
+                        col.className = 'col';
+                        const card = document.createElement('div');
+                        card.className = 'card bg-body-tertiary shadow-sm h-100 overflow-hidden';
+                        
+                        const img = document.createElement('img');
+                        img.src = item.url;
+                        img.className = 'card-img-top gallery-thumbnail';
+                        img.alt = `Photobomb: ${item.prompt.substring(0, 50)}...`;
+                        img.dataset.fullurl = item.url;
+                        img.dataset.prompt = item.prompt;
+                        img.dataset.aspect = item.aspectRatio;
+                        img.loading = 'lazy';
+
+                        card.appendChild(img);
+
+                        const cardBody = document.createElement('div');
+                        cardBody.className = 'card-body p-2 d-none d-sm-block';
+                        const cardText = document.createElement('p');
+                        cardText.className = 'card-text small text-truncate mb-0';
+                        cardText.title = item.prompt;
+                        cardText.textContent = item.prompt;
+                        cardBody.appendChild(cardText);
+                        card.appendChild(cardBody);
+                        
+                        col.appendChild(card);
+                        galleryGrid.appendChild(col);
+                    });
+                }
+            }
+
+            function handleGalleryClick(event) {
+                const targetImg = event.target.closest('.gallery-thumbnail');
+                if (targetImg) {
+                    currentImageUrl = targetImg.dataset.fullurl;
+                    currentImagePrompt = targetImg.dataset.prompt;
+                    currentImageAspectRatio = targetImg.dataset.aspect;
+
+                    generatedImage.src = currentImageUrl;
+                    generatedImage.alt = `Generated image for: ${currentImagePrompt} with a cute robot`;
+                    promptInput.value = currentImagePrompt;
+                    aspectRatioSelect.value = currentImageAspectRatio;
+
+                    generatedImage.classList.remove('d-none');
+                    downloadButton.classList.remove('d-none');
+                    imagePlaceholder.classList.add('d-none');
+                    loadingSpinnerContainer.classList.add('d-none');
+                    errorDisplay.classList.add('d-none');
+
+                    imageDisplaySection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+
+            function handleDownloadImage() {
+                if (currentImageUrl && currentImageUrl !== '#') {
+                    const link = document.createElement('a');
+                    link.href = currentImageUrl;
+                    
+                    const promptPart = currentImagePrompt.substring(0,20).replace(/[^a-z0-9]/gi, '_').toLowerCase() || "photobomb";
+                    link.download = `robot_${promptPart}_${Date.now()}.png`;
+                    
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                } else {
+                    showError("No image available to download.");
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', init);
+        })();
+    </script>
+<!-- Injectable Console Log Copier Snippet --><div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab"><button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button></div><script>(function() { const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil'); if (utilContainer) { const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug; const logs = []; function formatLog(type, args) { const timestamp = new Date().toISOString(); const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' '); return `[${timestamp}] [${type.toUpperCase()}] ${message}`; } console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); }; console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); }; console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); }; console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); }; console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); }; window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; }; window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); }; const copyButton = utilContainer.querySelector('button'); if (copyButton) { copyButton.addEventListener('click', function(e) { e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; } const logText = logs.join('\n'); navigator.clipboard.writeText(logText).then(function() { const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745'; setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000); originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.'); }).catch(function(err) { originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message); alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.'); const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545'; setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000); }); }); } } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); } })();</script><!-- End of Injectable Snippet -->
+</body>
+</html>

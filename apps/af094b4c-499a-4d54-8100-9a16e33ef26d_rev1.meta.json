@@ -1,0 +1,38 @@
+{
+  "projectId": "af094b4c-499a-4d54-8100-9a16e33ef26d",
+  "revisionString": "1",
+  "projectNameDisplay": "DXB Pixar 2",
+  "userPromptForThisRevision": "logo\r\nProtect your domain from theft and accidental changes.\r\nGet Started\r\nimpression\r\nDouglas Crossing Band\r\n\r\nSOUTH SURREY'S VERY OWN\r\nCome experience the spectacle!\r\nCONTACT US\r\nTHE BAND\r\n\r\nWhat We Play\r\n\r\n60s through today including Mellencamp, The Doors, Poison, T-Rex, Guns&Roses, Smash Mouth, Trooper, AC/DC and so much more.\r\nOUR SONG LIST & SAMPLES\r\nSee Us Live\r\n\r\nWe keep the dance floor moving by playing great dance tunes. Find out when we're playing next.\r\nCALENDAR\r\nHave Us Play Your Event\r\n\r\nGet in touch to find out about featuring Douglas Crossing Band at your event or venue.\r\nCONTACT US\r\nEVENTS\r\nSaturday Feb 24, 2024\r\nLive at Crescent Beach Legion, South Surry\r\nHear us live at The Crescent Beach Legion for an evening of dancing & good times.  $10 cover charge.\r\n7:30 pm- 11:00 pm\r\nCrescent Beach Legion South Surrey, BC\r\nOUR SONG LIST\r\n\r\nAin't my Fault\r\nBang a Gong\r\nBlue Suede Shoes\r\nBreakup Song\r\nCherry Bomb\r\nCinnamon Girl\r\nCome & Get Your Love\r\nComfortably Numb\r\nCould Have Been a Lady\r\nCrazy Little Thing Called Love\r\nDay After Day\r\nDead Flowers\r\nDear Mr. Fantasy\r\nEvery Rose Has Its Thorns\r\nFriday I'm in Love\r\nHave You Ever Seen the Rain\r\nHere for a Good Time\r\nHungry Heart\r\nHurts so Good\r\nI won't Back Down\r\nI Would Walk 500 Miles\r\nIt's Only Rock & Roll\r\nJohnny B Good\r\nKeep Your Hands to Yourself\r\nKnockin' on Heaven's Door\r\nLittle Bones\r\nLittle Sister\r\nLittle Wing\r\nLosing My Religion\r\nMaggie May\r\nMargaritaville\r\nMary Jane's Last Dance\r\nMidnight Special\r\nMustang Sally\r\nNew Orleans is Sinking\r\nNo Matter What\r\nPink Houses \r\nPretty Woman \r\nPride & Joy\r\nProud Mary\r\nRaise a Little Hell\r\nRoadhouse Blues\r\nR.O.C.K in the USA\r\nRun to You\r\nRunning Down a Dream\r\nSatisfaction\r\nShook me all Night Long\r\nSome Kind of Wonderful\r\nStray Cat Strut\r\nStuck in the Middle with You\r\nTennessee Whisky\r\nThe Way\r\nThis One Goes Out to the One I Love\r\nTonight is a Wonderful Night to Fall in Love\r\nUnder My Thumb\r\nUnder the Boardwalk\r\nWagon Wheel\r\nWhat I Like About You\r\nWhat's Up\r\nWhite Wedding\r\nWho'll Stop the Rain\r\nYou May be Right\r\nYou Wreck Me\r\nSOCIAL\r\nCONTACT US\r\n\r\nSend Message\r\nPixar style vibrant website. 3-4 generated images.",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-05-23T14:56:58.253Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/dalle_dd420715-c9e.png",
+      "url": "/generated_images/dalle_dd420715-c9e.png",
+      "description": "A vibrant, Pixar-style illustration of a 4-5 piece rock band joyfully performing on a warmly lit stage. Characters should be stylized (think 'Soul' or 'Coco' movie styles), expressive, and diverse. Instruments visible (electric guitar, bass, drums, maybe a keyboard). The background should show subtle hints of an energetic, colorful, stylized audience or dynamic stage lights. Overall mood: energetic, fun, family-friendly, professional.",
+      "purpose": "Main hero image for the band website background.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_4b8505c9-0bf.png",
+      "url": "/generated_images/dalle_4b8505c9-0bf.png",
+      "description": "A Pixar-style still life composition of various musical instruments typically used by a rock band: an electric guitar with character (maybe some cool stickers, slightly worn look) leaning against a vintage-style amplifier, a sleek bass guitar, a pair of drumsticks resting on a snare drum with a cool band logo sketch on it, perhaps a dynamic microphone on a stand with a cable coiling artfully. Instruments should look appealing, slightly personified, and colorful, with interesting textures. Background should be a simple, warm, slightly out-of-focus studio or practice space setting. Lighting: warm, dramatic, highlighting instrument details.",
+      "purpose": "Illustrative image for 'The Band' or 'What We Play' section.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_1a110072-c95.png",
+      "url": "/generated_images/dalle_1a110072-c95.png",
+      "description": "A Pixar-style depiction of a diverse and happy audience silhouettes dancing and enjoying live music, seen from slightly behind and below, looking towards a brightly lit, colorful, slightly abstract stage in the distance. The focus is on the energy, movement, and shared joy of the audience, conveyed through dynamic poses and a vibrant color palette for the stage lights reflecting on them. Could have some fun, stylized light beams or musical notes floating in the air.",
+      "purpose": "Image for the 'See Us Live' or 'Events' section to convey the live experience atmosphere.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_c92aa601-36f.png",
+      "url": "/generated_images/dalle_c92aa601-36f.png",
+      "description": "A whimsical, Pixar-style logo design for 'Douglas Crossing Band'. The text 'Douglas Crossing Band' should be prominent, using a fun, bold, slightly retro, and very readable font. It could incorporate subtle, clever musical elements (e.g., a guitar headstock forming part of a letter, a bridge silhouette subtly integrated with 'Crossing'). Colors: vibrant, primary Pixar colors (e.g., blue, yellow, red accents) that pop. Ensure it's clean, scalable, and works well on dark backgrounds. Provide a version with a transparent background if possible.",
+      "purpose": "Band logo for the navbar, favicon, and potentially other branding uses on the site.",
+      "isNewlyGenerated": true
+    }
+  ]
+}

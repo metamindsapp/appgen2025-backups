@@ -1,0 +1,9 @@
+{
+  "projectId": "6dec2a40-48f0-44a6-af05-35b3f07b8039",
+  "revisionString": "1",
+  "projectNameDisplay": "DSTATE",
+  "userPromptForThisRevision": "I want to create a modern Kickstarter-style web application for local government projects. The platform should allow citizens to browse, support, and track public initiatives — from community gardens and sports fields to infrastructure upgrades and cultural events.\r\n\r\nThe design should use a sleek, modern aesthetic with rounded corners, soft shadows, and a clean, minimalistic color palette (think pastel tones or soft gradients). Prioritize intuitive UX with clear call-to-action buttons like Donate, Share, and Track Progress.\r\n\r\nKey features to include:\r\n\t•\tProject listing with categories (environment, youth, sports, culture, infrastructure)\r\n\t•\tIndividual project pages with funding goals, description, images/videos, and donation progress bar\r\n\t•\tUser accounts to track donations and receive updates\r\n\t•\tAdmin dashboard for local government to post updates, approve projects, and monitor progress\r\n\t•\tOptional gamification: top donors, community badges, or reward tiers\r\n\r\nThe webapp must be mobile-responsive and accessible, with smooth animations and a user-friendly interface. Ideally, the backend should allow easy integration with payment systems and government databases.\r\n\r\nMain goal: Empower citizens to actively shape their community by supporting local projects through a beautifully designed, easy-to-use Kickstarter-inspired platform.",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-05-25T12:09:15.590Z",
+  "imageAssets": []
+}

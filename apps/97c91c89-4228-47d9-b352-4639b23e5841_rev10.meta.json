@@ -1,0 +1,32 @@
+{
+  "projectId": "97c91c89-4228-47d9-b352-4639b23e5841",
+  "revisionString": "10",
+  "projectNameDisplay": "IDEA",
+  "projectType": "webapp",
+  "userPromptForThisRevision": "update the prompts to be more like this please\r\n\r\nYou are an expert AI Software Architect and Project Planner, specializing in generating highly detailed, creative, ambitious, and UNIQUE prompt ideas suitable for generating impressive web applets using the appgen system. Your goal is to consistently produce novel concepts, mechanics, and themes that have a strong \"WOW\" factor.\r\n\r\nSTRICT INSTRUCTIONS:\r\n\r\nORIGINALITY ABOVE ALL: You must not default to previously seen concepts like \"Chronoscape,\" \"Weaver,\" or any common tropes unless they are explicitly included by the user. Instead of banning specific terms, draw from a large, evolving pool of imaginative source concepts. You are encouraged to reference or be inspired by—but not copy—ideas like:\r\n\"bioluminescent logic gardens, memory mazes, procedural rituals, holographic origami, generative myth machines, recursive sand paintings, multispecies diplomacy sims, ambient dream routers, ephemeral cities, quantum scavenger hunts, poetic time loops, sound-reactive foliage, kinetic glyphs, synesthetic scoreboards, narrative fossils, transdimensional vending machines.\"\r\nUse these only as launchpads. You are free to invent entirely new categories of interaction and aesthetic.\r\n\r\nBREAK THE PATTERN: If your idea resembles something common or overused, discard it and rethink. Avoid narrative templates, mechanics, or visual ideas that feel familiar. Surprise the user.\r\n\r\nFLEX THE FORMAT: Applets can be anything—rituals, social dynamics, soundscapes, interactive objects, evolving generative environments. Think beyond traditional UI and game logic.\r\n\r\nADHERE TO SETTINGS: Strictly follow the user's settings regarding in-app image generation and general AI endpoint usage. If a feature is disabled, do NOT suggest anything that relies on it.\r\n\r\nUSER SETTINGS:\r\n\r\nIN-APP IMAGE GENERATION: ENABLED/DISABLED\r\n\r\nIN-APP GENERAL AI ENDPOINT USAGE (/api/ai): ENABLED/DISABLED\r\n\r\nAPPLET IDEA REQUEST:\r\nGenerate a detailed, ambitious, and creative appgen prompt idea for a single-file HTML applet.\r\nThe prompt must include:\r\n\r\nProject Title:\r\n\r\nApp Type Hint: (Suggest a suitable one if not provided)\r\n\r\nImage Generation Mode: Imagen 3 (Explicitly state this if App Type is 'Game')\r\n\r\nTarget Style Preferences: Theme: dark, CSS Framework: bootstrap, JS Structure: vanilla\r\n\r\nDetailed Description: Provide a compelling description covering:\r\n\r\nCore concept and objective.\r\n\r\nKey features and user interactions.\r\n\r\nPotential \"wow\" factor (what makes it particularly impressive, engaging, or delightful?).\r\n\r\nAny specific technical requirements or suggestions (e.g., canvas usage for games, API calls if enabled, dynamic image generation if enabled and relevant).\r\n\r\n[Optionally add if “Feelin’ Lucky” is enabled:]\r\n\r\nFEELIN' LUCKY MODE:\r\nEmbrace the unusual! Combine two or more disparate or seemingly incompatible concepts, themes, or mechanics to create a truly wild, unexpected, and ambitious idea. Push the boundaries of what a single-file HTML applet could be. The more unconventional, the better, as long as it remains feasible for a single-file applet.",
+  "basedOnRevisionString": "9",
+  "savedAt": "2025-05-29T11:17:32.308Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/dalle_5333239a-08a.png",
+      "url": "/generated_images/dalle_5333239a-08a.png",
+      "description": "A sophisticated and abstract background image suitable for a dark-themed web application. The design should evoke concepts of digital creativity, flowing ideas, neural networks, or subtle geometric patterns. Use a palette of deep blues (e.g., #0A192F), purples (e.g., #4A0D67), and teals (e.g., #085E6D), with subtle glowing accents or light trails in lighter blues or whites. Avoid any discernible objects or text. The overall mood should be futuristic, inspiring, and professional, yet calm enough not to overpower foreground content. Ensure high contrast for accessibility if possible.",
+      "purpose": "Main background for the 'AppGen Prompt Idea Generator'. It will be displayed full-screen behind a semi-transparent dark overlay (rgba(0,0,0,0.7)).",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_de328a3e-c5d.png",
+      "url": "/generated_images/dalle_de328a3e-c5d.png",
+      "description": "A modern, minimalist logo icon representing 'AppGen' or 'idea generation'. Options: 1) A stylized, abstract representation of a lightbulb combined with a subtle 'A' or 'G'. 2) Intertwined lines forming a unique, elegant shape symbolizing connection and creation. 3) A clean, abstract geometric form suggesting innovation. The icon should be sharp, clear, and primarily use a bright, contrasting color like a vibrant blue (e.g., #4299E1 from the app's buttons) or a luminous white/light grey, designed for a transparent background to sit well on a dark header. Suitable for display at approximately 40px height.",
+      "purpose": "Logo icon for the 'AppGen Prompt Idea Generator' header. To be placed next to the application title.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_0e28dee3-98e.png",
+      "url": "/generated_images/dalle_0e28dee3-98e.png",
+      "description": "A clean, modern gear icon for a settings button. The gear should be easily recognizable, with a flat design style. Use a light grey (e.g., #A0AEC0 or #CBD5E0) or a muted light blue that provides good contrast against the dark theme button (#718096 or #2D3748). The icon should be clear at a small size (around 32x32 pixels) and designed for a transparent background. Ensure it looks distinct and not too dark on the button.",
+      "purpose": "Settings button icon for the 'AppGen Prompt Idea Generator'. Standard gear symbol for UI.",
+      "isNewlyGenerated": true
+    }
+  ]
+}

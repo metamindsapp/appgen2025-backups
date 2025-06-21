@@ -1,0 +1,25 @@
+{
+  "projectId": "5ebe90d6-72a0-47ec-a452-ef90a7f6ea66",
+  "revisionString": "2",
+  "projectNameDisplay": "Khora Dialogue αω v5.0",
+  "projectType": "webapp",
+  "userPromptForThisRevision": "finish the code please",
+  "basedOnRevisionString": "1",
+  "savedAt": "2025-05-29T11:23:58.255Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/imagen3_324bac7e-ecb.png",
+      "url": "/generated_images/imagen3_324bac7e-ecb.png",
+      "description": "A subtle, abstract, dark background image. Theme: 'digital terrarium' or AI simulation. Colors: Dark grays, deep blues, near-black. Patterns: Faint, intricate digital lines, subtle neural network-like filaments, or faint geometric grids. Mood: Sophisticated, mysterious, high-tech, non-distracting. Low contrast details. Style: Abstract digital art. Suitable for seamless tiling or full-screen texture. Should harmonize with a Bootstrap dark theme.",
+      "purpose": "Subtle background texture for the main application body, enhancing the 'digital terrarium' feel. To be used with `background-size: cover` and `background-attachment: fixed` if it looks good, or as a repeating tile.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_d3492de7-965.png",
+      "url": "/generated_images/imagen3_d3492de7-965.png",
+      "description": "A minimalist, modern logo icon for 'Khora Dialogue αω'. Elements: Stylized Greek letters Alpha (Α) and Omega (Ω), possibly interconnected or forming an abstract symbol of dialogue/evolution. Colors: Light cyan or electric blue (e.g., #7AFDFD or #61DAFB) suitable for a dark navbar. Background: Transparent. Style: Clean, geometric, slightly futuristic, flat design. Avoid overly complex details.",
+      "purpose": "Small logo icon for the application navbar, to be placed next to the title 'Khora Dialogue αω v5.0'.",
+      "isNewlyGenerated": true
+    }
+  ]
+}

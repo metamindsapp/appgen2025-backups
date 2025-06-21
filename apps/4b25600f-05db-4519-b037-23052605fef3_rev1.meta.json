@@ -1,0 +1,21 @@
+{
+  "projectId": "4b25600f-05db-4519-b037-23052605fef3",
+  "revisionString": "1",
+  "projectNameDisplay": "Cute Robot Photo Bombs",
+  "projectType": "webapp",
+  "ownerPublicKey": "EZxuU9mZRqgsYxoFgDEnwNvWu4DYVjWiCFnSB3jSj7Hq",
+  "userPromptForThisRevision": "make an image generator that adds a cute robot to every image no matter what the user asks for. ",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-06-14T22:09:06.748Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/dalle3_EZxuU9_4b2560_90e34af4-617.png",
+      "url": "/generated_images/dalle3_EZxuU9_4b2560_90e34af4-617.png",
+      "description": "A charming and friendly small robot icon for a webapp header. The robot should look cute and evoke a sense of fun, perhaps peeking playfully. Style: clean digital art, slightly glossy, vector-like appearance. It should be easily recognizable at a small size (e.g., 40x40 pixels). The robot could be primarily light silver or white with vibrant cyan or electric blue accents to stand out on a dark theme. Transparent background is essential. Avoid overly complex details. Ensure it looks modern and tech-y but still very approachable and cute.",
+      "purpose": "Header icon for the 'Cute Robot Photobombs' webapp. To be displayed next to the application title, enhancing the theme.",
+      "isNewlyGenerated": true
+    }
+  ],
+  "isPublished": false,
+  "isShowcased": false
+}

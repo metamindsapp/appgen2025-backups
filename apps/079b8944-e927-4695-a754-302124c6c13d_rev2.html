@@ -1,0 +1,2158 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Art Purgatory</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #1a202c;
+            color: #e2e8f0;
+            height: 100vh;
+            width: 100vw;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: sans-serif;
+        }
+
+        #game-wrapper {
+            position: relative;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Size set by JS for aspect ratio */
+        }
+
+        #gameCanvas {
+            display: block;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            touch-action: none;
+            background-color: #1a202c;
+            /* Size attributes set by JS (native resolution) */
+            /* Style width/height set by JS (scaled size) */
+        }
+
+        .game-ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .game-hud {
+            pointer-events: auto;
+            padding: 10px;
+            color: #fff;
+            z-index: 11;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+         .hud-item {
+             margin: 0 10px;
+         }
+
+         #powerUpIndicators img {
+             width: 24px;
+             height: 24px;
+             margin-left: 5px;
+             vertical-align: middle;
+             image-rendering: pixelated;
+         }
+
+
+        .modal-content {
+            background-color: #2d3748;
+            color: #e2e8f0;
+            border-color: #4a5568;
+        }
+
+        .modal-header, .modal-footer {
+             border-color: #4a5568;
+        }
+
+        .btn-close {
+            filter: invert(1);
+        }
+
+        #pixelEditorSection {
+            pointer-events: auto;
+            background-color: #2d3748;
+            padding: 20px;
+            max-width: 95vw;
+            max-height: 95vh;
+            overflow: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 12;
+             box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        #editorCanvas {
+            border: 1px solid #4a5568;
+            background-color: #1a202c;
+            cursor: crosshair;
+             touch-action: none;
+             image-rendering: pixelated;
+        }
+
+        .color-palette {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 10px;
+            justify-content: center;
+        }
+
+        .color-swatch {
+            width: 28px;
+            height: 28px;
+            margin: 3px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+            transition: border-color 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+        }
+
+        .color-swatch:hover {
+             border-color: #63b3ed;
+        }
+
+        .color-swatch.active {
+            border-color: #63b3ed;
+            box-shadow: 0 0 8px rgba(99, 179, 237, 0.8);
+        }
+
+        .editor-tools button {
+            margin: 5px;
+        }
+
+        #loadingOverlay {
+            z-index: 20;
+        }
+
+        .btn-primary {
+            background-color: #63b3ed;
+            border-color: #63b3ed;
+            transition: background-color 0.1s ease-in-out, border-color 0.1s ease-in-out;
+        }
+        .btn-primary:hover {
+             background-color: #4299e1;
+             border-color: #4299e1;
+        }
+         .btn-primary:active {
+             background-color: #3182ce !important;
+             border-color: #3182ce !important;
+        }
+
+        .btn-secondary {
+             background-color: #4a5568;
+             border-color: #4a5568;
+             transition: background-color 0.1s ease-in-out, border-color 0.1s ease-in-out;
+        }
+         .btn-secondary:hover {
+             background-color: #2d3748;
+             border-color: #2d3748;
+        }
+        .btn-secondary:active {
+             background-color: #1a202c !important;
+             border-color: #1a202c !important;
+        }
+
+        .form-control.bg-secondary {
+            background-color: #4a5568 !important;
+            border-color: #4a5568;
+            color: #e2e8f0;
+        }
+         .form-control.bg-secondary::placeholder {
+             color: #a0aec0;
+        }
+
+        .text-success { color: #68d391 !important; }
+        .text-danger { color: #f56565 !important; }
+        .text-warning { color: #f6e05e !important; }
+        .text-info { color: #63b3ed !important; }
+    </style>
+</head>
+<body class="bg-dark text-white">
+
+    <div id="game-wrapper">
+        <canvas id="gameCanvas"></canvas>
+
+        <div class="game-ui-overlay">
+
+            <div class="game-hud d-none d-flex justify-content-between w-100">
+                <div class="hud-item">Score: <span id="scoreValue">0</span></div>
+                <div class="hud-item">Attempts Left: <span id="attemptsValue">3</span></div>
+                <div class="hud-item" id="powerUpIndicators"></div>
+            </div>
+
+            <div id="pixelEditorSection" class="d-none position-absolute top-50 start-50 translate-middle rounded shadow">
+                <h3 class="mb-3">Create Your Interpretation</h3>
+                <canvas id="editorCanvas"></canvas>
+                <div class="editor-tools d-flex flex-wrap justify-content-center mt-3">
+                    <button class="btn btn-secondary btn-sm" id="pencilToolBtn">Pencil</button>
+                    <button class="btn btn-secondary btn-sm" id="fillToolBtn">Fill</button>
+                    <button class="btn btn-secondary btn-sm" id="eraserToolBtn">Eraser</button>
+                     <button class="btn btn-secondary btn-sm" id="brushSizeBtn">Brush Size: 1x1</button>
+                     <button class="btn btn-secondary btn-sm" id="gridToggleBtn">Hide Grid</button>
+                     <button class="btn btn-secondary btn-sm" id="eyedropperToolBtn">Eyedropper</button>
+                    <button class="btn btn-secondary btn-sm" id="undoBtn">Undo</button>
+                    <button class="btn btn-secondary btn-sm" id="redoBtn">Redo</button>
+                </div>
+                 <div class="color-palette mt-2">
+                 </div>
+                <div class="mt-3 w-100 px-3">
+                    <label for="artDescriptionInput" class="form-label">Describe your art:</label>
+                    <input type="text" class="form-control bg-secondary text-white border-secondary" id="artDescriptionInput" placeholder="e.g., A lonely tree under a red sky">
+                </div>
+                <button class="btn btn-primary btn-lg mt-4" id="submitArtBtn">Submit to the Judges</button>
+            </div>
+
+            <div id="loadingOverlay" class="d-none position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-dark bg-opacity-75">
+                 <div class="text-center">
+                    <div class="spinner-border text-light" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div id="loadingMessage" class="mt-2 text-light">Processing...</div>
+                     <div id="apiError" class="mt-2 text-danger d-none"></div>
+                 </div>
+            </div>
+
+        </div>
+    </div>
+
+     <div class="modal fade" id="mainMenuModal" tabindex="-1" aria-labelledby="mainMenuModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="mainMenuModalLabel">Pixel Art Purgatory</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <p>Navigate the shifting landscapes of purgatory, guided by cryptic haikus.</p>
+                    <button class="btn btn-primary btn-lg" id="startGameBtn">Start Journey</button>
+                    <button class="btn btn-secondary btn-lg mt-2" id="instructionsBtn">Instructions</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+     <div class="modal fade" id="instructionsModal" tabindex="-1" aria-labelledby="instructionsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="instructionsModalLabel">Instructions</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>You are lost in Pixel Art Purgatory. Your path is revealed by cryptic haikus.</p>
+                    <p>1. Read the haiku presented.</p>
+                    <p>2. Use the Pixel Editor to create art that interprets the haiku's meaning or feeling.</p>
+                    <p>3. Submit your art and a short description for AI judgment.</p>
+                    <p>4. Successful interpretations open paths and reveal secrets. Failures create obstacles and challenge you further.</p>
+                    <p>Navigate the pixel world using WASD or Arrow Keys.</p>
+                    <p>Press ESC to pause.</p>
+                     <p>Collect glowing orbs for score and power-ups!</p>
+                </div>
+                 <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="haikuModal" tabindex="-1" aria-labelledby="haikuModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div
+ class="modal-header">
+                    <h5 class="modal-title" id="haikuModalLabel">A Whisper from the Void...</h5>
+                </div>
+                <div class="modal-body text-center">
+                    <p id="haikuText" class="lead"></p>
+                     <div id="haikuApiError" class="mt-2 text-danger d-none"></div>
+                </div>
+                 <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-primary" id="startArtBtn">Interpret This Haiku</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="judgmentModal" tabindex="-1" aria-labelledby="judgmentModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="judgmentModalLabel">The Judges Speak...</h5>
+                </div>
+                <div class="modal-body text-center">
+                    <p id="judgmentText" class="lead"></p>
+                    <p id="judgmentOutcome" class="h4 mt-3"></p>
+                     <div id="judgmentApiError" class="mt-2 text-danger d-none"></div>
+                </div>
+                 <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-primary" id="continueJourneyBtn">Continue to Purgatory</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+     <div class="modal fade" id="gameOverModal" tabindex="-1" aria-labelledby="gameOverModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="gameOverModalLabel">Journey Ended</h5>
+                </div>
+                <div class="modal-body text-center">
+                    <p id="gameOverText" class="lead">Your soul faltered.</p>
+                    <p>Final Score: <span id="finalScoreValue">0</span></p>
+                </div>
+                 <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-primary" id="restartGameBtn">Seek a New Path</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+     <div class="modal fade" id="pauseMenuModal" tabindex="-1" aria-labelledby="pauseMenuModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="pauseMenuModalLabel">Paused</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <button class="btn btn-primary btn-lg" id="resumeGameBtn">Resume</button>
+                    <button class="btn btn-secondary btn-lg mt-2" id="quitToMenuBtn">Quit to Menu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="errorModalMessage"></p>
+                </div>
+                 <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
+    <script>
+        const GAME_CONFIG = {
+            CANVAS_NATIVE_WIDTH: 320,
+            CANVAS_NATIVE_HEIGHT: 200,
+            TILE_SIZE: 16,
+            PLAYER_SPEED: 150,
+            GRAVITY: 400,
+            JUMP_FORCE: -220,
+            MAX_ATTEMPTS: 3,
+            EDITOR_PIXEL_SIZE: 10,
+            EDITOR_WIDTH_PIXELS: 32,
+            EDITOR_HEIGHT_PIXELS: 32,
+            PALETTE: ['#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#00FFFF', '#FF00FF', '#C0C0C0', '#808080', '#800000', '#808000', '#008000', '#800080', '#008080', '#000080', '#4a5568', '#2d3748', '#63b3ed', '#e53e3e'],
+            API_ENDPOINTS: {
+                HAIKU: '/api/ai',
+                ANALYZE: '/api/ai',
+                JUDGE: '/api/ai',
+                SKETCH: '/api/generate-image-on-demand'
+            },
+            PARTICLE_COUNT_HIT: 10,
+            PARTICLE_COUNT_GOAL: 30,
+            PARTICLE_LIFETIME: 0.5,
+            PLAYER_INVINCIBILITY_TIME: 1.5,
+            ENEMY_SPEED_MULTIPLIER: 0.4,
+            COLLECTIBLE_SCORE: 10,
+            POWERUP_DURATION: 5,
+            BRUSH_SIZES: [1, 2, 4],
+            SPRITE_PATHS: {
+                 player: "/generated_images/dalle_6e164216-630.png",
+                 tile_solid: "/generated_images/dalle_d5b53d86-a74.png",
+                 tile_hazard: "/generated_images/dalle_51095cbc-44a.png",
+                 tile_goal: "/generated_images/dalle_c7894143-982.png",
+                 enemy_basic: "/generated_images/dalle_3a4e47b4-982.png",
+                 collectible: "/generated_images/dalle_710605d8-410.png",
+                 powerup_invincible: "/generated_images/dalle_a225873d-dea.png"
+            },
+            SPRITE_DIMS: {
+                 player: { frameWidth: 16, frameHeight: 16, frameCounts: { idle: 4, run: 6, jump: 3 } },
+                 tile: { frameWidth: 16, frameHeight: 16 },
+                 enemy_basic: { frameWidth: 16, frameHeight: 16, frameCounts: { run: 4 } },
+                 collectible: { frameWidth: 16, frameHeight: 16 },
+                 powerup_invincible: { frameWidth: 16, frameHeight: 16 }
+            }
+        };
+
+        let gameState = {
+            currentPhase: 'loading',
+            score: 0,
+            attempts: GAME_CONFIG.MAX_ATTEMPTS,
+            currentHaiku: '',
+            haikuAnalysis: null,
+            landscapeSketchImage: null,
+            lastJudgment: null,
+            playerState: null,
+            entities: [],
+            tilemap: [],
+            difficulty: 1,
+            gameTime: 0,
+            isPaused: false,
+            keysPressed: {},
+            editorState: null,
+            playerInvincibleTimer: 0,
+            activePowerUps: { invincible: 0 },
+            brushSizeIndex: 0,
+            showEditorGrid: true,
+            loadedSprites: {},
+            playerAnimation: { state: 'idle', frame: 0, timer: 0, speed: 0.1 },
+            camera: { x: 0, y: 0 }
+        };
+
+        let lastTime = 0;
+        const gameCanvas = document.getElementById('gameCanvas');
+        const ctx = gameCanvas.getContext('2d');
+        const editorCanvas = document.getElementById('editorCanvas');
+        const editorCtx = editorCanvas.getContext('2d');
+
+        const scoreValueSpan = document.getElementById('scoreValue');
+        const attemptsValueSpan = document.getElementById('attemptsValue');
+        const powerUpIndicatorsDiv = document.getElementById('powerUpIndicators');
+        const haikuTextElement = document.getElementById('haikuText');
+        const haikuApiErrorElement = document.getElementById('haikuApiError');
+        const judgmentTextElement = document.getElementById('judgmentText');
+        const judgmentOutcomeElement = document.getElementById('judgmentOutcome');
+        const judgmentApiErrorElement = document.getElementById('judgmentApiError');
+        const finalScoreValueSpan = document.getElementById('finalScoreValue');
+        const artDescriptionInput = document.getElementById('artDescriptionInput');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const apiErrorElement = document.getElementById('apiError');
+        const pixelEditorSection = document.getElementById('pixelEditorSection');
+        const colorPaletteDiv = document.querySelector('.color-palette');
+        const errorModalElement = document.getElementById('errorModal');
+        const errorModalMessageElement = document.getElementById('errorModalMessage');
+        const brushSizeBtn = document.getElementById('brushSizeBtn');
+        const gridToggleBtn = document.getElementById('gridToggleBtn');
+        const eyedropperToolBtn = document.getElementById('eyedropperToolBtn');
+
+        const mainMenuModal = new bootstrap.Modal(document.getElementById('mainMenuModal'));
+        const instructionsModal = new bootstrap.Modal(document.getElementById('instructionsModal'));
+        const haikuModal = new bootstrap.Modal(document.getElementById('haikuModal'));
+        const judgmentModal = new bootstrap.Modal(document.getElementById('judgmentModal'));
+        const gameOverModal = new bootstrap.Modal(document.getElementById('gameOverModal'));
+        const pauseMenuModal = new bootstrap.Modal(document.getElementById('pauseMenuModal'));
+        const errorModal = new bootstrap.Modal(errorModalElement);
+
+        const sounds = {};
+
+        class ApiManager {
+            static showLoading(message) {
+                loadingMessage.textContent = message;
+                apiErrorElement.classList.add('d-none');
+                apiErrorElement.textContent = '';
+                loadingOverlay.classList.remove('d-none');
+            }
+
+            static hideLoading() {
+                loadingOverlay.classList.add('d-none');
+            }
+
+             static showError(message) {
+                 apiErrorElement.textContent = `Error: ${message}`;
+                 apiErrorElement.classList.remove('d-none');
+             }
+
+            static async callApi(endpoint, msgForAi, aiGuide) {
+                try {
+                    const body = { aiguide: aiGuide, msgforai: msgForAi };
+
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                    const data = await response.
+json();
+                    if (response.ok && data.success) {
+                        return data.response;
+                    } else {
+                        console.error('API Error:', data.error);
+                         ApiManager.showError(data.error || 'Unknown API error');
+                        throw new Error(data.error || `API call failed for ${endpoint}`);
+                    }
+                } catch (error) {
+                    console.error('Fetch Error:', error);
+                     ApiManager.showError(`Network or server error: ${error.message}`);
+                    throw new Error(`Network or server error calling ${endpoint}: ${error.message}`);
+                }
+            }
+
+            static async generateImage(prompt, aspectRatio = '1:1', style = 'standard') {
+                 try {
+                     const response = await fetch(GAME_CONFIG.API_ENDPOINTS.SKETCH, {
+                         method: 'POST',
+                         headers: { 'Content-Type': 'application/json' },
+                         body: JSON.stringify({ prompt, aspectRatio, style })
+                     });
+                     const data = await response.json();
+                     if (response.ok && data.success) {
+                         return data.imageUrl;
+                     } else {
+                         console.error('Image Generation Error:', data.error);
+                          ApiManager.showError(data.error || 'Image generation failed.');
+                         throw new Error(data.error || 'Image generation failed.');
+                     }
+                 } catch (error) {
+                     console.error('Image Fetch Error:', error);
+                      ApiManager.showError(`Network or server error calling image API: ${error.message}`);
+                     throw new Error(`Network or server error calling image API: ${error.message}`);
+                 }
+            }
+
+            static async getHaiku() {
+                ApiManager.showLoading('Conjuring a haiku...');
+                const haikuGuide = `Generate a cryptic, surreal, pixel art themed haiku (5-7-5 syllables). Focus on themes of journey, nature, emptiness, or transformation.`;
+                try {
+                    const haiku = await ApiManager.callApi(GAME_CONFIG.API_ENDPOINTS.HAIKU, '', haikuGuide);
+                    gameState.currentHaiku = haiku.trim();
+                    haikuApiErrorElement.classList.add('d-none');
+                    return haiku;
+                } catch (error) {
+                    console.error('Failed to get haiku:', error);
+                    gameState.currentHaiku = "An error occurred. The void is silent.";
+                     haikuApiErrorElement.textContent = `Failed to get haiku: ${error.message}`;
+                     haikuApiErrorElement.classList.remove('d-none');
+                    throw error;
+                }
+            }
+
+             static async analyzeHaiku(haiku) {
+                 ApiManager.showLoading('Analyzing the whisper...');
+                 const analysisGuide = `Analyze the following haiku for its dominant mood, key objects/themes, and suggest a simple pixel art biome (e.g., forest, cave, ruins, void) it evokes. Respond in a concise JSON object: {"mood": "...", "themes": ["...", "..."], "biome": "..."}.`;
+                 try {
+                     const analysisJson = await ApiManager.callApi(GAME_CONFIG.API_ENDPOINTS.ANALYZE, haiku, analysisGuide);
+                     try {
+                         gameState.haikuAnalysis = JSON.parse(analysisJson);
+                         if (!gameState.haikuAnalysis.mood || !gameState.haikuAnalysis.themes || !gameState.haikuAnalysis.biome) {
+                              throw new Error("Incomplete analysis data.");
+                         }
+                         judgmentApiErrorElement.classList.add('d-none');
+                     } catch (e) {
+                         console.error('Failed to parse or validate haiku analysis JSON:', e, analysisJson);
+                         gameState.haikuAnalysis = { mood: 'unknown', themes: ['mystery'], biome: 'void' };
+                          judgmentApiErrorElement.textContent = `Failed to parse analysis: ${e.message}`;
+                          judgmentApiErrorElement.classList.remove('d-none');
+                     }
+                 } catch (error) {
+                     console.error('Failed to analyze haiku:', error);
+                      gameState.haikuAnalysis = { mood: 'unknown', themes: ['mystery'], biome: 'void' };
+                      judgmentApiErrorElement.textContent = `Failed to analyze haiku: ${error.message}`;
+                      judgmentApiErrorElement.classList.remove('d-none');
+                     throw error;
+                 }
+             }
+
+            static async getLandscapeSketch(haiku, analysis) {
+                 ApiManager.showLoading('Generating a glimpse of the path...');
+                 const prompt = `Simple, abstract pixel art landscape sketch, ${GAME_CONFIG.CANVAS_NATIVE_WIDTH/GAME_CONFIG.TILE_SIZE}x${GAME_CONFIG.CANVAS_NATIVE_HEIGHT/GAME_CONFIG.TILE_SIZE} tiles equivalent, no characters, based on this haiku and analysis. Focus on mood and biome. Haiku: "${haiku}". Analysis: Mood is ${analysis.mood}, Themes include ${analysis.themes.join(', ')}, Biome is ${analysis.biome}. Style: 8-bit pixel art, limited color palette, abstract, minimal detail, focus on shapes.`;
+                 try {
+                     const imageUrl = await ApiManager.generateImage(prompt, `${GAME_CONFIG.CANVAS_NATIVE_WIDTH}:${GAME_CONFIG.CANVAS_NATIVE_HEIGHT}`, 'standard');
+                     const img = new Image();
+                     img.onload = () => {
+                         gameState.landscapeSketchImage = img;
+                         console.log('Landscape sketch loaded.');
+                         ApiManager.hideLoading();
+                         UIManager.displayHaiku(gameState.currentHaiku);
+                     };
+                     img.onerror = () => {
+                         console.error('Failed to load landscape sketch image.');
+                         gameState.landscapeSketchImage = null;
+                         ApiManager.hideLoading();
+                         UIManager.displayHaiku(gameState.currentHaiku);
+                          errorModalMessageElement.textContent = 'Failed to load the landscape sketch image. Proceeding without.';
+                          errorModal.show();
+                     };
+                     img.src = imageUrl;
+                 } catch (error) {
+                     console.error('Failed to generate landscape sketch:', error);
+                     gameState.landscapeSketchImage = null;
+                     ApiManager.hideLoading();
+                     UIManager.displayHaiku(gameState.currentHaiku);
+                      errorModalMessageElement.textContent = `Failed to generate landscape sketch: ${error.message}. Proceeding without.`;
+                      errorModal.show();
+                 }
+            }
+
+
+            static async judgePixelArt(haiku, artDescription) {
+                ApiManager.showLoading('Submitting to the judges...');
+                const judgmentGuide = `You are a cryptic entity judging a pixel art interpretation based on a haiku and description. Respond with a judgment message (1-3 sentences) and a single word outcome: "SUCCESS" or "FAILURE". Format: "Judgment message. OUTCOME: [SUCCESS/FAILURE]". Be poetic and aligned with the purgatory theme.`;
+                const msgForAi = `Haiku: "${haiku}"\nPlayer's Art Description: "${artDescription}"`;
+                try {
+                    const judgmentResult = await ApiManager.callApi(GAME_CONFIG.API_ENDPOINTS.JUDGE, msgForAi, judgmentGuide);
+                    const parts = judgmentResult.split('OUTCOME:');
+                    gameState.lastJudgment = {
+                        text: parts[0].trim(),
+                        outcome: parts.length > 1 ? parts[1].trim().toUpperCase() : 'FAILURE'
+                    };
+                     judgmentApiErrorElement.classList.add('d-none');
+                     ApiManager.hideLoading();
+                     UIManager.displayJudgment(gameState.lastJudgment);
+
+                } catch (error) {
+                    console.error('Failed to get judgment:', error);
+                     gameState.lastJudgment = {
+                        text: "The judges are unreachable. Their silence is a judgment.",
+                        outcome: 'FAILURE'
+                    };
+                     judgmentApiErrorElement.textContent = `Failed to get judgment: ${error.message}`;
+                     judgmentApiErrorElement.classList.remove('d-none');
+                     ApiManager.hideLoading();
+                     UIManager.displayJudgment(gameState.lastJudgment);
+                }
+            }
+        }
+
+        class UIManager {
+            static showModal(modal) { modal.show(); }
+            static hideModal(modal) { modal.hide(); }
+            static showEditor() { pixelEditorSection.classList.remove('d-none'); }
+            static hideEditor() { pixelEditorSection.classList.add('d-none'); }
+            static showHUD() { document.querySelector('.game-hud').classList.remove('d-none'); }
+            static hideHUD() { document.querySelector('.game-hud').classList.add('d-none'); }
+
+            static updateScore(value) { scoreValueSpan.textContent = value; }
+            static updateAttempts(value) { attemptsValueSpan.textContent = value; }
+            static setFinalScore(value) { finalScoreValueSpan.textContent = value; }
+
+            static updatePowerUpIndicators() {
+                 powerUpIndicatorsDiv.innerHTML = '';
+                 if (gameState.activePowerUps.invincible > 0) {
+                     const img = document.createElement('img');
+                     img.src = GAME_CONFIG.SPRITE_PATHS.powerup_invincible;
+                     img.alt = 'Invincible';
+                     img.title = `Invincible (${gameState.activePowerUps.invincible.toFixed(1)}s)`;
+                     powerUpIndicatorsDiv.appendChild(img);
+                 }
+            }
+
+            static displayHaiku(haiku) {
+                haikuTextElement.textContent = haiku;
+                 haikuApiErrorElement.classList.add('d-none');
+                UIManager.showModal(haikuModal);
+            }
+
+            static displayJudgment(judgment) {
+                 judgmentTextElement.textContent = judgment.text;
+                 judgmentOutcomeElement.textContent = judgment.outcome === 'SUCCESS' ? 'Verdict: Accepted' : 'Verdict: Rejected';
+                 judgmentOutcomeElement.className = judgment.outcome === 'SUCCESS' ? 'h4 mt-3 text-success' : 'h4 mt-3 text-danger';
+                 judgmentApiErrorElement.classList.add('d-none');
+                 UIManager.showModal(judgmentModal);
+            }
+
+            static setupEventListeners() {
+                document.getElementById('startGameBtn').addEventListener('click', GameManager.startGame);
+                document.getElementById('instructionsBtn').addEventListener('click', () => {
+                     UIManager.hideModal(mainMenuModal);
+                     UIManager.showModal(instructionsModal);
+                });
+                document.querySelector('#instructionsModal .btn-secondary').addEventListener('click', () => {
+                     UIManager.hideModal(instructionsModal);
+                     UIManager.showModal(mainMenuModal);
+                });
+                document.getElementById('startArtBtn').addEventListener('click', GameManager.startPixelEditing);
+                document.getElementById('submitArtBtn').addEventListener('click', GameManager.submitPixelArt);
+                document.getElementById('continueJourneyBtn').addEventListener('click', GameManager.continueJourney);
+                document.getElementById('restartGameBtn').addEventListener('click', GameManager.restartGame);
+                document.getElementById('resumeGameBtn').addEventListener('click', GameManager.resumeGame);
+                document.getElementById('quitToMenuBtn').addEventListener('click', GameManager.quitToMenu);
+
+                document.addEventListener('keydown', InputManager.handleKeyDown);
+                document.addEventListener('keyup', InputManager.handleKeyUp);
+
+                editorCanvas.addEventListener('mousedown', InputManager.handleEditorMouseDown);
+                editorCanvas.addEventListener('mousemove', InputManager.handleEditorMouseMove);
+                document.addEventListener('mouseup', InputManager.handleEditorMouseUp);
+                editorCanvas.addEventListener('touchstart', InputManager.handleEditorTouchStart, { passive: false });
+                editorCanvas.addEventListener('touchmove', InputManager.handleEditorTouchMove, { passive: false });
+                document.addEventListener('touchend', InputManager.handleEditorTouchEnd);
+
+
+                document.getElementById('pencilToolBtn').addEventListener('click', () => gameState.editorState.setTool('pencil'));
+                document.getElementById('fillToolBtn').addEventListener('click', () => gameState.editorState.setTool('fill'));
+                document.getElementById('eraserToolBtn').addEventListener('click', () => gameState.editorState.setTool('eraser'));
+                 brushSizeBtn.addEventListener('click', () => gameState.editorState.cycleBrushSize());
+                 gridToggleBtn.addEventListener('click', () => gameState.editorState.toggleGrid());
+                 eyedropperToolBtn.addEventListener('click', () => gameState.editorState.setTool('eyedropper'));
+                document.getElementById('undoBtn').addEventListener('click', () => gameState.editorState.undo());
+                document.getElementById('redoBtn').addEventListener('click', () => gameState.editorState.redo());
+            }
+
+            static populateColorPalette() {
+                colorPaletteDiv.innerHTML = '';
+                GAME_CONFIG.PALETTE.forEach(color => {
+                    const swatch = document.createElement('div');
+                    swatch.classList.add('color-swatch');
+                    swatch.style.backgroundColor = color;
+                    swatch.dataset.color = color;
+                    swatch.addEventListener('click', () => gameState.editorState.setColor(color));
+                    colorPaletteDiv.appendChild(swatch);
+                });
+            }
+
+            static updateColorPaletteUI(activeColor) {
+                 colorPaletteDiv.querySelectorAll('.color-swatch').forEach(swatch => {
+                     swatch.classList.remove('active');
+                     if (swatch.dataset.color.toLowerCase() === activeColor.toLowerCase()) {
+                         swatch.classList.add('active');
+                     }
+                 });
+            }
+
+            static updateBrushSizeButton(size) {
+                 brushSizeBtn.textContent = `Brush Size: ${size}x${size}`;
+            }
+
+            static updateGridToggleButton(showGrid) {
+                 gridToggleBtn.textContent = showGrid ? 'Hide Grid' : 'Show Grid';
+            }
+        }
+
+        const InputManager = {
+            keysPressed: {},
+            isEditorDrawing: false,
+            lastEditorMouseX: null,
+            lastEditorMouseY: null,
+            lastEditorTouchX: null,
+            lastEditorTouchY: null,
+
+            handleKeyDown: (event) => {
+                 if (gameState.currentPhase === 'playingLevel' && !gameState.isPaused) {
+                    gameState.keysPressed[event.key.toLowerCase()] = true;
+                    if ([' ', 'arrowup', 'w'].includes(event.key.toLowerCase())) {
+                         event.preventDefault();
+                    }
+                 } else if (event.key === 'Escape' && gameState.currentPhase === 'playingLevel' && !gameState.isPaused) {
+                     GameManager.pauseGame();
+                 } else if (event.key === 'Escape' && gameState.isPaused) {
+                     GameManager.resumeGame();
+                 }
+            },
+
+            handleKeyUp: (event) => {
+                 if (gameState.currentPhase === 'playingLevel') {
+                    gameState.keysPressed[event.key.toLowerCase()] = false;
+                 }
+            },
+
+            getGameCoords(event) {
+                 const rect = gameCanvas.getBoundingClientRect();
+                 const scaleX = gameCanvas.width / rect.width;
+                 const scaleY = gameCanvas.height / rect.height;
+                 const x = (event.clientX - rect.left) * scaleX;
+                 const y = (event.clientY - rect.top) * scaleY;
+                 return { x, y };
+            },
+
+             getEditorCoords(clientX, clientY) {
+                 const rect = editorCanvas.getBoundingClientRect();
+                 const scaleX = editorCanvas.width / rect.width;
+                 const scaleY = editorCanvas.height / rect.height;
+                 const x = (clientX - rect.left) * scaleX;
+                 const y = (clientY - rect.top) * scaleY;
+                 return { x, y };
+            },
+
+            handleEditorMouseDown: (event) => {
+                 if (gameState.currentPhase === 'pixelEditing' && event.button === 0) {
+                     const { x, y } = InputManager.getEditorCoords(event.clientX, event.clientY);
+                     if (gameState.editorState.currentTool === 'eyedropper') {
+                         gameState.editorState.eyedrop(x, y);
+                     } else {
+                         InputManager.isEditorDrawing = true;
+                         gameState.editorState.handleInput(x, y, 'start');
+                          InputManager.lastEditorMouseX = x;
+                          InputManager.lastEditorMouseY = y;
+                     }
+                 }
+            },
+
+            handleEditorMouseMove: (event) => {
+                 if (gameState.currentPhase === 'pixelEditing' && InputManager.isEditorDrawing) {
+                     const { x, y } = InputManager.getEditorCoords(event.clientX, event.clientY);
+                     gameState.editorState.handleInput(x, y, 'move', InputManager.lastEditorMouseX, InputManager.lastEditorMouseY);
+                     InputManager.lastEditorMouseX = x;
+                     InputManager.lastEditorMouseY = y;
+                 }
+            },
+
+            handleEditorMouseUp: () => {
+                 if (gameState.currentPhase === 'pixelEditing' && InputManager.isEditorDrawing) {
+                     InputManager.isEditorDrawing = false;
+                     gameState.editorState.handleInput(null, null, 'end');
+                 }
+            },
+
+             handleEditorTouchStart: (event) => {
+                 if (gameState.currentPhase === 'pixelEditing' && event.touches.length === 1) {
+                      event.preventDefault();
+                     const touch = event.touches[0];
+                     const { x, y } = InputManager.getEditorCoords(touch.clientX, touch.clientY);
+                     if (gameState.editorState.currentTool === 'eyedropper') {
+                         gameState.editorState.eyedrop(x, y);
+                     } else {
+                         InputManager.isEditorDrawing = true;
+                         gameState.editorState.handleInput(x, y, 'start');
+                         InputManager.lastEditorTouchX = touch.clientX;
+                         InputManager.lastEditorTouchY = touch.clientY;
+                     }
+                 }
+            },
+
+             handleEditorTouchMove: (event) => {
+                 if (gameState.currentPhase === 'pixelEditing' && InputManager.isEditorDrawing && event.touches.length === 1) {
+                      event.preventDefault();
+                     const touch = event.touches[0];
+                     const { x, y } = InputManager.getEditorCoords(touch.clientX, touch.clientY);
+                     const lastEditorCoords = InputManager.getEditorCoords(InputManager.lastEditorTouchX, InputManager.lastEditorTouchY);
+                     gameState.editorState.handleInput(x, y, 'move', lastEditorCoords.x, lastEditorCoords.y);
+                     InputManager.lastEditorTouchX = touch.clientX;
+                     InputManager.lastEditorTouchY = touch.clientY;
+                 }
+            },
+
+             handleEditorTouchEnd: () => {
+                 if (gameState.currentPhase === 'pixelEditing' && InputManager.isEditorDrawing) {
+                     InputManager.isEditorDrawing = false;
+                     gameState.editorState.handleInput(null, null, 'end');
+                 }
+            }
+        };
+
+        class LevelGenerator {
+             static generateLevel(haikuAnalysis, difficulty, sketchImage = null) {
+                 const width = 50 + difficulty * 5; // Level gets wider with difficulty
+                 const height = GAME_CONFIG.CANVAS_NATIVE_HEIGHT / GAME_CONFIG.TILE_SIZE;
+                 const tilemap = Array(height).fill(0).map(() => Array(width).fill(0));
+
+                 let startX = 2;
+                 let startY = height - 2;
+
+                 // Basic ground layer
+                 for (let x = 0; x < width; x++) {
+                     tilemap[height - 1][x] = 1;
+                     if (height > 1) tilemap[height - 2][x] = 1;
+                 }
+
+                 // Influence from sketch image
+                 if (sketchImage) {
+                      const sketchCanvas = document.createElement('canvas');
+                      const sketchCtx = sketchCanvas.getContext('2d');
+                      sketchCanvas.width = sketchImage.width;
+                      sketchCanvas.height = sketchImage.height;
+                      sketchCtx.drawImage(sketchImage, 0, 0);
+
+                      const sketchToTileX = sketchImage.width / (width * GAME_CONFIG.TILE_SIZE);
+                      const sketchToTileY = sketchImage.height / (height * GAME_CONFIG.TILE_SIZE);
+
+
+                      for (let y = 0; y < height - 2; y++) { // Avoid bottom layers
+                          for (let x = 0; x < width; x++) {
+                               let totalBrightness = 0;
+                               let sampleCount = 0;
+                               const sampleSize = Math.max(1, Math.floor(GAME_CONFIG.TILE_SIZE / 4));
+
+                               for(let sy = 0; sy < sampleSize; sy++) {
+                                   for (let sx = 0; sx < sampleSize; sx++) {
+                                        const sketchX = Math.floor((x * GAME_CONFIG.TILE_SIZE + sx * (GAME_CONFIG.TILE_SIZE/sampleSize)) * sketchToTileX);
+                                        const sketchY = Math.floor((y * GAME_CONFIG.TILE_SIZE + sy * (GAME_CONFIG.TILE_SIZE/sampleSize)) * sketchToTileY);
+
+                                         if (sketchX >= 0 && sketchX < sketchImage.width && sketchY >= 0 && sketchY < sketchImage.height) {
+                                            const pixelData = sketchCtx.getImageData(sketchX, sketchY, 1, 1).data;
+                                            totalBrightness += (pixelData[0] + pixelData[1] + pixelData[2]) / 3;
+                                            sampleCount++;
+                                         }
+                                   }
+                               }
+
+                               const averageBrightness = sampleCount > 0 ? totalBrightness / sampleCount : 255;
+
+                              if (averageBrightness < 100) { // Darker areas suggest solid ground
+                                   if (Math.random() < (1 - averageBrightness / 255) * (0.1 + difficulty * 0.03)) { // Higher chance in darker areas, scales with difficulty
+                                        if (y < height - 2) tilemap[y][x] = 1; // Place solid tile
+                                   }
+                              } else if (averageBrightness > 200) { // Brighter areas might suggest hazards
+                                    if (Math.random() < (averageBrightness / 255) * (0.02 + difficulty * 0.01)) { // Higher chance in brighter areas, scales with difficulty
+                                        if (y < height - 2 && tilemap[y][x] === 0 && LevelGenerator.isSolid(tilemap, x * GAME_CONFIG.TILE_SIZE, (y + 1) * GAME_CONFIG.TILE_SIZE)) {
+                                            tilemap[y][x] = 3; // Place hazard on solid ground
+                                        }
+                                    }
+                              }
+                          }
+                      }
+                 }
+
+                 // Simple platform generation (enhance this for better playability)
+                 let currentX = startX;
+                 let currentY = startY;
+                 const maxPlatformLength = 8;
+                 const maxGap = 4;
+                 const maxVertical = 3;
+
+                 while (currentX < width - 10) {
+                     // Generate platform
+                     const platformLength = Math.floor(Math.random() * (maxPlatformLength - 2)) + 2;
+                     for (let i = 0; i < platformLength; i++) {
+                         if (currentX + i < width) {
+                             tilemap[currentY][currentX + i] = 1;
+                         }
+                     }
+                     currentX += platformLength;
+
+                     // Generate gap
+                     const gap = Math.floor(Math.random() * maxGap) + 1;
+                     currentX += gap;
+
+                     // Decide next vertical position
+                     const verticalMove = Math.floor(Math.random() * (maxVertical * 2 + 1)) - maxVertical;
+                     currentY = Math.max(2, Math.min(height - 2, currentY + verticalMove));
+
+                     // Ensure landing spot
+                     if (currentX < width) {
+                         let foundLanding = false;
+                         for (let y = currentY; y < height; y++) {
+                             if (LevelGenerator.isSolid(tilemap, currentX * GAME_CONFIG.TILE_SIZE, y * GAME_CONFIG.TILE_SIZE)) {
+                                 currentY = y - 1; // Land on the tile above
+                                 foundLanding = true;
+                                 break;
+                             }
+                         }
+                         if (!foundLanding) { // If no landing found below, create a platform
+                             tilemap[currentY][currentX] = 1;
+                              if (currentY < height - 1) tilemap[currentY + 1][currentX] = 1;
+                         }
+                     }
+                 }
+
+
+                 // Place goal
+                 let goalX = width - 5;
+                 let goalY = height - 3;
+                 while(goalY > 0 && (LevelGenerator.getTileType(tilemap, goalX * GAME_CONFIG.TILE_SIZE, goalY * GAME_CONFIG.TILE_SIZE) !== 0 || !LevelGenerator.isSolid(tilemap, goalX * GAME_CONFIG.TILE_SIZE, (goalY + 1) * GAME_CONFIG.TILE_SIZE))) {
+                     goalY--;
+                 }
+                 if (goalY <= 0) goalY = height - 3; // Fallback if no suitable spot found high up
+
+                 tilemap[goalY][goalX] = 2;
+
+
+                 const entities = [];
+                 // Place enemies, collectibles, powerups more intelligently on platforms
+                 for (let y = 0; y < height - 2; y++) {
+                     for (let x = 0; x < width; x++) {
+                         if (LevelGenerator.getTileType(tilemap, x * GAME_CONFIG.TILE_SIZE, y * GAME_CONFIG.TILE_SIZE) === 0 &&
+                             LevelGenerator.isSolid(tilemap, x * GAME_CONFIG.TILE_SIZE, (y + 1) * GAME_CONFIG.TILE_SIZE)) {
+
+                             // Place enemies on larger platforms
+                             if (Math.random() < (0.005 * difficulty) && x > startX + 5 && x < goalX - 5) {
+                                  let platformSolid = true;
+                                  for(let i = 1; i < 5; i++) { // Check platform length
+                                      if(!LevelGenerator.isSolid(tilemap, (x+i) * GAME_CONFIG.TILE_SIZE, (y + 1) * GAME_CONFIG.TILE_SIZE)) {
+                                          platformSolid = false;
+                                          break;
+                                      }
+                                  }
+                                  if(platformSolid) {
+                                      entities.push(new Enemy(x * GAME_CONFIG.TILE_SIZE, y * GAME_CONFIG.TILE_SIZE, gameState.loadedSprites.enemy_basic));
+                                  }
+                             }
+
+                             // Place collectibles
+                             if (Math.random() < (0.02 * difficulty)) {
+                                  entities.push(new Collectible(x * GAME_CONFIG.TILE_SIZE + GAME_CONFIG.TILE_SIZE * 0.2, y * GAME_CONFIG.TILE_SIZE + GAME_CONFIG.TILE_SIZE * 0.2, gameState.loadedSprites.collectible));
+                             }
+
+                             // Place powerups
+                             if (Math.random() < (0.005 * difficulty)) {
+                                  entities.push(new PowerUp(x * GAME_CONFIG.TILE_SIZE + GAME_CONFIG.TILE_SIZE * 0.2, y * GAME_CONFIG.TILE_SIZE + GAME_CONFIG.TILE_SIZE * 0.2, 'invincible', gameState.loadedSprites.powerup_invincible));
+                             }
+                         }
+                     }
+                 }
+
+
+                 return { tilemap, startX, startY, entities };
+             }
+
+             static draw(ctx, tilemap, sketchImage = null) {
+                 const tileSize = GAME_CONFIG.TILE_SIZE;
+                 const camX = gameState.camera.x;
+                 const camY = gameState.camera.y;
+
+                 if (sketchImage) {
+                      // Draw sketch as background, potentially with parallax
+                      const parallaxFactor = 0.3; // Adjust for desired parallax effect
+                      const bgX = -camX * parallaxFactor;
+                      const bgY = -camY * parallaxFactor;
+                      ctx.drawImage(sketchImage, bgX, bgY, gameCanvas.width + camX * parallaxFactor * 2, gameCanvas.height + camY * parallaxFactor * 2); // Simple scaling/positioning, could be more complex
+                 } else {
+                      ctx.fillStyle = '#1a202c';
+                      ctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+                 }
+
+
+                 for (let y = 0; y < tilemap.length; y++) {
+                     for (let x = 0; x < tilemap[y].length; x++) {
+                         const tileType = tilemap[y][x];
+                         let sprite = null;
+                         if (tileType === 1) {
+                             sprite = gameState.loadedSprites.tile_solid;
+                         } else if (tileType === 2) {
+                              sprite = gameState.loadedSprites.tile_goal;
+                         } else if (tileType === 3) {
+                              sprite = gameState.loadedSprites.tile_hazard;
+                         }
+
+                         if (sprite) {
+                              ctx.drawImage(sprite, x * tileSize - camX, y * tileSize - camY, tileSize, tileSize);
+                         }
+                     }
+                 }
+             }
+
+             static isSolid(tilemap, x, y) {
+                 const tileX = Math.floor(x / GAME_CONFIG.TILE_SIZE);
+                 const tileY = Math.floor(y / GAME_CONFIG.TILE_SIZE);
+
+                 if (tileX < 0 || tileX >= tilemap[0].length || tileY < 0 || tileY >= tilemap.length) {
+                     return true; // Treat out of bounds as solid
+                 }
+                 const tileType = tilemap[tileY][tileX];
+                 return tileType === 1; // Only type 1 is solid for collision
+             }
+
+             static getTileType(tilemap, x, y) {
+                 const tileX = Math.floor(x / GAME_CONFIG.TILE_SIZE);
+                 const tileY = Math.floor(y / GAME_CONFIG.TILE_SIZE);
+
+                 if (tileX < 0 || tileX >= tilemap[0].length || tileY < 0 || tileY >= tilemap.length) {
+                     return 1; // Out of bounds is solid
+                 }
+                 return tilemap[tileY][tileX];
+             }
+        }
+
+        class Entity {
+            constructor(x, y, width, height, sprite = null) {
+                this.x = x;
+                this.y = y;
+                this.width = width;
+                this.height = height;
+                this.sprite = sprite;
+                this.vx = 0;
+                this.vy = 0;
+                this.onGround = false;
+                this.toRemove = false;
+            }
+
+            update(dt, tilemap) {
+                this.vy += GAME_CONFIG.GRAVITY * dt;
+
+                const moveX = this.vx * dt;
+                const moveY = this.vy * dt;
+
+                // X-axis collision
+                this.x += moveX;
+                if (moveX !== 0) {
+                     const checkDir = moveX > 0 ? 1 : -1;
+                     const checkX = checkDir > 0 ? this.x + this.width : this.x;
+                      const checkYTop = this.y + 1; // Check slightly inside entity bounds
+                      const checkYBottom = this.y + this.height - 1;
+
+                     if (LevelGenerator.isSolid(tilemap, checkX, checkYTop) || LevelGenerator.isSolid(tilemap, checkX, checkYBottom)) {
+                         this.x = checkDir > 0 ? Math.floor(checkX / GAME_CONFIG.TILE_SIZE) * GAME_CONFIG.TILE_SIZE - this.width : Math.floor(checkX / GAME_CONFIG.TILE_SIZE) * GAME_CONFIG.TILE_SIZE + GAME_CONFIG.TILE_SIZE;
+                         this.vx = 0;
+                     }
+                }
+
+                // Y-axis collision
+                this.y += moveY;
+                this.onGround = false;
+                 if (moveY !== 0) {
+                     const checkDir = moveY > 0 ? 1 : -1;
+                     const checkY = checkDir > 0 ? this.y + this.height : this.y;
+                     const checkXLeft = this.x + 1; // Check slightly inside entity bounds
+                     const checkXRight = this.x + this.width - 1;
+
+                      if (LevelGenerator.isSolid(tilemap, checkXLeft, checkY) || LevelGenerator.isSolid(tilemap, checkXRight, checkY)) {
+                         this.y = checkDir > 0 ? Math.floor(checkY / GAME_CONFIG.TILE_SIZE) * GAME_CONFIG.TILE_SIZE - this.height : Math.floor(checkY / GAME_CONFIG.TILE_SIZE) * GAME_CONFIG.TILE_SIZE + GAME_CONFIG.TILE_SIZE;
+                         this.vy = 0;
+                         if (checkDir > 0) this.onGround = true;
+                      }
+                 }
+            }
+
+            draw(ctx) {
+                const camX = gameState.camera.x;
+                const camY = gameState.camera.y;
+                if (this.sprite) {
+                     ctx.drawImage(this.sprite, this.x - camX, this.y - camY, this.width, this.height);
+                } else {
+                    ctx.fillStyle = '#fff';
+                    ctx.fillRect(this.x - camX, this.y - camY, this.width, this.height);
+                }
+            }
+
+            onCollision(other) {
+
+            }
+        }
+
+        class Player extends Entity {
+            constructor(x, y, spriteSheet) {
+                super(x, y, GAME_CONFIG.SPRITE_DIMS.player.frameWidth, GAME_CONFIG.SPRITE_DIMS.player.frameHeight, spriteSheet);
+                this.health = 1;
+                this.spriteSheet = spriteSheet;
+                this.facingRight = true;
+            }
+
+            update(dt, inputState, tilemap) {
+                this.vx = 0;
+                let moving = false;
+                if (inputState['arrowleft'] || inputState['a']) {
+                    this.vx = -GAME_CONFIG.PLAYER_SPEED;
+                    moving = true;
+                    this.facingRight = false;
+                }
+                if (inputState['arrowright'] || inputState['d']) {
+                    this.vx = GAME_CONFIG.PLAYER_SPEED;
+                    moving = true;
+                    this.facingRight = true;
+                }
+
+                if ((inputState[' '] || inputState['arrowup'] || inputState['w']) && this.onGround) {
+                    this.vy = GAME_CONFIG.JUMP_FORCE;
+                     if (sounds.jump && sounds.jump.state() === 'loaded') sounds.jump.play();
+                }
+
+                 if (gameState.activePowerUps.invincible > 0) {
+                     gameState.activePowerUps.invincible -= dt;
+                     UIManager.updatePowerUpIndicators(); // Update timer text
+                     if (gameState.activePowerUps.invincible <= 0) {
+                         gameState.activePowerUps
+.invincible = 0;
+                         UIManager.updatePowerUpIndicators(); // Remove indicator
+                     }
+                 }
+
+
+                super.update(dt, tilemap);
+
+                // Update animation state
+                 if (!this.onGround) {
+                     gameState.playerAnimation.state = 'jump';
+                 } else if (moving) {
+                     gameState.playerAnimation.state = 'run';
+                 } else {
+                     gameState.playerAnimation.state = 'idle';
+                 }
+
+                // Update animation frame
+                 gameState.playerAnimation.timer += dt;
+                 const frameSpeed = gameState.playerAnimation.state === 'run' ? 0.08 : 0.15; // Run faster animation
+                 if (gameState.playerAnimation.timer >= frameSpeed) {
+                     gameState.playerAnimation.frame = (gameState.playerAnimation.frame + 1) % GAME_CONFIG.SPRITE_DIMS.player.frameCounts[gameState.playerAnimation.state];
+                     gameState.playerAnimation.timer = 0;
+                 }
+
+
+                const goalTile = LevelGenerator.getTileType(tilemap, this.x + this.width / 2, this.y + this.height / 2);
+                 if (goalTile === 2) {
+                     GameManager.levelComplete();
+                 }
+
+                 // Check for hazard collision at player's feet
+                 const hazardTile = LevelGenerator.getTileType(tilemap, this.x + this.width / 2, this.y + this.height - 1);
+                  if (hazardTile === 3 && gameState.activePowerUps.invincible <= 0) {
+                      this.takeHit();
+                  }
+
+                 // Check for falling off the world
+                 if (this.y > tilemap.length * GAME_CONFIG.TILE_SIZE) {
+                     this.health = 0; // Instant death from falling
+                     GameManager.loseAttempt();
+                 }
+
+                 // Update camera position to follow player
+                 gameState.camera.x = this.x - GAME_CONFIG.CANVAS_NATIVE_WIDTH / 2 + this.width / 2;
+                 gameState.camera.y = this.y - GAME_CONFIG.CANVAS_NATIVE_HEIGHT / 2 + this.height / 2;
+
+                 // Clamp camera to level bounds
+                 const levelWidth = tilemap[0].length * GAME_CONFIG.TILE_SIZE;
+                 const levelHeight = tilemap.length * GAME_CONFIG.TILE_SIZE;
+                 gameState.camera.x = Math.max(0, Math.min(gameState.camera.x, levelWidth - GAME_CONFIG.CANVAS_NATIVE_WIDTH));
+                 gameState.camera.y = Math.max(0, Math.min(gameState.camera.y, levelHeight - GAME_CONFIG.CANVAS_NATIVE_HEIGHT));
+            }
+
+            draw(ctx) {
+                 const camX = gameState.camera.x;
+                 const camY = gameState.camera.y;
+
+                 if (gameState.activePowerUps.invincible > 0 && Math.floor(gameState.gameTime * 10) % 2 === 0) {
+                    // Player flashes when invincible - skip drawing on some frames
+                 } else {
+                     const spriteInfo = GAME_CONFIG.SPRITE_DIMS.player;
+                     const frameX = gameState.playerAnimation.frame * spriteInfo.frameWidth;
+                     let frameY = 0;
+                     if (gameState.playerAnimation.state === 'run') frameY = spriteInfo.frameCounts.idle * spriteInfo.frameHeight;
+                     if (gameState.playerAnimation.state === 'jump') frameY = (spriteInfo.frameCounts.idle + spriteInfo.frameCounts.run) * spriteInfo.frameHeight;
+
+                     ctx.save();
+                     if (!this.facingRight) {
+                         ctx.scale(-1, 1);
+                         ctx.drawImage(
+                              this.spriteSheet,
+                              frameX, frameY, spriteInfo.frameWidth, spriteInfo.frameHeight,
+                              -(this.x + this.width) + camX, this.y - camY, this.width, this.height
+                         );
+                     } else {
+                         ctx.drawImage(
+                              this.spriteSheet,
+                              frameX, frameY, spriteInfo.frameWidth, spriteInfo.frameHeight,
+                              this.x - camX, this.y - camY, this.width, this.height
+                         );
+                     }
+                     ctx.restore();
+                 }
+            }
+
+            onCollision(other) {
+                 if (other instanceof Enemy && gameState.activePowerUps.invincible <= 0) {
+                     this.takeHit();
+                 } else if (other instanceof Collectible) {
+                     GameManager.collectItem(other);
+                 } else if (other instanceof PowerUp) {
+                     GameManager.activatePowerUp(other);
+                 }
+            }
+
+            takeHit() {
+                this.health--;
+                 if (sounds.hit && sounds.hit.state() === 'loaded') sounds.hit.play();
+                 gameState.activePowerUps.invincible = GAME_CONFIG.PLAYER_INVINCIBILITY_TIME;
+                 UIManager.updatePowerUpIndicators();
+
+                if (this.health <= 0) {
+                    GameManager.loseAttempt();
+                }
+                 for (let i = 0; i < GAME_CONFIG.PARTICLE_COUNT_HIT; i++) {
+                     ParticleManager.createParticle(
+                         this.x + this.width / 2,
+                         this.y + this.height / 2,
+                         '#e53e3e',
+                         2,
+                         (Math.random() - 0.5) * 100,
+                         (Math.random() - 0.5) * 100 - 50,
+                         GAME_CONFIG.PARTICLE_LIFETIME
+                     );
+                 }
+            }
+        }
+
+        class Enemy extends Entity {
+             constructor(x, y, spriteSheet) {
+                 super(x, y, GAME_CONFIG.SPRITE_DIMS.enemy_basic.frameWidth, GAME_CONFIG.SPRITE_DIMS.enemy_basic.frameHeight, spriteSheet);
+                 this.speed = GAME_CONFIG.PLAYER_SPEED * GAME_CONFIG.ENEMY_SPEED_MULTIPLIER;
+                 this.direction = 1;
+                 this.vx = this.speed * this.direction;
+                 this.spriteSheet = spriteSheet;
+                 this.animation = { frame: 0, timer: 0, speed: 0.2 };
+             }
+
+             update(dt, tilemap, entities) {
+                  // Simple patrolling: turn if hitting a wall or edge of platform
+                  const nextTileX = this.x + this.vx * dt + (this.direction > 0 ? this.width : 0);
+                  const tileBelowX = this.x + (this.direction > 0 ? this.width : 0) + this.direction * (GAME_CONFIG.TILE_SIZE / 2); // Check slightly ahead
+                  const tileBelowY = this.y + this.height + 5;
+
+                  if (LevelGenerator.isSolid(tilemap, nextTileX, this.y + this.height / 2) || !LevelGenerator.isSolid(tilemap, tileBelowX, tileBelowY)) {
+                       this.direction *= -1;
+                       this.vx = this.speed * this.direction;
+                  }
+
+                 super.update(dt, tilemap);
+
+                 this.animation.timer += dt;
+                 if (this.animation.timer >= this.animation.speed) {
+                      this.animation.frame = (this.animation.frame + 1) % GAME_CONFIG.SPRITE_DIMS.enemy_basic.frameCounts.run;
+                      this.animation.timer = 0;
+                 }
+             }
+
+             draw(ctx) {
+                 const camX = gameState.camera.x;
+                 const camY = gameState.camera.y;
+                 const spriteInfo = GAME_CONFIG.SPRITE_DIMS.enemy_basic;
+                 const frameX = this.animation.frame * spriteInfo.frameWidth;
+                 const frameY = 0;
+
+                 ctx.save();
+                 if (this.direction < 0) {
+                     ctx.scale(-1, 1);
+                     ctx.drawImage(
+                          this.spriteSheet,
+                          frameX, frameY, spriteInfo.frameWidth, spriteInfo.frameHeight,
+                          -(this.x + this.width) + camX, this.y - camY, this.width, this.height
+                     );
+                 } else {
+                     ctx.drawImage(
+                          this.spriteSheet,
+                          frameX, frameY, spriteInfo.frameWidth, spriteInfo.frameHeight,
+                          this.x - camX, this.y - camY, this.width, this.height
+                     );
+                 }
+                 ctx.restore();
+             }
+
+             onCollision(other) {
+             }
+        }
+
+        class Collectible extends Entity {
+             constructor(x, y, sprite) {
+                 super(x, y, GAME_CONFIG.SPRITE_DIMS.collectible.frameWidth, GAME_CONFIG.SPRITE_DIMS.collectible.frameHeight, sprite);
+                 this.scoreValue = GAME_CONFIG.COLLECTIBLE_SCORE;
+             }
+
+             onCollision(other) {
+                 if (other instanceof Player) {
+                     this.toRemove = true;
+                 }
+             }
+        }
+
+        class PowerUp extends Entity {
+             constructor(x, y, type, sprite) {
+                 super(x, y, GAME_CONFIG.SPRITE_DIMS.powerup_invincible.frameWidth, GAME_CONFIG.SPRITE_DIMS.powerup_invincible.frameHeight, sprite);
+                 this.type = type;
+             }
+
+             onCollision(other) {
+                 if (other instanceof Player) {
+                     this.toRemove = true;
+                 }
+             }
+        }
+
+
+        class Particle {
+            constructor(x, y, color, size, vx, vy, lifetime) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.size = size;
+                this.vx = vx;
+                this.vy = vy;
+                this.lifetime = lifetime;
+                this.alpha = 1;
+                this.time = 0;
+                this.toRemove = false;
+            }
+
+            update(dt) {
+                this.x += this.vx * dt;
+                this.y += this.vy * dt;
+                this.vy += GAME_CONFIG.GRAVITY * 0.5 * dt; // Affected by gravity
+
+                this.time += dt;
+                this.alpha = 1 - (this.time / this.lifetime);
+                if (this.alpha <= 0) {
+                    this.toRemove = true;
+                }
+            }
+
+            draw(ctx) {
+                const camX = gameState.camera.x;
+                const camY = gameState.camera.y;
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x - camX, this.y - camY, this.size, this.size);
+                ctx.restore();
+            }
+        }
+
+        const ParticleManager = {
+             particles: [],
+
+             createParticle(x, y, color, size = 2, vx = (Math.random() - 0.5) * 50, vy = (Math.random() - 0.5) * 50, lifetime = 1) {
+                 this.particles.push(new Particle(x, y, color, size, vx, vy, lifetime));
+             },
+
+             update(dt) {
+                 for (let i = this.particles.length - 1; i >= 0; i--) {
+                     const p = this.particles[i];
+                     p.update(dt);
+                     if (p.toRemove) {
+                         this.particles.splice(i, 1);
+                     }
+                 }
+             },
+
+             draw(ctx) {
+                 this.particles.forEach(p => p.draw(ctx));
+             }
+        };
+
+
+        class PixelEditor {
+            constructor(widthPixels, heightPixels, pixelSize, palette) {
+                this.widthPixels = widthPixels;
+                this.heightPixels = heightPixels;
+                this.pixelSize = pixelSize;
+                this.palette = palette;
+                this.pixelGrid = Array(heightPixels).fill(0).map(() => Array(widthPixels).fill(null));
+                this.currentColor = palette[0];
+                this.currentTool = 'pencil';
+                this.history = [];
+                this.historyIndex = -1;
+                this.canvas = editorCanvas;
+                this.ctx = editorCtx;
+                this.isDrawing = false;
+                this.canvas.width = widthPixels * pixelSize;
+                this.canvas.height = heightPixels * pixelSize;
+                this.brushSize = GAME_CONFIG.BRUSH_SIZES[gameState.brushSizeIndex];
+            }
+
+            init() {
+                 this.saveState();
+                 this.draw();
+                 UIManager.populateColorPalette();
+                 UIManager.updateColorPaletteUI(this.currentColor);
+                 UIManager.updateBrushSizeButton(this.brushSize);
+                 UIManager.updateGridToggleButton(gameState.showEditorGrid);
+                 this.setTool('pencil'); // Default tool
+            }
+
+            setColor(color) {
+                this.currentColor = color;
+                UIManager.updateColorPaletteUI(this.currentColor);
+                 if (this.currentTool !== 'eyedropper') { // Don't switch tool if eyedropper was active
+                    this.setTool('pencil');
+                 }
+            }
+
+            setTool(tool) {
+                this.currentTool = tool;
+                // Visually indicate active tool - needs CSS classes or similar
+            }
+
+            cycleBrushSize() {
+                 gameState.brushSizeIndex = (gameState.brushSizeIndex + 1) % GAME_CONFIG.BRUSH_SIZES.length;
+                 this.brushSize = GAME_CONFIG.BRUSH_SIZES[gameState.brushSizeIndex];
+                 UIManager.updateBrushSizeButton(this.brushSize);
+                 this.setTool('pencil'); // Switch to pencil after changing size
+            }
+
+            toggleGrid() {
+                 gameState.showEditorGrid = !gameState.showEditorGrid;
+                 UIManager.updateGridToggleButton(gameState.showEditorGrid);
+                 this.draw();
+            }
+
+            saveState() {
+                this.history = this.history.slice(0, this.historyIndex + 1);
+                const stateCopy = this.pixelGrid.map(row => [...row]);
+                this.history.push(stateCopy);
+                this.historyIndex++;
+                 if (this.history.length > 50) { // Limit history size
+                     this.history.shift();
+                     this.historyIndex--;
+                 }
+            }
+
+            undo() {
+                if (this.historyIndex > 0) {
+                    this.historyIndex--;
+                    this.pixelGrid = this.history[this.historyIndex].map(row => [...row]);
+                    this.draw();
+                }
+            }
+
+            redo() {
+                 if (this.historyIndex < this.history.length - 1) {
+                    this.historyIndex++;
+                    this.pixelGrid = this.history[this.historyIndex].map(row => [...row]);
+                    this.draw();
+                 }
+            }
+
+             eyedrop(x, y) {
+                 const pixelX = Math.floor(x / this.pixelSize);
+                 const pixelY = Math.floor(y / this.pixelSize);
+
+                 if (pixelX >= 0 && pixelX < this.widthPixels && pixelY >= 0 && pixelY < this.heightPixels) {
+                     const color = this.pixelGrid[pixelY][pixelX];
+                     if (color !== null) {
+                         this.setColor(color);
+                     } else {
+                         this.setColor('#000000'); // Default to black if sampling empty
+                     }
+                 }
+                  this.setTool('pencil'); // Switch back to pencil after eyedropping
+             }
+
+
+            handleInput(x, y, type, lastX, lastY) {
+                 const pixelX = Math.floor(x / this.pixelSize);
+                 const pixelY = Math.floor(y / this.pixelSize);
+
+                 if (pixelX < 0 || pixelX >= this.widthPixels || pixelY < 0 || pixelY >= this.heightPixels) {
+                     if (type === 'end' && this.isDrawing) { // Save state if drawing ends outside canvas
+                          this.isDrawing = false;
+                          this.saveState();
+                     }
+                     return;
+                 }
+
+                 if (type === 'start') {
+                     this.isDrawing = true;
+                     if (this.currentTool === 'fill') {
+                         if (this.fill(pixelX, pixelY, this.currentTool === 'eraser' ? null : this.currentColor)) {
+                              this.saveState();
+                         }
+                     } else {
+                          this.drawPixel(pixelX, pixelY);
+                     }
+                 } else if (type === 'move' && this.isDrawing && this.currentTool !== 'fill') {
+                     const lastPixelX = Math.floor(lastX / this.pixelSize);
+                     const lastPixelY = Math.floor(lastY / this.pixelSize);
+                     this.drawLine(lastPixelX, lastPixelY, pixelX, pixelY);
+                 } else if (type === 'end' && this.isDrawing) {
+                     this.isDrawing = false;
+                     this.saveState();
+                 }
+
+                 this.draw();
+            }
+
+            drawPixel(px, py) {
+                const colorToUse = this.currentTool === 'eraser' ? null : this.currentColor;
+                const halfBrush = Math.floor(this.brushSize / 2);
+
+                 let pixelChanged = false;
+                 for (let oy = -halfBrush; oy <= halfBrush; oy++) {
+                     for (let ox = -halfBrush; ox <= halfBrush; ox++) {
+                         const targetX = px + ox;
+                         const targetY = py + oy;
+
+                         if (targetX >= 0 && targetX < this.widthPixels && targetY >= 0 && targetY < this.heightPixels) {
+                             if (this.pixelGrid[targetY][targetX] !== colorToUse) {
+                                 this.pixelGrid[targetY][targetX] = colorToUse;
+                                 pixelChanged = true;
+                             }
+                         }
+                     }
+                 }
+                return pixelChanged;
+            }
+
+             drawLine(x0, y0, x1, y1) {
+                 const dx = Math.abs(x1 - x0);
+                 const dy = Math.abs(y1 - y0);
+                 const sx = (x0 < x1) ? 1 : -1;
+                 const sy = (y0 < y1) ? 1 : -1;
+                 let err = dx - dy;
+                 let pixelChanged = false;
+
+                 let currentX = x0;
+                 let currentY = y0;
+
+                 while(true) {
+                     if (this.drawPixel(currentX, currentY)) {
+                         pixelChanged = true;
+                     }
+
+                     if (currentX === x1 && currentY === y1) break;
+                     const e2 = 2 * err;
+                     if (e2 > -dy) { err -= dy; currentX += sx; }
+                     if (e2 < dx) { err += dx; currentY += sy; }
+                 }
+                 return pixelChanged;
+             }
+
+             fill(startX, startY, targetColor) {
+                 const target = this.pixelGrid[startY][startX];
+                 if (target === targetColor) return false;
+
+                 const queue = [[startX, startY]];
+                 let pixelChanged = false;
+
+                 while (queue.length > 0) {
+                     const [x, y] = queue.shift();
+
+                     if (x < 0 || x >= this.widthPixels || y < 0 || y >= this.heightPixels || this.pixelGrid[y][x] !== target) {
+                         continue;
+                     }
+
+                     this.pixelGrid[y][x] = targetColor;
+                     pixelChanged = true;
+
+                     queue.push([x + 1, y]);
+                     queue.push([x - 1, y]);
+                     queue.push([x, y + 1]);
+                     queue.push([x, y - 1]);
+                 }
+                 return pixelChanged;
+             }
+
+
+            draw() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                for (let y = 0; y < this.heightPixels; y++) {
+                    for (let x = 0; x < this.widthPixels; x++) {
+                        const color = this.pixelGrid[y][x];
+                        if (color !== null) {
+                            this.ctx.fillStyle = color;
+                            this.ctx.fillRect(x * this.pixelSize, y * this.pixelSize, this.pixelSize, this.pixelSize);
+                        }
+                    }
+                }
+
+                 if (gameState.showEditorGrid) {
+                     this.ctx.strokeStyle = '#4a5568';
+                     this.ctx.lineWidth = 0.5;
+                     this.ctx.beginPath();
+                     for (let i = 0; i <= this.widthPixels; i++) {
+                         this.ctx.moveTo(i * this.pixelSize + 0.5, 0);
+                         this.ctx.lineTo(i * this.pixelSize + 0.5, this.canvas.height);
+                     }
+                     for (let i = 0; i <= this.heightPixels; i++) {
+                         this.ctx.moveTo(0, i * this.pixelSize + 0.5);
+                         this.ctx.lineTo(this.canvas.width, i * this.pixelSize + 0.5);
+                     }
+                     this.ctx.stroke();
+                 }
+            }
+
+             getArtDescription() {
+                 return artDescriptionInput.value.trim();
+             }
+
+             reset() {
+                 this.pixelGrid = Array(this.heightPixels).fill(0).map(() => Array(this.widthPixels).fill(null));
+                 this.history = [];
+                 this.historyIndex = -1;
+                 this.saveState();
+                 artDescriptionInput.value = '';
+                 this.draw();
+             }
+        }
+
+        const EntityManager = {
+             entities: [],
+
+             init(player, initialEntities = []) {
+                 this.entities = [player, ...initialEntities];
+             },
+
+             update(dt, tilemap) {
+                 for (let i = this.entities.length - 1; i >= 0; i--) {
+                     const entity = this.entities[i];
+                     entity.update(dt, InputManager.keysPressed, tilemap, this.entities);
+                     if (entity.toRemove) {
+                         this.entities.splice(i, 1);
+                     }
+                 }
+                 ParticleManager.update(dt);
+                 this.checkCollisions(tilemap);
+             },
+
+             draw(ctx) {
+                 this.entities.forEach(entity => entity.draw(ctx));
+                 ParticleManager.draw(ctx);
+             },
+
+             checkCollisions(tilemap) {
+                  const player = this.entities.find(e => e instanceof Player);
+                  if (!player) return;
+
+                  for (let i = this.entities.length - 1; i >= 0; i--) {
+                      const entity = this.entities[i];
+                       if (entity === player || entity.toRemove) continue;
+
+                       // Simple AABB collision
+                       if (player.x < entity.x + entity.width &&
+                           player.x + player.width > entity.x &&
+                           player.y < entity.y + entity.height &&
+                           player.y + player.height > entity.y) {
+                           player.onCollision(entity);
+                           entity.onCollision(player); // Allow entities to react to player collision
+                       }
+                  }
+             }
+        };
+
+
+        const GameManager = {
+            init() {
+                gameCanvas.width = GAME_CONFIG.CANVAS_NATIVE_WIDTH;
+                gameCanvas.height = GAME_CONFIG.CANVAS_NATIVE_HEIGHT;
+                UIManager.setupEventListeners();
+                window.addEventListener('resize', GameManager.resizeGameCanvasMaintainAspectRatio);
+                GameManager.resizeGameCanvasMaintainAspectRatio();
+
+                gameState.editorState = new PixelEditor(GAME_CONFIG.EDITOR_WIDTH_PIXELS, GAME_CONFIG.EDITOR_HEIGHT_PIXELS, GAME_CONFIG.EDITOR_PIXEL_SIZE, GAME_CONFIG.PALETTE);
+
+                 GameManager.loadAssets().then(() => {
+                     UIManager.showModal(mainMenuModal);
+                     UIManager.hideHUD();
+                     gameState.currentPhase = 'mainMenu';
+                 }).catch(error => {
+                     console.error("Failed to load assets:", error);
+                      errorModalMessageElement.textContent = `Failed to load game assets: ${error.message}. The game cannot start.`;
+                      errorModal.show();
+                      gameState.currentPhase = 'error';
+                 });
+
+
+                sounds.jump = new Howl({ src: ['https://cdn.jsdelivr.net/gh/dmorse/arcade-sounds@master/sounds/jump.wav'], volume: 0.3 });
+                sounds.hit = new Howl({ src: ['https://cdn.jsdelivr.net/gh/dmorse/arcade-sounds@master/sounds/hit.wav'], volume: 0.4 });
+                sounds.success = new Howl({ src: ['https://cdn.jsdelivr.net/gh/dmorse/arcade-sounds@master/sounds/success.wav'], volume: 0.5 });
+                sounds.failure = new Howl({ src: ['https://cdn.jsdelivr.net/gh/dmorse/arcade-sounds@master/sounds/failure.wav'], volume: 0.5 });
+                sounds.collect = new Howl({ src: ['https://cdn.jsdelivr.net/gh/dmorse/arcade-sounds@master/sounds/collect.wav'], volume: 0.5 });
+                sounds.powerup = new Howl({ src: ['https://cdn.jsdelivr.net/gh/dmorse/arcade-sounds@master/sounds/powerup.wav'], volume: 0.5 });
+                sounds.music = new Howl({
+                     src: ['https://cdn.jsdelivr.net/gh/dmorse/arcade-sounds@master/sounds/music_loop.wav'],
+                     loop: true,
+                     volume: 0.2
+                });
+            },
+
+            async loadAssets() {
+                 const promises = [];
+                 for (const key in GAME_CONFIG.SPRITE_PATHS) {
+                     promises.push(new Promise((resolve, reject) => {
+                         const img = new Image();
+                         img.onload = () => {
+                             gameState.loadedSprites[key] = img;
+                             resolve();
+                         };
+                         img.onerror = () => {
+                             console.error(`Failed to load sprite: ${GAME_CONFIG.SPRITE_PATHS[key]}`);
+                             reject(new Error(`Failed to load sprite: ${GAME_CONFIG.SPRITE_PATHS[key]}`));
+                         };
+                         img.src = GAME_CONFIG.SPRITE_PATHS[key];
+                     }));
+                 }
+                 return Promise.all(promises);
+            },
+
+            startGame() {
+                UIManager.hideModal(mainMenuModal);
+                gameState.score = 0;
+                gameState.attempts = GAME_CONFIG.MAX_ATTEMPTS;
+                gameState.difficulty = 1;
+                UIManager.updateScore(gameState.score);
+                UIManager.updateAttempts(gameState.attempts);
+                 gameState.activePowerUps = { invincible: 0 };
+                 UIManager.updatePowerUpIndicators();
+                 if (sounds.music && sounds.music.state() === 'loaded') sounds.music.play();
+                GameManager.startNewHaikuCycle();
+            },
+
+            async startNewHaikuCycle() {
+                gameState.currentPhase = 'loading';
+                UIManager.hideHUD();
+                UIManager.hideEditor();
+                UIManager.hideModal(judgmentModal);
+                haikuApiErrorElement.classList.add('d-none');
+                judgmentApiErrorElement.classList.add('d-none');
+                 apiErrorElement.classList.add('d-none');
+
+                try {
+                    await ApiManager.getHaiku();
+                    await ApiManager.analyzeHaiku(gameState.currentHaiku);
+                    await ApiManager.getLandscapeSketch(gameState.currentHaiku, gameState.haikuAnalysis);
+                } catch (error) {
+                    console.error("Error starting haiku cycle:", error);
+                    ApiManager.hideLoading();
+                     errorModalMessageElement.textContent = `Failed to start new cycle: ${error.message}. Returning to main menu.`;
+                     errorModal.show();
+                     GameManager.quitToMenu();
+                }
+            },
+
+            startPixelEditing() {
+                gameState.currentPhase = 'pixelEditing';
+                UIManager.hideModal(haikuModal);
+                UIManager.showEditor();
+                gameState.editorState.reset();
+                gameState.editorState.init();
+            },
+
+            async submitPixelArt() {
+                 const artDescription = gameState.editorState.getArtDescription();
+                 if (!artDescription) {
+                      alert("Please describe your art!");
+                      return;
+                 }
+
+                 gameState.currentPhase = 'loadingJudgment';
+                 UIManager.hideEditor();
+                 await ApiManager.judgePixelArt(gameState.currentHaiku, artDescription);
+            },
+
+            continueJourney() {
+                 UIManager.hideModal(judgmentModal);
+                 if (gameState.lastJudgment && gameState.lastJudgment.outcome === 'SUCCESS') {
+                     gameState.difficulty++;
+                     gameState.score += 100 + (gameState.difficulty * 10);
+                     if (sounds.success && sounds.success.state() === 'loaded') sounds.success.play();
+                 } else {
+                     // Difficulty increases on failure
+                     gameState.difficulty = Math.max(1, gameState.difficulty + 0.5); // Increase difficulty less drastically on failure
+                     GameManager.loseAttempt();
+                     if (sounds.failure && sounds.failure.state() === 'loaded') sounds.failure.play();
+                 }
+                 UIManager.updateScore(gameState.score);
+                 GameManager.startPlayingLevel();
+
+            },
+
+            startPlayingLevel() {
+                gameState.currentPhase = 'playingLevel';
+                UIManager.showHUD();
+                ApiManager.showLoading('Forging the path...');
+                const levelData = LevelGenerator.generateLevel(gameState.haikuAnalysis, gameState.difficulty, gameState.landscapeSketchImage);
+                gameState.tilemap = levelData.tilemap;
+                gameState.playerState = new Player(levelData.startX * GAME_CONFIG.TILE_SIZE, levelData.startY * GAME_CONFIG.TILE_SIZE, gameState.loadedSprites.player);
+                 gameState.playerState.health = 1; // Reset health per level
+                 gameState.activePowerUps = { invincible: 0 }; // Reset powerups per level
+                 UIManager.updatePowerUpIndicators();
+
+
+                 const initialEntities = levelData.entities.map(entity => {
+                     if (entity instanceof Enemy) {
+                         return new Enemy(entity.x, entity.y, gameState.loadedSprites.enemy_basic);
+                     } else if (entity instanceof Collectible) {
+                          return new Collectible(entity.x, entity.y, gameState.loadedSprites.collectible);
+                     } else if (entity instanceof PowerUp && entity.type === 'invincible') {
+                          return new PowerUp(entity.x, entity.y, 'invincible', gameState.loadedSprites.powerup_invincible);
+                     }
+                      return null; // Should not happen
+                 }).filter(entity => entity !== null);
+
+
+                EntityManager.init(gameState.playerState, initialEntities);
+                ParticleManager.particles = []; // Clear particles
+
+                ApiManager.hideLoading();
+                lastTime = performance.now();
+                 if (gameState.currentPhase === 'playingLevel' && !gameState.isPaused) {
+                     requestAnimationFrame(GameManager.gameLoop);
+                 }
+            },
+
+            gameLoop(timestamp) {
+                if (gameState.currentPhase !== 'playingLevel' || gameState.isPaused) {
+                     lastTime = timestamp; // Keep lastTime updated even when paused
+                     requestAnimationFrame(GameManager.gameLoop);
+                     return;
+                }
+
+                const dt = Math.min(0.1, (timestamp - lastTime) / 1000);
+                lastTime = timestamp;
+                gameState.gameTime += dt;
+
+                EntityManager.update(dt, gameState.tilemap);
+                GameManager.render();
+
+                requestAnimationFrame(GameManager.gameLoop);
+            },
+
+            render() {
+                ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
+                LevelGenerator.draw(ctx, gameState.tilemap, gameState.landscapeSketchImage);
+                EntityManager.draw(ctx);
+            },
+
+            levelComplete() {
+                gameState.currentPhase = 'levelComplete';
+                 if (sounds.success && sounds.success.state() === 'loaded') sounds.success.play();
+
+                 const player = gameState.playerState;
+                  if (player) {
+                     for (let i = 0; i < GAME_CONFIG.PARTICLE_COUNT_GOAL; i++) {
+                          ParticleManager.createParticle(
+                              player.x + player.width / 2,
+                              player.y + player.height / 2,
+                              GAME_CONFIG.PALETTE[Math.floor(Math.random() * GAME_CONFIG.PALETTE.length)],
+                              3,
+                              (Math.random() - 0.5) * 200,
+                              (Math.random() - 1) * 200,
+                              GAME_CONFIG.PARTICLE_LIFETIME * 2
+                          );
+                      }
+                  }
+
+                // Short delay before starting the next haiku cycle
+                setTimeout(GameManager.startNewHaikuCycle, 2000);
+            },
+
+            loseAttempt() {
+                gameState.attempts--;
+                UIManager.updateAttempts(gameState.attempts);
+                 if (sounds.hit && sounds.hit.state() === 'loaded') sounds.hit.play();
+
+                 if (gameState.attempts <= 0) {
+                     GameManager.gameOver();
+                 } else {
+                     GameManager.restartLevel();
+                 }
+            },
+
+             restartLevel() {
+                 gameState.currentPhase = 'loadingLevel';
+                 ApiManager.showLoading('Retrying the path...');
+                 // Regenerate level with current difficulty and sketch
+                 const levelData = LevelGenerator.generateLevel(gameState.haikuAnalysis, gameState.difficulty, gameState.landscapeSketchImage);
+                 gameState.tilemap = levelData.tilemap;
+                 gameState.playerState = new Player(levelData.startX * GAME_CONFIG.TILE_SIZE, levelData.startY * GAME_CONFIG.TILE_SIZE, gameState.loadedSprites.player);
+                 gameState.playerState.health = 1; // Reset health for the retry
+                 gameState.activePowerUps = { invincible: 0 }; // Reset powerups for the retry
+                 UIManager.updatePowerUpIndicators();
+
+                  const initialEntities = levelData.entities.map(entity => {
+                     if (entity instanceof Enemy) {
+                         return new Enemy(entity.x, entity.y, gameState.loadedSprites.enemy_basic);
+                     } else if (entity instanceof Collectible) {
+                          return new Collectible(entity.x, entity.y, gameState.loadedSprites.collectible);
+
+                     } else if (entity instanceof PowerUp && entity.type === 'invincible') {
+                          return new PowerUp(entity.x, entity.y, 'invincible', gameState.loadedSprites.powerup_invincible);
+                     }
+                      return null;
+                 }).filter(entity => entity !== null);
+
+                 EntityManager.init(gameState.playerState, initialEntities);
+                 ParticleManager.particles = [];
+
+                 ApiManager.hideLoading();
+                 gameState.currentPhase = 'playingLevel';
+                 lastTime = performance.now(); // Reset lastTime for smooth transition
+                 requestAnimationFrame(GameManager.gameLoop);
+             },
+
+            gameOver() {
+                gameState.currentPhase = 'gameOver';
+                UIManager.hideHUD();
+                UIManager.setFinalScore(gameState.score);
+                 if (sounds.music && sounds.music.state() === 'loaded') sounds.music.stop();
+                UIManager.showModal(gameOverModal);
+            },
+
+            restartGame() {
+                 UIManager.hideModal(gameOverModal);
+                 GameManager.startGame();
+            },
+
+            pauseGame() {
+                 gameState.isPaused = true;
+                 if (sounds.music && sounds.music.state() === 'loaded') sounds.music.pause();
+                 UIManager.showModal(pauseMenuModal);
+            },
+
+            resumeGame() {
+                 gameState.isPaused = false;
+                 UIManager.hideModal(pauseMenuModal);
+                 lastTime = performance.now(); // Ensure smooth resume
+                 if (sounds.music && sounds.music.state() === 'loaded') sounds.music.play();
+                 requestAnimationFrame(GameManager.gameLoop);
+            },
+
+            quitToMenu() {
+                 gameState.isPaused = false;
+                 UIManager.hideModal(pauseMenuModal);
+                 gameState.currentPhase = 'mainMenu';
+                 UIManager.showModal(mainMenuModal);
+                 UIManager.hideHUD();
+                 if (sounds.music && sounds.music.state() === 'loaded') sounds.music.stop();
+
+                 // Reset game state variables
+                 gameState.entities = [];
+                 gameState.tilemap = [];
+                 gameState.playerState = null;
+                 gameState.landscapeSketchImage = null;
+                 gameState.currentHaiku = '';
+                 gameState.haikuAnalysis = null;
+                 gameState.lastJudgment = null;
+                 gameState.score = 0;
+                 gameState.attempts = GAME_CONFIG.MAX_ATTEMPTS;
+                 gameState.difficulty = 1;
+                 gameState.gameTime = 0;
+                 gameState.activePowerUps = { invincible: 0 };
+                 ParticleManager.particles = [];
+                 gameState.camera = { x: 0, y: 0 }; // Reset camera
+                 gameState.keysPressed = {}; // Clear inputs
+            },
+
+            collectItem(collectible) {
+                 gameState.score += collectible.scoreValue;
+                 UIManager.updateScore(gameState.score);
+                 collectible.toRemove = true;
+                 if (sounds.collect && sounds.collect.state() === 'loaded') sounds.collect.play();
+                  ParticleManager.createParticle(
+                       collectible.x + collectible.width / 2,
+                       collectible.y + collectible.height / 2,
+                       '#ecc94b', // Yellow/gold color
+                       3,
+                       (Math.random() - 0.5) * 100,
+                       (Math.random() - 1) * 100,
+                       0.8
+                  );
+            },
+
+             activatePowerUp(powerUp) {
+                  if (powerUp.type === 'invincible') {
+                      gameState.activePowerUps.invincible = GAME_CONFIG.POWERUP_DURATION;
+                      UIManager.updatePowerUpIndicators();
+                       if (sounds.powerup && sounds.powerup.state() === 'loaded') sounds.powerup.play();
+                       ParticleManager.createParticle(
+                           powerUp.x + powerUp.width / 2,
+                           powerUp.y + powerUp.height
+ / 2,
+                           '#63b3ed', // Blue color
+                           4,
+                           (Math.random() - 0.5) * 150,
+                           (Math.random() - 1) * 150,
+                           1
+                      );
+                  }
+                  powerUp.toRemove = true;
+             },
+
+
+            resizeGameCanvasMaintainAspectRatio() {
+                const nativeAspectRatio = GAME_CONFIG.CANVAS_NATIVE_WIDTH / GAME_CONFIG.CANVAS_NATIVE_HEIGHT;
+                let windowWidth = window.innerWidth;
+                let windowHeight = window.innerHeight;
+                const windowAspectRatio = windowWidth / windowHeight;
+
+                let scaledWidth, scaledHeight;
+
+                if (windowAspectRatio > nativeAspectRatio) {
+                    scaledHeight = windowHeight;
+                    scaledWidth = scaledHeight * nativeAspectRatio;
+                } else {
+                    scaledWidth = windowWidth;
+                    scaledHeight = scaledWidth / nativeAspectRatio;
+                }
+
+                gameCanvas.style.width = Math.floor(scaledWidth) + 'px';
+                gameCanvas.style.height = Math.floor(scaledHeight) + 'px';
+
+                const gameWrapper = document.getElementById('game-wrapper');
+                 if (gameWrapper) {
+                   gameWrapper.style.width = gameCanvas.style.width;
+                   gameWrapper.style.height = gameCanvas.style.height;
+                 }
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', GameManager.init);
+
+    </script>
+
+
+
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

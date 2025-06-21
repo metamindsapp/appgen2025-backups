@@ -1,0 +1,31 @@
+{
+  "projectId": "69356c90-21d3-4c2c-b24b-227638892cda",
+  "revisionString": "1",
+  "projectNameDisplay": "Fart",
+  "userPromptForThisRevision": "Make me a website of a memecoin for a fart cause my girlfriend is always farting, so let's monetize it, and make a tokenomics",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-05-25T13:03:30.297Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/dalle_014d3b1c-e4e.png",
+      "url": "/generated_images/dalle_014d3b1c-e4e.png",
+      "description": "A humorous and iconic logo for a memecoin called '$FART Coin'. The logo should feature a stylized, cartoonish green or brown fart cloud, possibly with a cheeky smiling face or googly eyes. Alternatively, a cute cartoon animal (like a frog, pug, or skunk) comically emitting a visible puff of 'gas'. The text '$FART' or 'FART COIN' should be integrated clearly within or around the design, using a bold, playful, rounded font. The style should be clean, vector-like, and easily recognizable as a small icon. Colors should be vibrant and contrast well on a dark background. Avoid overly realistic or offensive imagery. Aim for 'memeable' and friendly.",
+      "purpose": "Main logo for $FART memecoin (navbar, hero, favicon). ID: LOGO_PLACEHOLDER_ID",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_990c1dff-1fc.png",
+      "url": "/generated_images/dalle_990c1dff-1fc.png",
+      "description": "A visually engaging pie chart graphic for the 'Tokenomics' section of the $FART memecoin website. The chart should represent fictional token distribution percentages (e.g., Liquidity 40%, Marketing 30%, Team 15%, Community 10%, Burn 5%). Use distinct, bright, and somewhat playful colors for each segment that pop on a dark theme (e.g., vibrant green, electric blue, sunny yellow, hot pink, bright orange). Each segment could have a tiny, subtle icon related to its purpose (e.g., a droplet for liquidity, a megaphone for marketing). Style should be clean, modern flat design, perhaps with a slight 3D effect or subtle gradients. Ensure clarity and readability.",
+      "purpose": "Visual representation of token distribution for the Tokenomics section. ID: TOKENOMICS_CHART_PLACEHOLDER_ID",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_ba77fab7-b42.png",
+      "url": "/generated_images/dalle_ba77fab7-b42.png",
+      "description": "A whimsical and abstract background image suitable for the hero section or the 'About' section of the $FART memecoin website. Depict stylized, swirling currents of 'wind' or 'gas' in various shades of green, yellow, and perhaps a touch of light brown, against a very dark background (e.g., deep navy or charcoal). The swirls should be soft and painterly or like gentle smoke, with a sense of motion and lightness. Maybe a few subtle sparkles or tiny bubble-like elements within the currents. The overall mood should be playful, energetic, and slightly magical, not gross. This image will be used as a background, so it shouldn't be too busy.",
+      "purpose": "Thematic background image for hero or about section to enhance visual appeal. ID: BACKGROUND_IMAGE_PLACEHOLDER_ID_OPTIONAL",
+      "isNewlyGenerated": true
+    }
+  ]
+}

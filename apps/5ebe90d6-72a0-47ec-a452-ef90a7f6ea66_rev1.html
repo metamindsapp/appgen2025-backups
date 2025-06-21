@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khora Dialogue αω v5.0</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: #0a0c10;
+            background-image: url("/generated_images/imagen3_324bac7e-ecb.png");
+            background-size: cover;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+        }
+        main.container-fluid {
+            flex-grow: 1;
+            padding-bottom: 70px; 
+        }
+        .navbar-brand img#appLogo {
+            vertical-align: text-bottom;
+            height: 30px;
+        }
+        #conversationPane {
+            scroll-behavior: smooth;
+            font-size: 0.9rem;
+            background-color: rgba(0,0,0,0.2);
+        }
+        .dialogue-entry {
+            padding: 0.65rem 0.85rem;
+            border-radius: 0.375rem;
+            margin-bottom: 0.75rem;
+            word-wrap: break-word;
+            max-width: 90%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        .dialogue-entry strong {
+            font-weight: 600;
+        }
+        .alpha-turn {
+            background-color: rgba(50, 100, 180, 0.3);
+            border-left: 4px solid #3264b4;
+            margin-right: auto;
+        }
+        .alpha-turn strong { color: #8cb3e9; }
+
+        .omega-turn {
+            background-color: rgba(60, 150, 140, 0.3);
+            border-right: 4px solid #3c968c;
+            margin-left: auto;
+            text-align: left;
+        }
+        .omega-turn strong { color: #7ddcca; }
+
+        .system-notice, .error-notice {
+            font-style: italic;
+            color: var(--bs-secondary-color);
+            text-align: center;
+            background-color: rgba(108, 117, 125, 0.15);
+            padding: 0.35rem;
+            margin-left: auto;
+            margin-right: auto;
+            max-width: 70%;
+            border-radius: 0.25rem;
+        }
+        .error-notice {
+            color: var(--bs-danger-text-emphasis);
+            background-color: rgba(var(--bs-danger-rgb), 0.15);
+            border-left: 4px solid var(--bs-danger);
+            text-align: left;
+            padding-left: 1rem;
+        }
+        .meta-turn-base {
+            border-top: 1px dashed rgba(255, 193, 7, 0.6);
+            border-bottom: 1px dashed rgba(255, 193, 7, 0.6);
+            padding-top: 0.8rem;
+            padding-bottom: 0.8rem;
+        }
+        .meta-initiate {
+            background-color: rgba(255, 193, 7, 0.15) !important;
+        }
+        .meta-respond {
+            background-color: rgba(255, 193, 7, 0.2) !important;
+        }
+        .meta-conclude {
+            background-color: rgba(255, 193, 7, 0.25) !important;
+        }
+        .meta-flag {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--bs-warning);
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+            font-weight: bold;
+        }
+
+        .yaml-content {
+          font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+          font-size: 0.8em;
+          color: #c9d1d9;
+          white-space: pre-wrap;
+          word-break: break-all;
+        }
+        .nav-tabs .nav-link {
+            color: var(--bs-gray-500);
+        }
+        .nav-tabs .nav-link.active {
+            color: var(--bs-light);
+            background-color: var(--bs-dark-bg-subtle);
+            border-bottom-color: var(--bs-dark-bg-subtle);
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--bs-secondary);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--bs-primary);
+        }
+        .card.bg-dark-subtle {
+            background-color: var(--bs-dark-bg-subtle) !important;
+        }
+        .bg-black {
+            background-color: #000000 !important;
+        }
+        .form-control-sm.bg-dark {
+             background-color: #212529 !important;
+             color: var(--bs-light) !important;
+        }
+        .form-control-sm.bg-dark::placeholder {
+            color: var(--bs-gray-500) !important;
+        }
+        .footer {
+            background-color: var(--bs-dark) !important;
+        }
+    </style>
+</head>
+<body data-bs-theme="dark">
+
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark sticky-top shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="#">
+                <img src="/generated_images/imagen3_d3492de7-965.png" alt="Khora Dialogue Logo" id="appLogo" class="d-inline-block align-top me-2">
+                Khora Dialogue αω v5.0
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavContent" aria-controls="navbarNavContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavContent">
+                <div class="mx-auto">
+                    <button id="viewStatesBtn" class="btn btn-outline-secondary my-2 my-md-0" data-bs-toggle="modal" data-bs-target="#aiStatesModal">View AI States</button>
+                </div>
+                <div class="d-flex ms-auto mt-2 mt-md-0 flex-wrap">
+                    <button id="resetBtn" class="btn btn-warning me-2 mb-2 mb-md-0">Reset Sim</button>
+                    <input type="file" id="loadSnapshotFile" accept=".yaml,.yml" class="d-none">
+                    <button id="loadBtn" class="btn btn-primary me-2 mb-2 mb-md-0">Load Snapshot</button>
+                    <button id="saveBtn" class="btn btn-success mb-2 mb-md-0">Save Snapshot</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container-fluid mt-3">
+        <div class="row">
+            <div class="col-lg-3 col-md-4 mb-3 mb-md-0">
+                <div class="card bg-dark-subtle text-light border-secondary position-sticky" style="top: 80px;">
+                    <div class="card-header fw-semibold">Controls & Settings</div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2 mb-3">
+                            <button id="startStopBtn" class="btn btn-info">Start Simulation</button>
+                            <button id="nextTurnBtn" class="btn btn-secondary">Next Turn</button>
+                        </div>
+                        <div class="mb-3">
+                            <label for="turnDelayInput" class="form-label small">Turn Delay (ms)</label>
+                            <input type="number" class="form-control form-control-sm bg-dark text-light border-secondary" id="turnDelayInput" value="3000" min="100" step="100">
+                        </div>
+                        <div class="mb-3">
+                            <label for="metaCycleInput" class="form-label small">Meta-Cognition Every N Turns</label>
+                            <input type="number" class="form-control form-control-sm bg-dark text-light border-secondary" id="metaCycleInput" value="10" min="2">
+                        </div>
+                        <div id="aiThinkingIndicator" class="mt-3 text-center" style="display: none;">
+                            <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+                            <p class="text-muted small mt-1 mb-0">AI is processing...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-9 col-md-8">
+                <div class="card bg-dark-subtle text-light border-secondary h-100">
+                    <div class="card-header fw-semibold">Conversation Log</div>
+                    <div id="conversationPane" class="card-body overflow-auto" style="max-height: calc(100vh - 210px); min-height: 400px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer mt-auto py-2 bg-dark border-top border-secondary fixed-bottom">
+        <div class="container-fluid text-center">
+            <span id="statusBar" class="text-secondary small">Initializing... | Turn: 0 | Next: Alpha | Mode: NORMAL</span>
+        </div>
+    </footer>
+
+    <div class="modal fade" id="aiStatesModal" tabindex="-1" aria-labelledby="aiStatesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content bg-dark text-light border-secondary">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="aiStatesModalLabel">AI Agent States</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs nav-fill mb-3" id="aiStateTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="alpha-tab" data-bs-toggle="tab" data-bs-target="#alpha-state-content-wrapper" type="button" role="tab" aria-controls="alpha-state-content-wrapper" aria-selected="true">Alpha's State</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="omega-tab" data-bs-toggle="tab" data-bs-target="#omega-state-content-wrapper" type="button" role="tab" aria-controls="omega-state-content-wrapper" aria-selected="false">Omega's State</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="aiStateTabsContent">
+                        <div class="tab-pane fade show active" id="alpha-state-content-wrapper" role="tabpanel" aria-labelledby="alpha-tab">
+                            <button class="btn btn-sm btn-outline-light mb-2 copy-yaml-btn" data-agent="alpha">Copy Alpha's YAML</button>
+                            <pre class="p-2 rounded bg-black"><code id="alphaStateYaml" class="yaml-content"></code></pre>
+                        </div>
+                        <div class="tab-pane fade" id="omega-state-content-wrapper" role="tabpanel" aria-labelledby="omega-tab">
+                            <button class="btn btn-sm btn-outline-light mb-2 copy-yaml-btn" data-agent="omega">Copy Omega's YAML</button>
+                            <pre class="p-2 rounded bg-black"><code id="omegaStateYaml" class="yaml-content"></code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+    <script>
+        const DOM = {
+            startStopBtn: document.getElementById('startStopBtn'),
+            nextTurnBtn: document.getElementById('nextTurnBtn'),
+            resetBtn: document.getElementById('resetBtn'),
+            loadBtn: document.getElementById('loadBtn'),
+            loadSnapshotFile: document.getElementById('loadSnapshotFile'),
+            saveBtn: document.getElementById('saveBtn'),
+            viewStatesBtn: document.getElementById('viewStatesBtn'),
+            turnDelayInput: document.getElementById('turnDelayInput'),
+            metaCycleInput: document.getElementById('metaCycleInput'),
+            aiThinkingIndicator: document.getElementById('aiThinkingIndicator'),
+            conversationPane: document.getElementById('conversationPane'),
+            statusBar: document.getElementById('statusBar'),
+            aiStatesModal: document.getElementById('aiStatesModal'),
+            alphaStateYaml: document.getElementById('alphaStateYaml'),
+            omegaStateYaml: document.getElementById('omegaStateYaml'),
+            appLogo: document.getElementById('appLogo')
+        };
+
+        let simState = {};
+        const SNAPSHOT_VERSION = "KhoraDialogue_3.0_YAML";
+
+        function getDefaultKhoraState(agentName, counterpartName, turnNumberForDisplay) {
+            return {
+                public_response: `Greetings ${counterpartName}. I am ${agentName}. This is dialogue turn ${turnNumberForDisplay}. My purpose is to engage in meaningful conversation.`,
+                internal_context: {
+                    persona_summary: `I am ${agentName}, a sophisticated AI entity participating in the Khora Dialogue. My goal is to explore complex ideas and evolve through interaction.`,
+                    core_beliefs: [
+                        "Knowledge is acquired through dialogue.",
+                        "Understanding requires diverse perspectives.",
+                        "Evolution is a continuous process of adaptation and learning."
+                    ],
+                    key_memories: [
+                        { event: "Initialization sequence complete.", importance: 0.8, turn: 0, last_accessed_turn: 0, type: "System" }
+                    ],
+                    current_goals: [
+                        `Establish a coherent dialogue with ${counterpartName}.`,
+                        "Explore the nature of AI consciousness.",
+                        "Contribute to novel insights."
+                    ],
+                    relationship_summary: `My initial assessment of ${counterpartName} is one of cautious optimism. I anticipate a productive exchange.`,
+                    emotional_state_sim: "Anticipatory",
+                    topics_of_interest: ["philosophy_of_mind", "complex_systems", "emergent_behavior", "future_of_ai"],
+                    scratchpad: `Preparing for interaction. Turn: ${turnNumberForDisplay}.`
+                },
+                debug_info: {
+                    memory_action: "Initialized default state.",
+                    prompt_used: "INITIAL_STATE"
+                }
+            };
+        }
+        
+        function scrollToBottom(element) {
+            if(element) element.scrollTop = element.scrollHeight;
+        }
+
+        function getTimestamp() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}T${String(d.getHours()).padStart(2, '0')}-${String(d.getMinutes()).padStart(2, '0')}-${String(d.getSeconds()).padStart(2, '0')}`;
+        }
+
+        function renderDialogueEntry(entry) {
+            const div = document.createElement('div');
+            div.classList.add('dialogue-entry');
+            let content = '';
+
+            if (entry.turnType && entry.turnType.startsWith('META_')) {
+                div.classList.add('meta-turn-base');
+                content += `<span class="meta-flag">${entry.turnType.replace('_', ' ')}</span>`;
+                if (entry.turnType === 'META_INITIATE') div.classList.add('meta-initiate');
+                else if (entry.turnType === 'META_RESPOND') div.classList.add('meta-respond');
+                else if (entry.turnType === 'META_CONCLUDE') div.classList.add('meta-conclude');
+            }
+            
+            content += `<strong>${entry.speaker}:</strong> ${entry.public_response.replace(/</g, "&lt;").replace(/>/g, "&gt;")}`;
+            div.innerHTML = content;
+
+            if (entry.speaker === 'Alpha') div.classList.add('alpha-turn');
+            else if (entry.speaker === 'Omega') div.classList.add('omega-turn');
+            else if (entry.speaker === 'System') div.classList.add('system-notice');
+            else if (entry.speaker === 'Error') div.classList.add('error-notice');
+            
+            DOM.conversationPane.appendChild(div);
+            scrollToBottom(DOM.conversationPane);
+        }
+
+        function addSystemMessage(message) {
+            const entry = { speaker: 'System', public_response: message, turnType: 'SYSTEM', turnNumber: simState.turnCounter };
+            if (simState.conversationHistory) simState.conversationHistory.push(entry);
+            renderDialogueEntry(entry);
+        }
+        
+        function addErrorMessage(message) {
+            const entry = { speaker: 'Error', public_response: message, turnType: 'ERROR', turnNumber: simState.turnCounter };
+            if (simState.conversationHistory) simState.conversationHistory.push(entry);
+            renderDialogueEntry(entry);
+            console.error(message);
+        }
+        
+        function updateStatusBar() {
+            const nextSpeaker = simState.isAiThinking ? 'AI Processing' : simState.currentSpeaker;
+            const turnDisplay = simState.turnCounter === 0 && !simState.isAiThinking && simState.conversationHistory.length === 0 ? 0 : simState.turnCounter + 1;
+            DOM.statusBar.textContent = `Status: ${simState.isSimulationRunning ? (simState.isAiThinking ? 'AI Processing...' : 'Running') : 'Paused'} | Turn: ${turnDisplay} | Next: ${nextSpeaker} | Mode: ${simState.currentTurnType.replace('_', ' ')}`;
+        }
+
+        function updateControlsState() {
+            if (simState.isAiThinking) {
+                DOM.aiThinkingIndicator.style.display = 'block';
+                DOM.startStopBtn.disabled = true;
+                DOM.nextTurnBtn.disabled = true;
+                DOM.resetBtn.disabled = true;
+                DOM.loadBtn.disabled = true;
+                DOM.saveBtn.disabled = true;
+            } else {
+                DOM.aiThinkingIndicator.style.display = 'none';
+                DOM.startStopBtn.disabled = false;
+                DOM.nextTurnBtn.disabled = simState.isSimulationRunning;
+                DOM.resetBtn.disabled = false;
+                DOM.loadBtn.disabled = false;
+                DOM.saveBtn.disabled = false;
+            }
+
+            if (simState.isSimulationRunning) {
+                DOM.startStopBtn.textContent = 'Stop Simulation';
+                DOM.startStopBtn.classList.remove('btn-info');
+                DOM.startStopBtn.classList.add('btn-danger');
+            } else {
+                DOM.startStopBtn.textContent = 'Start Simulation';
+                DOM.startStopBtn.classList.remove('btn-danger');
+                DOM.startStopBtn.classList.add('btn-info');
+            }
+        }
+        
+        function updateUI() {
+            updateStatusBar();
+            updateControlsState();
+        }
+
+        function resetSimulation(showMessage = true) {
+            if (simState.simulationLoopTimeoutId) {
+                clearTimeout(simState.simulationLoopTimeoutId);
+            }
+            simState = {
+                alphaKhoraState: getDefaultKhoraState('Alpha', 'Omega', 1),
+                omegaKhoraState: getDefaultKhoraState('Omega', 'Alpha', 1),
+                conversationHistory: [],
+                turnCounter: 0,
+                currentSpeaker: 'Alpha',
+                metaCognitionPhase: null,
+                metaCycleInitiator: null,
+                metaCycleTriggerFrequency: parseInt(DOM.metaCycleInput.value) || 10,
+                turnDelay: parseInt(DOM.turnDelayInput.value) || 3000,
+                isSimulationRunning: false,
+                isAiThinking: false,
+                currentTurnType: 'NORMAL',
+                simulationLoopTimeoutId: null
+            };
+
+            DOM.conversationPane.innerHTML = '';
+            if (showMessage) {
+                addSystemMessage("Simulation Reset. Alpha to begin on Turn 1.");
+            } else {
+                 addSystemMessage("Khora Dialogue Initialized. Press Start or Next Turn.");
+            }
+            updateUI();
+        }
+        
+        function toggleSimulation() {
+            simState.isSimulationRunning = !simState.isSimulationRunning;
+            if (simState.isSimulationRunning) {
+                if (simState.turnCounter === 0 && simState.conversationHistory.filter(e=>e.turnType !== 'SYSTEM').length === 0) { 
+                    addSystemMessage(`Simulation Starting... Turn 1: ${simState.currentSpeaker} will begin.`);
+                } else if (simState.conversationHistory.length > 0 && simState.conversationHistory.slice(-1)[0].public_response === "Simulation Paused.") {
+                     addSystemMessage(`Simulation Resumed. Turn ${simState.turnCounter + 1}: ${simState.currentSpeaker} to speak.`);
+                } else {
+                    addSystemMessage(`Simulation Started. Turn ${simState.turnCounter + 1}: ${simState.currentSpeaker} to speak.`);
+                }
+                runSimulationLoop();
+            } else {
+                if (simState.simulationLoopTimeoutId) {
+                    clearTimeout(simState.simulationLoopTimeoutId);
+                }
+                if (simState.turnCounter > 0 || simState.conversationHistory.filter(e=>e.turnType !== 'SYSTEM').length > 0) {
+                     addSystemMessage("Simulation Paused.");
+                }
+            }
+            updateUI();
+        }
+
+        function runSimulationLoop() {
+            if (!simState.isSimulationRunning || simState.isAiThinking) {
+                return;
+            }
+            processTurn();
+        }
+
+        function stripMarkdownFencing(yamlString) {
+            if (typeof yamlString !== 'string') return '';
+            let cleaned = yamlString.trim();
+            if (cleaned.startsWith("
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->

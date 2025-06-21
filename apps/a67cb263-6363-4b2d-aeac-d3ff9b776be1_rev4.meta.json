@@ -1,0 +1,32 @@
+{
+  "projectId": "a67cb263-6363-4b2d-aeac-d3ff9b776be1",
+  "revisionString": "4",
+  "projectNameDisplay": "NeuroFlow",
+  "projectType": "webapp",
+  "userPromptForThisRevision": "i screwed up heres the audio URL i meant to give you last time for use to use. \r\n\r\nhttps://cdn.pixabay.com/download/audio/2025/03/06/audio_856ae61a60.mp3?filename=log-soft-low-frequency-bell-sound-temple-asmr-309725.mp3",
+  "basedOnRevisionString": "3",
+  "savedAt": "2025-05-29T12:42:49.177Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/imagen3_a325c57b-e8c.png",
+      "url": "/generated_images/imagen3_a325c57b-e8c.png",
+      "description": "A sleek, modern logo for 'NeuroFlow'. The logo should subtly incorporate elements related to brain activity (e.g., stylized neuron, abstract brainwave pattern) and time/flow (e.g., a gentle curve, circular element). The style should be minimalist and abstract, fitting a tech/productivity app. Dominant colors: a cool blue (e.g., Bootstrap primary #0D6EFD) or a vibrant teal, with white or light gray (#E2E8F0) accents. It must look sharp on a very dark background (e.g., #000000 or #0a0a0a). Avoid overly complex details. Text 'NeuroFlow' is NOT part of the logo image itself, it will be text next to it. Ensure it's clean and professional.",
+      "purpose": "Navbar brand logo for the NeuroFlow webapp. To be used as a small icon (e.g., 30x30px).",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_4dbf9b18-947.png",
+      "url": "/generated_images/imagen3_4dbf9b18-947.png",
+      "description": "A subtle, abstract background pattern image. The pattern should consist of very faint, dark gray (#222222) or dark blue (#101025) interwoven lines or soft, flowing organic shapes, reminiscent of neural pathways or calm energy flows. It should be almost imperceptible and not distracting, designed to add subtle depth to a primary dark background (e.g., #0a0a0a). The overall mood should be calm, focused, and sophisticated. Ensure it tiles seamlessly if possible, or is large enough to cover typical screen backgrounds without obvious repetition.",
+      "purpose": "Optional subtle background texture for the main body of the webapp to add depth to the dark theme. If used, it would be `body { background-image: url(...); background-size: cover; background-attachment: fixed; }`.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_f84d3052-27a.png",
+      "url": "/generated_images/imagen3_f84d3052-27a.png",
+      "description": "An icon for browser notifications. A simple, clean design combining an abstract brain/neuron silhouette with a small, modern notification bell symbol. Colors should be high contrast for visibility as a small icon: primary blue (#0D6EFD) for the main element on a transparent background, or white (#FFFFFF) on transparent. Style: flat icon, minimalist.",
+      "purpose": "Icon to be used with the Web Notifications API (e.g., 192x192px or similar standard notification icon size).",
+      "isNewlyGenerated": true
+    }
+  ]
+}

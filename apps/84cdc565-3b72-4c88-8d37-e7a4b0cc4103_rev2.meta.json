@@ -1,0 +1,95 @@
+{
+  "projectId": "84cdc565-3b72-4c88-8d37-e7a4b0cc4103",
+  "revisionString": "2",
+  "projectNameDisplay": "kye clone",
+  "projectType": "game",
+  "userPromptForThisRevision": "oops the levels are just black screens. close though. finish it up",
+  "basedOnRevisionString": "1",
+  "savedAt": "2025-05-29T06:58:03.572Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/dalle3_61fdba94-633.png",
+      "url": "/generated_images/dalle3_61fdba94-633.png",
+      "description": "Pixel art sprite for the player character 'Kye'. A small, friendly, androgynous humanoid figure, facing forward, ready for adventure. Style: clean 16-bit or 32-bit pixel art. Dominant colors: light theme friendly, e.g., Kye wears a blue shirt and khaki pants. Transparent background. Ideal for a 32x32 pixel tile.",
+      "purpose": "Player character main sprite.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_50a60a9d-b6b.png",
+      "url": "/generated_images/dalle3_50a60a9d-b6b.png",
+      "description": "Pixel art sprite for a sparkling diamond collectible. Classic faceted diamond shape. Bright, clear, or light blue, with a prominent sparkle/shine effect. Style: 16/32-bit pixel art. Transparent background. Ideal for a 32x32 pixel tile.",
+      "purpose": "Collectible diamond sprite.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_a88e9439-483.png",
+      "url": "/generated_images/dalle3_a88e9439-483.png",
+      "description": "Pixel art sprite for a solid wall block. Textured like light gray stone bricks or clean metallic panels. Clearly impassable. Style: 16/32-bit pixel art. Square, designed to fill a 32x32 pixel tile. Light theme compatible.",
+      "purpose": "Impassable wall block sprite.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_f9932b71-4f4.png",
+      "url": "/generated_images/dalle3_f9932b71-4f4.png",
+      "description": "Pixel art sprite for a generic floor tile. A simple, clean light gray or beige patterned tile, or very light grass texture. Subtle, not distracting. Style: 16/32-bit pixel art. Square, fills a 32x32 pixel tile.",
+      "purpose": "Default empty/walkable floor tile sprite.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_f6602569-3d4.png",
+      "url": "/generated_images/dalle3_f6602569-3d4.png",
+      "description": "Pixel art sprite for a pushable box. Looks like a light brown wooden crate or a simple, colored (e.g., light green) block. Clearly distinct from walls. Style: 16/32-bit pixel art. Square, fills a 32x32 pixel tile.",
+      "purpose": "Pushable box/slider sprite.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_3e47a10d-25b.png",
+      "url": "/generated_images/dalle3_3e47a10d-25b.png",
+      "description": "Pixel art sprite for a 'sticky' magnet block. Metallic gray with a subtle blue or red magnet symbol (U-shape or bar) or electric sparks. Distinct from other blocks. Style: 16/32-bit pixel art. Square, fills a 32x32 pixel tile.",
+      "purpose": "Sticky/Magnet block sprite.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_48f3f382-4cf.png",
+      "url": "/generated_images/dalle3_48f3f382-4cf.png",
+      "description": "Pixel art sprite for a 'Rocker' monster. A simple, round, red or orange creature with determined eyes, possibly with small horns or a grumpy expression. Looks like it would roll or slide. Style: 16/32-bit pixel art. Transparent background. Fits within a 32x32 pixel tile.",
+      "purpose": "Rocker monster sprite.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_22580a7e-825.png",
+      "url": "/generated_images/dalle3_22580a7e-825.png",
+      "description": "Pixel art sprite for an 'Eater' monster. A green or purple amorphous blob-like creature with a large, visible mouth, perhaps a single eye. Looks hungry. Style: 16/32-bit pixel art. Transparent background. Fits within a 32x32 pixel tile.",
+      "purpose": "Eater/Blob monster sprite.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_2fed1623-1ba.png",
+      "url": "/generated_images/dalle3_2fed1623-1ba.png",
+      "description": "Pixel art sprite for a one-way arrow block, pointing UP. A block (perhaps light blue or gray) with a clear, contrasting white or yellow upward-pointing arrow icon on it. Style: 16/32-bit pixel art. Square, fills a 32x32 pixel tile.",
+      "purpose": "One-way UP arrow block sprite.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_7471ad32-926.png",
+      "url": "/generated_images/dalle3_7471ad32-926.png",
+      "description": "Pixel art sprite for a one-way arrow block, pointing DOWN. Similar to UP arrow block, but arrow points down. Style: 16/32-bit pixel art. Square, fills a 32x32 pixel tile.",
+      "purpose": "One-way DOWN arrow block sprite.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_a7489d18-a58.png",
+      "url": "/generated_images/dalle3_a7489d18-a58.png",
+      "description": "Pixel art sprite for a one-way arrow block, pointing LEFT. Similar to UP arrow block, but arrow points left. Style: 16/32-bit pixel art. Square, fills a 32x32 pixel tile.",
+      "purpose": "One-way LEFT arrow block sprite.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_a4cdf779-3b7.png",
+      "url": "/generated_images/dalle3_a4cdf779-3b7.png",
+      "description": "Pixel art sprite for a one-way arrow block, pointing RIGHT. Similar to UP arrow block, but arrow points right. Style: 16/32-bit pixel art. Square, fills a 32x32 pixel tile.",
+      "purpose": "One-way RIGHT arrow block sprite.",
+      "isNewlyGenerated": true
+    }
+  ]
+}

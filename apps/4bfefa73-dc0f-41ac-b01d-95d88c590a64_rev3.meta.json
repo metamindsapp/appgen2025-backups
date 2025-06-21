@@ -1,0 +1,46 @@
+{
+  "projectId": "4bfefa73-dc0f-41ac-b01d-95d88c590a64",
+  "revisionString": "3",
+  "projectNameDisplay": "Theremin",
+  "projectType": "webapp",
+  "userPromptForThisRevision": "[2025-05-29T15:23:09.703Z] [WARN] Cannot rebuild effect chain: Audio system not fully initialized or core nodes invalid/missing.",
+  "basedOnRevisionString": "2",
+  "savedAt": "2025-05-29T15:31:16.674Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/imagen3_bd0f3da4-9ff.png",
+      "url": "/generated_images/imagen3_bd0f3da4-9ff.png",
+      "description": "A subtle, abstract background image for a web theremin. Style: digital art, light theme. Dominant colors: very light greys (e.g., #F0F5FA, #E8EFF5), soft blues (e.g., #D0E0FF, #C0D8F8), and hints of silver. The design should evoke sound waves, gentle electronic circuits, or ethereal patterns. It should be non-distracting and provide a clean, modern, technological feel. Avoid strong contrasts or overly busy elements. Overall mood: calm, focused, slightly futuristic. Ensure it tiles seamlessly if possible, or is large enough to cover common aspect ratios without obvious repetition if not tiling.",
+      "purpose": "Background for the main theremin interaction area (#thereminZone) to enhance visual appeal without distracting from controls. It will be applied using `background-image` CSS property.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_dc54ddde-6b7.png",
+      "url": "/generated_images/imagen3_dc54ddde-6b7.png",
+      "description": "Icon: Sine wave symbol. Style: clean, minimalist line art icon, single solid color (intended to be #0d6efd Bootstrap primary blue, or a color that works well on a light button background). Clearly depicts one or two cycles of a smooth sine wave. Optimized for use as a small icon on a button (e.g., 24x24 or 32x32 effective display size). Background should be transparent.",
+      "purpose": "Visual icon for the 'Sine' waveform selection button in the control panel. Path: /generated_images/waveform_sine.png",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_2fe77ef0-5d5.png",
+      "url": "/generated_images/imagen3_2fe77ef0-5d5.png",
+      "description": "Icon: Square wave symbol. Style: clean, minimalist line art icon, single solid color (intended to be #0d6efd Bootstrap primary blue). Clearly depicts one or two cycles of a sharp square wave. Optimized for use as a small icon on a button. Background should be transparent.",
+      "purpose": "Visual icon for the 'Square' waveform selection button in the control panel. Path: /generated_images/waveform_square.png",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_be245015-3c5.png",
+      "url": "/generated_images/imagen3_be245015-3c5.png",
+      "description": "Icon: Sawtooth wave symbol. Style: clean, minimalist line art icon, single solid color (intended to be #0d6efd Bootstrap primary blue). Clearly depicts one or two cycles of a ramp-like sawtooth wave. Optimized for use as a small icon on a button. Background should be transparent.",
+      "purpose": "Visual icon for the 'Sawtooth' waveform selection button in the control panel. Path: /generated_images/waveform_sawtooth.png",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_cbe76ae5-681.png",
+      "url": "/generated_images/imagen3_cbe76ae5-681.png",
+      "description": "Icon: Triangle wave symbol. Style: clean, minimalist line art icon, single solid color (intended to be #0d6efd Bootstrap primary blue). Clearly depicts one or two cycles of a symmetrical triangle wave. Optimized for use as a small icon on a button. Background should be transparent.",
+      "purpose": "Visual icon for the 'Triangle' waveform selection button in the control panel. Path: /generated_images/waveform_triangle.png",
+      "isNewlyGenerated": true
+    }
+  ]
+}

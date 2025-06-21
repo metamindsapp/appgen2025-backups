@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>$FART Coin - The Most Explosive Token!</title>
+    <link rel="icon" href="/generated_images/dalle_014d3b1c-e4e.png" type="image/png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --fart-green: #66ff66;
+            --dark-bg-body: #121212;
+            --dark-bg-section-1: #1A202C; /* For sections like about, tokenomics */
+            --dark-bg-section-2: #212529; /* For sections like roadmap, fart-zone */
+            --dark-bg-card: #2D3748;
+            --bs-border-color-translucent: rgba(255, 255, 255, 0.15);
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 70px; 
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--dark-bg-body);
+            color: #adb5bd;
+        }
+        [data-bs-theme="dark"] {
+            color-scheme: dark;
+        }
+
+        .navbar.fixed-top {
+            background-color: rgba(20, 20, 22, 0.85) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--bs-border-color-translucent);
+        }
+        .navbar-brand strong {
+            color: var(--fart-green);
+        }
+        .nav-link {
+            transition: color 0.2s ease-in-out;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: var(--fart-green) !important;
+        }
+        .nav-link.btn-outline-success {
+             border-width: 2px;
+        }
+
+        #hero {
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            position: relative;
+            color: #f8f9fa;
+        }
+        #heroTitle {
+            color: var(--fart-green); 
+            text-shadow: 0 0 12px rgba(102, 255, 102, 0.6), 0 0 25px rgba(0,0,0,0.8);
+        }
+        @keyframes floatAnimation {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-18px); }
+        }
+        #heroLogoImage {
+             filter: drop-shadow(0 0 20px rgba(102, 255, 102, 0.5));
+             max-width: 180px;
+        }
+        @media (min-width: 768px) {
+            #heroLogoImage {
+                max-width: 220px;
+            }
+        }
+
+
+        #about, #tokenomics {
+            background-color: var(--dark-bg-section-1);
+        }
+        #roadmap, #fart-zone {
+             background-color: var(--dark-bg-section-2);
+        }
+         #how-to-buy {
+             background-color: var(--dark-bg-section-1);
+         }
+        
+        .section-title {
+            color: #f8f9fa;
+        }
+        .section-subtitle {
+            color: #adb5bd; /* Bootstrap's text-muted for dark theme */
+        }
+
+        #roadmap .card {
+            background-color: var(--dark-bg-card);
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            border: 1px solid var(--bs-border-color-translucent);
+        }
+        #roadmap .card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 1.2rem 2.5rem rgba(102, 255, 102, 0.25) !important;
+        }
+        #roadmap .card .fs-1 { 
+            font-size: 2.8rem !important;
+            filter: grayscale(40%);
+            transition: filter 0.3s ease, transform 0.3s ease;
+        }
+        #roadmap .card:hover .fs-1 {
+            filter: grayscale(0%);
+            transform: scale(1.1);
+        }
+
+        #fartButton {
+            transition: transform 0.1s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        #fartButton:active {
+            transform: scale(0.93);
+            box-shadow: 0 0 10px rgba(220, 53, 69, 0.7) !important;
+        }
+        #fartEffectDisplay {
+            border: 2px dashed var(--fart-green);
+            box-shadow: 0 0 18px rgba(102, 255, 102, 0.35);
+            color: var(--fart-green);
+            opacity: 0; /* Initially hidden for animation */
+        }
+        @keyframes fadeInEffect {
+            from { opacity: 0; transform: translateY(25px) scale(0.9); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes fadeOutEffect {
+            from { opacity: 1; transform: translateY(0) scale(1); }
+            to { opacity: 0; transform: translateY(-25px) scale(0.9); }
+        }
+        @keyframes wiggleEffect {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            20% { transform: translateX(-4px) rotate(-1.5deg); }
+            40% { transform: translateX(4px) rotate(1.5deg); }
+            60% { transform: translateX(-3px) rotate(-1deg); }
+            80% { transform: translateX(3px) rotate(1deg); }
+        }
+        .visible-fart {
+            display: block !important;
+            animation: fadeInEffect 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards, wiggleEffect 0.6s 0.15s ease-in-out forwards;
+        }
+        .hidden-fart {
+            animation: fadeOutEffect 0.4s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards;
+        }
+        
+        .fw-bold { font-weight: 600 !important; } 
+        .text-success { color: var(--fart-green) !important; } 
+
+        .btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-success { background-color: #52cc52; border-color: #47b347; color: #111; }
+        .btn-success:hover { background-color: #47b347; border-color: #3c993c; color: #000; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(82, 204, 82, 0.3);}
+        
+        .btn-outline-success { border-color: var(--fart-green); color: var(--fart-green); }
+        .btn-outline-success:hover { background-color: var(--fart-green); color: var(--dark-bg-body); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(102, 255, 102, 0.3); }
+        
+        .btn-danger { background-color: #dc3545; border-color: #dc3545;}
+        .btn-danger:hover { background-color: #c82333; border-color: #bd2130; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);}
+        
+        .btn-warning { background-color: #ffc107; border-color: #ffc107; color: #111;}
+        .btn-warning:hover { background-color: #e0a800; border-color: #d39e00; color: #000; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3);}
+        
+        .btn-outline-light { border-color: #f8f9fa; color: #f8f9fa; }
+        .btn-outline-light:hover { background-color: #f8f9fa; color: var(--dark-bg-body); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(248, 249, 250, 0.2);}
+
+        .bg-black { background-color: #000 !important; }
+        .shadow-lg { box-shadow: 0 1rem 3rem rgba(0,0,0,.35)!important; }
+        
+        .list-group-item.bg-transparent {
+            border-color: var(--bs-border-color-translucent) !important;
+        }
+        code.user-select-all {
+            background-color: rgba(255,255,255,0.1);
+            padding: 0.2em 0.4em;
+            border-radius: 0.25rem;
+            color: #f8f9fa;
+        }
+        #gasPriceTicker .gas-value {
+            transition: color 0.3s ease-in-out, transform 0.3s ease-in-out;
+            display: inline-block;
+        }
+        #gasPriceTicker .gas-value.updated {
+            color: var(--fart-green);
+            transform: scale(1.15) translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top shadow-sm">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="#hero">
+                <img src="" alt="$FART Coin Logo" id="navLogoImage" style="height: 40px; margin-right: 10px;">
+                <strong>$FART Coin</strong>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link active" aria-current="page" href="#hero">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#about">About $FART</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#tokenomics">Tokenomics</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#roadmap">Roadmap</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#how-to-buy">How to Buy</a></li>
+                    <li class="nav-item"><a class="nav-link btn btn-sm btn-outline-success ms-lg-2 mt-2 mt-lg-0 py-2 px-3" href="#fart-zone">💨 Fart Zone!</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section id="hero" class="d-flex flex-column justify-content-center align-items-center text-center vh-100">
+        <div class="container pt-5">
+            <img src="" alt="$FART Coin Large Logo" id="heroLogoImage" class="mb-4" style="animation: floatAnimation 3.5s ease-in-out infinite;">
+            <h1 class="display-1 fw-bold mb-3" id="heroTitle">Welcome to $FART Coin!</h1>
+            <p class="lead col-lg-8 mx-auto mb-4">The Most Explosive, Gas-Powered Revolution in Crypto! Embrace the Wind of Change and Let it Rip!</p>
+            <a href="#how-to-buy" class="btn btn-lg btn-success me-md-3 mb-3 mb-md-0 shadow-lg">Get $FART Now! <small>(Theoretically)</small></a>
+            <a href="#about" class="btn btn-lg btn-outline-light shadow-lg">Learn About the Stench</a>
+            <div id="gasPriceTicker" class="mt-5 p-3 rounded small shadow" style="background-color: rgba(0,0,0,0.5); display: inline-block; border: 1px solid rgba(102, 255, 102, 0.3); min-width: 280px;">
+                Current Gas Fee: Loading...
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold display-5 section-title">About <span class="text-success">$FART</span> Coin</h2>
+                <p class="lead section-subtitle">What's that smell? It's innovation!</p>
+            </div>
+            <div class="row align-items-center">
+                <div class="col-lg-6 mb-4 mb-lg-0 text-center">
+                    <img src="" alt="Whimsical abstract gaseous swirls" id="aboutImage" class="img-fluid rounded shadow-lg" style="max-height: 400px;">
+                </div>
+                <div class="col-lg-6">
+                    <h3 class="fw-light section-title">The Genesis of Gas</h3>
+                    <p>It all started with a muse... and her frequent, fragrant emissions. We thought, "Why let all that good gas go to waste?" $FART Coin was born from a desire to capture this raw, natural energy and channel it into the blockchain. We're not just full of hot air; we're building a community that appreciates the lighter (and sometimes smellier) side of life.</p>
+                    <h3 class="fw-light mt-4 section-title">Our Potent Mission</h3>
+                    <p>Our mission is to create the most talked-about, laughed-about, and surprisingly valuable memecoin on the market. We aim for transparency (you can almost see through it!), powerful upward price movements (like a well-aimed... well, you know), and a community as strong and resilient as a cast-iron stomach. Join the $FART movement and let's make some noise (and smells)!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="tokenomics" class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold display-5 section-title">Tokenomics: The Winds of Fortune</h2>
+                <p class="lead section-subtitle">Fueling the $FART Ecosystem.</p>
+            </div>
+            <div class="row align-items-center">
+                <div class="col-lg-6 mb-4 mb-lg-0 text-center">
+                    <img src="" alt="Tokenomics Pie Chart for $FART Coin" id="tokenomicsChartImage" class="img-fluid rounded shadow-lg" style="max-width: 450px;">
+                </div>
+                <div class="col-lg-6">
+                    <h4 class="mb-3 section-title">Total Supply: <span class="text-success fw-bold">1,000,000,000,000 $FART</span></h4>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item bg-transparent text-white-50 d-flex justify-content-between align-items-center">💨 Liquidity Pool (LP): <strong class="text-white">40%</strong> <span class="badge bg-success rounded-pill">Smooth Flow</span></li>
+                        <li class="list-group-item bg-transparent text-white-50 d-flex justify-content-between align-items-center">🌬️ Marketing & Hot Air: <strong class="text-white">30%</strong> <span class="badge bg-info rounded-pill">Spreading Scent</span></li>
+                        <li class="list-group-item bg-transparent text-white-50 d-flex justify-content-between align-items-center">☁️ Team & Development (Gas Reserves): <strong class="text-white">15%</strong> <span class="badge bg-warning text-dark rounded-pill">Future Fuel</span></li>
+                        <li class="list-group-item bg-transparent text-white-50 d-flex justify-content-between align-items-center">💩 Community Airdrops & Giveaways: <strong class="text-white">10%</strong> <span class="badge bg-primary rounded-pill">Loyal Stinkers</span></li>
+                        <li class="list-group-item bg-transparent text-white-50 d-flex justify-content-between align-items-center">🔥 Burnt Tokens (Odor Eaters): <strong class="text-white">5%</strong> <span class="badge bg-danger rounded-pill">Potency Up</span></li>
+                    </ul>
+                    <p class="mt-4"><strong>Transaction Fee (The "Gas" Fee):</strong> A tiny 2% whiff on every transaction. 1% gets redistributed to all $FART holders (Silent But Deadly Rewards!), and 1% is added to the liquidity pool to ensure a steady breeze.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="roadmap" class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold display-5 section-title">Our Gaseous Roadmap</h2>
+                <p class="lead section-subtitle">Charting a Course Through the Methane Clouds.</p>
+            </div>
+            <div class="row">
+                <div class="col-md-6 col-lg-3 mb-4">
+                    <div class="card h-100 shadow">
+                        <div class="card-body text-center d-flex flex-column justify-content-center p-4">
+                            <div class="fs-1 mb-3">💨</div>
+                            <h5 class="card-title text-success">Phase 1: The Initial Puff</h5>
+                            <p class="card-text small">Website launch, community building on "Toot-ter" & "Fart-cord", release the $FART whitepaper (The Brown Paper).</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 mb-4">
+                    <div class="card h-100 shadow">
+                        <div class="card-body text-center d-flex flex-column justify-content-center p-4">
+                            <div class="fs-1 mb-3">🌬️</div>
+                            <h5 class="card-title text-info">Phase 2: Gathering Wind</h5>
+                            <p class="card-text small">Listings on "PooCoinSwap" and "UniScent". First "Celebrity Fart Endorsement" campaign. Launch "Smellable NFT" collection (conceptual).</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 mb-4">
+                    <div class="card h-100 shadow">
+                        <div class="card-body text-center d-flex flex-column justify-content-center p-4">
+                            <div class="fs-1 mb-3">🌪️</div>
+                            <h5 class="card-title text-warning">Phase 3: Category 5 Flatulence</h5>
+                            <p class="card-text small">Develop the "FartVerse" - a VR experience where you can *almost* smell the success. Strategic partnerships with baked bean companies.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 mb-4">
+                    <div class="card h-100 shadow">
+                        <div class="card-body text-center d-flex flex-column justify-content-center p-4">
+                            <div class="fs-1 mb-3">🚀</div>
+                            <h5 class="card-title text-danger">Phase 4: Interstellar Gas Cloud</h5>
+                            <p class="card-text small">Methane-powered rocket to the moon. $FART becomes official currency of the first lunar bean farm. Girlfriend finally admits it was a good idea.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="how-to-buy" class="py-5">
+        <div class="container text-center">
+            <h2 class="fw-bold display-5 mb-3 section-title">How to Get Your Hands on <span class="text-success">$FART</span></h2>
+            <p class="lead col-md-8 mx-auto mb-4 section-subtitle">Ready to join the stinkiest revolution in crypto? It's easier than holding one in during a silent meeting!</p>
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="alert alert-info bg-info-subtle border-info-subtle text-info-emphasis p-4" role="alert">
+                        <h4 class="alert-heading">Follow These Simple Steps!</h4>
+                        <p><strong>Step 1:</strong> Acquire a Wallet (MetaMethane or TrustToot recommended).<br>
+                        <strong>Step 2:</strong> Fund it with some BNB (Brown Nasty Bits) or ETH (Eau de Toilette Holdings).<br>
+                        <strong>Step 3:</strong> Visit your favorite DEX (PancakeScent or UniFart).<br>
+                        <strong>Step 4:</strong> Paste our official (and totally real, wink wink) contract address: <code class="user-select-all d-block my-2">0xF4RT...L0L...N0T...R34L...Y3T</code><br>
+                        <strong>Step 5:</strong> Swap and HODL your $FART with pride!</p>
+                        <hr>
+                        <p class="mb-0">Remember, this is all in good fun. Don't actually look for this address!</p>
+                    </div>
+                </div>
+            </div>
+            <button id="tryToBuyButton" class="btn btn-warning btn-lg mt-4 shadow-lg">Attempt to Buy $FART (Good Luck!)</button>
+        </div>
+    </section>
+
+    <section id="fart-zone" class="py-5">
+        <div class="container text-center">
+            <h2 class="fw-bold display-5 mb-3 section-title">💨 The Official <span class="text-success">$FART</span> Zone! 💨</h2>
+            <p class="lead mb-4 section-subtitle">Feeling a bit gassy? Need to release some pressure? Click the button below for a guaranteed chuckle (or your money back*).</p>
+            <button id="fartButton" class="btn btn-danger btn-lg shadow-lg mb-3" style="font-size: 1.5rem; padding: 1rem 2rem;">Unleash the Beast!</button>
+            <div id="fartEffectDisplay" class="mt-4 p-3 rounded" style="min-height: 70px; font-size: 1.8rem; font-weight: bold; display: none;">
+            </div>
+            <p class="small text-white-50 mt-3 fst-italic">*Money back guarantee not valid, as this is all for fun.</p>
+        </div>
+    </section>
+
+    <footer class="py-4 bg-black text-white-50 text-center">
+        <div class="container">
+            <p class="mb-1">&copy; 2025 $FART Coin. All Rights Reserved (to laugh). This is a parody project for entertainment purposes only.</p>
+            <p class="small mb-2">Not financial advice. Investing in memecoins is risky, especially ones named $FART. Consult a professional (or maybe just open a window).</p>
+            <div class="mt-2">
+                <a href="#" class="text-white-50 mx-2">Twitter (Toot-ter)</a> |
+                <a href="#" class="text-white-50 mx-2">Telegram (Tele-Gas)</a> |
+                <a href="#" class="text-white-50 mx-2">Discord (Fart-cord)</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const imageSources = {
+            navLogo: "/generated_images/dalle_014d3b1c-e4e.png",
+            heroLogo: "/generated_images/dalle_014d3b1c-e4e.png",
+            heroBackground: "/generated_images/dalle_ba77fab7-b42.png",
+            aboutSectionImage: "/generated_images/dalle_ba77fab7-b42.png", 
+            tokenomicsChart: "/generated_images/dalle_990c1dff-1fc.png"
+        };
+
+        const navLogoImageEl = document.getElementById('navLogoImage');
+        if (navLogoImageEl && imageSources.navLogo) navLogoImageEl.src = imageSources.navLogo;
+
+        const heroLogoImageEl = document.getElementById('heroLogoImage');
+        if (heroLogoImageEl && imageSources.heroLogo) heroLogoImageEl.src = imageSources.heroLogo;
+        
+        const heroSectionEl = document.getElementById('hero');
+        if (heroSectionEl) {
+            if (imageSources.heroBackground) {
+                heroSectionEl.style.backgroundImage = `linear-gradient(rgba(26, 29, 32, 0.88), rgba(26, 29, 32, 0.98)), url('${imageSources.heroBackground}')`;
+            } else { 
+                heroSectionEl.style.backgroundImage = 'linear-gradient(to bottom, #23272b, #1a1d20)';
+            }
+        }
+
+        const aboutImageEl = document.getElementById('aboutImage');
+        if (aboutImageEl) {
+            if (imageSources.aboutSectionImage) {
+                aboutImageEl.src = imageSources.aboutSectionImage;
+            } else if (aboutImageEl.tagName === 'IMG') {
+                aboutImageEl.style.display = 'none'; 
+            }
+        }
+        
+        const tokenomicsChartImageEl = document.getElementById('tokenomicsChartImage');
+        if (tokenomicsChartImageEl && imageSources.tokenomicsChart) {
+            tokenomicsChartImageEl.src = imageSources.tokenomicsChart;
+        } else if (tokenomicsChartImageEl && tokenomicsChartImageEl.tagName === 'IMG') {
+            tokenomicsChartImageEl.style.display = 'none';
+        }
+        
+        const navLinks = document.querySelectorAll('#navbarNav .nav-link[href^="#"]');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                navLinks.forEach(navLink => navLink.classList.remove('active'));
+                this.classList.add('active');
+                if (this.getAttribute('aria-current')) {
+                    navLinks.forEach(nl => nl.removeAttribute('aria-current'));
+                    this.setAttribute('aria-current', 'page');
+                }
+
+                if (this.hash !== "") {
+                    e.preventDefault();
+                    const hash = this.hash;
+                    const targetElement = document.querySelector(hash);
+                    if (targetElement) {
+                        const navbarHeight = document.querySelector('.navbar.fixed-top')?.offsetHeight || 70;
+                        const elementPosition = targetElement.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - navbarHeight;
+
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: 'smooth'
+                        });
+                        
+                        const navbarToggler = document.querySelector('.navbar-toggler');
+                        const navbarCollapseEl = document.getElementById('navbarNav');
+                        if (navbarCollapseEl.classList.contains('show')) {
+                            const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapseEl) || new bootstrap.Collapse(navbarCollapseEl);
+                            bsCollapse.hide();
+                        }
+                    }
+                }
+            });
+        });
+
+        const gasPriceTickerElement = document.getElementById('gasPriceTicker');
+        const funnyGasUnits = ["Gwei of pure methane!", "PPM (Parts Per Methane)", "Sniff Units (SU)", "Tootawatts of Power", "Windy Bits (WB)", "Silent But Deadly (SBD) Index", "Brown Notes per Second", "Air Biscuits (AB)"];
+        let gasValueSpan = null;
+        function updateGasPrice() {
+            if (gasPriceTickerElement) {
+                const randomGwei = (Math.random() * 150 + 10).toFixed(0); 
+                const randomUnit = funnyGasUnits[Math.floor(Math.random() * funnyGasUnits.length)];
+                
+                if (!gasValueSpan) {
+                    gasPriceTickerElement.innerHTML = `<strong>Current Gas Fee:</strong> <span class="gas-value"></span> <span style="font-style:italic;"></span>`;
+                    gasValueSpan = gasPriceTickerElement.querySelector('.gas-value');
+                }
+                
+                gasValueSpan.textContent = randomGwei;
+                gasPriceTickerElement.querySelector('span[style="font-style:italic;"]').textContent = randomUnit;
+
+                gasValueSpan.classList.add('updated');
+                setTimeout(() => {
+                    gasValueSpan.classList.remove('updated');
+                }, 300);
+            }
+        }
+        if (gasPriceTickerElement) {
+            setInterval(updateGasPrice, 4500); 
+            updateGasPrice(); 
+        }
+
+        const tryToBuyButton = document.getElementById('tryToBuyButton');
+        if (tryToBuyButton) {
+            tryToBuyButton.addEventListener('click', () => {
+                alert("💨 WHOOSH! 💨\n\nCongratulations! You've successfully *imagined* buying $FART Coin!\n\nRemember, this is a parody. There's no actual coin... yet! Thanks for playing along and sharing a laugh. Now go tell your girlfriend she's a crypto visionary!");
+            });
+        }
+
+        const fartButton = document.getElementById('fartButton');
+        const fartEffectDisplay = document.getElementById('fartEffectDisplay');
+        const fartMessages = [
+            "Pfffft! A classic.", "Tooooot! Smooth operator.", "Brrrrrap! That had some bass!", 
+            "Poof! The silent but friendly type.", "SBD Release Initiated!", "A gentle breeze of genius...",
+            "Warning: High Potency Emission!", "Smell that? That's the scent of innovation!", 
+            "Gas powered and ready to go!", "A true masterpiece of flatulence!", "Air biscuit deployed!",
+            "That one echoed through the blockchain!", "A fragrant offering to the crypto gods!",
+            "Consider the air... perfumed.", "A symphony of smells!", "A little toot for the soul."
+        ];
+        const fartEmojis = ["💨", "💥", "☁️", "💩", "🌬️", "✨"];
+        let fartTimeoutId = null;
+
+        if (fartButton && fartEffectDisplay) {
+            fartButton.addEventListener('click', () => {
+                if (fartTimeoutId) {
+                    clearTimeout(fartTimeoutId);
+                    fartEffectDisplay.classList.remove('visible-fart', 'hidden-fart');
+                    void fartEffectDisplay.offsetWidth; 
+                }
+
+                const randomEmoji = fartEmojis[Math.floor(Math.random() * fartEmojis.length)];
+                const randomMessage = fartMessages[Math.floor(Math.random() * fartMessages.length)];
+                fartEffectDisplay.innerHTML = `<span style="font-size: 2.5rem; margin-right: 10px;">${randomEmoji}</span> ${randomMessage}`;
+                
+                fartEffectDisplay.classList.remove('hidden-fart');
+                fartEffectDisplay.classList.add('visible-fart');
+
+                fartTimeoutId = setTimeout(() => {
+                    fartEffectDisplay.classList.remove('visible-fart');
+                    fartEffectDisplay.classList.add('hidden-fart');
+                }, 5000);
+            });
+        }
+    });
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

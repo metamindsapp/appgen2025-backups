@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head><meta charset="UTF-8"><title>Greek restaurant - Rev 2</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-translate-key="site.title">Zorbas - Authentic Greek Restaurant, Antwerp</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="icon" href="/generated_images/dalle_ef248c6f-bd2.png" type="image/png">
+    <style>
+        :root {
+            --bs-primary: #0D6EFD; 
+            --bs-primary-rgb: 13,110,253;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: #121212;
+            color: #f8f9fa;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            overflow-x: hidden;
+        }
+
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #121212;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease-out;
+        }
+
+        #mainContent {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        #mainContent.loaded {
+            opacity: 1;
+        }
+
+        .navbar {
+            transition: background-color 0.3s ease-in-out;
+        }
+        
+        .navbar-brand img {
+            height: 40px;
+        }
+
+        .navbar-nav .nav-link {
+            transition: color 0.2s ease;
+            font-weight: 500;
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
+
+        .navbar-nav .nav-link.active,
+        .navbar-nav .nav-link:hover,
+        .navbar-nav .nav-link:focus {
+            color: var(--bs-primary) !important;
+        }
+        
+        .navbar.scrolled {
+            background-color: rgba(21, 21, 21, 0.85) !important; 
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        #home {
+            background: url('/generated_images/dalle_c761dad7-f73.png') no-repeat center center;
+            background-size: cover;
+            background-attachment: fixed;
+            position: relative;
+        }
+
+        #home::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6); 
+        }
+
+        #home .container {
+            position: relative; 
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .hero-content {
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+        }
+
+        .section-title {
+            margin-bottom: 3rem;
+            font-weight: 700;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            display: block;
+            width: 60px;
+            height: 3px;
+            background: var(--bs-primary);
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .card {
+            border: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .menu-card-img {
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .nav-pills .nav-link {
+            color: #adb5bd;
+            background-color: #343a40; 
+            margin: 0 5px;
+            border-radius: 0.375rem;
+        }
+        .nav-pills .nav-link.active {
+            color: #fff;
+            background-color: var(--bs-primary);
+        }
+
+        .review-card .blockquote-footer {
+            color: #adb5bd !important;
+        }
+        .review-card .fa-star, .review-card .fa-star-half-alt {
+            color: #ffc107; 
+        }
+
+        .form-control, .form-select {
+            background-color: #2d3748;
+            color: #f8f9fa;
+            border: 1px solid #495057;
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: #343a40;
+            color: #f8f9fa;
+            border-color: var(--bs-primary);
+            box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+        }
+        .form-control::placeholder {
+            color: #6c757d;
+        }
+        textarea.form-control {
+            min-height: calc(1.5em + 0.75rem + 2px); /* Default BS textarea height */
+        }
+
+
+        #location iframe {
+            border-radius: 0.375rem; 
+            filter: grayscale(30%) contrast(1.1) brightness(0.9); 
+            border: 0;
+        }
+
+        .footer {
+            background-color: #000;
+        }
+        .footer .social-icons a {
+            color: #adb5bd;
+            font-size: 1.5rem;
+            margin: 0 10px;
+            transition: color 0.2s ease;
+        }
+        .footer .social-icons a:hover {
+            color: var(--bs-primary);
+        }
+        .back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: none; 
+            z-index: 1030; 
+            opacity: 0.8;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .back-to-top:hover {
+            opacity: 1;
+            transform: translateY(-3px);
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #212529;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: var(--bs-primary);
+            border-radius: 5px;
+            border: 2px solid #212529;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: #0a58ca;
+        }
+
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .animate-on-scroll.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .bg-section-dark { background-color: #212529; } 
+        .bg-section-secondary-dark { background-color: #2c3034; } 
+
+        .carousel-caption {
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 0.375rem;
+            padding: 1rem;
+        }
+        .carousel-item img {
+            max-height: 550px;
+            object-fit: cover;
+            width: 100%;
+        }
+        .dropdown-item.active, .dropdown-item:active {
+             background-color: var(--bs-primary) !important;
+             color: #fff !important;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="preloader">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+            <span class="visually-hidden" data-translate-key="preloader.loading">Loading...</span>
+        </div>
+    </div>
+
+    <div id="mainContent">
+        <nav class="navbar navbar-expand-lg navbar-dark fixed-top shadow-sm">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center" href="#home">
+                    <img src="/generated_images/dalle_ef248c6f-bd2.png" data-translate-key-alt="nav.logoAlt" alt="Zorbas Logo" class="me-2"> Zorbas
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" data-translate-key-aria-label="nav.toggleNavAriaLabel" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto align-items-center">
+                        <li class="nav-item"><a class="nav-link" href="#home" data-translate-key="nav.home">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#about" data-translate-key="nav.about">About</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#menu" data-translate-key="nav.menu">Menu</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#reviews" data-translate-key="nav.reviews">Reviews</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#gallery" data-translate-key="nav.gallery">Gallery</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#booking" data-translate-key="nav.booking">Book Table</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#location" data-translate-key="nav.location">Location</a></li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="languageSelectorLink" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-translate-key-aria-label="nav.languageSelectorAriaLabel">
+                                <i class="fas fa-globe me-1" aria-hidden="true"></i> <span id="currentLangDisplay">EN</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark" aria-labelledby="languageSelectorLink" id="languageSelectorMenu">
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <main>
+            <section id="home" class="text-center text-white">
+                <div class="container">
+                    <div class="hero-content">
+                        <h1 class="display-2 fw-bolder animate-on-scroll" data-translate-key="home.hero.title">Experience Authentic Greek Cuisine</h1>
+                        <p class="lead my-4 fs-4 animate-on-scroll" style="animation-delay: 0.2s;" data-translate-key="home.hero.subtitle">Welcome to Zorbas - A Taste of Greece in the Heart of Antwerp.</p>
+                        <div class="mt-5 animate-on-scroll" style="animation-delay: 0.4s;">
+                            <a href="#menu" class="btn btn-primary btn-lg mx-2 px-4 py-2" data-translate-key="home.hero.viewMenuButton">View Menu</a>
+                            <a href="#booking" class="btn btn-outline-light btn-lg mx-2 px-4 py-2" data-translate-key="home.hero.bookTableButton">Book a Table</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="about" class="py-5 bg-section-secondary-dark text-white">
+                <div class="container">
+                    <h2 class="text-center section-title animate-on-scroll" data-translate-key="about.title">About Zorbas</h2>
+                    <div class="row align-items-center gy-4">
+                        <div class="col-lg-6 animate-on-scroll">
+                            <p class="lead mb-4" data-translate-key="about.p1">Nestled in the vibrant Kerstraat 12, Antwerp, Zorbas brings the sun-kissed flavors of Greece to your table. Our passion is to share the rich culinary heritage of Greece, using only the freshest ingredients and time-honored family recipes.</p>
+                            <p data-translate-key="about.p2">From sizzling souvlaki to creamy moussaka and delicate baklava, every dish is a celebration of authentic Greek taste. Join us for an unforgettable dining experience where warm hospitality meets exquisite food, making you feel like part of our big Greek family.</p>
+                        </div>
+                        <div class="col-lg-6 text-center animate-on-scroll" style="animation-delay: 0.2s;">
+                            <img src="/generated_images/dalle_930a0a05-713.png" data-translate-key-alt="about.imageAlt" alt="Cozy interior of Zorbas Restaurant" class="img-fluid rounded shadow-lg">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="menu" class="py-5 bg-section-dark text-white">
+                <div class="container">
+                    <h2 class="text-center section-title animate-on-scroll" data-translate-key="menu.title">Our Delicious Menu</h2>
+                    <ul class="nav nav-pills justify-content-center mb-5 animate-on-scroll" id="menuTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="appetizers-tab" data-bs-toggle="tab" data-bs-target="#appetizers-pane" type="button" role="tab" aria-controls="appetizers-pane" aria-selected="true" data-translate-key="menu.tabs.appetizers">Appetizers</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="mains-tab" data-bs-toggle="tab" data-bs-target="#mains-pane" type="button" role="tab" aria-controls="mains-pane" aria-selected="false" data-translate-key="menu.tabs.mains">Main Courses</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="desserts-tab" data-bs-toggle="tab" data-bs-target="#desserts-pane" type="button" role="tab" aria-controls="desserts-pane" aria-selected="false" data-translate-key="menu.tabs.desserts">Desserts</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="drinks-tab" data-bs-toggle="tab" data-bs-target="#drinks-pane" type="button" role="tab" aria-controls="drinks-pane" aria-selected="false" data-translate-key="menu.tabs.drinks">Drinks</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content animate-on-scroll" style="animation-delay: 0.2s;" id="menuTabContent">
+                        <div class="tab-pane fade show active" id="appetizers-pane" role="tabpanel" aria-labelledby="appetizers-tab" tabindex="0">
+                            <div class="row gy-4">
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="card h-100 bg-body-tertiary text-white">
+                                        <img src="/generated_images/dalle_70ec3b63-204.png" class="card-img-top menu-card-img" data-translate-key-alt="menu.appetizers.tzatziki.imgAlt" alt="Tzatziki dip with pita bread">
+                                        <div class="card-body d-flex flex-column">
+                                            <h5 class="card-title" data-translate-key="menu.appetizers.tzatziki.name">Tzatziki</h5>
+                                            <p class="card-text flex-grow-1" data-translate-key="menu.appetizers.tzatziki.desc">Creamy yogurt dip with cucumber, garlic, and dill. Served with pita bread.</p>
+                                            <p class="card-text fw-bold fs-5 text-primary" data-translate-key="menu.appetizers.tzatziki.price">€7.50</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="card h-100 bg-body-tertiary text-white">
+                                        <div class="card-body d-flex flex-column">
+                                            <h5 class="card-title" data-translate-key="menu.appetizers.dolmades.name">Dolmades</h5>
+                                            <p class="card-text flex-grow-1" data-translate-key="menu.appetizers.dolmades.desc">Grape leaves stuffed with rice and herbs, drizzled with lemon juice.</p>
+                                            <p class="card-text fw-bold fs-5 text-primary" data-translate-key="menu.appetizers.dolmades.price">€8.00</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="card h-100 bg-body-tertiary text-white">
+                                        <div class="card-body d-flex flex-column">
+                                            <h5 class="card-title" data-translate-key="menu.appetizers.spanakopita.name">Spanakopita</h5>
+                                            <p class="card-text flex-grow-1" data-translate-key="menu.appetizers.spanakopita.desc">Savory spinach and feta pie wrapped in flaky phyllo pastry.</p>
+                                            <p class="card-text fw-bold fs-5 text-primary" data-translate-key="menu.appetizers.spanakopita.price">€8.50</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="mains-pane" role="tabpanel" aria-labelledby="mains-tab" tabindex="0">
+                            <div class="row gy-4">
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="card h-100 bg-body-tertiary text-white">
+                                        <img src="/generated_images/dalle_a97c2b97-838.png" class="card-img-top menu-card-img" data-translate-key-alt="menu.mains.moussaka.imgAlt" alt="Moussaka slice on a plate">
+                                        <div class="card-body d-flex flex-column">
+                                            <h5 class="card-title" data-translate-key="menu.mains.moussaka.name">Moussaka</h5>
+                                            <p class="card-text flex-grow-1" data-translate-key="menu.mains.moussaka.desc">Layers of eggplant, spiced ground lamb, and creamy béchamel sauce.</p>
+                                            <p class="card-text fw-bold fs-5 text-primary" data-translate-key="menu.mains.moussaka.price">€18.50</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                 <div class="col-md-6 col-lg-4">
+                                    <div class="card h-100 bg-body-tertiary text-white">
+                                        <div class="card-body d-flex flex-column">
+                                            <h5 class="card-title" data-translate-key="menu.mains.souvlaki.name">Souvlaki Platter</h5>
+                                            <p class="card-text flex-grow-1" data-translate-key="menu.mains.souvlaki.desc">Grilled skewers of marinated chicken or pork, served with pita, tzatziki, and fries.</p>
+                                            <p class="card-text fw-bold fs-5 text-primary" data-translate-key="menu.mains.souvlaki.price">€19.00</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="card h-100 bg-body-tertiary text-white">
+                                        <div class="card-body d-flex flex-column">
+                                            <h5 class="card-title" data-translate-key="menu.mains.kleftiko.name">Kleftiko</h5>
+                                            <p class="card-text flex-grow-1" data-translate-key="menu.mains.kleftiko.desc">Slow-cooked lamb with herbs, lemon, and potatoes, wrapped in parchment.</p>
+                                            <p class="card-text fw-bold fs-5 text-primary" data-translate-key="menu.mains.kleftiko.price">€22.00</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="desserts-pane" role="tabpanel" aria-labelledby="desserts-tab" tabindex="0">
+                            <div class="row gy-4">
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="card h-100 bg-body-tertiary text-white">
+                                        <img src="/generated_images/dalle_ead60cff-27b.png" class="card-img-top menu-card-img" data-translate-key-alt="menu.desserts.baklava.imgAlt" alt="Baklava pieces on a plate">
+                                        <div class="card-body d-flex flex-column">
+                                            <h5 class="card-title" data-translate-key="menu.desserts.baklava.name">Baklava</h5>
+                                            <p class="card-text flex-grow-1" data-translate-key="menu.desserts.baklava.desc">Rich, sweet pastry made of layers of phyllo filled with chopped nuts and sweetened with syrup.</p>
+                                            <p class="card-text fw-bold fs-5 text-primary" data-translate-key="menu.desserts.baklava.price">€7.00</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="card h-100 bg-body-tertiary text-white">
+                                        <div class="card-body d-flex flex-column">
+                                            <h5 class="card-title" data-translate-key="menu.desserts.galaktoboureko.name">Galaktoboureko</h5>
+                                            <p class="card-text flex-grow-1" data-translate-key="menu.desserts.galaktoboureko.desc">Semolina custard baked in phyllo, soaked in a light lemon-scented syrup.</p>
+                                            <p class="card-text fw-bold fs-5 text-primary" data-translate-key="menu.desserts.galaktoboureko.price">€7.50</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="drinks-pane" role="tabpanel" aria-labelledby="drinks-tab" tabindex="0">
+                             <div class="row gy-4">
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="card h-100 bg-body-tertiary text-white">
+                                        <div class="card-body d-flex flex-column">
+                                            <h5 class="card-title" data-translate-key="menu.drinks.greekWine.name">Greek Wine (Red/White)</h5>
+                                            <p class="card-text flex-grow-1" data-translate-key="menu.drinks.greekWine.desc">Selection of fine wines from renowned Greek vineyards.</p>
+                                            <p class="card-text fw-bold fs-5 text-primary" data-translate-key="menu.drinks.greekWine.price">From €6.00/glass</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="card h-100 bg-body-tertiary text-white">
+                                        <div class="card-body d-flex flex-column">
+                                            <h5 class="card-title" data-translate-key="menu.drinks.ouzo.name">Ouzo</h5>
+                                            <p class="card-text flex-grow-1" data-translate-key="menu.drinks.ouzo.desc">Traditional Greek anise-flavored aperitif.</p>
+                                            <p class="card-text fw-bold fs-5 text-primary" data-translate-key="menu.drinks.ouzo.price">€5.00</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                 <div class="col-md-6 col-lg-4">
+                                    <div class="card h-100 bg-body-tertiary text-white">
+                                        <div class="card-body d-flex flex-column">
+                                            <h5 class="card-title" data-translate-key="menu.drinks.ellinikosKafes.name">Ellinikos Kafes</h5>
+                                            <p class="card-text flex-grow-1" data-translate-key="menu.drinks.ellinikosKafes.desc">Strong, traditionally brewed Greek coffee.</p>
+                                            <p class="card-text fw-bold fs-5 text-primary" data-translate-key="menu.drinks.ellinikosKafes.price">€3.50</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="reviews" class="py-5 bg-section-secondary-dark text-white">
+                <div class="container">
+                    <h2 class="text-center section-title animate-on-scroll" data-translate-key="reviews.title">What Our Customers Say</h2>
+                    <div class="row gy-4">
+                        <div class="col-lg-4 animate-on-scroll">
+                            <div class="card h-100 review-card bg-dark text-white p-3">
+                                <div class="card-body">
+                                    <div class="mb-2 fs-5">
+                                        <i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i>
+                                    </div>
+                                    <blockquote class="blockquote mb-0">
+                                        <p data-translate-key="reviews.anna.quote">"Absolutely authentic! The moussaka was heavenly, and the staff made us feel right at home. Best Greek food in Antwerp!"</p>
+                                        <footer class="blockquote-footer mt-3" data-translate-key="reviews.anna.footer">Anna V.</footer>
+                                    </blockquote>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animate-on-scroll" style="animation-delay: 0.2s;">
+                            <div class="card h-100 review-card bg-dark text-white p-3">
+                                 <div class="card-body">
+                                    <div class="mb-2 fs-5">
+                                        <i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star-half-alt" aria-hidden="true"></i>
+                                    </div>
+                                    <blockquote class="blockquote mb-0">
+                                        <p data-translate-key="reviews.mark.quote">"A wonderful evening at Zorbas. The souvlaki was perfectly grilled, and the baklava was to die for. Highly recommended!"</p>
+                                        <footer class="blockquote-footer mt-3" data-translate-key="reviews.mark.footer">Mark D.</footer>
+                                    </blockquote>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 animate-on-scroll" style="animation-delay: 0.4s;">
+                            <div class="card h-100 review-card bg-dark text-white p-3">
+                                <div class="card-body">
+                                    <div class="mb-2 fs-5">
+                                        <i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i>
+                                    </div>
+                                    <blockquote class="blockquote mb-0">
+                                        <p data-translate-key="reviews.sophie.quote">"The atmosphere is cozy and inviting. We loved the fresh tzatziki and the friendly service. We'll be back soon!"</p>
+                                        <footer class="blockquote-footer mt-3" data-translate-key="reviews.sophie.footer">Sophie L.</footer>
+                                    </blockquote>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="gallery" class="py-5 bg-section-dark text-white">
+                <div class="container">
+                    <h2 class="text-center section-title animate-on-scroll" data-translate-key="gallery.title">A Glimpse of Zorbas</h2>
+                    <div id="zorbasCarousel" class="carousel slide animate-on-scroll shadow-lg" style="animation-delay: 0.2s;" data-bs-ride="carousel">
+                        <div class="carousel-indicators">
+                            <button type="button" data-bs-target="#zorbasCarousel" data-bs-slide-to="0" class="active" aria-current="true" data-translate-key-aria-label="gallery.slide1.ariaLabel" aria-label="Slide 1: Greek Feast Platter"></button>
+                            <button type="button" data-bs-target="#zorbasCarousel" data-bs-slide-to="1" data-translate-key-aria-label="gallery.slide2.ariaLabel" aria-label="Slide 2: Zorbas Restaurant Exterior"></button>
+                            <button type="button" data-bs-target="#zorbasCarousel" data-bs-slide-to="2" data-translate-key-aria-label="gallery.slide3.ariaLabel" aria-label="Slide 3: Traditional Greek Coffee"></button>
+                        </div>
+                        <div class="carousel-inner rounded">
+                            <div class="carousel-item active">
+                                <img src="/generated_images/dalle_a5bedb64-ee3.png" class="d-block" data-translate-key-alt="gallery.slide1.imgAlt" alt="Greek Feast Platter with souvlaki, keftedes, dolmades and salad">
+                                <div class="carousel-caption d-none d-md-block">
+                                    <h5 data-translate-key="gallery.slide1.caption.title">Bountiful Greek Feasts</h5>
+                                    <p data-translate-key="gallery.slide1.caption.p">A taste of our generous platters, perfect for sharing.</p>
+                                </div>
+                            </div>
+                            <div class="carousel-item">
+                                <img src="/generated_images/dalle_e1b20e8e-b61.png" class="d-block" data-translate-key-alt="gallery.slide2.imgAlt" alt="Charming exterior of Zorbas restaurant at dusk with warm lighting">
+                                 <div class="carousel-caption d-none d-md-block">
+                                    <h5 data-translate-key="gallery.slide2.caption.title">Charming Ambiance</h5>
+                                    <p data-translate-key="gallery.slide2.caption.p">Our welcoming exterior, inviting you for a memorable meal.</p>
+                                </div>
+                            </div>
+                            <div class="carousel-item">
+                                <img src="/generated_images/dalle_4fbb5524-928.png" class="d-block" data-translate-key-alt="gallery.slide3.imgAlt" alt="Traditional Greek coffee being poured, with loukoumi">
+                                 <div class="carousel-caption d-none d-md-block">
+                                    <h5 data-translate-key="gallery.slide3.caption.title">Authentic Traditions</h5>
+                                    <p data-translate-key="gallery.slide3.caption.p">Enjoy a traditional Greek coffee and sweet delights.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#zorbasCarousel" data-bs-slide="prev" data-translate-key-aria-label="gallery.carousel.prevAriaLabel">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden" data-translate-key="gallery.carousel.prev">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#zorbasCarousel" data-bs-slide="next" data-translate-key-aria-label="gallery.carousel.nextAriaLabel">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden" data-translate-key="gallery.carousel.next">Next</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="booking" class="py-5 bg-section-secondary-dark text-white">
+                <div class="container">
+                    <h2 class="text-center section-title animate-on-scroll" data-translate-key="bookingForm.title">Book Your Table</h2>
+                    <div class="row justify-content-center">
+                        <div class="col-lg-8 animate-on-scroll" style="animation-delay: 0.2s;">
+                            <form id="bookingForm" class="needs-validation p-4 rounded bg-dark shadow" novalidate>
+                                <div id="bookingMessage" class="mb-3"></div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="bookingName" class="form-label" data-translate-key="bookingForm.nameLabel">Full Name</label>
+                                        <input type="text" class="form-control form-control-lg" id="bookingName" data-translate-key-placeholder="bookingForm.namePlaceholder" placeholder="Your Name" required>
+                                        <div class="invalid-feedback" data-translate-key="bookingForm.nameInvalidFeedback">Please enter your name.</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="bookingEmail" class="form-label" data-translate-key="bookingForm.emailLabel">Email Address</label>
+                                        <input type="email" class="form-control form-control-lg" id="bookingEmail" data-translate-key-placeholder="bookingForm.emailPlaceholder" placeholder="your@email.com" required>
+                                        <div class="invalid-feedback" data-translate-key="bookingForm.emailInvalidFeedback">Please enter a valid email address.</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="bookingPhone" class="form-label" data-translate-key="bookingForm.phoneLabel">Phone Number</label>
+                                        <input type="tel" class="form-control form-control-lg" id="bookingPhone" data-translate-key-placeholder="bookingForm.phonePlaceholder" placeholder="Your Phone Number" required pattern="[0-9\s\-\+()]*">
+                                        <div class="invalid-feedback" data-translate-key="bookingForm.phoneInvalidFeedback">Please enter your phone number.</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="bookingGuests" class="form-label" data-translate-key="bookingForm.guestsLabel">Number of Guests</label>
+                                        <input type="number" class="form-control form-control-lg" id="bookingGuests" data-translate-key-placeholder="bookingForm.guestsPlaceholder" placeholder="2" min="1" max="20" required>
+                                        <div class="invalid-feedback" data-translate-key="bookingForm.guestsInvalidFeedback">Please enter the number of guests (1-20).</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="bookingDate" class="form-label" data-translate-key="bookingForm.dateLabel">Date</label>
+                                        <input type="date" class="form-control form-control-lg" id="bookingDate" required>
+                                        <div class="invalid-feedback" data-translate-key="bookingForm.dateInvalidFeedback">Please select a date.</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="bookingTime" class="form-label" data-translate-key="bookingForm.timeLabel">Time</label>
+                                        <input type="time" class="form-control form-control-lg" id="bookingTime" min="12:00" max="22:00" step="900" required>
+                                        <div class="invalid-feedback" data-translate-key="bookingForm.timeInvalidFeedback">Please select a time (e.g., 19:30).</div>
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="bookingRequests" class="form-label" data-translate-key="bookingForm.requestsLabel">Special Requests (Optional)</label>
+                                        <textarea class="form-control form-control-lg" id="bookingRequests" rows="3" data-translate-key-placeholder="bookingForm.requestsPlaceholder" placeholder="Any allergies, preferences, or special occasion?"></textarea>
+                                    </div>
+                                </div>
+                                <div class="text-center mt-4">
+                                    <button type="submit" class="btn btn-primary btn-lg px-5" data-translate-key="bookingForm.submitButton">Request Booking</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="location" class="py-5 bg-section-dark text-white">
+                <div class="container">
+                    <h2 class="text-center section-title animate-on-scroll" data-translate-key="location.title">Find Us & Get In Touch</h2>
+                    <div class="row gy-4">
+                        <div class="col-lg-6 animate-on-scroll">
+                            <h4 class="text-primary">Zorbas</h4>
+                            <p class="fs-5"><i class="fas fa-map-marker-alt me-2 text-primary" aria-hidden="true"></i>Kerstraat 12, 2000 Antwerpen, Belgium</p>
+                            
+                            <h5 class="mt-4"><i class="fas fa-clock me-2 text-primary" aria-hidden="true"></i><span data-translate-key="location.openingHoursTitle">Opening Hours:</span></h5>
+                            <ul class="list-unstyled ps-1">
+                                <li data-translate-key="location.hours.monThu">Monday - Thursday: 17:00 - 22:00</li>
+                                <li data-translate-key="location.hours.friSat">Friday - Saturday: 12:00 - 15:00 & 17:00 - 23:00</li>
+                                <li data-translate-key="location.hours.sun">Sunday: 12:00 - 21:00</li>
+                            </ul>
+                            
+                            <h5 class="mt-4"><i class="fas fa-phone me-2 text-primary" aria-hidden="true"></i><span data-translate-key="location.contactUsTitle">Contact Us:</span></h5>
+                            <p><a href="tel:+32123456789" class="text-white text-decoration-none fs-5">+32 123 456 789 (<span data-translate-key="location.sample">Sample</span>)</a></p>
+                            <p><a href="mailto:info@zorbasantwerp.be" class="text-white text-decoration-none fs-5">info@zorbasantwerp.be (<span data-translate-key="location.sample">Sample</span>)</a></p>
+                        </div>
+                        <div class="col-lg-6 animate-on-scroll" style="animation-delay: 0.2s;">
+                            <iframe data-translate-key-title="location.mapTitle" title="Google Maps location of Zorbas Restaurant" src="https://maps.google.com/maps?q=Kerstraat%2012%2C%20Antwerpen%2C%20Belgium&t=&z=15&ie=UTF8&iwloc=&output=embed" width="100%" height="400" allowfullscreen="" loading="lazy"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer py-4 text-white-50 text-center">
+            <div class="container">
+                <div class="social-icons mb-3">
+                    <a href="#" data-translate-key-aria-label="footer.facebookAriaLabel" aria-label="Visit our Facebook page" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook-f" aria-hidden="true"></i></a>
+                    <a href="#" data-translate-key-aria-label="footer.instagramAriaLabel" aria-label="Check our Instagram profile" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+                    <a href="#" data-translate-key-aria-label="footer.tripadvisorAriaLabel" aria-label="Read reviews on TripAdvisor" target="_blank" rel="noopener noreferrer"><i class="fab fa-tripadvisor" aria-hidden="true"></i></a>
+                </div>
+                <p>&copy; <span id="currentYear"></span> <span data-translate-key="footer.copyrightBrand">Zorbas</span>. <span data-translate-key="footer.copyrightRights">All Rights Reserved</span>. <span data-translate-key="footer.copyrightDesignedWith">Designed with</span> <i class="fas fa-heart text-danger mx-1" data-translate-key-aria-label="footer.copyrightHeartAriaLabel" aria-label="love"></i> <span data-translate-key="footer.copyrightLocation">in Antwerp</span>.</p>
+            </div>
+        </footer>
+
+        <a href="#home" class="btn btn-primary back-to-top p-2" data-translate-key-aria-label="footer.backToTopAriaLabel" aria-label="Back to top">
+            <i class="fas fa-arrow-up fs-4" aria-hidden="true"></i>
+        </a>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const translations = {
+            en: {
+                "site.title": "Zorbas - Authentic Greek Restaurant, Antwerp",
+                "preloader.loading": "Loading...",
+                "nav.logoAlt": "Zorbas Logo",
+                "nav.toggleNavAriaLabel": "Toggle navigation",
+                "nav.home": "Home", "nav.about": "About", "nav.menu": "Menu", "nav.reviews": "Reviews", "nav.gallery": "Gallery", "nav.booking": "Book Table", "nav.location": "Location",
+                "nav.languageSelectorAriaLabel": "Select language",
+                "lang.en": "English", "lang.nl": "Nederlands", "lang.fr": "Français", "lang.gr": "Ελληνικά",
+                "home.hero.title": "Experience Authentic Greek Cuisine",
+                "home.hero.subtitle": "Welcome to Zorbas - A Taste of Greece in the Heart of Antwerp.",
+                "home.hero.viewMenuButton": "View Menu", "home.hero.bookTableButton": "Book a Table",
+                "about.title": "About Zorbas",
+                "about.p1": "Nestled in the vibrant Kerstraat 12, Antwerp, Zorbas brings the sun-kissed flavors of Greece to your table. Our passion is to share the rich culinary heritage of Greece, using only the freshest ingredients and time-honored family recipes.",
+                "about.p2": "From sizzling souvlaki to creamy moussaka and delicate baklava, every dish is a celebration of authentic Greek taste. Join us for an unforgettable dining experience where warm hospitality meets exquisite food, making you feel like part of our big Greek family.",
+                "about.imageAlt": "Cozy interior of Zorbas Restaurant",
+                "menu.title": "Our Delicious Menu",
+                "menu.tabs.appetizers": "Appetizers", "menu.tabs.mains": "Main Courses", "menu.tabs.desserts": "Desserts", "menu.tabs.drinks": "Drinks",
+                "menu.appetizers.tzatziki.name": "Tzatziki", "menu.appetizers.tzatziki.desc": "Creamy yogurt dip with cucumber, garlic, and dill. Served with pita bread.", "menu.appetizers.tzatziki.price": "€7.50", "menu.appetizers.tzatziki.imgAlt": "Tzatziki dip with pita bread",
+                "menu.appetizers.dolmades.name": "Dolmades", "menu.appetizers.dolmades.desc": "Grape leaves stuffed with rice and herbs, drizzled with lemon juice.", "menu.appetizers.dolmades.price": "€8.00", "menu.appetizers.dolmades.imgAlt": "Dolmades (stuffed grape leaves)",
+                "menu.appetizers.spanakopita.name": "Spanakopita", "menu.appetizers.spanakopita.desc": "Savory spinach and feta pie wrapped in flaky phyllo pastry.", "menu.appetizers.spanakopita.price": "€8.50", "menu.appetizers.spanakopita.imgAlt": "Spanakopita (spinach pie)",
+                "menu.mains.moussaka.name": "Moussaka", "menu.mains.moussaka.desc": "Layers of eggplant, spiced ground lamb, and creamy béchamel sauce.", "menu.mains.moussaka.price": "€18.50", "menu.mains.moussaka.imgAlt": "Moussaka slice on a plate",
+                "menu.mains.souvlaki.name": "Souvlaki Platter", "menu.mains.souvlaki.desc": "Grilled skewers of marinated chicken or pork, served with pita, tzatziki, and fries.", "menu.mains.souvlaki.price": "€19.00", "menu.mains.souvlaki.imgAlt": "Souvlaki platter with pita and fries",
+                "menu.mains.kleftiko.name": "Kleftiko", "menu.mains.kleftiko.desc": "Slow-cooked lamb with herbs, lemon, and potatoes, wrapped in parchment.", "menu.mains.kleftiko.price": "€22.00", "menu.mains.kleftiko.imgAlt": "Kleftiko (slow-cooked lamb)",
+                "menu.desserts.baklava.name": "Baklava", "menu.desserts.baklava.desc": "Rich, sweet pastry made of layers of phyllo filled with chopped nuts and sweetened with syrup.", "menu.desserts.baklava.price": "€7.00", "menu.desserts.baklava.imgAlt": "Baklava pieces on a plate",
+                "menu.desserts.galaktoboureko.name": "Galaktoboureko", "menu.desserts.galaktoboureko.desc": "Semolina custard baked in phyllo, soaked in a light lemon-scented syrup.", "menu.desserts.galaktoboureko.price": "€7.50", "menu.desserts.galaktoboureko.imgAlt": "Galaktoboureko (custard pie)",
+                "menu.drinks.greekWine.name": "Greek Wine (Red/White)", "menu.drinks.greekWine.desc": "Selection of fine wines from renowned Greek vineyards.", "menu.drinks.greekWine.price": "From €6.00/glass", "menu.drinks.greekWine.imgAlt": "Glass of Greek wine",
+                "menu.drinks.ouzo.name": "Ouzo", "menu.drinks.ouzo.desc": "Traditional Greek anise-flavored aperitif.", "menu.drinks.ouzo.price": "€5.00", "menu.drinks.ouzo.imgAlt": "Glass of Ouzo",
+                "menu.drinks.ellinikosKafes.name": "Ellinikos Kafes", "menu.drinks.ellinikosKafes.desc": "Strong, traditionally brewed Greek coffee.", "menu.drinks.ellinikosKafes.price": "€3.50", "menu.drinks.ellinikosKafes.imgAlt": "Cup of Greek coffee",
+                "reviews.title": "What Our Customers Say",
+                "reviews.anna.quote": "Absolutely authentic! The moussaka was heavenly, and the staff made us feel right at home. Best Greek food in Antwerp!", "reviews.anna.footer": "Anna V.",
+                "reviews.mark.quote": "A wonderful evening at Zorbas. The souvlaki was perfectly grilled, and the baklava was to die for. Highly recommended!", "reviews.mark.footer": "Mark D.",
+                "reviews.sophie.quote": "The atmosphere is cozy and inviting. We loved the fresh tzatziki and the friendly service. We'll be back soon!", "reviews.sophie.footer": "Sophie L.",
+                "gallery.title": "A Glimpse of Zorbas",
+                "gallery.slide1.ariaLabel": "Slide 1: Greek Feast Platter", "gallery.slide2.ariaLabel": "Slide 2: Zorbas Restaurant Exterior", "gallery.slide3.ariaLabel": "Slide 3: Traditional Greek Coffee",
+                "gallery.slide1.imgAlt": "Greek Feast Platter with souvlaki, keftedes, dolmades and salad", "gallery.slide1.caption.title": "Bountiful Greek Feasts", "gallery.slide1.caption.p": "A taste of our generous platters, perfect for sharing.",
+                "gallery.slide2.imgAlt": "Charming exterior of Zorbas restaurant at dusk with warm lighting", "gallery.slide2.caption.title": "Charming Ambiance", "gallery.slide2.caption.p": "Our welcoming exterior, inviting you for a memorable meal.",
+                "gallery.slide3.imgAlt": "Traditional Greek coffee being poured, with loukoumi", "gallery.slide3.caption.title": "Authentic Traditions", "gallery.slide3.caption.p": "Enjoy a traditional Greek coffee and sweet delights.",
+                "gallery.carousel.prev": "Previous", "gallery.carousel.next": "Next", "gallery.carousel.prevAriaLabel": "Previous slide", "gallery.carousel.nextAriaLabel": "Next slide",
+                "bookingForm.title": "Book Your Table",
+                "bookingForm.nameLabel": "Full Name", "bookingForm.namePlaceholder": "Your Name", "bookingForm.nameInvalidFeedback": "Please enter your name.",
+                "bookingForm.emailLabel": "Email Address", "bookingForm.emailPlaceholder": "your@email.com", "bookingForm.emailInvalidFeedback": "Please enter a valid email address.",
+                "bookingForm.phoneLabel": "Phone Number", "bookingForm.phonePlaceholder": "Your Phone Number", "bookingForm.phoneInvalidFeedback": "Please enter your phone number.",
+                "bookingForm.guestsLabel": "Number of Guests", "bookingForm.guestsPlaceholder": "2", "bookingForm.guestsInvalidFeedback": "Please enter the number of guests (1-20).",
+                "bookingForm.dateLabel": "Date", "bookingForm.dateInvalidFeedback": "Please select a date.",
+                "bookingForm.timeLabel": "Time", "bookingForm.timeInvalidFeedback": "Please select a time (e.g., 19:30).",
+                "bookingForm.requestsLabel": "Special Requests (Optional)", "bookingForm.requestsPlaceholder": "Any allergies, preferences, or special occasion?",
+                "bookingForm.submitButton": "Request Booking",
+                "bookingForm.successMessage": "Thank you! Your booking request has been received. We will contact you shortly.",
+                "bookingForm.errorMessage": "Please fill out all required fields correctly and ensure values are within valid ranges (e.g., time, number of guests).",
+                "bookingForm.alertCloseAriaLabel": "Close alert",
+                "location.title": "Find Us & Get In Touch", "location.openingHoursTitle": "Opening Hours:",
+                "location.hours.monThu": "Monday - Thursday: 17:00 - 22:00", "location.hours.friSat": "Friday - Saturday: 12:00 - 15:00 & 17:00 - 23:00", "location.hours.sun": "Sunday: 12:00 - 21:00",
+                "location.contactUsTitle": "Contact Us:", "location.sample": "Sample", "location.mapTitle": "Google Maps location of Zorbas Restaurant",
+                "footer.facebookAriaLabel": "Visit our Facebook page", "footer.instagramAriaLabel": "Check our Instagram profile", "footer.tripadvisorAriaLabel": "Read reviews on TripAdvisor",
+                "footer.copyrightBrand": "Zorbas", "footer.copyrightRights": "All Rights Reserved", "footer.copyrightDesignedWith": "Designed with", "footer.copyrightHeartAriaLabel": "love", "footer.copyrightLocation": "in Antwerp.",
+                "footer.backToTopAriaLabel": "Back to top"
+            },
+            nl: {
+                "site.title": "Zorbas - Authentiek Grieks Restaurant, Antwerpen",
+                "preloader.loading": "Laden...",
+                "nav.logoAlt": "Zorbas Logo",
+                "nav.toggleNavAriaLabel": "Navigatie wisselen",
+                "nav.home": "Startpagina", "nav.about": "Over ons", "nav.menu": "Menu", "nav.reviews": "Recensies", "nav.gallery": "Galerij", "nav.booking": "Reserveer Tafel", "nav.location": "Locatie",
+                "nav.languageSelectorAriaLabel": "Selecteer taal",
+                "lang.en": "English", "lang.nl": "Nederlands", "lang.fr": "Français", "lang.gr": "Ελληνικά",
+                "home.hero.title": "Ervaar Authentieke Griekse Keuken",
+                "home.hero.subtitle": "Welkom bij Zorbas - Een Smaak van Griekenland in het Hart van Antwerpen.",
+                "home.hero.viewMenuButton": "Bekijk Menu", "home.hero.bookTableButton": "Reserveer een Tafel",
+                "about.title": "Over Zorbas",
+                "about.p1": "Gelegen aan de levendige Kerstraat 12 in Antwerpen, brengt Zorbas de zonovergoten smaken van Griekenland naar uw tafel. Onze passie is het delen van het rijke culinaire erfgoed van Griekenland, met uitsluitend de meest verse ingrediënten en aloude familierecepten.",
+                "about.p2": "Van sissende souvlaki tot romige moussaka en delicate baklava, elk gerecht is een viering van de authentieke Griekse smaak. Kom bij ons voor een onvergetelijke eetervaring waar warme gastvrijheid en voortreffelijk eten samenkomen, zodat u zich deel voelt van onze grote Griekse familie.",
+                "about.imageAlt": "Gezellig interieur van Restaurant Zorbas",
+                "menu.title": "Ons Heerlijke Menu",
+                "menu.tabs.appetizers": "Voorgerechten", "menu.tabs.mains": "Hoofdgerechten", "menu.tabs.desserts": "Nagerechten", "menu.tabs.drinks": "Dranken",
+                "menu.appetizers.tzatziki.name": "Tzatziki", "menu.appetizers.tzatziki.desc": "Romige yoghurtdip met komkommer, knoflook en dille. Geserveerd met pitabrood.", "menu.appetizers.tzatziki.price": "€7,50", "menu.appetizers.tzatziki.imgAlt": "Tzatziki dip met pitabrood",
+                "menu.appetizers.dolmades.name": "Dolmades", "menu.appetizers.dolmades.desc": "Druivenbladeren gevuld met rijst en kruiden, besprenkeld met citroensap.", "menu.appetizers.dolmades.price": "€8,00", "menu.appetizers.dolmades.imgAlt": "Dolmades (gevulde druivenbladeren)",
+                "menu.appetizers.spanakopita.name": "Spanakopita", "menu.appetizers.spanakopita.desc": "Hartige spinazie- en fetataart in knapperig filodeeg.", "menu.appetizers.spanakopita.price": "€8,50", "menu.appetizers.spanakopita.imgAlt": "Spanakopita (spinazietaart)",
+                "menu.mains.moussaka.name": "Moussaka", "menu.mains.moussaka.desc": "Lagen aubergine, gekruid lamsgehakt en romige béchamelsaus.", "menu.mains.moussaka.price": "€18,50", "menu.mains.moussaka.imgAlt": "Moussaka schotel op een bord",
+                "menu.mains.souvlaki.name": "Souvlaki Schotel", "menu.mains.souvlaki.desc": "Gegrilde spiesen van gemarineerde kip of varken, geserveerd met pita, tzatziki en friet.", "menu.mains.souvlaki.price": "€19,00", "menu.mains.souvlaki.imgAlt": "Souvlaki schotel met pita en friet",
+                "menu.mains.kleftiko.name": "Kleftiko", "menu.mains.kleftiko.desc": "Langzaam gegaard lamsvlees met kruiden, citroen en aardappelen, verpakt in perkament.", "menu.mains.kleftiko.price": "€22,00", "menu.mains.kleftiko.imgAlt": "Kleftiko (langzaam gegaard lamsvlees)",
+                "menu.desserts.baklava.name": "Baklava", "menu.desserts.baklava.desc": "Rijk, zoet gebak van filodeeglagen gevuld met gehakte noten en gezoet met siroop.", "menu.desserts.baklava.price": "€7,00", "menu.desserts.baklava.imgAlt": "Stukjes baklava op een bord",
+                "menu.desserts.galaktoboureko.name": "Galaktoboureko", "menu.desserts.galaktoboureko.desc": "Griesmeelpudding gebakken in filodeeg, gedrenkt in een lichte citroensiroop.", "menu.desserts.galaktoboureko.price": "€7,50", "menu.desserts.galaktoboureko.imgAlt": "Galaktoboureko (custardtaart)",
+                "menu.drinks.greekWine.name": "Griekse Wijn (Rood/Wit)", "menu.drinks.greekWine.desc": "Selectie van fijne wijnen van gerenommeerde Griekse wijngaarden.", "menu.drinks.greekWine.price": "Vanaf €6,00/glas", "menu.drinks.greekWine.imgAlt": "Glas Griekse wijn",
+                "menu.drinks.ouzo.name": "Ouzo", "menu.drinks.ouzo.desc": "Traditioneel Grieks aperitief met anijssmaak.", "menu.drinks.ouzo.price": "€5,00", "menu.drinks.ouzo.imgAlt": "Glas Ouzo",
+                "menu.drinks.ellinikosKafes.name": "Ellinikos Kafes", "menu.drinks.ellinikosKafes.desc": "Sterke, traditioneel gebrouwen Griekse koffie.", "menu.drinks.ellinikosKafes.price": "€3,50", "menu.drinks.ellinikosKafes.imgAlt": "Kop Griekse koffie",
+                "reviews.title": "Wat Onze Klanten Zeggen",
+                "reviews.anna.quote": "Absoluut authentiek! De moussaka was hemels en het personeel zorgde ervoor dat we ons meteen thuis voelden. Beste Griekse eten in Antwerpen!", "reviews.anna.footer": "Anna V.",
+                "reviews.mark.quote": "Een geweldige avond bij Zorbas. De souvlaki was perfect gegrild en de baklava was om voor te sterven. Sterk aanbevolen!", "reviews.mark.footer": "Mark D.",
+                "reviews.sophie.quote": "De sfeer is gezellig en uitnodigend. We hielden van de verse tzatziki en de vriendelijke service. We komen snel terug!", "reviews.sophie.footer": "Sophie L.",
+                "gallery.title": "Een Glimp van Zorbas",
+                "gallery.slide1.ariaLabel": "Dia 1: Griekse Feestschotel", "gallery.slide2.ariaLabel": "Dia 2: Buitenkant Zorbas Restaurant", "gallery.slide3.ariaLabel": "Dia 3: Traditionele Griekse Koffie",
+                "gallery.slide1.imgAlt": "Griekse Feestschotel met souvlaki, keftedes, dolmades en salade", "gallery.slide1.caption.title": "Overvloedige Griekse Feesten", "gallery.slide1.caption.p": "Een voorproefje van onze royale schotels, perfect om te delen.",
+                "gallery.slide2.imgAlt": "Charmante buitenkant van Zorbas restaurant in de schemering met warme verlichting", "gallery.slide2.caption.title": "Charmante Sfeer", "gallery.slide2.caption.p": "Onze gastvrije buitenkant, die u uitnodigt voor een onvergetelijke maaltijd.",
+                "gallery.slide3.imgAlt": "Traditionele Griekse koffie wordt ingeschonken, met loukoumi", "gallery.slide3.caption.title": "Authentieke Tradities", "gallery.slide3.caption.p": "Geniet van een traditionele Griekse koffie en zoete lekkernijen.",
+                "gallery.carousel.prev": "Vorige", "gallery.carousel.next": "Volgende", "gallery.carousel.prevAriaLabel": "Vorige dia", "gallery.carousel.nextAriaLabel": "Volgende dia",
+                "bookingForm.title": "Reserveer Uw Tafel",
+                "bookingForm.nameLabel": "Volledige Naam", "bookingForm.namePlaceholder": "Uw Naam", "bookingForm.nameInvalidFeedback": "Voer uw naam in.",
+                "bookingForm.emailLabel": "E-mailadres", "bookingForm.emailPlaceholder": "uw@email.com", "bookingForm.emailInvalidFeedback": "Voer een geldig e-mailadres in.",
+                "bookingForm.phoneLabel": "Telefoonnummer", "bookingForm.phonePlaceholder": "Uw Telefoonnummer", "bookingForm.phoneInvalidFeedback": "Voer uw telefoonnummer in.",
+                "bookingForm.guestsLabel": "Aantal Gasten", "bookingForm.guestsPlaceholder": "2", "bookingForm.guestsInvalidFeedback": "Voer het aantal gasten in (1-20).",
+                "bookingForm.dateLabel": "Datum", "bookingForm.dateInvalidFeedback": "Selecteer een datum.",
+                "bookingForm.timeLabel": "Tijd", "bookingForm.timeInvalidFeedback": "Selecteer een tijd (bijv. 19:30).",
+                "bookingForm.requestsLabel": "Speciale Verzoeken (Optioneel)", "bookingForm.requestsPlaceholder": "Allergieën, voorkeuren of speciale gelegenheid?",
+                "bookingForm.submitButton": "Reservering Aanvragen",
+                "bookingForm.successMessage": "Bedankt! Uw reserveringsaanvraag is ontvangen. We nemen spoedig contact met u op.",
+                "bookingForm.errorMessage": "Vul alstublieft alle verplichte velden correct in en zorg ervoor dat de waarden binnen geldige bereiken vallen (bijv. tijd, aantal gasten).",
+                "bookingForm.alertCloseAriaLabel": "Melding sluiten",
+                "location.title": "Vind Ons & Neem Contact Op", "location.openingHoursTitle": "Openingstijden:",
+                "location.hours.monThu": "Maandag - Donderdag: 17:00 - 22:00", "location.hours.friSat": "Vrijdag - Zaterdag: 12:00 - 15:00 & 17:00 - 23:00", "location.hours.sun": "Zondag: 12:00 - 21:00",
+                "location.contactUsTitle": "Neem Contact Op:", "location.sample": "Voorbeeld", "location.mapTitle": "Google Maps locatie van Restaurant Zorbas",
+                "footer.facebookAriaLabel": "Bezoek onze Facebook-pagina", "footer.instagramAriaLabel": "Bekijk ons Instagram-profiel", "footer.tripadvisorAriaLabel": "Lees beoordelingen op TripAdvisor",
+                "footer.copyrightBrand": "Zorbas", "footer.copyrightRights": "Alle Rechten Voorbehouden", "footer.copyrightDesignedWith": "Ontworpen met", "footer.copyrightHeartAriaLabel": "liefde", "footer.copyrightLocation": "in Antwerpen.",
+                "footer.backToTopAriaLabel": "Terug naar boven"
+            },
+            fr: {
+                "site.title": "Zorbas - Restaurant Grec Authentique, Anvers",
+                "preloader.loading": "Chargement...",
+                "nav.logoAlt": "Logo Zorbas",
+                "nav.toggleNavAriaLabel": "Basculer la navigation",
+                "nav.home": "Accueil", "nav.about": "À propos", "nav.menu": "Menu", "nav.reviews": "Avis", "nav.gallery": "Galerie", "nav.booking": "Réserver", "nav.location": "Emplacement",
+                "nav.languageSelectorAriaLabel": "Sélectionner la langue",
+                "lang.en": "English", "lang.nl": "Nederlands", "lang.fr": "Français", "lang.gr": "Ελληνικά",
+                "home.hero.title": "Découvrez la Cuisine Grecque Authentique",
+                "home.hero.subtitle": "Bienvenue chez Zorbas - Un Goût de Grèce au Cœur d'Anvers.",
+                "home.hero.viewMenuButton": "Voir le Menu", "home.hero.bookTableButton": "Réserver une Table",
+                "about.title": "À Propos de Zorbas",
+                "about.p1": "Niché dans la vibrante Kerstraat 12, à Anvers, Zorbas apporte les saveurs ensoleillées de la Grèce à votre table. Notre passion est de partager le riche héritage culinaire de la Grèce, en utilisant uniquement les ingrédients les plus frais et des recettes familiales ancestrales.",
+                "about.p2": "Du souvlaki grésillant à la moussaka crémeuse et au baklava délicat, chaque plat est une célébration du goût grec authentique. Rejoignez-nous pour une expérience culinaire inoubliable où l'hospitalité chaleureuse rencontre une cuisine exquise, vous faisant sentir comme un membre de notre grande famille grecque.",
+                "about.imageAlt": "Intérieur chaleureux du Restaurant Zorbas",
+                "menu.title": "Notre Délicieux Menu",
+                "menu.tabs.appetizers": "Entrées", "menu.tabs.mains": "Plats Principaux", "menu.tabs.desserts": "Desserts", "menu.tabs.drinks": "Boissons",
+                "menu.appetizers.tzatziki.name": "Tzatziki", "menu.appetizers.tzatziki.desc": "Sauce crémeuse au yaourt avec concombre, ail et aneth. Servie avec du pain pita.", "menu.appetizers.tzatziki.price": "€7,50", "menu.appetizers.tzatziki.imgAlt": "Sauce tzatziki avec pain pita",
+                "menu.appetizers.dolmades.name": "Dolmades", "menu.appetizers.dolmades.desc": "Feuilles de vigne farcies de riz et d'herbes, arrosées de jus de citron.", "menu.appetizers.dolmades.price": "€8,00", "menu.appetizers.dolmades.imgAlt": "Dolmades (feuilles de vigne farcies)",
+                "menu.appetizers.spanakopita.name": "Spanakopita", "menu.appetizers.spanakopita.desc": "Savoureuse tourte aux épinards et à la feta, enveloppée dans une pâte phyllo croustillante.", "menu.appetizers.spanakopita.price": "€8,50", "menu.appetizers.spanakopita.imgAlt": "Spanakopita (tourte aux épinards)",
+                "menu.mains.moussaka.name": "Moussaka", "menu.mains.moussaka.desc": "Couches d'aubergines, d'agneau haché épicé et de sauce béchamel crémeuse.", "menu.mains.moussaka.price": "€18,50", "menu.mains.moussaka.imgAlt": "Part de moussaka dans une assiette",
+                "menu.mains.souvlaki.name": "Assiette Souvlaki", "menu.mains.souvlaki.desc": "Brochettes grillées de poulet ou de porc mariné, servies avec pita, tzatziki et frites.", "menu.mains.souvlaki.price": "€19,00", "menu.mains.souvlaki.imgAlt": "Assiette de souvlaki avec pita et frites",
+                "menu.mains.kleftiko.name": "Kleftiko", "menu.mains.kleftiko.desc": "Agneau mijoté lentement avec herbes, citron et pommes de terre, enveloppé dans du papier sulfurisé.", "menu.mains.kleftiko.price": "€22,00", "menu.mains.kleftiko.imgAlt": "Kleftiko (agneau mijoté)",
+                "menu.desserts.baklava.name": "Baklava", "menu.desserts.baklava.desc": "Pâtisserie riche et sucrée composée de couches de pâte phyllo garnies de noix hachées et arrosées de sirop.", "menu.desserts.baklava.price": "€7,00", "menu.desserts.baklava.imgAlt": "Morceaux de baklava dans une assiette",
+                "menu.desserts.galaktoboureko.name": "Galaktoboureko", "menu.desserts.galaktoboureko.desc": "Crème pâtissière à la semoule cuite en pâte phyllo, imbibée d'un léger sirop parfumé au citron.", "menu.desserts.galaktoboureko.price": "€7,50", "menu.desserts.galaktoboureko.imgAlt": "Galaktoboureko (gâteau à la crème)",
+                "menu.drinks.greekWine.name": "Vin Grec (Rouge/Blanc)", "menu.drinks.greekWine.desc": "Sélection de vins fins issus de vignobles grecs renommés.", "menu.drinks.greekWine.price": "À partir de €6,00/verre", "menu.drinks.greekWine.imgAlt": "Verre de vin grec",
+                "menu.drinks.ouzo.name": "Ouzo", "menu.drinks.ouzo.desc": "Apéritif traditionnel grec parfumé à l'anis.", "menu.drinks.ouzo.price": "€5,00", "menu.drinks.ouzo.imgAlt": "Verre d'Ouzo",
+                "menu.drinks.ellinikosKafes.name": "Ellinikos Kafes", "menu.drinks.ellinikosKafes.desc": "Café grec fort, brassé traditionnellement.", "menu.drinks.ellinikosKafes.price": "€3,50", "menu.drinks.ellinikosKafes.imgAlt": "Tasse de café grec",
+                "reviews.title": "Ce que Disent Nos Clients",
+                "reviews.anna.quote": "Absolument authentique ! La moussaka était divine, et le personnel nous a fait nous sentir comme chez nous. La meilleure cuisine grecque d'Anvers !", "reviews.anna.footer": "Anna V.",
+                "reviews.mark.quote": "Une merveilleuse soirée chez Zorbas. Le souvlaki était parfaitement grillé, et le baklava était à tomber. Fortement recommandé !", "reviews.mark.footer": "Mark D.",
+                "reviews.sophie.quote": "L'atmosphère est chaleureuse et accueillante. Nous avons adoré le tzatziki frais et le service amical. Nous reviendrons bientôt !", "reviews.sophie.footer": "Sophie L.",
+                "gallery.title": "Un Aperçu de Zorbas",
+                "gallery.slide1.ariaLabel": "Diapositive 1 : Festin Grec", "gallery.slide2.ariaLabel": "Diapositive 2 : Extérieur du Restaurant Zorbas", "gallery.slide3.ariaLabel": "Diapositive 3 : Café Grec Traditionnel",
+                "gallery.slide1.imgAlt": "Plateau de festin grec avec souvlaki, keftedes, dolmades et salade", "gallery.slide1.caption.title": "Festins Grecs Abondants", "gallery.slide1.caption.p": "Un avant-goût de nos plateaux généreux, parfaits pour partager.",
+                "gallery.slide2.imgAlt": "Charmant extérieur du restaurant Zorbas au crépuscule avec un éclairage chaleureux", "gallery.slide2.caption.title": "Ambiance Charmante", "gallery.slide2.caption.p": "Notre extérieur accueillant, vous invitant pour un repas mémorable.",
+                "gallery.slide3.imgAlt": "Café grec traditionnel versé, avec loukoumi", "gallery.slide3.caption.title": "Traditions Authentiques", "gallery.slide3.caption.p": "Savourez un café grec traditionnel et des douceurs sucrées.",
+                "gallery.carousel.prev": "Précédent", "gallery.carousel.next": "Suivant", "gallery.carousel.prevAriaLabel": "Diapositive précédente", "gallery.carousel.nextAriaLabel": "Diapositive suivante",
+                "bookingForm.title": "Réservez Votre Table",
+                "bookingForm.nameLabel": "Nom Complet", "bookingForm.namePlaceholder": "Votre Nom", "bookingForm.nameInvalidFeedback": "Veuillez entrer votre nom.",
+                "bookingForm.emailLabel": "Adresse E-mail", "bookingForm.emailPlaceholder": "votre@email.com", "bookingForm.emailInvalidFeedback": "Veuillez entrer une adresse e-mail valide.",
+                "bookingForm.phoneLabel": "Numéro de Téléphone", "bookingForm.phonePlaceholder": "Votre Numéro de Téléphone", "bookingForm.phoneInvalidFeedback": "Veuillez entrer votre numéro de téléphone.",
+                "bookingForm.guestsLabel": "Nombre de Personnes", "bookingForm.guestsPlaceholder": "2", "bookingForm.guestsInvalidFeedback": "Veuillez entrer le nombre de personnes (1-20).",
+                "bookingForm.dateLabel": "Date", "bookingForm.dateInvalidFeedback": "Veuillez sélectionner une date.",
+                "bookingForm.timeLabel": "Heure", "bookingForm.timeInvalidFeedback": "Veuillez sélectionner une heure (ex: 19:30).",
+                "bookingForm.requestsLabel": "Demandes Spéciales (Optionnel)", "bookingForm.requestsPlaceholder": "Allergies, préférences ou occasion spéciale ?",
+                "bookingForm.submitButton": "Demander une Réservation",
+                "bookingForm.successMessage": "Merci ! Votre demande de réservation a été reçue. Nous vous contacterons sous peu.",
+                "bookingForm.errorMessage": "Veuillez remplir correctement tous les champs obligatoires et vous assurer que les valeurs sont dans des plages valides (par exemple, heure, nombre d'invités).",
+                "bookingForm.alertCloseAriaLabel": "Fermer l'alerte",
+                "location.title": "Nous Trouver & Contacter", "location.openingHoursTitle": "Heures d'Ouverture:",
+                "location.hours.monThu": "Lundi - Jeudi : 17:00 - 22:00", "location.hours.friSat": "Vendredi - Samedi : 12:00 - 15:00 & 17:00 - 23:00", "location.hours.sun": "Dimanche : 12:00 - 21:00",
+                "location.contactUsTitle": "Contactez-Nous:", "location.sample": "Exemple", "location.mapTitle": "Localisation Google Maps du Restaurant Zorbas",
+                "footer.facebookAriaLabel": "Visitez notre page Facebook", "footer.instagramAriaLabel": "Consultez notre profil Instagram", "footer.tripadvisorAriaLabel": "Lisez les avis sur TripAdvisor",
+                "footer.copyrightBrand": "Zorbas", "footer.copyrightRights": "Tous Droits Réservés", "footer.copyrightDesignedWith": "Conçu avec", "footer.copyrightHeartAriaLabel": "amour", "footer.copyrightLocation": "à Anvers.",
+                "footer.backToTopAriaLabel": "Retour en haut"
+            },
+            gr: {
+                "site.title": "Ζορμπάς - Αυθεντικό Ελληνικό Εστιατόριο, Αμβέρσα",
+                "preloader.loading": "Φόρτωση...",
+                "nav.logoAlt": "Λογότυπο Ζορμπάς",
+                "nav.toggleNavAriaLabel": "Εναλλαγή πλοήγησης",
+                "nav.home": "Αρχική", "nav.about": "Σχετικά", "nav.menu": "Μενού", "nav.reviews": "Κριτικές", "nav.gallery": "Συλλογή", "nav.booking": "Κράτηση", "nav.location": "Τοποθεσία",
+                "nav.languageSelectorAriaLabel": "Επιλογή γλώσσας",
+                "lang.en": "English", "lang.nl": "Nederlands", "lang.fr": "Français", "lang.gr": "Ελληνικά",
+                "home.hero.title": "Γευτείτε Αυθεντική Ελληνική Κουζίνα",
+                "home.hero.subtitle": "Καλώς ήρθατε στον Ζορμπά - Μια Γεύση Ελλάδας στην Καρδιά της Αμβέρσας.",
+                "home.hero.viewMenuButton": "Δείτε το Μενού", "home.hero.bookTableButton": "Κάντε Κράτηση",
+                "about.title": "Σχετικά με τον Ζορμπά",
+                "about.p1": "Φωλιασμένο στην πολυσύχναστη Kerstraat 12, στην Αμβέρσα, το Ζορμπάς φέρνει τις ηλιόλουστες γεύσεις της Ελλάδας στο τραπέζι σας. Το πάθος μας είναι να μοιραστούμε την πλούσια γαστρονομική κληρονομιά της Ελλάδας, χρησιμοποιώντας μόνο τα πιο φρέσκα υλικά και πατροπαράδοτες οικογενειακές συνταγές.",
+                "about.p2": "Από το λαχταριστό σουβλάκι μέχρι τον κρεμώδη μουσακά και τον ντελικάτο μπακλαβά, κάθε πιάτο είναι μια γιορτή αυθεντικής ελληνικής γεύσης. Ελάτε μαζί μας για μια αξέχαστη γευστική εμπειρία όπου η ζεστή φιλοξενία συναντά το εξαιρετικό φαγητό, κάνοντάς σας να νιώσετε μέλος της μεγάλης ελληνικής μας οικογένειας.",
+                "about.imageAlt": "Ζεστό εσωτερικό του Εστιατορίου Ζορμπάς",
+                "menu.title": "Το Νόστιμο Μενού μας",
+                "menu.tabs.appetizers": "Ορεκτικά", "menu.tabs.mains": "Κυρίως Πιάτα", "menu.tabs.desserts": "Επιδόρπια", "menu.tabs.drinks": "Ποτά",
+                "menu.appetizers.tzatziki.name": "Τζατζίκι", "menu.appetizers.tzatziki.desc": "Κρεμώδης σάλτσα γιαουρτιού με αγγούρι, σκόρδο και άνηθο. Σερβίρεται με πίτα.", "menu.appetizers.tzatziki.price": "€7,50", "menu.appetizers.tzatziki.imgAlt": "Τζατζίκι με πίτα",
+                "menu.appetizers.dolmades.name": "Ντολμάδες", "menu.appetizers.dolmades.desc": "Αμπελόφυλλα γεμιστά με ρύζι και μυρωδικά, περιχυμένα με χυμό λεμονιού.", "menu.appetizers.dolmades.price": "€8,00", "menu.appetizers.dolmades.imgAlt": "Ντολμάδες (γεμιστά αμπελόφυλλα)",
+                "menu.appetizers.spanakopita.name": "Σπανακόπιτα", "menu.appetizers.spanakopita.desc": "Αλμυρή πίτα με σπανάκι και φέτα τυλιγμένη σε τραγανό φύλλο κρούστας.", "menu.appetizers.spanakopita.price": "€8,50", "menu.appetizers.spanakopita.imgAlt": "Σπανακόπιτα",
+                "menu.mains.moussaka.name": "Μουσακάς", "menu.mains.moussaka.desc": "Στρώσεις μελιτζάνας, πικάντικου κιμά αρνιού και κρεμώδους σάλτσας μπεσαμέλ.", "menu.mains.moussaka.price": "€18,50", "menu.mains.moussaka.imgAlt": "Μερίδα μουσακά σε πιάτο",
+                "menu.mains.souvlaki.name": "Πιατέλα Σουβλάκι", "menu.mains.souvlaki.desc": "Ψητά σουβλάκια από μαριναρισμένο κοτόπουλο ή χοιρινό, σερβιρισμένα με πίτα, τζατζίκι και πατάτες τηγανητές.", "menu.mains.souvlaki.price": "€19,00", "menu.mains.souvlaki.imgAlt": "Πιατέλα σουβλάκι με πίτα και πατάτες",
+                "menu.mains.kleftiko.name": "Κλέφτικο", "menu.mains.kleftiko.desc": "Αργοψημένο αρνί με μυρωδικά, λεμόνι και πατάτες, τυλιγμένο σε λαδόκολλα.", "menu.mains.kleftiko.price": "€22,00", "menu.mains.kleftiko.imgAlt": "Κλέφτικο (αργοψημένο αρνί)",
+                "menu.desserts.baklava.name": "Μπακλαβάς", "menu.desserts.baklava.desc": "Πλούσιο, γλυκό γλύκισμα από στρώσεις φύλλου γεμισμένες με ψιλοκομμένα καρύδια και σιρόπι.", "menu.desserts.baklava.price": "€7,00", "menu.desserts.baklava.imgAlt": "Κομμάτια μπακλαβά σε πιάτο",
+                "menu.desserts.galaktoboureko.name": "Γαλακτομπούρεκο", "menu.desserts.galaktoboureko.desc": "Κρέμα σιμιγδαλιού ψημένη σε φύλλο, περιχυμένη με ελαφρύ σιρόπι αρωματισμένο με λεμόνι.", "menu.desserts.galaktoboureko.price": "€7,50", "menu.desserts.galaktoboureko.imgAlt": "Γαλακτομπούρεκο (πίτα με κρέμα)",
+                "menu.drinks.greekWine.name": "Ελληνικό Κρασί (Κόκκινο/Λευκό)", "menu.drinks.greekWine.desc": "Επιλογή εκλεκτών κρασιών από φημισμένα ελληνικά οινοποιεία.", "menu.drinks.greekWine.price": "Από €6,00/ποτήρι", "menu.drinks.greekWine.imgAlt": "Ποτήρι ελληνικό κρασί",
+                "menu.drinks.ouzo.name": "Ούζο", "menu.drinks.ouzo.desc": "Παραδοσιακό ελληνικό απεριτίφ με γεύση γλυκάνισου.", "menu.drinks.ouzo.price": "€5,00", "menu.drinks.ouzo.imgAlt": "Ποτήρι Ούζο",
+                "menu.drinks.ellinikosKafes.name": "Ελληνικός Καφές", "menu.drinks.ellinikosKafes.desc": "Δυνατός, παραδοσιακά φτιαγμένος ελληνικός καφές.", "menu.drinks.ellinikosKafes.price": "€3,50", "menu.drinks.ellinikosKafes.imgAlt": "Φλιτζάνι ελληνικού καφέ",
+                "reviews.title": "Τι Λένε οι Πελάτες Μας",
+                "reviews.anna.quote": "Απόλυτα αυθεντικό! Ο μουσακάς ήταν θεϊκός και το προσωπικό μας έκανε να νιώσουμε σαν στο σπίτι μας. Το καλύτερο ελληνικό φαγητό στην Αμβέρσα!", "reviews.anna.footer": "Άννα Β.",
+                "reviews.mark.quote": "Μια υπέροχη βραδιά στον Ζορμπά. Το σουβλάκι ήταν τέλεια ψημένο και ο μπακλαβάς ήταν απίθανος. Συνιστάται ανεπιφύλακτα!", "reviews.mark.footer": "Μάρκος Δ.",
+                "reviews.sophie.quote": "Η ατμόσφαιρα είναι ζεστή και φιλόξενη. Λατρέψαμε το φρέσκο τζατζίκι και τη φιλική εξυπηρέτηση. Θα ξανάρθουμε σύντομα!", "reviews.sophie.footer": "Σοφία Λ.",
+                "gallery.title": "Μια Ματιά στον Ζορμπά",
+                "gallery.slide1.ariaLabel": "Διαφάνεια 1: Ελληνική Πιατέλα Γεύσεων", "gallery.slide2.ariaLabel": "Διαφάνεια 2: Εξωτερικό Εστιατορίου Ζορμπάς", "gallery.slide3.ariaLabel": "Διαφάνεια 3: Παραδοσιακός Ελληνικός Καφές",
+                "gallery.slide1.imgAlt": "Ελληνική πιατέλα γεύσεων με σουβλάκι, κεφτέδες, ντολμάδες και σαλάτα", "gallery.slide1.caption.title": "Πλούσιες Ελληνικές Γεύσεις", "gallery.slide1.caption.p": "Μια γεύση από τις γενναιόδωρες πιατέλες μας, ιδανικές για μοίρασμα.",
+                "gallery.slide2.imgAlt": "Γοητευτικό εξωτερικό του εστιατορίου Ζορμπάς το σούρουπο με ζεστό φωτισμό", "gallery.slide2.caption.title": "Γοητευτική Ατμόσφαιρα", "gallery.slide2.caption.p": "Το φιλόξενο εξωτερικό μας, σας προσκαλεί για ένα αξέχαστο γεύμα.",
+                "gallery.slide3.imgAlt": "Παραδοσιακός ελληνικός καφές σερβίρεται, με λουκούμι", "gallery.slide3.caption.title": "Αυθεντικές Παραδόσεις", "gallery.slide3.caption.p": "Απολαύστε έναν παραδοσιακό ελληνικό καφέ και γλυκές λιχουδιές.",
+                "gallery.carousel.prev": "Προηγούμενη", "gallery.carousel.next": "Επόμενη", "gallery.carousel.prevAriaLabel": "Προηγούμενη διαφάνεια", "gallery.carousel.nextAriaLabel": "Επόμενη διαφάνεια",
+                "bookingForm.title": "Κάντε Κράτηση",
+                "bookingForm.nameLabel": "Ονοματεπώνυμο", "bookingForm.namePlaceholder": "Το Όνομά σας", "bookingForm.nameInvalidFeedback": "Παρακαλώ εισάγετε το όνομά σας.",
+                "bookingForm.emailLabel": "Διεύθυνση Email", "bookingForm.emailPlaceholder": "your@email.com", "bookingForm.emailInvalidFeedback": "Παρακαλώ εισάγετε μια έγκυρη διεύθυνση email.",
+                "bookingForm.phoneLabel": "Αριθμός Τηλεφώνου", "bookingForm.phonePlaceholder": "Ο Αριθμός Τηλεφώνου σας", "bookingForm.phoneInvalidFeedback": "Παρακαλώ εισάγετε τον αριθμό τηλεφώνου σας.",
+                "bookingForm.guestsLabel": "Αριθμός Ατόμων", "bookingForm.guestsPlaceholder": "2", "bookingForm.guestsInvalidFeedback": "Παρακαλώ εισάγετε τον αριθμό των ατόμων (1-20).",
+                "bookingForm.dateLabel": "Ημερομηνία", "bookingForm.dateInvalidFeedback": "Παρακαλώ επιλέξτε ημερομηνία.",
+                "bookingForm.timeLabel": "Ώρα", "bookingForm.timeInvalidFeedback": "Παρακαλώ επιλέξτε ώρα (π.χ., 19:30).",
+                "bookingForm.requestsLabel": "Ειδικά Αιτήματα (Προαιρετικά)", "bookingForm.requestsPlaceholder": "Αλλεργίες, προτιμήσεις ή ειδική περίσταση;",
+                "bookingForm.submitButton": "Αίτηση Κράτησης",
+                "bookingForm.successMessage": "Ευχαριστούμε! Το αίτημα κράτησής σας έχει παραληφθεί. Θα επικοινωνήσουμε μαζί σας σύντομα.",
+                "bookingForm.errorMessage": "Παρακαλούμε συμπληρώστε σωστά όλα τα απαιτούμενα πεδία και βεβαιωθείτε ότι οι τιμές είναι εντός έγκυρων ορίων (π.χ. ώρα, αριθμός επισκεπτών).",
+                "bookingForm.alertCloseAriaLabel": "Κλείσιμο ειδοποίησης",
+                "location.title": "Βρείτε Μας & Επικοινωνήστε", "location.openingHoursTitle": "Ώρες Λειτουργίας:",
+                "location.hours.monThu": "Δευτέρα - Πέμπτη: 17:00 - 22:00", "location.hours.friSat": "Παρασκευή - Σάββατο: 12:00 - 15:00 & 17:00 - 23:00", "location.hours.sun": "Κυριακή: 12:00 - 21:00",
+                "location.contactUsTitle": "Επικοινωνήστε Μαζί Μας:", "location.sample": "Δείγμα", "location.mapTitle": "Τοποθεσία Google Maps του Εστιατορίου Ζορμπάς",
+                "footer.facebookAriaLabel": "Επισκεφθείτε τη σελίδα μας στο Facebook", "footer.instagramAriaLabel": "Δείτε το προφίλ μας στο Instagram", "footer.tripadvisorAriaLabel": "Διαβάστε κριτικές στο TripAdvisor",
+                "footer.copyrightBrand": "Ζορμπάς", "footer.copyrightRights": "Με επιφύλαξη παντός δικαιώματος", "footer.copyrightDesignedWith": "Σχεδιάστηκε με", "footer.copyrightHeartAriaLabel": "αγάπη", "footer.copyrightLocation": "στην Αμβέρσα.",
+                "footer.backToTopAriaLabel": "Επιστροφή στην κορυφή"
+            }
+        };
+
+        let currentLanguage = 'en';
+        const availableLanguages = ['en', 'nl', 'fr', 'gr'];
+
+        function getTranslation(key, lang = currentLanguage) {
+            if (translations[lang] && translations[lang][key] !== undefined) {
+                return translations[lang][key];
+            }
+            if (lang !== 'en' && translations.en && translations.en[key] !== undefined) {
+                console.warn(`Translation missing for key '${key}' in language '${lang}'. Falling back to English.`);
+                return translations.en[key];
+            }
+            console.error(`Translation missing for key '${key}' in English or specified language '${lang}'. Returning key.`);
+            return key;
+        }
+
+        function translatePage() {
+            document.querySelectorAll('[data-translate-key]').forEach(el => {
+                el.innerHTML = getTranslation(el.dataset.translateKey);
+            });
+            document.querySelectorAll('[data-translate-key-placeholder]').forEach(el => {
+                el.placeholder = getTranslation(el.dataset.translateKeyPlaceholder);
+            });
+            document.querySelectorAll('[data-translate-key-alt]').forEach(el => {
+                el.alt = getTranslation(el.dataset.translateKeyAlt);
+            });
+            document.querySelectorAll('[data-translate-key-aria-label]').forEach(el => {
+                el.setAttribute('aria-label', getTranslation(el.dataset.translateKeyAriaLabel));
+            });
+            document.querySelectorAll('[data-translate-key-title]').forEach(el => {
+                el.title = getTranslation(el.dataset.translateKeyTitle);
+            });
+            
+            const siteTitleElement = document.querySelector('title[data-translate-key="site.title"]');
+            if (siteTitleElement) {
+                 document.title = getTranslation('site.title');
+            }
+           
+            document.documentElement.lang = currentLanguage;
+        }
+
+        function updateLanguageSelectorUI() {
+            const currentLangDisplay = document.getElementById('currentLangDisplay');
+            const languageSelectorMenu = document.getElementById('languageSelectorMenu');
+            const languageSelectorLink = document.getElementById('languageSelectorLink');
+
+            if (currentLangDisplay) currentLangDisplay.textContent = currentLanguage.toUpperCase();
+            if (languageSelectorLink) languageSelectorLink.setAttribute('aria-label', getTranslation('nav.languageSelectorAriaLabel'));
+
+            if (languageSelectorMenu) {
+                languageSelectorMenu.innerHTML = '';
+                availableLanguages.forEach(langCode => {
+                    const listItem = document.createElement('li');
+                    const link = document.createElement('a');
+                    link.classList.add('dropdown-item');
+                    link.href = '#';
+                    link.dataset.lang = langCode;
+                    link.textContent = `${getTranslation('lang.' + langCode, langCode)} (${langCode.toUpperCase()})`;
+                    if (langCode === currentLanguage) {
+                        link.classList.add('active');
+                        link.setAttribute('aria-current', 'true');
+                    }
+                    listItem.appendChild(link);
+                    languageSelectorMenu.appendChild(listItem);
+                });
+            }
+        }
+
+        function setLanguage(langCode) {
+            if (!availableLanguages.includes(langCode)) {
+                langCode = 'en'; 
+            }
+            currentLanguage = langCode;
+            try {
+                localStorage.setItem('zorbasPreferredLanguage', currentLanguage);
+            } catch (e) {
+                console.warn('Could not save language to localStorage:', e);
+            }
+            translatePage();
+            updateLanguageSelectorUI();
+        }
+
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const preloader = document.getElementById('preloader');
+            const mainContent = document.getElementById('mainContent');
+            const navbar = document.querySelector('.navbar');
+            const backToTopButton = document.querySelector('.back-to-top');
+            let navbarHeight = navbar ? navbar.offsetHeight : 70;
+
+            function setBodyPadding() {
+                navbarHeight = navbar ? navbar.offsetHeight : 70;
+                document.body.style.paddingTop = navbarHeight + 'px';
+            }
+            
+            if (navbar) {
+                setBodyPadding();
+                new ResizeObserver(setBodyPadding).observe(navbar);
+            }
+
+            let initialLang = 'en';
+            try {
+                const savedLang = localStorage.getItem('zorbasPreferredLanguage');
+                if (savedLang && availableLanguages.includes(savedLang)) {
+                    initialLang = savedLang;
+                } else {
+                    const browserLang = navigator.language.split('-')[0];
+                    if (availableLanguages.includes(browserLang)) {
+                        initialLang = browserLang;
+                    }
+                }
+            } catch(e) {
+                console.warn('Could not access localStorage or navigator.language:', e);
+            }
+            
+            setLanguage(initialLang); 
+
+            const languageSelectorMenu = document.getElementById('languageSelectorMenu');
+            if (languageSelectorMenu) {
+                languageSelectorMenu.addEventListener('click', (event) => {
+                    if (event.target.tagName === 'A' && event.target.dataset.lang) {
+                        event.preventDefault();
+                        setLanguage(event.target.dataset.lang);
+                        const dropdownElement = document.getElementById('languageSelectorLink');
+                        if (dropdownElement) {
+                            const dropdownInstance = bootstrap.Dropdown.getInstance(dropdownElement);
+                            if(dropdownInstance) dropdownInstance.hide();
+                        }
+                    }
+                });
+            }
+
+
+            window.addEventListener('load', () => {
+                if (preloader) {
+                    preloader.style.opacity = '0';
+                    preloader.addEventListener('transitionend', () => {
+                        preloader.style.display = 'none';
+                    }, { once: true });
+                }
+                if (mainContent) {
+                    mainContent.style.display = 'block';
+                    setTimeout(() => mainContent.classList.add('loaded'), 50);
+                    
+                    const heroAnimatedElements = document.querySelectorAll('#home .animate-on-scroll');
+                    heroAnimatedElements.forEach(el => {
+                        const delay = parseFloat(el.style.animationDelay || 0) * 1000;
+                        setTimeout(() => el.classList.add('is-visible'), delay);
+                    });
+                }
+            });
+            
+            window.addEventListener('scroll', () => {
+                if (navbar) {
+                    if (window.scrollY > 50) {
+                        navbar.classList.add('scrolled');
+                    } else {
+                        navbar.classList.remove('scrolled');
+                    }
+                }
+
+                if (backToTopButton) {
+                    if (window.scrollY > 300) {
+                        backToTopButton.style.display = 'block';
+                    } else {
+                        backToTopButton.style.display = 'none';
+                    }
+                }
+            });
+
+            const sections = document.querySelectorAll('main section[id
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->

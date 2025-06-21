@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DSTATE - Community Projects</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --app-bg: #1A202C;
+            --app-card-bg: #2D3748;
+            --app-text-light: #E2E8F0;
+            --app-text-muted: #A0AEC0;
+            --app-primary-accent: #4FD1C5; /* Soft Teal */
+            --app-secondary-accent: #A78BFA; /* Muted Purple */
+            --app-border-radius: 0.75rem;
+            --app-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+            --app-shadow-sm: 0 3px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            background-color: var(--app-bg);
+            color: var(--app-text-light);
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header.navbar {
+            background-color: var(--app-card-bg);
+            box-shadow: var(--app-shadow-sm);
+        }
+
+        header.navbar .navbar-brand {
+            font-weight: bold;
+            color: var(--app-primary-accent);
+        }
+
+        header.navbar .nav-link {
+            color: var(--app-text-muted);
+            transition: color 0.3s ease;
+        }
+
+        header.navbar .nav-link:hover,
+        header.navbar .nav-link.active {
+            color: var(--app-primary-accent);
+        }
+
+        #app-root {
+            flex-grow: 1;
+            transition: opacity 0.3s ease-in-out;
+        }
+        
+        .view-hidden {
+            opacity: 0;
+            pointer-events: none;
+            height: 0;
+            overflow: hidden;
+        }
+
+        .view-visible {
+            opacity: 1;
+        }
+
+        .project-card {
+            background-color: var(--app-card-bg);
+            border-radius: var(--app-border-radius);
+            box-shadow: var(--app-shadow);
+            transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+            overflow: hidden;
+            border: 1px solid #3E4C59; /* Slightly lighter border for definition */
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+        }
+
+        .project-card img, .project-image-placeholder {
+            height: 200px;
+            object-fit: cover;
+            background-color: #3E4C59;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--app-text-muted);
+            font-size: 0.9rem;
+        }
+        .project-detail-page .project-card img, 
+        .project-detail-page .project-image-placeholder {
+             height: 400px; width: 100%; object-fit: cover;
+        }
+
+
+        .btn-primary {
+            background-color: var(--app-primary-accent);
+            border-color: var(--app-primary-accent);
+            color: #1A202C; 
+            font-weight: 500;
+            border-radius: calc(var(--app-border-radius) / 1.5);
+            transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+        }
+
+        .btn-primary:hover, .btn-primary:focus {
+            background-color: #3dbbab; 
+            border-color: #3dbbab;
+            color: #1A202C;
+            transform: translateY(-1px);
+        }
+        .btn-primary:active {
+            transform: translateY(0px);
+        }
+
+
+        .btn-outline-primary {
+            color: var(--app-primary-accent);
+            border-color: var(--app-primary-accent);
+            border-radius: calc(var(--app-border-radius) / 1.5);
+        }
+        .btn-outline-primary:hover {
+            background-color: var(--app-primary-accent);
+            color: #1A202C;
+        }
+
+        .btn-secondary {
+            background-color: var(--app-secondary-accent);
+            border-color: var(--app-secondary-accent);
+            color: #FFFFFF;
+            font-weight: 500;
+            border-radius: calc(var(--app-border-radius) / 1.5);
+        }
+        .btn-secondary:hover, .btn-secondary:focus {
+            background-color: #9370DB; 
+            border-color: #9370DB;
+            color: #FFFFFF;
+        }
+
+
+        .form-control, .form-select {
+            background-color: #3E4C59;
+            color: var(--app-text-light);
+            border-color: #4A5568;
+            border-radius: calc(var(--app-border-radius) / 2);
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: #4A5568;
+            color: var(--app-text-light);
+            border-color: var(--app-primary-accent);
+            box-shadow: 0 0 0 0.25rem rgba(79, 209, 197, 0.25);
+        }
+        .form-control::placeholder {
+            color: var(--app-text-muted);
+        }
+
+        .modal-content {
+            background-color: var(--app-card-bg);
+            border-radius: var(--app-border-radius);
+            box-shadow: var(--app-shadow);
+            border: 1px solid #3E4C59;
+        }
+        .modal-header, .modal-footer {
+            border-color: #3E4C59;
+        }
+
+        .progress {
+            height: 1.25rem;
+            border-radius: calc(var(--app-border-radius) / 2);
+            background-color: #3E4C59;
+        }
+        .progress-bar {
+            background-color: var(--app-primary-accent);
+            transition: width 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+
+        .category-tag {
+            font-size: 0.75rem;
+            padding: 0.3em 0.6em;
+            border-radius: 1rem;
+            color: var(--app-text-light);
+            font-weight: 500;
+        }
+        .category-environment { background-color: #2F855A; } 
+        .category-youth { background-color: #C05621; } 
+        .category-sports { background-color: #2B6CB0; } 
+        .category-culture { background-color: #7B341E; } 
+        .category-infrastructure { background-color: #4A5568; } 
+
+        footer.app-footer {
+            background-color: var(--app-card-bg);
+            box-shadow: 0 -3px 8px rgba(0,0,0,0.2); 
+        }
+        footer.app-footer a {
+            color: var(--app-text-muted);
+            text-decoration: none;
+        }
+        footer.app-footer a:hover {
+            color: var(--app-primary-accent);
+        }
+
+        .badge-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-size: 1.8rem;
+            margin: 5px;
+            color: white;
+            box-shadow: var(--app-shadow-sm);
+        }
+        .badge-first-donation { background-color: var(--app-primary-accent); }
+        .badge-eco-warrior { background-color: #2F855A; }
+        .badge-super-supporter { background-color: var(--app-secondary-accent); }
+        .badge-community-builder { background-color: #C05621; } /* Example for a potential new badge */
+
+        .nav-tabs .nav-link {
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: var(--app-text-muted);
+            padding-bottom: 0.75rem;
+        }
+        .nav-tabs .nav-link.active {
+            color: var(--app-primary-accent);
+            background-color: transparent;
+            border-bottom-color: var(--app-primary-accent);
+            font-weight: 500;
+        }
+        .tab-content {
+            padding-top: 1.5rem;
+        }
+        
+        .reward-tier-card {
+            border: 1px solid #3E4C59;
+            border-radius: calc(var(--app-border-radius) / 1.5);
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .reward-tier-card:hover {
+            background-color: #374251; /* Slightly lighter than card-bg */
+            border-color: var(--app-secondary-accent);
+        }
+        .reward-tier-card.selected {
+            background-color: #3E4C59;
+            border-color: var(--app-primary-accent);
+            box-shadow: 0 0 0 2px var(--app-primary-accent), var(--app-shadow-sm);
+        }
+
+        #imagePreviewAdmin {
+            max-width: 100%;
+            max-height: 200px;
+            margin-top: 10px;
+            border-radius: calc(var(--app-border-radius) / 2);
+            object-fit: cover;
+            border: 1px solid #3E4C59;
+        }
+        #imageGenStatus, #postUpdateFeedback, #loginFeedback, #donationFeedback {
+            font-size: 0.9em;
+            margin-top: 5px;
+            min-height: 1.2em; /* Prevent layout shifts */
+        }
+
+        .form-check-input:checked {
+            background-color: var(--app-primary-accent);
+            border-color: var(--app-primary-accent);
+        }
+
+        .list-group-item {
+            background-color: var(--app-card-bg); /* Ensure list items in profile match card bg */
+            border-color: #3E4C59; /* Consistent border color */
+        }
+        .list-group-item a {
+            color: var(--app-primary-accent);
+            text-decoration: none;
+        }
+        .list-group-item a:hover {
+            text-decoration: underline;
+        }
+        .project-detail-page #updates .border { /* Specificity for update items */
+           border-color: #3E4C59;
+        }
+
+        .sticky-lg-top { /* Ensure sticky element respects navbar height */
+            top: 90px; /* Adjust if navbar height changes */
+        }
+    </style>
+</head>
+<body>
+
+    <header class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand fs-4" href="#home">DSTATE</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="#projects">Browse Projects</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#profile" id="nav-profile-link" style="display:none;">My Profile</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#admin" id="nav-admin-link" style="display:none;">Admin Panel</a></li>
+                    <li class="nav-item"><button id="authButton" class="btn btn-outline-primary ms-lg-2 mt-2 mt-lg-0">Login</button></li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <main id="app-root" class="container py-4">
+        <div id="initial-loading" class="text-center py-5">
+            <h2 class="mb-3">Loading DSTATE Platform...</h2>
+            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </main>
+
+    <footer class="text-center py-3 mt-auto app-footer">
+        <p class="mb-1">&copy; <span id="currentYear"></span> DSTATE. Empowering Communities.</p>
+        <p class="mb-0 fs-sm"><a href="#about">About Us</a> | <a href="#contact">Contact Us</a> | <a href="#privacy">Privacy Policy</a></p>
+    </footer>
+
+    <!-- Donation Modal -->
+    <div class="modal fade" id="donationModal" tabindex="-1" aria-labelledby="donationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="donationModalLabel">Support Project: <span id="donateProjectTitle"></span></h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Select a reward tier or enter a custom donation amount:</p>
+                    <div id="rewardTiersContainer" class="mb-3 list-group"></div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">$</span>
+                        <input type="number" class="form-control" id="donationAmountInput" placeholder="Enter amount" min="1">
+                    </div>
+                    <p id="donationFeedback" class="form-text" aria-live="polite"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirmDonationButton">Confirm Donation</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Modal -->
+    <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="infoModalLabel">Notification</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="infoModalBody"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">Login / Register (Simulated)</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="usernameInput" class="form-label">Enter Username:</label>
+                        <input type="text" class="form-control" id="usernameInput" placeholder="E.g., CommunityHero123">
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="isAdminCheckbox">
+                        <label class="form-check-label" for="isAdminCheckbox">
+                            Login as Admin (Simulated)
+                        </label>
+                    </div>
+                    <p id="loginFeedback" class="form-text" aria-live="polite"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirmLoginButton">Login</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Post Update Modal -->
+    <div class="modal fade" id="postUpdateModal" tabindex="-1" aria-labelledby="postUpdateModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="postUpdateModalLabel">Post Update for: <span id="updateProjectTitle"></span></h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="projectUpdateText" class="form-label">Update Content:</label>
+                        <textarea class="form-control" id="projectUpdateText" rows="5" required></textarea>
+                        <p id="postUpdateFeedback" class="form-text" aria-live="polite"></p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirmPostUpdateButton">Post Update</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <script>
+        const appState = {
+            currentUser: null,
+            projects: [],
+            currentView: 'home',
+            currentProjectId: null,
+            isLoading: true,
+            filters: {
+                category: 'all',
+                status: 'all',
+                sortBy: 'newest'
+            },
+            categories: ['environment', 'youth', 'sports', 'culture', 'infrastructure'],
+            projectStatuses: ['pending', 'active', 'funded', 'completed']
+        };
+
+        const appRoot = document.getElementById('app-root');
+        const initialLoadingDiv = document.getElementById('initial-loading');
+        const navProfileLink = document.getElementById('nav-profile-link');
+        const navAdminLink = document.getElementById('nav-admin-link');
+        const authButton = document.getElementById('authButton');
+        
+        let donationModalInstance, infoModalInstance, loginModalInstance, postUpdateModalInstance;
+
+        function initApp() {
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+            
+            donationModalInstance = new bootstrap.Modal(document.getElementById('donationModal'));
+            infoModalInstance = new bootstrap.Modal(document.getElementById('infoModal'));
+            loginModalInstance = new bootstrap.Modal(document.getElementById('loginModal'));
+            postUpdateModalInstance = new bootstrap.Modal(document.getElementById('postUpdateModal'));
+
+            loadInitialData();
+            loadUserState();
+            updateAuthUI();
+
+            window.addEventListener('hashchange', handleRouteChange);
+            
+            authButton.addEventListener('click', handleAuthButtonClick);
+            document.getElementById('confirmLoginButton').addEventListener('click', processLogin);
+            document.getElementById('confirmDonationButton').addEventListener('click', processDonation);
+            document.getElementById('confirmPostUpdateButton').addEventListener('click', processPostUpdate);
+            document.getElementById('donationAmountInput').addEventListener('input', () => {
+                 document.querySelectorAll('#rewardTiersContainer .reward-tier-card.selected').forEach(el => el.classList.remove('selected'));
+            });
+            
+            appState.isLoading = false;
+            if (initialLoadingDiv) initialLoadingDiv.remove();
+            handleRouteChange(); 
+        }
+
+        function loadInitialData() {
+            const storedProjects = localStorage.getItem('dstateProjects');
+            if (storedProjects) {
+                try {
+                    appState.projects = JSON.parse(storedProjects);
+                } catch (e) {
+                    console.error("Error parsing projects from localStorage:", e);
+                    localStorage.removeItem('dstateProjects'); // Clear corrupted data
+                    setDefaultProjects();
+                }
+            } else {
+                setDefaultProjects();
+            }
+        }
+
+        function setDefaultProjects() {
+             appState.projects = [
+                { id: 1, title: 'Community Garden Expansion', category: 'environment', description: 'Help us expand our beloved community garden with new plots and tools.', longDescription: 'Our community garden has been a source of fresh produce and joy for many residents.\nThis expansion will add 20 new plots, a tool shed, and an improved composting system. We aim to foster greater community involvement and promote sustainable living.', imageUrl: 'https://via.placeholder.com/800x400/2F855A/E2E8F0?text=Garden+Expansion', fundingGoal: 5000, currentFunding: 2500, backers: 35, status: 'active', updates: [{date: '2025-05-10', text:'Reached 50% funding! Thanks everyone!'}, {date: '2025-04-20', text:'Project launched! Spread the word.'}], rewardTiers: [{amount:10, description: 'Personal thank you note!'}, {amount:50, description: 'Packet of seeds & thank you note.'}, {amount:100, description: 'Name on a garden plaque + seeds & note.'}], creationDate: '2025-04-15', daysLeft: 30, creator: 'Green Thumbs Org' },
+                { id: 2, title: 'Youth Coding Bootcamp', category: 'youth', description: 'Equip local youth with valuable coding skills for their future.', longDescription: 'This bootcamp will offer a 12-week intensive coding program for underprivileged youth aged 14-18.\nWe will cover web development fundamentals, Python, and introductory data science. Your support helps us provide laptops, software, and experienced instructors.', imageUrl: 'https://via.placeholder.com/800x400/C05621/E2E8F0?text=Coding+Bootcamp', fundingGoal: 10000, currentFunding: 1500, backers: 12, status: 'active', updates: [{date: '2025-05-01', text:'First sponsors onboarded!'}], rewardTiers: [{amount:25, description: 'Digital certificate of support.'}, {amount:100, description: 'Your name listed as a "Tech Mentor" on our site.'}, {amount:250, description: 'A personal thank you video from the students.'}], creationDate: '2025-05-01', daysLeft: 50, creator: 'Tech Future Initiative' },
+                { id: 3, title: 'Upgrade Town Sports Field', category: 'sports', description: 'Renovate our main sports field with better lighting and seating.', longDescription: 'The current town sports field is in dire need of an upgrade.\nThis project will install new energy-efficient LED lighting for evening games, repair and expand spectator seating, and improve drainage on the field. This will benefit all local sports teams and fans.', imageUrl: 'https://via.placeholder.com/800x400/2B6CB0/E2E8F0?text=Sports+Field+Upgrade', fundingGoal: 25000, currentFunding: 18000, backers: 150, status: 'active', updates: [], rewardTiers: [{amount:20, description: 'Shoutout on social media.'}, {amount:75, description: 'Commemorative sports whistle.'}, {amount:200, description: 'VIP pass to the first game after renovation.'}], creationDate: '2025-03-10', daysLeft: 15, creator: 'Local Sports Council' },
+                { id: 4, title: 'Annual Cultural Festival', category: 'culture', description: 'Support our vibrant annual festival celebrating local arts and heritage.', longDescription: 'The Annual Cultural Festival is a cornerstone of our community, showcasing local artists, musicians, and culinary talents.\nFunding helps cover performer fees, venue costs, and free workshops for attendees. Let\'s make this year\'s festival the best one yet!', imageUrl: 'https://via.placeholder.com/800x400/7B341E/E2E8F0?text=Cultural+Festival', fundingGoal: 7500, currentFunding: 7600, backers: 210, status: 'funded', updates: [{date: '2025-05-20', text:'Fully funded! Festival planning is in full swing!'}], rewardTiers: [{amount:15, description: 'Festival sticker pack.'}, {amount:50, description: 'Early access ticket to one workshop.'}, {amount:150, description: 'Mention in the official festival program.'}], creationDate: '2025-02-20', daysLeft: 0, creator: 'Arts & Culture Committee' },
+                { id: 5, title: 'New Pedestrian Bridge', category: 'infrastructure', description: 'Construct a new pedestrian bridge over River Creek for safer access.', longDescription: 'Currently, pedestrians must use a narrow, busy road bridge to cross River Creek.\nThis project will build a dedicated, accessible pedestrian and cyclist bridge, improving safety and connectivity between neighborhoods. It will feature modern design and lighting.', imageUrl: 'https://via.placeholder.com/800x400/4A5568/E2E8F0?text=Pedestrian+Bridge', fundingGoal: 150000, currentFunding: 35000, backers: 80, status: 'pending', updates: [], rewardTiers: [{amount:50, description: 'Your name on a "Friend of the Bridge" digital display.'}, {amount:250, description: 'A commemorative blueprint of the bridge design.'}, {amount:1000, description: 'Invitation to the bridge inauguration ceremony.'}], creationDate: '2025-05-25', daysLeft: 120, creator: 'City Planning Department' },
+            ];
+            saveProjects();
+        }
+        
+        function saveProjects() {
+            try {
+                localStorage.setItem('dstateProjects', JSON.stringify(appState.projects));
+            } catch (e) {
+                console.error("Error saving projects to localStorage:", e);
+            }
+        }
+
+        function loadUserState() {
+            const user = localStorage.getItem('dstateUser');
+            if (user) {
+                try {
+                    appState.currentUser = JSON.parse(user);
+                } catch (e) {
+                    console.error("Error parsing user from localStorage:", e);
+                    localStorage.removeItem('dstateUser');
+                }
+            }
+        }
+
+        function saveUserState() {
+            try {
+                if (appState.currentUser) {
+                    localStorage.setItem('dstateUser', JSON.stringify(appState.currentUser));
+                } else {
+                    localStorage.removeItem('dstateUser');
+                }
+            } catch (e) {
+                console.error("Error saving user to localStorage:", e);
+            }
+        }
+
+        function updateAuthUI() {
+            if (appState.currentUser) {
+                navProfileLink.style.display = 'block';
+                navAdminLink.style.display = appState.currentUser.isAdmin ? 'block' : 'none';
+                authButton.textContent = 'Logout';
+                authButton.classList.remove('btn-outline-primary');
+                authButton.classList.add('btn-danger'); 
+            } else {
+                navProfileLink.style.display = 'none';
+                navAdminLink.style.display = 'none';
+                authButton.textContent = 'Login';
+                authButton.classList.remove('btn-danger');
+                authButton.classList.add('btn-outline-primary');
+            }
+        }
+
+        function handleAuthButtonClick() {
+            if (appState.currentUser) { 
+                appState.currentUser = null;
+                saveUserState();
+                updateAuthUI();
+                showInfo('Logged out successfully.', 'Logout');
+                if (appState.currentView === 'profile' || appState.currentView === 'admin') {
+                    navigateTo('home');
+                }
+            } else { 
+                document.getElementById('usernameInput').value = '';
+                document.getElementById('isAdminCheckbox').checked = false;
+                document.getElementById('loginFeedback').textContent = '';
+                loginModalInstance.show();
+            }
+        }
+
+        function processLogin() {
+            const usernameInput = document.getElementById('usernameInput');
+            const username = usernameInput.value.trim();
+            const isAdmin = document.getElementById('isAdminCheckbox').checked;
+            const loginFeedback = document.getElementById('loginFeedback');
+
+            if (!username) {
+                loginFeedback.textContent = 'Please enter a username.';
+                usernameInput.focus();
+                return;
+            }
+            appState.currentUser = {
+                username: username,
+                isAdmin: isAdmin,
+                donations: [],
+                trackedProjects: [],
+                badges: []
+            };
+            saveUserState();
+            updateAuthUI();
+            loginModalInstance.hide();
+            showInfo(`Welcome, ${username}!`, 'Login Successful');
+            if (isAdmin) navigateTo('admin'); else navigateTo('profile');
+        }
+
+        function showInfo(message, title = 'Notification', type = 'info') {
+            document.getElementById('infoModalLabel').textContent = title;
+            document.getElementById('infoModalBody').textContent = message;
+            const infoModal = document.getElementById('infoModal');
+            if (type === 'success') {
+                infoModal.querySelector('.modal-header').classList.add('bg-success', 'text-white');
+            } else {
+                infoModal.querySelector('.modal-header').classList.remove('bg-success', 'text-white');
+            }
+            infoModalInstance.show();
+        }
+
+        function navigateTo(path) {
+            if (window.location.hash === `#${path}`) { // If already on the path, force re-render
+                handleRouteChange(true);
+            } else {
+                window.location.hash = path;
+            }
+        }
+        
+        async function switchView(viewElement) {
+            appRoot.classList.remove('view-visible');
+            appRoot.classList.add('view-hidden');
+            
+            await new Promise(resolve => setTimeout(resolve, appRoot.innerHTML === '' ? 0 : 150)); 
+
+            appRoot.innerHTML = ''; 
+            appRoot.appendChild(viewElement);
+
+            appRoot.classList.remove('view-hidden');
+            appRoot.classList.add('view-visible');
+            window.scrollTo(0, 0); // Scroll to top on view change
+        }
+
+        function handleRouteChange(forceReload = false) {
+            const hash = window.location.hash.substring(1) || 'home';
+            const [view, param] = hash.split('/');
+            
+            if (!forceReload && appState.currentView === view && (appState.currentProjectId === (param ? parseInt(param) : null))) {
+                 return; // Avoid re-rendering if view and param are same, unless forced
+            }
+
+            appState.currentView = view;
+            appState.currentProjectId = param ? parseInt(param) : null;
+
+            document.querySelectorAll('#navbarNav .nav-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${view.split('?')[0]}`) { 
+                    link.classList.add('active');
+                }
+            });
+             if (view === 'home' || view === '') { // Special case for home to activate 'Browse Projects'
+                const projectsLink = document.querySelector('#navbarNav .nav-link[href="#projects"]');
+                if(projectsLink) projectsLink.classList.add('active');
+            }
+
+
+            switch (view) {
+                case 'home':
+                case 'projects':
+                    renderProjectsPage();
+                    break;
+                case 'project':
+                    if (appState.currentProjectId) {
+                        renderProjectDetailsPage(appState.currentProjectId);
+                    } else {
+                        navigateTo('projects'); 
+                    }
+                    break;
+                case 'profile':
+                    if (appState.currentUser) {
+                        renderProfilePage();
+                    } else {
+                        showInfo('Please login to view your profile.', 'Login Required');
+                        navigateTo('projects');
+                    }
+                    break;
+                case 'admin':
+                    if (appState.currentUser && appState.currentUser.isAdmin) {
+                        renderAdminPanel();
+                    } else {
+                        showInfo('Access denied. Admin privileges required.', 'Unauthorized');
+                        navigateTo('projects');
+                    }
+                    break;
+                case 'about':
+                case 'contact':
+                case 'privacy':
+                    renderStaticPage(view);
+                    break;
+                default:
+                    renderProjectsPage(); 
+            }
+        }
+
+        function createProgressBarHTML(current, goal, animate = true) {
+            const percentage = goal > 0 ? Math.min((current / goal) * 100, 100) : 0;
+            return `
+                <div class="progress" role="progressbar" aria-valuenow="${percentage}" aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-bar ${animate ? 'progress-bar-striped progress-bar-animated' : ''}" style="width: ${percentage}%">${Math.round(percentage)}%</div>
+                </div>
+            `;
+        }
+        
+        function formatCurrency(amount) {
+            return `$${amount.toLocaleString()}`;
+        }
+
+        function createProjectCardHTML(project) {
+            const card = document.createElement('div');
+            card.className = 'col-md-6 col-lg-4 mb-4 d-flex'; // Added d-flex for consistent height
+            card.innerHTML = `
+                <div class="project-card h-100 d-flex flex-column w-100">
+                    ${project.imageUrl && (project.imageUrl.startsWith('https://via.placeholder.com/') || project.imageUrl.startsWith('/generated_images/')) ? 
+                        `<img src="${project.imageUrl}" class="card-img-top" alt="${project.title}">` : 
+                        `<div class="project-image-placeholder card-img-top"><span>${project.title} (Image Placeholder)</span></div>`
+                    }
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title mb-1">${project.title}</h5>
+                        <p class="card-text text-muted small mb-2">
+                            <span class="category-tag category-${project.category.toLowerCase()}">${project.category.charAt(0).toUpperCase() + project.category.slice(1)}</span>
+                        </p>
+                        <p class="card-text flex-grow-1 small">${project.description}</p>
+                        ${createProgressBarHTML(project.currentFunding, project.fundingGoal, false)}
+                        <div class="d-flex justify-content-between small mt-2 text-muted">
+                            <span>${formatCurrency(project.currentFunding)} raised</span>
+                            <span>Goal: ${formatCurrency(project.fundingGoal)}</span>
+                        </div>
+                         <div class="d-flex justify-content-between small mt-1 text-muted">
+                            <span>${project.backers} backers</span>
+                            <span>${project.daysLeft !== undefined && project.daysLeft > 0 ? `${project.daysLeft} days left` : (project.status === 'funded' || project.status === 'completed' ? project.status.charAt(0).toUpperCase() + project.status.slice(1) : 'Ended')}</span>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0 p-3">
+                        <button class="btn btn-primary w-100 view-project-btn" data-project-id="${project.id}">View Project</button>
+                    </div>
+                </div>
+            `;
+            card.querySelector('.view-project-btn').addEventListener('click', (e) => {
+                navigateTo(`project/${e.target.dataset.projectId}`);
+            });
+            return card;
+        }
+
+        function renderProjectsPage() {
+            const pageContainer = document.createElement('div');
+            pageContainer.innerHTML = `
+                <div class="text-center mb-5">
+                    <h1 class="display-4 fw-bold">Support Local Initiatives</h1>
+                    <p class="lead text-muted">Browse projects and help shape your community.</p>
+                </div>
+                <div class="row mb-4 g-3">
+                    <div class="col-md-4">
+                        <select id="categoryFilter" class="form-select form-select-lg" aria-label="Filter by category">
+                            <option value="all">All Categories</option>
+                            ${appState.categories.map(cat => `<option value="${cat}" ${appState.filters.category === cat ? 'selected' : ''}>${cat.charAt(0).toUpperCase() + cat.slice(1)}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <select id="statusFilter" class="form-select form-select-lg" aria-label="Filter by status">
+                            <option value="all">All Statuses</option>
+                            <option value="active" ${appState.filters.status === 'active' ? 'selected' : ''}>Active Funding</option>
+                            <option value="funded" ${appState.filters.status === 'funded' ? 'selected' : ''}>Funded</option>
+                            <option value="pending" ${appState.filters.status === 'pending' ? 'selected' : ''}>Pending Approval</option>
+                            <option value="completed" ${appState.filters.status === 'completed' ? 'selected' : ''}>Completed</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <select id="sortFilter" class="form-select form-select-lg" aria-label="Sort projects by">
+                            <option value="newest" ${appState.filters.sortBy === 'newest' ? 'selected' : ''}>Newest</option>
+                            <option value="endingSoon" ${appState.filters.sortBy === 'endingSoon' ? 'selected' : ''}>Ending Soon</option>
+                            <option value="mostFunded" ${appState.filters.sortBy === 'mostFunded' ? 'selected' : ''}>Most Funded (%)</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="projectsGrid" class="row">
+                    <p class="text-center text-muted">Loading projects...</p>
+                </div>
+            `;
+
+            switchView(pageContainer);
+
+            const projectsGrid = pageContainer.querySelector('#projectsGrid');
+            const categoryFilter = pageContainer.querySelector('#categoryFilter');
+            const statusFilter = pageContainer.querySelector('#statusFilter');
+            const sortFilter = pageContainer.querySelector('#sortFilter');
+
+            categoryFilter.addEventListener('change', (e) => { appState.filters.category = e.target.value; displayFilteredProjects(); });
+            statusFilter.addEventListener('change', (e) => { appState.filters.status = e.target.value; displayFilteredProjects(); });
+            sortFilter.addEventListener('change', (e) => { appState.filters.sortBy = e.target.value; displayFilteredProjects(); });
+            
+            function displayFilteredProjects() {
+                let filtered = [...appState.projects];
+                if (appState.filters.category !== 'all') {
+                    filtered = filtered.filter(p => p.category === appState.filters.category);
+                }
+                if (appState.filters.status !== 'all') {
+                    filtered = filtered.filter(p => p.status === appState.filters.status);
+                }
+
+                switch(appState.filters.sortBy) {
+                    case 'newest':
+                        filtered.sort((a,b) => new Date(b.creationDate) - new Date(a.creationDate));
+                        break;
+                    case 'endingSoon':
+                        filtered.sort((a,b) => (a.daysLeft === undefined || a.daysLeft === null || a.daysLeft <= 0 ? Infinity : a.daysLeft) - (b.daysLeft === undefined || b.daysLeft === null || b.daysLeft <= 0 ? Infinity : b.daysLeft));
+                        break;
+                    case 'mostFunded':
+                        filtered.sort((a,b) => (b.fundingGoal > 0 ? (b.currentFunding/b.fundingGoal) : 0) - (a.fundingGoal > 0 ? (a.currentFunding/a.fundingGoal) : 0));
+                        break;
+                }
+
+                projectsGrid.innerHTML = '';
+                if (filtered.length === 0) {
+                    projectsGrid.innerHTML = '<p class="text-center text-muted col-12 py-5">No projects match your criteria.</p>';
+                    return;
+                }
+                filtered.forEach(project => projectsGrid.appendChild(createProjectCardHTML(project)));
+            }
+            displayFilteredProjects();
+        }
+        
+        function renderProjectDetailsPage(projectId) {
+            const project = appState.projects.find(p => p.id === projectId);
+            if (!project) {
+                showInfo('Project not found.', 'Error');
+                navigateTo('projects');
+                return;
+            }
+
+            const pageContainer = document.createElement('div');
+            pageContainer.classList.add('project-detail-page');
+            pageContainer.innerHTML = `
+                <div class="row g-4">
+                    <div class="col-lg-8">
+                        <div class="mb-4 project-card p-0">
+                             ${project.imageUrl && (project.imageUrl.startsWith('https://via.placeholder.com/') || project.imageUrl.startsWith('/generated_images/')) ? 
+                                `<img src="${project.imageUrl}" class="img-fluid rounded-top" alt="${project.title}">` : 
+                                `<div class="project-image-placeholder img-fluid rounded-top"><span>${project.title} (Image Placeholder)</span></div>`
+                            }
+                        </div>
+                        <h1 class="mb-2 display-5 fw-bold">${project.title}</h1>
+                        <p class="text-muted mb-1"><span class="category-tag category-${project.category.toLowerCase()} me-2">${project.category.charAt(0).toUpperCase() + project.category.slice(1)}</span> Created by: ${project.creator || 'Local Government Department'}</p>
+                        
+                        <ul class="nav nav-tabs mt-4 mb-3" id="projectTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab" aria-controls="overview" aria-selected="true">Overview</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="updates-tab" data-bs-toggle="tab" data-bs-target="#updates" type="button" role="tab" aria-controls="updates" aria-selected="false">Updates <span class="badge bg-secondary rounded-pill">${project.updates.length}</span></button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="rewards-tab" data-bs-toggle="tab" data-bs-target="#rewards" type="button" role="tab" aria-controls="rewards" aria-selected="false">Reward Tiers</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content" id="projectTabContent">
+                            <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
+                                <p class="lead">${project.description}</p>
+                                <p>${project.longDescription.replace(/\n/g, '<br>')}</p>
+                            </div>
+                            <div class="tab-pane fade" id="updates" role="tabpanel" aria-labelledby="updates-tab">
+                                ${project.updates.length > 0 ? project.updates.map(u => `
+                                    <div class="mb-3 p-3 border rounded">
+                                        <p class="fw-bold mb-1">Update: ${new Date(u.date).toLocaleDateString()}</p>
+                                        <p class="mb-0">${u.text}</p>
+                                    </div>
+                                `).join('') : '<p>No updates posted yet.</p>'}
+                            </div>
+                            <div class="tab-pane fade" id="rewards" role="tabpanel" aria-labelledby="rewards-tab">
+                                ${project.rewardTiers.map(tier => `
+                                    <div class="reward-tier-card">
+                                        <h5>Pledge ${formatCurrency(tier.amount)} or more</h5>
+                                        <p class="mb-0">${tier.description}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="project-card p-4 sticky-lg-top">
+                            ${createProgressBarHTML(project.currentFunding, project.fundingGoal)}
+                            <div class="my-3">
+                                <h3 class="mb-0" style="color: var(--app-primary-accent);">${formatCurrency(project.currentFunding)}</h3>
+                                <p class="text-muted small">pledged of ${formatCurrency(project.fundingGoal)} goal</p>
+                            </div>
+                            <div class="mb-3">
+                                <h4 class="fs-5 mb-0">${project.backers}</h4>
+                                <p class="text-muted small">backers</p>
+                            </div>
+                            <div class="mb-4">
+                                <h4 class="fs-5 mb-0">${project.daysLeft !== undefined && project.daysLeft > 0 ? `${project.daysLeft} days left` : (project.status === 'funded' || project.status === 'completed' ? project.status.charAt(0).toUpperCase() + project.status.slice(1) : 'Ended')}</h4>
+                                <p class="text-muted small">to fund this project</p>
+                            </div>
+                            ${project.status === 'active' ? `<button class="btn btn-primary w-100 mb-2 btn-lg" id="donateNowBtn">Donate Now</button>` : `<p class="text-center text-info fw-bold">${project.status === 'funded' ? 'Project Successfully Funded!' : (project.status === 'completed' ? 'Project Completed!' : 'Funding Not Active')}</p>`}
+                            <button class="btn btn-outline-secondary w-100 mb-2" id="trackProjectBtn">${isProjectTracked(project.id) ? '<i class="bi bi-bookmark-check-fill" aria-hidden="true"></i> Untrack Project' : '<i class="bi bi-bookmark" aria-hidden="true"></i> Track Project'}</button>
+                            <button class="btn btn-outline-info w-100" id="shareProjectBtn"><i class="bi bi-share" aria-hidden="true"></i> Share Project</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            switchView(pageContainer);
+
+            if (project.status === 'active') {
+                pageContainer.querySelector('#donateNowBtn').addEventListener('click', () => openDonationModal(project));
+            }
+            pageContainer.querySelector('#trackProjectBtn').addEventListener('click', () => toggleTrackProject(project.id, pageContainer.querySelector('#trackProjectBtn')));
+            pageContainer.querySelector('#shareProjectBtn').addEventListener('click', () => showInfo('Sharing features are simulated. Imagine sharing this on social media!', 'Share Project'));
+        }
+        
+        function isProjectTracked(projectId) {
+            return appState.currentUser && appState.currentUser.trackedProjects && appState.currentUser.trackedProjects.includes(projectId);
+        }
+
+        function toggleTrackProject(projectId, buttonElement) {
+            if (!appState.currentUser) {
+                showInfo('Please login to track projects.', 'Login Required');
+                return;
+            }
+            if (!appState.currentUser.trackedProjects) appState.currentUser.trackedProjects = [];
+
+            const tracked = isProjectTracked(projectId);
+            if (tracked) {
+                appState.currentUser.trackedProjects = appState.currentUser.trackedProjects.filter(id => id !== projectId);
+                if(buttonElement) buttonElement.innerHTML = '<i class="bi bi-bookmark" aria-hidden="true"></i> Track Project';
+                showInfo('Project untracked.', 'Success');
+            } else {
+                appState.currentUser.trackedProjects.push(projectId);
+                if(buttonElement) buttonElement.innerHTML = '<i class="bi bi-bookmark-check-fill" aria-hidden="true"></i> Untrack Project';
+                showInfo('Project tracked!', 'Success');
+            }
+            saveUserState();
+        }
+
+        function openDonationModal(project) {
+            if (!appState.currentUser) {
+                showInfo('Please login to donate.', 'Login Required');
+                return;
+            }
+            document.getElementById('donateProjectTitle').textContent = project.title;
+            document.getElementById('donationAmountInput').value = '';
+            document.getElementById('donationFeedback').textContent = '';
+            
+            const tiersContainer = document.getElementById('rewardTiersContainer');
+            tiersContainer.innerHTML = '';
+             project.rewardTiers.sort((a,b) => a.amount - b.amount).forEach(tier => {
+                const tierEl = document.createElement('a');
+                tierEl.href = '#';
+                tierEl.className = 'list-group-item list-group-item-action reward-tier-card flex-column align-items-start';
+                tierEl.dataset.amount = tier.amount;
+                tierEl.innerHTML = `
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">Pledge ${formatCurrency(tier.amount)}</h5>
+                    </div>
+                    <p class="mb-1 small">${tier.description}</p>
+                `;
+                tierEl.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.querySelectorAll('#rewardTiersContainer .reward-tier-card').forEach(el => el.classList.remove('selected'));
+                    tierEl.classList.add('selected');
+                    document.getElementById('donationAmountInput').value = tier.amount;
+                });
+                tiersContainer.appendChild(tierEl);
+            });
+
+            document.getElementById('confirmDonationButton').dataset.projectId = project.id;
+            donationModalInstance.show();
+        }
+
+        function processDonation() {
+            const projectId = parseInt(document.getElementById('confirmDonationButton').dataset.projectId);
+            const amountInput = document.getElementById('donationAmountInput');
+            const amount = parseInt(amountInput.value);
+            const project = appState.projects.find(p => p.id === projectId);
+            const donationFeedback = document.getElementById('donationFeedback');
+
+            if (!project || isNaN(amount) || amount <= 0) {
+                donationFeedback.textContent = 'Please enter a valid positive amount.';
+                amountInput.focus();
+                return;
+            }
+
+            project.currentFunding += amount;
+            project.backers += 1;
+            
+            if (!appState.currentUser.donations) appState.currentUser.donations = [];
+            appState.currentUser.donations.push({ projectId: project.id, amount: amount, date: new Date().toISOString() });
+            
+            checkAndAwardBadges(amount, project.category);
+            saveUserState();
+            saveProjects();
+            
+            donationModalInstance.hide();
+            showInfo(`Thank you for your generous donation of ${formatCurrency(amount)} to "${project.title}"!`, 'Donation Successful', 'success');
+            
+            if (typeof confetti === 'function') {
+                confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 }, zIndex: 1070 });
+            }
+
+            if (appState.currentView === 'project' && appState.currentProjectId === projectId) {
+                renderProjectDetailsPage(projectId); 
+            } else if (appState.currentView === 'projects' || appState.currentView === 'home') {
+                renderProjectsPage(); 
+            }
+        }
+
+        function checkAndAwardBadges(donationAmount, projectCategory) {
+            if (!appState.currentUser.badges) appState.currentUser.badges = [];
+            let newBadgeEarned = false;
+            
+            if (appState.currentUser.donations.length === 1 && !appState.currentUser.badges.some(b => b.id === 'first_donation')) {
+                appState.currentUser.badges.push({id: 'first_donation', name: 'First Donation', icon: 'bi-award-fill', class: 'badge-first-donation', dateAwarded: new Date().toISOString()});
+                showInfo('New Badge Unlocked: First Donation!', 'Badge Earned');
+                newBadgeEarned = true;
+            }
+
+            const totalDonated = appState.currentUser.donations.reduce((sum, d) => sum + d.amount, 0);
+            if (totalDonated >= 500 && !appState.currentUser.badges.some(b => b.id === 'super_supporter')) {
+                appState.currentUser.badges.push({id: 'super_supporter', name: 'Super Supporter', icon: 'bi-star-fill', class: 'badge-super-supporter', dateAwarded: new Date().toISOString()});
+                 showInfo('New Badge Unlocked: Super Supporter (Donated $500+)!', 'Badge Earned');
+                 newBadgeEarned = true;
+            }
+            
+            if (projectCategory === 'environment') {
+                const environmentDonations = appState.currentUser.donations.filter(d => {
+                    const proj = appState.projects.find(p => p.id === d.projectId);
+                    return proj && proj.category === 'environment';
+                }).length;
+                if (environmentDonations >= 2 && !appState.currentUser.badges.some(b => b.id === 'eco_warrior')) {
+                     appState.currentUser.badges.push({id: 'eco_warrior', name: 'Eco Warrior', icon: 'bi-tree-fill', class: 'badge-eco-warrior', dateAwarded: new Date().toISOString()});
+                     showInfo('New Badge Unlocked: Eco Warrior (Supported 2+ environment projects)!', 'Badge Earned');
+                     newBadgeEarned = true;
+                }
+            }
+            if (newBadgeEarned) saveUserState();
+        }
+        
+        function renderBadgeHTML(badge) {
+            return `
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4 text-center">
+                    <div class="badge-icon ${badge.class}"><i class="bi ${badge.icon}" aria-hidden="true"></i></div>
+                    <p class="fw-semibold mb-0 mt-2">${badge.name}</p>
+                    <p class="small text-muted">Awarded: ${new Date(badge.dateAwarded).toLocaleDateString()}</p>
+                </div>
+            `;
+        }
+
+        function renderProfilePage() {
+            const pageContainer = document.createElement('div');
+            pageContainer.innerHTML = `
+                <div class="text-center mb-5">
+                    <h1 class="display-4 fw-bold">Welcome, ${appState.currentUser.username}!</h1>
+                    <p class="lead text-muted">Here's your DSTATE activity.</p>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-6 mb-4">
+                        <div class="project-card p-4 h-100">
+                            <h4 class="mb-3">Your Donations</h4>
+                            ${appState.currentUser.donations && appState.currentUser.donations.length > 0 ? `
+                                <ul class="list-group list-group-flush">
+                                    ${appState.currentUser.donations.map(d => {
+                                        const project = appState.projects.find(p => p.id === d.projectId);
+                                        return `<li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
+                                                    <span>To: <a href="#project/${project ? project.id : ''}">${project ? project.title : 'Unknown Project'}</a></span>
+                                                    <span class="badge bg-primary rounded-pill fs-6">${formatCurrency(d.amount)}</span>
+                                                </li>`;
+                                    }).join('')}
+                                </ul>
+                                <p class="mt-3 fw-bold fs-5">Total Donated: ${formatCurrency(appState.currentUser.donations.reduce((sum,d) => sum + d.amount, 0))}</p>
+                            ` : '<p class="text-muted">You haven\'t made any donations yet.</p>'}
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="project-card p-4 h-100">
+                            <h4 class="mb-3">Tracked Projects</h4>
+                            ${appState.currentUser.trackedProjects && appState.currentUser.trackedProjects.length > 0 ? `
+                                <ul class="list-group list-group-flush">
+                                    ${appState.currentUser.trackedProjects.map(pid => {
+                                        const project = appState.projects.find(p => p.id === pid);
+                                        return `<li class="list-group-item px-0 py-2"><a href="#project/${project ? project.id : ''}">${project ? project.title : 'Unknown Project'}</a></li>`;
+                                    }).join('')}
+                                </ul>
+                            ` : '<p class="text-muted">You are not tracking any projects yet.</p>'}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card p-4 mb-4">
+                    <h4 class="mb-3">Your Badges</h4>
+                    ${appState.currentUser.badges && appState.currentUser.badges.length > 0 ? `
+                        <div class="row mt-3">
+                            ${appState.currentUser.badges.map(renderBadgeHTML).join('')}
+                        </div>
+                    ` : '<p class="text-muted">No badges earned yet. Keep supporting projects!</p>'}
+                </div>
+            `;
+            switchView(pageContainer);
+        }
+        
+        function renderAdminPanel() {
+            const pageContainer = document.createElement('div');
+            pageContainer.innerHTML = `
+                <div class="text-center mb-5">
+                    <h1 class="display-4 fw-bold">Admin Dashboard</h1>
+                    <p class="lead text-muted">Manage DSTATE projects and platform.</p>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-md-4">
+                        <div class="project-card p-3 text-center h-100">
+                            <h5>Total Projects</h5>
+                            <p class="fs-2 fw-bold mb-0">${appState.projects.length}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="project-card p-3 text-center h-100">
+                            <h5>Total Funds Raised</h5>
+                            <p class="fs-2 fw-bold mb-0">${formatCurrency(appState.projects.reduce((sum, p) => sum + p.currentFunding, 0))}</p>
+                        </div>
+                    </div>
+                     <div class="col-md-4">
+                        <div class="project-card p-3 text-center h-100">
+                            <h5>Active Users (Simulated)</h5>
+                            <p class="fs-2 fw-bold mb-0">${localStorage.getItem('dstateUser') ? 1 : 0} (current)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card p-4 mb-4">
+                    <h4 class="mb-3">Add New Project</h4>
+                    <form id="addProjectForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="adminProjectTitle" class="form-label">Project Title</label>
+                                <input type="text" class="form-control" id="adminProjectTitle" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="adminProjectCategory" class="form-label">Category</label>
+                                <select class="form-select" id="adminProjectCategory" required>
+                                    ${appState.categories.map(cat => `<option value="${cat}">${cat.charAt(0).toUpperCase() + cat.slice(1)}</option>`).join('')}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="adminProjectDescription" class="form-label">Short Description (for cards)</label>
+                            <textarea class="form-control" id="adminProjectDescription" rows="2" required maxlength="150"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="adminProjectLongDescription" class="form-label">Full Description (supports newlines)</label>
+                            <textarea class="form-control" id="adminProjectLongDescription" rows="4" required></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="adminProjectGoal" class="form-label">Funding Goal ($)</label>
+                                <input type="number" class="form-control" id="adminProjectGoal" min="1" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="adminProjectDaysLeft" class="form-label">Days Left for Funding</label>
+                                <input type="number" class="form-control" id="adminProjectDaysLeft" min="1" value="30" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="adminProjectImagePrompt" class="form-label">Image Prompt (Optional - for AI generation)</label>
+                            <input type="text" class="form-control" id="adminProjectImagePrompt" placeholder="e.g., vibrant community park with children playing, sunny day">
+                            <div id="imageGenStatus" class="form-text" aria-live="polite"></div>
+                            <img id="imagePreviewAdmin" src="#" alt="Image Preview" style="display:none;">
+                        </div>
+                         <div class="mb-3">
+                            <label for="adminProjectImageUrl" class="form-label">Or Image URL (Placeholder)</label>
+                            <input type="text" class="form-control" id="adminProjectImageUrl" placeholder="https://via.placeholder.com/800x400?text=New+Project">
+                            <div class="form-text">If prompt is empty, this URL will be used. Default placeholder if both empty.</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg">Add Project</button>
+                    </form>
+                </div>
+
+                <div class="project-card p-4">
+                    <h4 class="mb-3">Manage Existing Projects</h4>
+                    <div id="adminProjectList" class="list-group">
+                        ${appState.projects.length > 0 ? appState.projects.map(p => `
+                            <div class="list-group-item d-md-flex justify-content-between align-items-center">
+                                <div class="mb-2 mb-md-0">
+                                    <h5 class="mb-1"><a href="#project/${p.id}">${p.title}</a> <span class="badge bg-info text-dark">${p.status}</span></h5>
+                                    <small>${p.category.charAt(0).toUpperCase() + p.category.slice(1)} - ${formatCurrency(p.currentFunding)} / ${formatCurrency(p.fundingGoal)}</small>
+                                </div>
+                                <div class="btn-group" role="group">
+                                    ${p.status === 'pending' ? `<button class="btn btn-sm btn-success approve-project-btn" data-project-id="${p.id}"><i class="bi bi-check-circle" aria-hidden="true"></i> Approve</button>` : ''}
+                                    <button class="btn btn-sm btn-info post-update-btn-admin" data-project-id="${p.id}"><i class="bi bi-pencil-square" aria-hidden="true"></i> Post Update</button>
+                                </div>
+                            </div>
+                        `).join('') : '<p class="text-muted">No projects to manage yet.</p>'}
+                    </div>
+                </div>
+            `;
+            switchView(pageContainer);
+            
+            pageContainer.querySelector('#addProjectForm').addEventListener('submit', handleAddProject);
+            pageContainer.querySelectorAll('.approve-project-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const projectId = parseInt(e.currentTarget.dataset.projectId);
+                    const project = appState.projects.find(p => p.id === projectId);
+                    if (project) {
+                        project.status = 'active';
+                        saveProjects();
+                        renderAdminPanel(); 
+                        showInfo(`Project "${project.title}" approved and set to active.`, 'Project Approved', 'success');
+                    }
+                });
+            });
+            pageContainer.querySelectorAll('.post-update-btn-admin').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const projectId = parseInt(e.currentTarget.dataset.projectId);
+                    const project = appState.projects.find(p => p.id === projectId);
+                    if (project) openPostUpdateModal(project);
+                });
+            });
+        }
+
+        function openPostUpdateModal(project) {
+            document.getElementById('updateProjectTitle').textContent = project.title;
+            document.getElementById('projectUpdateText').value = '';
+            document.getElementById('postUpdateFeedback').textContent = '';
+            document.getElementById('confirmPostUpdateButton').dataset.projectId = project.id;
+            postUpdateModalInstance.show();
+        }
+
+        function processPostUpdate() {
+            const projectId = parseInt(document.getElementById('confirmPostUpdateButton').dataset.projectId);
+            const updateTextEl = document.getElementById('projectUpdateText');
+            const updateText = updateTextEl.value.trim();
+            const project = appState.projects.find(p => p.id === projectId);
+            const feedbackEl = document.getElementById('postUpdateFeedback');
+
+            if (!updateText) {
+                feedbackEl.textContent = 'Update text cannot be empty.';
+                updateTextEl.focus();
+                return;
+            }
+
+            if (project) {
+                if (!project.updates) project.updates = [];
+                project.updates.unshift({ date: new Date().toISOString(), text: updateText });
+                saveProjects();
+                postUpdateModalInstance.hide();
+                showInfo(`Update posted for "${project.title}".`, 'Update Posted', 'success');
+                if (appState.currentView === 'admin') {
+                    renderAdminPanel(); 
+                } else if (appState.currentView === 'project' && appState.currentProjectId === projectId) {
+                    renderProjectDetailsPage(projectId);
+                }
+            } else {
+                feedbackEl.textContent = 'Error: Project not found.';
+            }
+        }
+
+
+        async function handleAddProject(event) {
+            event.preventDefault();
+            const form = event.target;
+            const title = form.adminProjectTitle.value.trim();
+            const category = form.adminProjectCategory.value;
+            const description = form.adminProjectDescription.value.trim();
+            const longDescription = form.adminProjectLongDescription.value.trim();
+            const fundingGoal = parseInt(form.adminProjectGoal.value);
+            const daysLeft = parseInt(form.adminProjectDaysLeft.value);
+            const imagePrompt = form.adminProjectImagePrompt.value.trim();
+            let imageUrl = form.adminProjectImageUrl.value.trim();
+
+            if (!title || !description || !longDescription || isNaN(fundingGoal) || fundingGoal <=0 || isNaN(daysLeft) || daysLeft <=0) {
+                showInfo("Please fill all required fields with valid data.", "Validation Error");
+                return;
+            }
+
+            const imageGenStatusEl = document.getElementById('imageGenStatus');
+            const imagePreviewAdminEl = document.getElementById('imagePreviewAdmin');
+            imagePreviewAdminEl.style.display = 'none';
+            imagePreviewAdminEl.src = '#'; 
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.innerHTML;
+            submitButton.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Adding...`;
+            submitButton.disabled = true;
+
+            if (imagePrompt) {
+                imageGenStatusEl.textContent = 'Generating image... Please wait.';
+                imageGenStatusEl.className = 'form-text text-info';
+                try {
+                    const response = await fetch('/api/generate-image-on-demand', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prompt: imagePrompt, aspectRatio: "16:9", style: "hd" })
+                    });
+                    const data = await response.json();
+                    if (response.ok && data.success) {
+                        imageUrl = data.imageUrl;
+                        imageGenStatusEl.textContent = 'Image generated successfully!';
+                        imageGenStatusEl.className = 'form-text text-success';
+                        imagePreviewAdminEl.src = imageUrl;
+                        imagePreviewAdminEl.style.display = 'block';
+                    } else {
+                        throw new Error(data.error || 'Unknown image generation error');
+                    }
+                } catch (err) {
+                    imageGenStatusEl.textContent = `Error generating image: ${err.message}. Using placeholder.`;
+                    imageGenStatusEl.className = 'form-text text-danger';
+                    imageUrl = `https://via.placeholder.com/800x400/4A5568/E2E8F0?text=${encodeURIComponent(title.substring(0,20))}`;
+                    console.error('Image generation fetch error:', err);
+                }
+            } else if (!imageUrl) {
+                 imageUrl = `https://via.placeholder.com/800x400/4A5568/E2E8F0?text=${encodeURIComponent(title.substring(0,20))}`;
+                 imageGenStatusEl.textContent = 'Using default placeholder image.';
+                 imageGenStatusEl.className = 'form-text text-info';
+            } else {
+                imageGenStatusEl.textContent = 'Using provided placeholder URL.';
+                imageGenStatusEl.className = 'form-text text-info';
+                imagePreviewAdminEl.src = imageUrl; // Show preview for manually entered URL
+                imagePreviewAdminEl.style.display = 'block';
+            }
+
+            const newProject = {
+                id: appState.projects.length > 0 ? Math.max(...appState.projects.map(p => p.id)) + 1 : 1,
+                title, category, description, longDescription, imageUrl, fundingGoal,
+                currentFunding: 0, backers: 0, status: 'pending', 
+                updates: [],
+                rewardTiers: [ 
+                    {amount: Math.max(10, Math.round(fundingGoal*0.01)), description: 'A heartfelt digital thank you note!'},
+                    {amount: Math.max(25, Math.round(fundingGoal*0.05)), description: 'Special mention on our project page and social media.'},
+                    {amount: Math.max(50, Math.round(fundingGoal*0.1)), description: 'A small, unique digital collectible related to the project.'}
+                ].filter(tier => tier.amount <= fundingGoal), // Ensure tiers are not more than goal
+                creationDate: new Date().toISOString(),
+                daysLeft: daysLeft,
+                creator: appState.currentUser.username 
+            };
+            if(newProject.rewardTiers.length === 0 && fundingGoal > 0) { // Add at least one tier if goal is positive
+                newProject.rewardTiers.push({amount: Math.max(1, Math.round(fundingGoal*0.01)), description: 'A heartfelt thank you!'});
+            }
+
+
+            appState.projects.unshift(newProject);
+            saveProjects();
+            showInfo(`Project "${title}" added successfully and is pending approval.`, 'Project Added', 'success');
+            form.reset();
+            imagePreviewAdminEl.style.display = 'none';
+            imagePreviewAdminEl.src = '#';
+            imageGenStatusEl.textContent = '';
+            
+            submitButton.innerHTML = originalButtonText;
+            submitButton.disabled = false;
+            renderAdminPanel(); 
+        }
+
+        function renderStaticPage(pageName) {
+            const content = {
+                about: {
+                    title: "About DSTATE",
+                    body: "<p>DSTATE is a platform dedicated to empowering local communities by connecting citizens with government initiatives. We believe in transparency, collaboration, and the power of collective action to make our towns and cities better places to live.</p><p>Our mission is to provide an easy-to-use, Kickstarter-style interface for funding and tracking projects that matter to you. From new parks to infrastructure upgrades, DSTATE helps bring community visions to life.</p>"
+                },
+                contact: {
+                    title: "Contact Us",
+                    body: "<p>Have questions or feedback? We'd love to hear from you!</p><p>Email: contact@dstate.example.com (Simulated)</p><p>Phone: (555) 123-4567 (Simulated)</p><p>Address: 123 Community Lane, OurTown, ST 12345 (Simulated)</p>"
+                },
+                privacy: {
+                    title: "Privacy Policy",
+                    body: "<p>Your privacy is important to us. This is a simulated application, and no real personal data is collected or stored beyond what your browser's localStorage handles for demonstration purposes.</p><p>In a real-world scenario, DSTATE would be committed to protecting your personal information in accordance with all applicable privacy laws and regulations. We would provide a comprehensive privacy policy detailing data collection, usage, and protection measures.</p>"
+                }
+            };
+
+            const pageData = content[pageName] || { title: "Page Not Found", body: "<p>The page you requested could not be found.</p>" };
+            
+            const pageContainer = document.createElement('div');
+            pageContainer.innerHTML = `
+                <div class="text-center mb-4">
+                    <h1 class="display-4 fw-bold">${pageData.title}</h1>
+                </div>
+                <div class="project-card p-4 p-md-5">
+                    ${pageData.body}
+                </div>
+            `;
+            switchView(pageContainer);
+        }
+
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

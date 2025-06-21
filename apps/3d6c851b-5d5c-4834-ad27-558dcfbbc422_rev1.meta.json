@@ -1,0 +1,38 @@
+{
+  "projectId": "3d6c851b-5d5c-4834-ad27-558dcfbbc422",
+  "revisionString": "1",
+  "projectNameDisplay": "snake game",
+  "userPromptForThisRevision": "snake game",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-05-25T14:28:22.686Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/dalle_0f4cd088-96e.png",
+      "url": "/generated_images/dalle_0f4cd088-96e.png",
+      "description": "A dark, subtly textured game background for a Snake game. Abstract pixel art style with a dark grid pattern overlaying a deep space nebula effect. Overall color scheme: very dark blues, purples, and hints of magenta. Should tile seamlessly or be designed for a 800x600 canvas (native game resolution).",
+      "purpose": "Main game background, to be drawn on the canvas. Should be visually appealing but not distracting.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_2e163a83-fe3.png",
+      "url": "/generated_images/dalle_2e163a83-fe3.png",
+      "description": "Pixel art snake head, 32x32 pixels. Bright, vibrant green with two clearly visible white eyes with black pupils. Friendly but focused expression. Designed to look good on a dark background. Facing right.",
+      "purpose": "Sprite for the snake's head. To be drawn on canvas and rotated based on direction.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_4e896855-bf1.png",
+      "url": "/generated_images/dalle_4e896855-bf1.png",
+      "description": "Pixel art food item: a classic shiny red apple, 32x32 pixels. Simple, iconic, with a small green leaf and a highlight. Clear and distinct.",
+      "purpose": "Sprite for the standard food item.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_5b1e3941-778.png",
+      "url": "/generated_images/dalle_5b1e3941-778.png",
+      "description": "Pixel art special food item: a glowing, sparkling golden apple, 32x32 pixels. Should appear more valuable and distinct than the regular red apple, possibly with animated sparkle effect hints (static image, but imply sparkle).",
+      "purpose": "Sprite for a special, high-value food item.",
+      "isNewlyGenerated": true
+    }
+  ]
+}

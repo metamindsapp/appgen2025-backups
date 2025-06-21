@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Copter Challenge</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
+    <style>
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body.bg-dark {
+            background-color: #212529 !important;
+        }
+
+        #game-container {
+            background-color: #1A202C; 
+        }
+
+        #gameCanvas {
+            display: block;
+            background-color: #0c0c1e; 
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            touch-action: none;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        
+        #game-wrapper {
+            position: relative;
+            line-height: 0; 
+        }
+
+        .modal-content {
+            border: 1px solid #495057; /* Slightly subtle border for modals */
+            box-shadow: 0 0 25px rgba(0,0,0,0.75);
+        }
+        .modal-header {
+            border-bottom-width: 2px !important;
+            border-color: #495057 !important;
+        }
+        .modal-footer {
+            border-top-width: 2px !important;
+            border-color: #495057 !important;
+        }
+
+        #scoreDisplay, #highScoreDisplay {
+            font-weight: bold;
+            text-shadow: 2px 2px 4px #000000, 0 0 5px rgba(255,255,255,0.7);
+        }
+        #scoreDisplay {
+             font-size: 2.5rem !important;
+        }
+        #highScoreDisplay {
+            font-size: 1.25rem !important;
+        }
+
+        .btn-close-white {
+            filter: invert(1) grayscale(100%) brightness(200%);
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #2D3748; }
+        ::-webkit-scrollbar-thumb { background: #4A5568; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #718096; }
+
+        .pixel-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+            vertical-align: middle;
+            image-rendering: pixelated;
+        }
+    </style>
+</head>
+<body class="bg-dark text-light">
+    <div id="game-container" class="container-fluid d-flex flex-column justify-content-center align-items-center min-vh-100 p-0">
+        
+        <div id="scoreDisplay" class="position-absolute top-0 start-50 translate-middle-x p-3 text-white" style="z-index: 10;">Score: 0</div>
+        <div id="highScoreDisplay" class="position-absolute top-0 end-0 p-3 text-white-50" style="z-index: 10;">High Score: 0</div>
+        
+        <div id="loadingMessage" class="position-absolute top-50 start-50 translate-middle text-white fs-3" style="z-index: 20; display: none; text-shadow: 1px 1px 2px #000;">Loading Assets...</div>
+
+        <div id="game-wrapper">
+             <canvas id="gameCanvas"></canvas>
+        </div>
+
+        <div class="modal fade" id="mainMenuModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="mainMenuModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content bg-dark text-light shadow-lg">
+                    <div class="modal-header border-bottom">
+                        <h5 class="modal-title w-100 text-center fs-1" id="mainMenuModalLabel">Copter Challenge</h5>
+                    </div>
+                    <div class="modal-body text-center py-4">
+                        <p class="mb-4 fs-5">Navigate your helicopter through treacherous caverns!</p>
+                        <button id="startGameButton" type="button" class="btn btn-primary btn-lg w-75 mb-3 py-2 fs-4">
+                            <img src="/generated_images/dalle_3ee4e682-fbd.png" alt="Play" class="pixel-icon"> Start Game
+                        </button>
+                        <button id="viewInstructionsButton" type="button" class="btn btn-info btn-lg w-75 py-2 fs-4">
+                            <img src="/generated_images/dalle_26c1c384-9ff.png" alt="Info" class="pixel-icon"> Instructions
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="instructionsModal" tabindex="-1" aria-labelledby="instructionsModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content bg-dark text-light shadow-lg">
+                    <div class="modal-header">
+                        <h5 class="modal-title w-100 text-center fs-3" id="instructionsModalLabel">How to Play</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body py-4">
+                        <ul class="list-unstyled fs-5">
+                            <li class="mb-2"><strong class="text-primary">Controls:</strong></li>
+                            <li class="mb-2 ms-3">&bull; <strong>Click Mouse button</strong> or <strong>Press Spacebar</strong> to make the helicopter ascend.</li>
+                            <li class="mb-2 ms-3">&bull; Release to descend due to gravity.</li>
+                            <li class="mb-2 mt-3"><strong class="text-primary">Objective:</strong></li>
+                            <li class="mb-2 ms-3">&bull; Navigate through the gaps in the cavern walls.</li>
+                            <li class="mb-2 ms-3">&bull; Don't hit the walls, ceiling, or floor.</li>
+                            <li class="ms-3">&bull; Your score increases the farther you travel!</li>
+                        </ul>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn btn-primary mx-auto px-5 py-2 fs-5" data-bs-dismiss="modal">Got it!</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="gameOverModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="gameOverModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content bg-dark text-light shadow-lg border border-danger">
+                    <div class="modal-header border-bottom border-danger justify-content-center">
+                        <h5 class="modal-title fs-1 text-danger" id="gameOverModalLabel">Game Over!</h5>
+                    </div>
+                    <div class="modal-body text-center py-4">
+                        <p class="fs-3">Final Score: <span id="finalScore" class="text-warning fw-bold">0</span></p>
+                        <p class="fs-4">High Score: <span id="gameOverHighScore" class="text-info fw-bold">0</span></p>
+                        <button id="restartGameButton" type="button" class="btn btn-success btn-lg w-75 mt-3 py-2 fs-4">
+                             <img src="/generated_images/dalle_24a8caf7-86f.png" alt="Restart" class="pixel-icon"> Restart Game
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const GAME_CONFIG = {
+            NATIVE_WIDTH: 960,
+            NATIVE_HEIGHT: 540,
+            PLAYER_WIDTH: 75, 
+            PLAYER_HEIGHT: 50,
+            GRAVITY: 1100, 
+            LIFT_FORCE: -400, 
+            MAX_VELOCITY_Y: 450,
+            MIN_VELOCITY_Y_FOR_LIFT: -300,
+            PLAYER_START_X_OFFSET: 150,
+            PLAYER_TILT_ANGLE: 15, 
+            SCROLL_SPEED_INITIAL: 180,
+            SCROLL_SPEED_INCREMENT: 2.5,
+            SCROLL_SPEED_MAX: 550,
+            OBSTACLE_WIDTH: 80,
+            OBSTACLE_MIN_HEIGHT: 70,
+            OBSTACLE_GAP_MIN: 150, 
+            OBSTACLE_GAP_MAX: 210,
+            OBSTACLE_SPAWN_INTERVAL_X: 380, 
+            THRUST_PARTICLE_COUNT: 3,
+            THRUST_PARTICLE_LIFE: 0.45,
+            THRUST_PARTICLE_SIZE_MIN: 2,
+            THRUST_PARTICLE_SIZE_MAX: 5,
+            THRUST_PARTICLE_SPEED: 60,
+            EXPLOSION_PARTICLE_COUNT: 60,
+            EXPLOSION_PARTICLE_LIFE: 1.3,
+            EXPLOSION_PARTICLE_SIZE_MIN: 2,
+            EXPLOSION_PARTICLE_SIZE_MAX: 7,
+            EXPLOSION_PARTICLE_SPEED_MAX: 350,
+            EXPLOSION_SPRITE_FRAMES: 6, 
+            EXPLOSION_SPRITE_FRAME_WIDTH: 64, 
+            EXPLOSION_SPRITE_FRAME_HEIGHT: 64,
+            EXPLOSION_SPRITE_DURATION_PER_FRAME: 0.08,
+            BG_LAYER_1_SPEED_MULTIPLIER: 0.2,
+            BG_LAYER_2_SPEED_MULTIPLIER: 0.5,
+            PROPELLER_RADIUS: 15,
+            PROPELLER_BLADES: 3,
+            PROPELLER_SPEED: 800, 
+            SCREEN_SHAKE_DURATION: 0.25,
+            SCREEN_SHAKE_MAGNITUDE: 6,
+            SCORE_MULTIPLIER_OBSTACLE: 50, 
+            SCORE_MULTIPLIER_DISTANCE: 0.1,
+        };
+
+        const ASSET_PATHS = {
+            player: "/user_uploaded_images/fba925f0-e05b-4e04-b9b1-4818d10bbce0.png",
+            obstacleTop: "/generated_images/dalle_085399fc-d36.png",
+            obstacleBottom: "/generated_images/dalle_0a4d9760-b22.png",
+            bgLayer1: "/generated_images/dalle_a32efb28-ed3.png",
+            bgLayer2: "/generated_images/dalle_118e23f9-f95.png",
+            explosionSheet: "/generated_images/dalle_c621d7db-375.png",
+            sounds: { // Placeholder paths; game will be silent but functional if files don't exist.
+                thrust: 'assets/sounds/thrust_placeholder.wav', 
+                crash: 'assets/sounds/crash_placeholder.wav',
+                music: 'assets/sounds/music_placeholder.mp3',
+                score: 'assets/sounds/score_placeholder.wav'
+            }
+        };
+
+        class Player {
+            constructor(game) {
+                this.game = game;
+                this.sprite = game.assets.images.player;
+                this.width = GAME_CONFIG.PLAYER_WIDTH;
+                this.height = GAME_CONFIG.PLAYER_HEIGHT;
+                this.reset();
+            }
+
+            reset() {
+                this.x = GAME_CONFIG.PLAYER_START_X_OFFSET;
+                this.y = this.game.canvas.height / 2 - this.height / 2;
+                this.velocityY = 0;
+                this.angle = 0;
+                this.isAlive = true;
+                this.propellerAngle = 0;
+            }
+
+            update(dt, isThrusting) {
+                if (!this.isAlive) return;
+
+                this.velocityY += GAME_CONFIG.GRAVITY * dt;
+                
+                if (isThrusting) {
+                    this.velocityY = Math.max(GAME_CONFIG.MIN_VELOCITY_Y_FOR_LIFT, this.velocityY + GAME_CONFIG.LIFT_FORCE * dt * 2.2); 
+                    this.angle = -GAME_CONFIG.PLAYER_TILT_ANGLE;
+                    this.game.spawnThrustParticles(this.x, this.y + this.height / 2);
+                    this.game.playSound('thrust', true, 0.3);
+                } else {
+                    this.angle = Math.min(GAME_CONFIG.PLAYER_TILT_ANGLE * 1.5, this.angle + 180 * dt); 
+                    this.game.stopSound('thrust', 0.1); 
+                }
+                
+                this.velocityY = Math.max(-GAME_CONFIG.MAX_VELOCITY_Y, Math.min(GAME_CONFIG.MAX_VELOCITY_Y, this.velocityY));
+                this.y += this.velocityY * dt;
+
+                this.propellerAngle += GAME_CONFIG.PROPELLER_SPEED * dt * (isThrusting ? 1.7 : 1);
+
+                if (this.y < 0) {
+                    this.y = 0;
+                    this.velocityY = Math.max(0, this.velocityY); // Stop upward momentum if hitting ceiling
+                    this.game.triggerGameOver();
+                }
+                if (this.y + this.height > this.game.canvas.height) {
+                    this.y = this.game.canvas.height - this.height;
+                    this.velocityY = Math.min(0, this.velocityY); // Stop downward momentum if hitting floor
+                    this.game.triggerGameOver();
+                }
+            }
+
+            draw(ctx) {
+                if (!this.sprite || !this.sprite.complete || this.sprite.naturalHeight === 0) {
+                    ctx.fillStyle = 'rgba(0, 255, 0, 0.8)';
+                    ctx.fillRect(this.x, this.y, this.width, this.height);
+                    return;
+                }
+
+                ctx.save();
+                ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
+                ctx.rotate(this.angle * Math.PI / 180);
+                
+                ctx.drawImage(this.sprite, -this.width / 2, -this.height / 2, this.width, this.height);
+
+                ctx.fillStyle = 'rgba(220, 220, 220, 0.35)';
+                const basePropellerAngleRad = this.propellerAngle * Math.PI / 180;
+                for (let i = 0; i < GAME_CONFIG.PROPELLER_BLADES; i++) {
+                    ctx.save();
+                    ctx.rotate(basePropellerAngleRad + ( (2 * Math.PI / GAME_CONFIG.PROPELLER_BLADES) * i) );
+                    ctx.fillRect(-GAME_CONFIG.PROPELLER_RADIUS / 7, -GAME_CONFIG.PROPELLER_RADIUS, GAME_CONFIG.PROPELLER_RADIUS / 3.5, GAME_CONFIG.PROPELLER_RADIUS);
+                    ctx.restore();
+                }
+                
+                ctx.restore();
+            }
+        }
+
+        class Obstacle {
+            constructor(game, x, y, height, type) {
+                this.game = game;
+                this.x = x;
+                this.y = y;
+                this.width = GAME_CONFIG.OBSTACLE_WIDTH;
+                this.height = height;
+                this.type = type; 
+                this.sprite = type === 'top' ? game.assets.images.obstacleTop : game.assets.images.obstacleBottom;
+                this.passedPlayer = false;
+            }
+
+            update(dt, scrollSpeed) {
+                this.x -= scrollSpeed * dt;
+            }
+
+            draw(ctx) {
+                if (!this.sprite || !this.sprite.complete || this.sprite.naturalHeight === 0) {
+                    ctx.fillStyle = this.type === 'top' ? '#4a5568' : '#5a6578';
+                    ctx.fillRect(this.x, this.y, this.width, this.height);
+                    return;
+                }
+                
+                let drawnHeight = 0;
+                const spriteHeight = this.sprite.naturalHeight;
+                const spriteWidth = this.sprite.naturalWidth;
+
+                while(drawnHeight < this.height) {
+                    const hToDraw = Math.min(spriteHeight, this.height - drawnHeight);
+                    if (this.type === 'top') {
+                         ctx.drawImage(this.sprite, 0, 0, spriteWidth, hToDraw, this.x, this.y + drawnHeight, this.width, hToDraw);
+                    } else { // bottom
+                         ctx.drawImage(this.sprite, 0, 0, spriteWidth, hToDraw, this.x, this.y + drawnHeight, this.width, hToDraw);
+                    }
+                    drawnHeight += hToDraw;
+                }
+            }
+        }
+
+        class ParallaxBackgroundLayer {
+            constructor(game, image, scrollSpeedMultiplier) {
+                this.game = game;
+                this.image = image;
+                this.scrollSpeedMultiplier = scrollSpeedMultiplier;
+                this.x = 0;
+                this.y = 0;
+                this.imgWidth = 0; 
+                if (this.image && this.image.complete && this.image.naturalWidth > 0) {
+                    this.imgWidth = this.image.naturalWidth * (this.game.canvas.height / this.image.naturalHeight);
+                }
+            }
+
+            update(dt, baseScrollSpeed) {
+                if (!this.image || !this.image.complete || this.image.naturalWidth === 0) return;
+                if (this.imgWidth === 0 && this.image.naturalHeight > 0) { 
+                     this.imgWidth = this.image.naturalWidth * (this.game.canvas.height / this.image.naturalHeight);
+                }
+                if (this.imgWidth === 0) return; 
+
+                this.x -= baseScrollSpeed * this.scrollSpeedMultiplier * dt;
+                if (this.x <= -this.imgWidth) {
+                    this.x += this.imgWidth; 
+                }
+            }
+
+            draw(ctx) {
+                if (!this.image || !this.image.complete || this.image.naturalWidth === 0 || this.imgWidth <= 0) return;
+                
+                let currentX = this.x;
+                while(currentX < this.game.canvas.width) {
+                    ctx.drawImage(this.image, currentX, this.y, this.imgWidth, this.game.canvas.height);
+                    currentX += this.imgWidth;
+                }
+            }
+        }
+        
+        class Particle {
+            constructor(x, y, type, game) {
+                this.game = game;
+                this.x = x;
+                this.y = y;
+                this.type = type;
+
+                if (type === 'thrust') {
+                    this.size = Math.random() * (GAME_CONFIG.THRUST_PARTICLE_SIZE_MAX - GAME_CONFIG.THRUST_PARTICLE_SIZE_MIN) + GAME_CONFIG.THRUST_PARTICLE_SIZE_MIN;
+                    this.vx = -GAME_CONFIG.THRUST_PARTICLE_SPEED - Math.random() * 50;
+                    this.vy = (Math.random() - 0.5) * GAME_CONFIG.THRUST_PARTICLE_SPEED / 1.5;
+                    this.life = GAME_CONFIG.THRUST_PARTICLE_LIFE * (Math.random() * 0.3 + 0.7);
+                    this.r = 255;
+                    this.g = Math.floor(Math.random() * 100 + 155);
+                    this.b = 0;
+                    this.baseAlpha = Math.random() * 0.5 + 0.4;
+                } else if (type === 'explosion') {
+                    this.size = Math.random() * (GAME_CONFIG.EXPLOSION_PARTICLE_SIZE_MAX - GAME_CONFIG.EXPLOSION_PARTICLE_SIZE_MIN) + GAME_CONFIG.EXPLOSION_PARTICLE_SIZE_MIN;
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = Math.random() * GAME_CONFIG.EXPLOSION_PARTICLE_SPEED_MAX;
+                    this.vx = Math.cos(angle) * speed;
+                    this.vy = Math.sin(angle) * speed;
+                    this.life = GAME_CONFIG.EXPLOSION_PARTICLE_LIFE * (Math.random() * 0.6 + 0.4);
+                    this.r = Math.floor(Math.random() * 100 + 155);
+                    this.g = Math.floor(Math.random() * this.r * 0.8); 
+                    this.b = 0;
+                    this.baseAlpha = Math.random() * 0.7 + 0.3;
+                    this.gravity = GAME_CONFIG.GRAVITY / 2.5;
+                }
+                this.initialLife = this.life;
+            }
+
+            update(dt) {
+                this.x += this.vx * dt;
+                this.y += this.vy * dt;
+                if (this.type === 'explosion') {
+                    this.vy += this.gravity * dt;
+                }
+                this.life -= dt;
+            }
+
+            draw(ctx) {
+                const currentAlpha = Math.max(0, this.life / this.initialLife);
+                const finalAlpha = this.baseAlpha * currentAlpha * (this.type === 'thrust' ? (Math.random() * 0.4 + 0.6) : 1);
+
+                ctx.fillStyle = `rgba(${this.r}, ${this.g}, ${this.b}, ${finalAlpha})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size * currentAlpha, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        class ExplosionSprite {
+            constructor(game, x, y) {
+                this.game = game;
+                this.sheet = game.assets.images.explosionSheet;
+                this.x = x - GAME_CONFIG.EXPLOSION_SPRITE_FRAME_WIDTH / 2;
+                this.y = y - GAME_CONFIG.EXPLOSION_SPRITE_FRAME_HEIGHT / 2;
+                this.frameWidth = GAME_CONFIG.EXPLOSION_SPRITE_FRAME_WIDTH;
+                this.frameHeight = GAME_CONFIG.EXPLOSION_SPRITE_FRAME_HEIGHT;
+                this.numFrames = GAME_CONFIG.EXPLOSION_SPRITE_FRAMES;
+                this.frameDuration = GAME_CONFIG.EXPLOSION_SPRITE_DURATION_PER_FRAME;
+                this.currentFrame = 0;
+                this.timeSinceLastFrame = 0;
+                this.isDone = false;
+            }
+
+            update(dt) {
+                if (this.isDone || !this.sheet || !this.sheet.complete) return;
+                this.timeSinceLastFrame += dt;
+                if (this.timeSinceLastFrame >= this.frameDuration) {
+                    this.currentFrame++;
+                    this.timeSinceLastFrame = 0;
+                    if (this.currentFrame >= this.numFrames) {
+                        this.isDone = true;
+                    }
+                }
+            }
+
+            draw(ctx) {
+                if (this.isDone || !this.sheet || !this.sheet.complete || this.sheet.naturalHeight === 0) return;
+                try {
+                    ctx.drawImage(
+                        this.sheet,
+                        this.currentFrame * this.frameWidth, 0, 
+                        this.frameWidth, this.frameHeight,
+                        this.x, this.y,
+                        this.frameWidth, this.frameHeight
+                    );
+                } catch (e) {
+                    console.error("Error drawing explosion sprite:", e);
+                    this.isDone = true; 
+                }
+            }
+        }
+
+        class CopterGame {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.canvas.width = GAME_CONFIG.NATIVE_WIDTH;
+                this.canvas.height = GAME_CONFIG.NATIVE_HEIGHT;
+
+                this.uiElements = {
+                    scoreDisplay: document.getElementById('scoreDisplay'),
+                    highScoreDisplay: document.getElementById('highScoreDisplay'),
+                    mainMenuModalEl: document.getElementById('mainMenuModal'),
+                    instructionsModalEl: document.getElementById('instructionsModal'),
+                    gameOverModalEl: document.getElementById('gameOverModal'),
+                    finalScore: document.getElementById('finalScore'),
+                    gameOverHighScore: document.getElementById('gameOverHighScore'),
+                    loadingMessage: document.getElementById('loadingMessage')
+                };
+                this.uiElements.mainMenuModal = new bootstrap.Modal(this.uiElements.mainMenuModalEl);
+                this.uiElements.instructionsModal = new bootstrap.Modal(this.uiElements.instructionsModalEl);
+                this.uiElements.gameOverModal = new bootstrap.Modal(this.uiElements.gameOverModalEl);
+                
+                this.assets = { images: {}, sounds: {} };
+                this.lastTime = 0;
+                this.deltaTime = 0;
+                this.gameState = 'loading'; 
+                this.isInputActive = false;
+                this.score = 0;
+                this.highScore = 0;
+                this.currentScrollSpeed = GAME_CONFIG.SCROLL_SPEED_INITIAL;
+                this.nextObstacleX = GAME_CONFIG.NATIVE_WIDTH * 1.5; 
+                this.screenShakeTime = 0;
+                this.screenShakeMagnitude = 0;
+
+                this.player = null;
+                this.obstacles = [];
+                this.particles = [];
+                this.explosions = [];
+                this.backgroundLayers = [];
+
+                this.bindEvents();
+                this.loadHighScore();
+
+                this.loadAssets().then(() => {
+                    this.uiElements.loadingMessage.style.display = 'none';
+                    this.initGameElements();
+                    this.showMainMenu();
+                    this.resizeCanvas(); 
+                    requestAnimationFrame(this.gameLoop.bind(this));
+                }).catch(error => {
+                    console.error("Asset loading failed:", error);
+                    this.uiElements.loadingMessage.textContent = 'Error loading assets. Please refresh.';
+                    this.uiElements.loadingMessage.style.display = 'block';
+                });
+            }
+
+            loadHighScore() {
+                try {
+                    const storedHighScore = localStorage.getItem('copterHighScore');
+                    this.highScore = storedHighScore ? parseInt(storedHighScore) : 0;
+                } catch (e) {
+                    console.warn("Could not load high score from localStorage:", e);
+                    this.highScore = 0;
+                }
+            }
+
+            saveHighScore() {
+                try {
+                    localStorage.setItem('copterHighScore', this.highScore.toString());
+                } catch (e) {
+                    console.warn("Could not save high score to localStorage:", e);
+                }
+            }
+            
+            initGameElements() {
+                this.player = new Player(this);
+                if (this.assets.images.bgLayer1 && this.assets.images.bgLayer2) {
+                    this.backgroundLayers = [
+                        new ParallaxBackgroundLayer(this, this.assets.images.bgLayer1, GAME_CONFIG.BG_LAYER_1_SPEED_MULTIPLIER),
+                        new ParallaxBackgroundLayer(this, this.assets.images.bgLayer2, GAME_CONFIG.BG_LAYER_2_SPEED_MULTIPLIER)
+                    ];
+                } else {
+                     console.warn("Background images not fully loaded, parallax will be disabled or partial.");
+                }
+                this.updateHighScoreDisplay();
+            }
+            
+            loadAssets() {
+                this.uiElements.loadingMessage.style.display = 'block';
+                const imageAssetEntries = Object.entries(ASSET_PATHS).filter(([key]) => key !== 'sounds');
+                
+                const imagePromises = imageAssetEntries.map(([name, path]) => {
+                    return new Promise((resolve) => {
+                        if (typeof path !== 'string' || path === '') {
+                             console.warn(`Asset path for ${name} is invalid.`);
+                             resolve(null); return;
+                        }
+                        const img = new Image();
+                        img.onload = () => { this.assets.images[name] = img; resolve(img); };
+                        img.onerror = () => { 
+                            console.error(`Failed to load image: ${name} from ${path}`); 
+                            this.assets.images[name] = null; 
+                            resolve(null); 
+                        };
+                        img.src = path;
+                    });
+                });
+
+                const soundPromises = Object.entries(ASSET_PATHS.sounds).map(([name, path]) => {
+                     return new Promise((resolve) => {
+                        if (typeof path !== 'string' || path === '' || path.includes('_placeholder.')) {
+                            resolve(); return; // Don't attempt to load placeholders
+                        }
+                        this.assets.sounds[name] = new Howl({
+                            src: [path],
+                            loop: name === 'thrust' || name === 'music',
+                            volume: name === 'music' ? 0.15 : (name === 'thrust' ? 0 : 0.5),
+                            onload: () => resolve(),
+                            onloaderror: (id, err) => { console.warn(`Sound ${name} from ${path} failed to load:`, err); resolve(); }
+                        });
+                    });
+                });
+                
+                return Promise.all([...imagePromises, ...soundPromises]);
+            }
+
+            bindEvents() {
+                document.getElementById('startGameButton').addEventListener('click', () => this.startGame());
+                document.getElementById('viewInstructionsButton').addEventListener('click', () => this.uiElements.instructionsModal.show());
+                document.getElementById('restartGameButton').addEventListener('click', () => this.startGame());
+                
+                window.addEventListener('resize', this.resizeCanvas.bind(this));
+
+                const handleInputStart = (e) => {
+                    if (this.gameState !== 'playing') return;
+                    if (e.type === 'keydown' && e.key !== ' ' && e.key !== 'Spacebar') return; // Spacebar for IE/Edge
+                    if (e.type === 'keydown' && e.repeat) return;
+                    
+                    if (e.cancelable) e.preventDefault();
+                    this.isInputActive = true;
+                };
+                const handleInputEnd = (e) => {
+                    if (this.gameState !== 'playing') return;
+                     if (e.type === 'keyup' && e.key !== ' ' && e.key !== 'Spacebar') return;
+                    this.isInputActive = false;
+                };
+
+                document.addEventListener('mousedown', handleInputStart);
+                document.addEventListener('mouseup', handleInputEnd);
+                document.addEventListener('touchstart', handleInputStart, { passive: false });
+                document.addEventListener('touchend', handleInputEnd);
+                document.addEventListener('keydown', handleInputStart);
+                document.addEventListener('keyup', handleInputEnd);
+            }
+
+            resizeCanvas() {
+                const nativeAspectRatio = GAME_CONFIG.NATIVE_WIDTH / GAME_CONFIG.NATIVE_HEIGHT;
+                let windowWidth = window.innerWidth;
+                let windowHeight = window.innerHeight;
+                const windowAspectRatio = windowWidth / windowHeight;
+
+                let scaledWidth, scaledHeight;
+
+                if (windowAspectRatio > nativeAspectRatio) {
+                    scaledHeight = windowHeight;
+                    scaledWidth = scaledHeight * nativeAspectRatio;
+                } else {
+                    scaledWidth = windowWidth;
+                    scaledHeight = scaledWidth / nativeAspectRatio;
+                }
+                
+                this.canvas.style.width = Math.floor(scaledWidth) + 'px';
+                this.canvas.style.height = Math.floor(scaledHeight) + 'px';
+
+                const gameWrapper = document.getElementById('game-wrapper');
+                if (gameWrapper) {
+                  gameWrapper.style.width = this.canvas.style.width;
+                  gameWrapper.style.height = this.canvas.style.height;
+                }
+                
+                this.backgroundLayers.forEach(layer => { 
+                    if (layer.image && layer.image.complete && layer.image.naturalWidth > 0 && layer.image.naturalHeight > 0) {
+                         layer.imgWidth = layer.image.naturalWidth * (this.canvas.height / layer.image.naturalHeight);
+                    }
+                });
+            }
+
+            startGame() {
+                this.uiElements.mainMenuModal.hide();
+                this.uiElements.gameOverModal.hide();
+                this.resetGame();
+                this.gameState = 'playing';
+                this.isInputActive = false; 
+                this.playSound('music', true, 0.15);
+            }
+
+            resetGame() {
+                if(this.player) this.player.reset();
+                this.obstacles = [];
+                this.particles = [];
+                this.explosions = [];
+                this.score = 0;
+                this.currentScrollSpeed = GAME_CONFIG.SCROLL_SPEED_INITIAL;
+                this.nextObstacleX = GAME_CONFIG.NATIVE_WIDTH * 1.1;
+                this.updateScoreDisplay();
+                this.updateHighScoreDisplay();
+                this.screenShakeTime = 0;
+                this.ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset any lingering transform from screen shake
+            }
+
+            gameLoop(timestamp) {
+                this.deltaTime = Math.min(0.05, (timestamp - this.lastTime) / 1000); // Capped dt, 0.05 is ~20fps min
+                this.lastTime = timestamp;
+
+                if (this.gameState === 'playing') {
+                    this.update(this.deltaTime || (1/60)); // Fallback dt if first frame
+                }
+                this.render();
+                requestAnimationFrame(this.gameLoop.bind(this));
+            }
+            
+            update(dt) {
+                this.backgroundLayers.forEach(layer => layer.update(dt, this.currentScrollSpeed));
+                if(this.player) this.player.update(dt, this.isInputActive);
+                
+                this.currentScrollSpeed = Math.min(GAME_CONFIG.SCROLL_SPEED_MAX, this.currentScrollSpeed + GAME_CONFIG.SCROLL_SPEED_INCREMENT * dt);
+
+                this.obstacles.forEach(obstacle => obstacle.update(dt, this.currentScrollSpeed));
+                this.obstacles = this.obstacles.filter(obstacle => obstacle.x + obstacle.width > 0);
+
+                this.particles.forEach(particle => particle.update(dt));
+                this.particles = this.particles.filter(particle => particle.life > 0);
+
+                this.explosions.forEach(explosion => explosion.update(dt));
+                this.explosions = this.explosions.filter(explosion => !explosion.isDone);
+
+                this.manageObstacles();
+                this.checkCollisions();
+                
+                if (this.player && this.player.isAlive) {
+                    this.score += this.currentScrollSpeed * dt * GAME_CONFIG.SCORE_MULTIPLIER_DISTANCE; 
+                    this.updateScoreDisplay();
+                }
+
+                if (this.screenShakeTime > 0) {
+                    this.screenShakeTime -= dt;
+                     if (this.screenShakeTime <= 0) {
+                        this.ctx.setTransform(1, 0, 0, 1, 0, 0); // Ensure transform is reset
+                    }
+                }
+            }
+
+            manageObstacles() {
+                if (this.obstacles.length === 0 || this.obstacles[this.obstacles.length -1].x < this.nextObstacleX) {
+                    this.spawnObstaclePair();
+                    const lastObstacle = this.obstacles[this.obstacles.length -1];
+                    if (lastObstacle) {
+                        this.nextObstacleX = lastObstacle.x + GAME_CONFIG.OBSTACLE_SPAWN_INTERVAL_X * (0.85 + Math.random() * 0.3);
+                    } else {
+                        this.nextObstacleX = this.canvas.width + GAME_CONFIG.OBSTACLE_SPAWN_INTERVAL_X; // Failsafe
+                    }
+                }
+            }
+
+            spawnObstaclePair() {
+                const gapHeight = Math.random() * (GAME_CONFIG.OBSTACLE_GAP_MAX - GAME_CONFIG.OBSTACLE_GAP_MIN) + GAME_CONFIG.OBSTACLE_GAP_MIN;
+                const minTopHeight = GAME_CONFIG.OBSTACLE_MIN_HEIGHT;
+                const minBottomHeight = GAME_CONFIG.OBSTACLE_MIN_HEIGHT;
+                const availableHeightForObstacles = this.canvas.height - gapHeight - 20; // 20px buffer total
+
+                let topObstacleHeight = Math.random() * (availableHeightForObstacles - minTopHeight - minBottomHeight) + minTopHeight;
+                topObstacleHeight = Math.max(minTopHeight, Math.min(topObstacleHeight, availableHeightForObstacles - minBottomHeight));
+                
+                const bottomObstacleHeight = this.canvas.height - topObstacleHeight - gapHeight;
+
+                if (topObstacleHeight > 0) {
+                    this.obstacles.push(new Obstacle(this, this.canvas.width, 0, topObstacleHeight, 'top'));
+                }
+                if (bottomObstacleHeight > 0) {
+                    this.obstacles.push(new Obstacle(this, this.canvas.width, topObstacleHeight + gapHeight, bottomObstacleHeight, 'bottom'));
+                }
+            }
+
+            checkCollisions() {
+                if (!this.player || !this.player.isAlive) return;
+
+                for (let obstacle of this.obstacles) {
+                    if (
+                        this.player.x < obstacle.x + obstacle.width &&
+                        this.player.x + this.player.width > obstacle.x &&
+                        this.player.y < obstacle.y + obstacle.height &&
+                        this.player.y + this.player.height > obstacle.y
+                    ) {
+                        this.triggerGameOver();
+                        return;
+                    }
+                    if (!obstacle.passedPlayer && obstacle.x + obstacle.width < this.player.x) {
+                        obstacle.passedPlayer = true;
+                        this.score += GAME_CONFIG.SCORE_MULTIPLIER_OBSTACLE;
+                        this.playSound('score', false, 0.4);
+                        this.updateScoreDisplay();
+                    }
+                }
+            }
+            
+            triggerGameOver() {
+                if (!this.player || !this.player.isAlive) return; 
+                this.player.isAlive = false;
+                this.gameState = 'gameOver';
+                this.isInputActive = false; 
+                this.stopSound('thrust');
+                this.stopSound('music', 0.5);
+                this.playSound('crash', false, 0.7);
+
+                this.spawnExplosion(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2);
+                for (let i = 0; i < GAME_CONFIG.EXPLOSION_PARTICLE_COUNT; i++) {
+                    this.particles.push(new Particle(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2, 'explosion', this));
+                }
+                
+                this.startScreenShake(GAME_CONFIG.SCREEN_SHAKE_DURATION, GAME_CONFIG.SCREEN_SHAKE_MAGNITUDE);
+
+                const finalScore = Math.floor(this.score);
+                if (finalScore > this.highScore) {
+                    this.highScore = finalScore;
+                    this.saveHighScore();
+                }
+                this.updateHighScoreDisplay();
+                this.uiElements.finalScore.textContent = finalScore;
+                this.uiElements.gameOverHighScore.textContent = this.highScore;
+                
+                setTimeout(() => { 
+                    if (this.uiElements.gameOverModalEl && this.gameState === 'gameOver') { // Ensure modal only shows if still in game over state
+                        this.uiElements.gameOverModal.show(); 
+                    }
+                }, 800);
+            }
+
+            startScreenShake(duration, magnitude) {
+                this.screenShakeTime = duration;
+                this.screenShakeMagnitude = magnitude;
+            }
+            
+            spawnThrustParticles(x, y) {
+                for (let i = 0; i < GAME_CONFIG.THRUST_PARTICLE_COUNT; i++) {
+                    this.particles.push(new Particle(x - this.player.width/2.5, y, 'thrust', this));
+                }
+            }
+
+            spawnExplosion(x, y) {
+                if (this.assets.images.explosionSheet) {
+                    this.explosions.push(new ExplosionSprite(this, x, y));
+                }
+            }
+
+            updateScoreDisplay() {
+                this.uiElements.scoreDisplay.textContent = `Score: ${Math.floor(this.score)}`;
+            }
+            
+            updateHighScoreDisplay() {
+                this.uiElements.highScoreDisplay.textContent = `High Score: ${this.highScore}`;
+            }
+
+            showMainMenu() {
+                this.gameState = 'mainMenu';
+                this.uiElements.mainMenuModal.show();
+                this.playSound('music', true, 0.15);
+            }
+            
+            playSound(soundName, loop = false, volume = 1) {
+                const sound = this.assets.sounds[soundName];
+                if (sound && sound.state() === 'loaded') {
+                    if (loop && sound.playing()) { 
+                        sound.volume(volume);
+                        return;
+                    }
+                    sound.loop(loop);
+                    sound.volume(volume);
+                    sound.play();
+                }
+            }
+
+            stopSound(soundName, fadeOutDurationMs = 0) {
+                const sound = this.assets.sounds[soundName];
+                if (sound && sound.state() === 'loaded' && sound.playing()) {
+                    if (fadeOutDurationMs > 0) {
+                        sound.fade(sound.volume(), 0, fadeOutDurationMs);
+                        setTimeout(() => { 
+                            if (sound && !sound.loop()) { // Only stop if not looping after fade
+                                sound.stop();
+                            } else if (sound && sound.loop()) { // For looped sounds, ensure volume is 0 if not stopped
+                                sound.volume(0);
+                            }
+                        }, fadeOutDurationMs);
+                    } else {
+                         if (!sound.loop()) {
+                            sound.stop();
+                         } else {
+                            sound.volume(0); 
+                         }
+                    }
+                } else if (sound && sound.loop() && sound.state() === 'loaded') { // Ensure looped sounds that were 'stopped' by volume 0 are truly at 0
+                    sound.volume(0);
+                }
+            }
+
+            render() {
+                this.ctx.save(); 
+                this.ctx.setTransform(1,0,0,1,0,0); // Reset transform fully
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                let shakeX = 0;
+                let shakeY = 0;
+                if (this.screenShakeTime > 0) {
+                    shakeX = (Math.random() - 0.5) * 2 * this.screenShakeMagnitude;
+                    shakeY = (Math.random() - 0.5) * 2 * this.screenShakeMagnitude;
+                    this.ctx.translate(shakeX, shakeY);
+                }
+
+                this.backgroundLayers.forEach(layer => layer.draw(this.ctx));
+                this.obstacles.forEach(obstacle => obstacle.draw(this.ctx));
+                this.particles.forEach(particle => particle.draw(this.ctx));
+                
+                if (this.player && this.player.isAlive) {
+                    this.player.draw(this.ctx);
+                }
+                this.explosions.forEach(explosion => explosion.draw(this.ctx));
+                
+                this.ctx.restore(); 
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                new CopterGame();
+            } catch (e) {
+                console.error("Failed to initialize CopterGame:", e);
+                const loadingMsg = document.getElementById('loadingMessage');
+                if (loadingMsg) {
+                    loadingMsg.textContent = "Critical error during game startup. Please refresh.";
+                    loadingMsg.style.display = 'block';
+                    loadingMsg.style.color = 'red';
+                }
+                const gameCanvas = document.getElementById('gameCanvas');
+                if(gameCanvas) gameCanvas.style.display = 'none';
+
+            }
+        });
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

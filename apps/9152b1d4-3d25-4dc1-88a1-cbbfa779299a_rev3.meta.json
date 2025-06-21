@@ -1,0 +1,115 @@
+{
+  "projectId": "9152b1d4-3d25-4dc1-88a1-cbbfa779299a",
+  "revisionString": "3",
+  "projectNameDisplay": "Breakout game",
+  "userPromptForThisRevision": "Paddle collisions aren't right, the ball slides along the paddle and isn't bouncing properly. ",
+  "basedOnRevisionString": "2",
+  "savedAt": "2025-05-20T16:36:18.120Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/dalle_f9ad15dc-d8d.png",
+      "url": "/generated_images/dalle_f9ad15dc-d8d.png",
+      "description": "Stylized forest background for a Breakout game. Dark theme, muted greens and browns, subtle trees and foliage. Designed to be a background image, not distracting. Aspect ratio 16:9.",
+      "purpose": "Level 1 background image.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_9ea470b2-7e4.png",
+      "url": "/generated_images/dalle_9ea470b2-7e4.png",
+      "description": "Stylized space background for a Breakout game. Dark theme, deep blues, purples, and blacks. Stars, maybe a subtle nebula or distant planet. Not too detailed. Aspect ratio 16:9.",
+      "purpose": "Level 2 background image.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_96ebc23a-599.png",
+      "url": "/generated_images/dalle_96ebc23a-599.png",
+      "description": "Stylized dungeon wall background for a Breakout game. Dark theme, grey and brown stone textures. Cracks, maybe subtle moss or roots. Not too detailed. Aspect ratio 16:9.",
+      "purpose": "Level 3 background image.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_22cbbf07-3cd.png",
+      "url": "/generated_images/dalle_22cbbf07-3cd.png",
+      "description": "Simple, dark, slightly stylized horizontal paddle sprite for a Breakout game. Clean design, maybe a subtle dark metallic or wood texture. Aspect ratio 4:1.",
+      "purpose": "Player paddle sprite.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_abd20dff-c3b.png",
+      "url": "/generated_images/dalle_abd20dff-c3b.png",
+      "description": "Simple, small, glowing sphere sprite for a Breakout game. Bright, contrasting color like electric blue or orange against a dark background. Aspect ratio 1:1.",
+      "purpose": "Game ball sprite.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_975abcd9-d4a.png",
+      "url": "/generated_images/dalle_975abcd9-d4a.png",
+      "description": "Rectangular brick sprite for a Breakout game. Forest theme. Muted green and brown colors, subtle wood or leaf texture. Aspect ratio 2:1.",
+      "purpose": "Level 1 normal brick sprite.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_f32cfde3-0d4.png",
+      "url": "/generated_images/dalle_f32cfde3-0d4.png",
+      "description": "Rectangular brick sprite for a Breakout game. Space theme. Deep blue and purple colors, subtle metallic or tech texture. Aspect ratio 2:1.",
+      "purpose": "Level 2 normal brick sprite.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_6ffc8e48-07c.png",
+      "url": "/generated_images/dalle_6ffc8e48-07c.png",
+      "description": "Rectangular brick sprite for a Breakout game. Dungeon theme. Dark grey and brown colors, subtle stone texture. Aspect ratio 2:1.",
+      "purpose": "Level 3 normal brick sprite.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_3272c525-986.png",
+      "url": "/generated_images/dalle_3272c525-986.png",
+      "description": "Rectangular brick sprite for a Breakout game. Visually distinct from regular bricks, showing damage or being darker. Cracked stone or reinforced look. Aspect ratio 2:1.",
+      "purpose": "Multi-hit brick sprite.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_04a383a8-60a.png",
+      "url": "/generated_images/dalle_04a383a8-60a.png",
+      "description": "Small icon for a Breakout power-up. Represents multiple balls. Simple, clear design on a dark background. Example: Three small circles. Aspect ratio 1:1.",
+      "purpose": "Multi-ball power-up sprite.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_a580a35c-987.png",
+      "url": "/generated_images/dalle_a580a35c-987.png",
+      "description": "Small icon for a Breakout power-up. Represents increasing paddle length. Simple, clear design on a dark background. Example: A horizontal bar with arrows pointing outwards. Aspect ratio 1:1.",
+      "purpose": "Paddle length power-up sprite.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_6b4b8062-b5f.png",
+      "url": "/generated_images/dalle_6b4b8062-b5f.png",
+      "description": "Small icon for a Breakout power-up. Represents increasing ball speed. Simple, clear design on a dark background. Example: A ball with speed lines. Aspect ratio 1:1.",
+      "purpose": "Ball speed power-up sprite.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_0c83188d-457.png",
+      "url": "/generated_images/dalle_0c83188d-457.png",
+      "description": "Small icon for a Breakout power-up. Represents a sticky paddle. Simple, clear design on a dark background. Example: A paddle with glue drips or a magnet. Aspect ratio 1:1.",
+      "purpose": "Sticky paddle power-up sprite.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_53b93833-9e8.png",
+      "url": "/generated_images/dalle_53b93833-9e8.png",
+      "description": "Small icon for a Breakout power-up. Represents an extra life. Simple, clear design on a dark background. Example: A heart or a '1 Up'. Aspect ratio 1:1.",
+      "purpose": "Extra life power-up sprite.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_795ba03f-bf8.png",
+      "url": "/generated_images/dalle_795ba03f-bf8.png",
+      "description": "Small icon for a Breakout power-up. Represents destroying multiple bricks. Simple, clear design on a dark background. Example: An explosion or a bomb hitting bricks. Aspect ratio 1:1.",
+      "purpose": "Brick Destroyer power-up sprite.",
+      "isNewlyGenerated": true
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "projectId": "5fc785f4-6cdf-4bb7-8b18-c18ec1a4d0b2",
+  "revisionString": "1",
+  "projectNameDisplay": "multiplayer snake that playes with all ais until you start a new game",
+  "userPromptForThisRevision": "multiplayer snake that playes with all ais until you start a new game",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-05-20T20:31:19.688Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/dalle_810b379c-9b6.png",
+      "url": "/generated_images/dalle_810b379c-9b6.png",
+      "description": "A vibrant, glossy, circular red food pellet icon, approximately 20x20 pixels. Simple, appealing, and clearly visible on a light gray background. Style: flat design with subtle highlights.",
+      "purpose": "Food item for snakes. Fallback: draw red circle with canvas.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_2aa3798c-f9c.png",
+      "url": "/generated_images/dalle_2aa3798c-f9c.png",
+      "description": "A small, simple, elegant golden crown icon. Minimalist design, clearly recognizable as a crown. Suitable to be drawn above a 20x20 snake head segment. Approx 15x10 pixels. Style: flat design icon, metallic gold color.",
+      "purpose": "Visual indicator for the longest snake. Fallback: draw yellow triangle.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_e1c751b6-684.png",
+      "url": "/generated_images/dalle_e1c751b6-684.png",
+      "description": "A set of 3-4 small, abstract 'sparkle' or 'burst' shapes for a particle effect. Yellow and orange colors. Individual shapes should be tiny (e.g., 5x5 pixels). The overall image can be a small spritesheet (e.g., 20x20) containing these shapes or just one iconic burst shape. Style: cartoonish, energetic.",
+      "purpose": "Particle effect for food consumption or snake elimination. Fallback: draw small colored squares.",
+      "isNewlyGenerated": true
+    }
+  ]
+}

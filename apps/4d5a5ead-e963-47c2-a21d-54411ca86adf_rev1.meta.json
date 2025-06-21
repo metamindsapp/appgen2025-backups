@@ -1,0 +1,73 @@
+{
+  "projectId": "4d5a5ead-e963-47c2-a21d-54411ca86adf",
+  "revisionString": "1",
+  "projectNameDisplay": "Greek restaurant",
+  "userPromptForThisRevision": "I have a Greek, Zorbas, restaurant in Antwerp, Belgium and I need a website. Use blue/white colors add reviews, booking module and location. Kerstraat 12 Antwerpen",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-05-22T11:53:37.748Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/dalle_c761dad7-f73.png",
+      "url": "/generated_images/dalle_c761dad7-f73.png",
+      "description": "Hero image for a Greek restaurant website 'Zorbas'. A breathtaking, slightly elevated panoramic view of a sun-drenched Greek island village (like Oia, Santorini) with iconic whitewashed buildings and blue-domed churches, overlooking the Aegean Sea at late afternoon/golden hour. Warm, inviting, and aspirational. Style: photorealistic, cinematic lighting, high detail.",
+      "purpose": "Main hero background image for the 'home' section. Filename hint: hero_image.png",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_930a0a05-713.png",
+      "url": "/generated_images/dalle_930a0a05-713.png",
+      "description": "Image for 'About Us' section of Zorbas restaurant. A cozy, warmly lit interior corner of a traditional Greek taverna. Rustic wooden table, perhaps a checkered tablecloth, a bottle of olive oil, and a vase with simple wildflowers. Focus on authenticity and welcoming atmosphere. Style: photorealistic, warm tones, slightly shallow depth of field.",
+      "purpose": "Image for the 'About Us' section. Filename hint: about_us_image.png",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_70ec3b63-204.png",
+      "url": "/generated_images/dalle_70ec3b63-204.png",
+      "description": "Menu item: Tzatziki. A vibrant, appetizing close-up shot of a rustic ceramic bowl filled with creamy Tzatziki, garnished with a sprig of fresh dill, a swirl of extra virgin olive oil, and a few Kalamata olives. Served with triangles of grilled pita bread on the side. Bright, natural lighting. Style: photorealistic food photography, sharp focus.",
+      "purpose": "Image for a menu item card (Tzatziki). Filename hint: menu_tzatziki.png",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_a97c2b97-838.png",
+      "url": "/generated_images/dalle_a97c2b97-838.png",
+      "description": "Menu item: Moussaka. A generous, perfectly baked slice of Moussaka on a clean white plate, showcasing its distinct layers of eggplant, spiced ground lamb (or beef), and rich béchamel topping, browned to perfection. A light garnish of fresh parsley. Style: photorealistic food photography, appetizing.",
+      "purpose": "Image for a menu item card (Moussaka). Filename hint: menu_moussaka.png",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_ead60cff-27b.png",
+      "url": "/generated_images/dalle_ead60cff-27b.png",
+      "description": "Menu item: Baklava. A tempting arrangement of several diamond-shaped pieces of Baklava, glistening with honey syrup, on an elegant dessert plate. Layers of flaky phyllo pastry and chopped nuts clearly visible. Garnished with a sprinkle of crushed pistachios. Style: photorealistic food photography, detailed texture.",
+      "purpose": "Image for a menu item card (Baklava). Filename hint: menu_baklava.png",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_a5bedb64-ee3.png",
+      "url": "/generated_images/dalle_a5bedb64-ee3.png",
+      "description": "Gallery image 1: A bountiful Greek feast platter. Assortment of grilled souvlaki skewers (chicken and pork), keftedes (meatballs), dolmades (stuffed grape leaves), and a colorful Greek salad, beautifully arranged on a large platter. Style: photorealistic food photography, vibrant colors.",
+      "purpose": "Image for the gallery carousel. Filename hint: gallery_food_1.png",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_e1b20e8e-b61.png",
+      "url": "/generated_images/dalle_e1b20e8e-b61.png",
+      "description": "Gallery image 2: The charming exterior of 'Zorbas' restaurant at dusk (simulated). Whitewashed walls, blue wooden door and window frames, hanging flower pots with vibrant bougainvillea. Warm light spilling from the windows, a traditional Greek lantern glowing by the entrance. Welcoming and picturesque. Style: photorealistic, atmospheric evening lighting.",
+      "purpose": "Image for the gallery carousel. Filename hint: gallery_exterior_zorbas.png (replaces generic interior)",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_4fbb5524-928.png",
+      "url": "/generated_images/dalle_4fbb5524-928.png",
+      "description": "Gallery image 3: A close-up of a traditional Greek coffee (Ellinikos kafes) being poured from a briki into a small cup, alongside a piece of loukoumi (Greek delight). Focus on the rich coffee and cultural elements. Style: photorealistic, lifestyle food photography.",
+      "purpose": "Image for the gallery carousel. Filename hint: gallery_coffee_loukoumi.png (replaces generic food shot)",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_ef248c6f-bd2.png",
+      "url": "/generated_images/dalle_ef248c6f-bd2.png",
+      "description": "Favicon for Zorbas restaurant. A stylized, minimalist representation of a Greek Ionic column capital or a simple blue olive. Clean lines, using the primary blue color (#0D6EFD or similar) on a transparent or white background. Must be clear and recognizable at small sizes (16x16, 32x32). Style: flat design icon.",
+      "purpose": "Favicon for the website. Filename hint: favicon.png",
+      "isNewlyGenerated": true
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "projectId": "9f3569a9-1971-4046-9feb-5c32bd83eeb8",
+  "revisionString": "1",
+  "projectNameDisplay": "game test",
+  "userPromptForThisRevision": "Make a single-screen 2D pixel-art platformer.\r\nDark-navy background.",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-05-23T10:34:19.017Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/dalle_68ad5eca-2ca.png",
+      "url": "/generated_images/dalle_68ad5eca-2ca.png",
+      "description": "Pixel art player character sprite sheet. Character is a small, agile hero/explorer type, suitable for a dark, slightly mysterious platformer. Include: IDLE (4 frames, subtle breathing/blinking, facing right), RUN (6 frames, dynamic leg/arm movement, facing right), JUMP (1 frame, mid-air pose, legs tucked or extended, facing right), FALL (1 frame, similar to jump or slightly more stretched, facing right). Character sprite frame size approx 24x32 pixels or 32x32 pixels. Style: 16-bit pixel art, vibrant accents against a generally darker or neutral palette to stand out on a dark navy background. Ensure clear silhouette.",
+      "purpose": "Player character animations. Sheet layout: all frames in a single row.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_cc5a9319-a4a.png",
+      "url": "/generated_images/dalle_cc5a9319-a4a.png",
+      "description": "Pixel art platform tile sprite. A generic, reusable block, 32x32 pixels. Design: weathered stone or dark metallic with subtle tech highlights, suitable for a slightly ancient/techy ruin theme. Must tile seamlessly horizontally and vertically. Dark theme, but with enough contrast to be distinct from a very dark navy background (#000033). Style: 16-bit pixel art.",
+      "purpose": "Main ground and floating platform blocks.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_3fe620d2-06c.png",
+      "url": "/generated_images/dalle_3fe620d2-06c.png",
+      "description": "Pixel art collectible item: a glowing, crystalline blue or purple energy gem. Sprite sheet for animation (4 frames, e.g., pulsing glow, slight rotation, or internal energy crackle). Each frame approx 16x16 or 24x24 pixels. Style: 16-bit pixel art. Clear and bright.",
+      "purpose": "Collectible gem for the player. Sheet layout: all frames in a single row.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_bfb5d911-015.png",
+      "url": "/generated_images/dalle_bfb5d911-015.png",
+      "description": "Pixel art hazard: sharp, menacing spikes. Dimensions 32x16 pixels (base is 32px wide, spikes are 16px tall from base). Pointing upwards. Dark metallic or obsidian-like, possibly with a faint dangerous red/purple glow at tips. Style: 16-bit pixel art.",
+      "purpose": "Static spike hazard for the player to avoid.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_257d8d45-4be.png",
+      "url": "/generated_images/dalle_257d8d45-4be.png",
+      "description": "Pixel art goal: a mystical portal (closed/inactive state). Dimensions approx 32x48 pixels (width x height). Design: a stone archway or tech frame, currently dark or inert, perhaps with faint, unlit runes or patterns. Style: 16-bit pixel art. Dark theme.",
+      "purpose": "Goal/exit portal, closed/inactive state.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_8c22d53b-3dc.png",
+      "url": "/generated_images/dalle_8c22d53b-3dc.png",
+      "description": "Pixel art goal: a mystical portal (OPEN/active state). Same dimensions as closed (approx 32x48 pixels). Design: The archway/frame is now filled with a swirling, bright blue/purple energy vortex. Clearly indicates it's active and enterable. Style: 16-bit pixel art.",
+      "purpose": "Goal/exit portal, open/activated state.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_70b5c9e3-af7.png",
+      "url": "/generated_images/dalle_70b5c9e3-af7.png",
+      "description": "Pixel art background for a single screen platformer game, designed for a native resolution of 640x360 pixels. Theme: ancient, slightly tech-infused ruins against a very dark navy sky (#000033 to #0A0A2A). Subtle details like distant, faint pixel stars, broken pillars, or glowing veins in the rock. Must be non-intrusive, allowing player/platforms to stand out clearly. Should feel atmospheric. Style: 16-bit pixel art.",
+      "purpose": "Static game background for the canvas, covering the entire 640x360 game area.",
+      "isNewlyGenerated": true
+    }
+  ]
+}

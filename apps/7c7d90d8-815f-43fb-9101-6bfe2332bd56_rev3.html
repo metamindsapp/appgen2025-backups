@@ -1,0 +1,2023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>trenndy - Explore Evolving Trends</title>
+    <meta name="description" content="trenndy: Your advanced dashboard for discovering, analyzing, and comparing real-world trends from diverse sources like Wikipedia, Google Trends, Reddit, and News, enhanced with AI insights.">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    <style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f8f9fa; 
+    color: #212529;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex-grow: 1;
+}
+
+.navbar-brand img { transition: transform 0.3s ease; }
+.navbar-brand:hover img { transform: rotate(-5deg) scale(1.1); }
+.nav-link { transition: color 0.2s ease-in-out; }
+.nav-link:hover, .nav-link.active { color: #0d6efd !important; }
+
+#heroImageBanner {
+    border: 5px solid white; 
+    max-height: 350px; 
+    object-fit: cover;
+    width: 100%;
+}
+
+#filters {
+    top: 60px; 
+    background-color: rgba(255, 255, 255, 0.95) !important; 
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border-bottom: 1px solid #dee2e6;
+    z-index: 1020; 
+}
+.navbar {
+    z-index: 1030;
+}
+
+.trend-card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+    display: flex;
+    flex-direction: column;
+}
+.trend-card:not(.placeholder-glow):hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+.trend-card .card-header {
+    background-color: transparent;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 0.75rem 1rem;
+}
+.trend-card .card-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+.category-icon {
+    width: 28px;
+    height: 28px;
+    opacity: 0.8;
+}
+.trend-card .card-body {
+    padding: 1rem;
+    flex-grow: 1; 
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.trend-description {
+    font-size: 0.8rem;
+    color: #555;
+    margin-bottom: 0.75rem;
+    min-height: 45px; 
+    flex-grow: 1;
+}
+.mini-chart-container {
+    width: 100%;
+    height: 70px; 
+    margin-bottom: 0.75rem;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    overflow: hidden; 
+}
+.mini-chart-container.placeholder {
+    background-color: #e9ecef;
+}
+.mini-chart-container svg {
+    display: block; 
+}
+.trend-stats {
+    font-size: 0.85rem;
+}
+.current-value { color: #0d6efd; }
+.change-value.positive { color: #198754; } 
+.change-value.negative { color: #dc3545; } 
+.change-value.neutral { color: #6c757d; } 
+
+.trend-card .card-footer {
+    background-color: transparent;
+    border-top: 1px solid #f0f0f0;
+    padding: 0.5rem 0.75rem;
+}
+.trend-card .btn-action-icon {
+    font-size: 0.85rem;
+    padding: 0.3rem 0.5rem;
+}
+.dataSource {
+    font-size: 0.7rem;
+    color: #6c757d;
+}
+
+.chart-line {
+    fill: none;
+    stroke-width: 2px;
+}
+.chart-area {
+    stroke: none;
+    opacity: 0.2;
+}
+.chart-dot {
+    stroke-width: 1px;
+    stroke: white; 
+}
+.axis-line {
+    stroke: #ccc;
+    stroke-width: 1px;
+}
+.axis-text {
+    font-size: 10px;
+    fill: #777;
+}
+
+#spotlightContent .display-6 { font-weight: 300; }
+#spotlightChartContainer, #comparisonChartContainer {
+    height: 350px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+}
+#spotlightImageContainer img, #modalImageContainer img, #modalRedditImage img, #modalGoogleTrendsImage img, #exploreRedditWordCloud img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    margin-top: 1rem;
+}
+.ai-content-area {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    border: 1px solid #e9ecef;
+}
+.ai-content-area h6 {
+    font-weight: 600;
+    color: #343a40;
+}
+
+.modal-xl { max-width: 900px; }
+.modal-lg { max-width: 800px; }
+.modal-header { border-bottom: 1px solid #dee2e6; }
+.modal-footer { border-top: 1px solid #dee2e6; }
+.modal-body .nav-tabs .nav-link {
+    color: #495057;
+    border-bottom-width: 2px;
+}
+.modal-body .nav-tabs .nav-link.active {
+    color: #0d6efd;
+    border-color: #dee2e6 #dee2e6 #0d6efd;
+}
+
+.spinner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100px; 
+}
+.spinner-container.inline {
+    min-height: auto;
+    display: inline-flex;
+    vertical-align: middle;
+    margin-left: 8px;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+#explore-topic-section .form-control-lg {
+    font-size: 1rem; 
+}
+#exploreTopicOutput {
+    min-height: 200px;
+}
+#exploreTopicChartContainer {
+    height: 300px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+    margin-top: 1rem;
+}
+.explore-output-block {
+    background-color: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+}
+.explore-output-block h5 {
+    color: #0d6efd;
+}
+
+.keyword-badge {
+    font-size: 0.85rem;
+    margin: 0.2rem;
+}
+.reddit-post-link {
+    display: block;
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+    text-decoration: none;
+}
+.reddit-post-link:hover {
+    text-decoration: underline;
+}
+
+#comparisonStatsTable th, #comparisonStatsTable td {
+    font-size: 0.9rem;
+    padding: 0.5rem;
+}
+
+.compare-checkbox {
+    transform: scale(1.2);
+    vertical-align: middle;
+}
+.form-check-label.card-title {
+    cursor: pointer;
+}
+
+@media (max-width: 991px) { 
+    #filters {
+         top: 56px; 
+    }
+}
+
+@media (max-width: 768px) {
+    #filters {
+        position: static; 
+    }
+    .display-5 { font-size: 2.5rem; }
+    #spotlightChartContainer, #comparisonChartContainer { height: 250px; }
+    #heroImageBanner { max-height: 250px; }
+    #exploreTopicChartContainer { height: 250px; }
+    .trend-card .card-title { font-size: 1rem; }
+    .trend-description { font-size: 0.75rem; min-height: 40px; }
+    .mini-chart-container { height: 60px; }
+}
+    </style>
+</head>
+<body class="bg-light">
+
+    <header class="bg-white shadow-sm sticky-top">
+        <nav class="navbar navbar-expand-lg navbar-light container">
+            <a class="navbar-brand fw-bold" href="#home">
+                <img src="" alt="trenndy logo" id="logoImage" style="height: 30px; margin-right: 10px; vertical-align: middle;">
+                trenndy
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link active" aria-current="page" href="#home">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#explore-topic-section">Explore Topic</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#dashboard">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#spotlight">Spotlight</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="home" class="py-5 text-center bg-white" data-aos="fade-in">
+            <div class="container">
+                <div class="row py-lg-4">
+                    <div class="col-lg-8 col-md-10 mx-auto">
+                        <img src="" alt="Abstract representation of data trends" id="heroImageBanner" class="img-fluid mb-4 rounded shadow-sm">
+                        <h1 class="fw-light display-5">Welcome to trenndy</h1>
+                        <p class="lead text-muted">Discover, analyze, and compare emerging trends across various domains. See how patterns evolve over time with curated visualizations from real-world data, enhanced with AI insights.</p>
+                        <p id="featuredTrendWelcome" class="fst-italic text-primary my-3"></p>
+                        <p>
+                            <a href="#dashboard" class="btn btn-primary my-2 rounded-pill px-4">Explore Dashboard</a>
+                            <a href="#spotlight" class="btn btn-outline-secondary my-2 rounded-pill px-4">View Trend Spotlight</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="explore-topic-section" class="py-5 bg-white border-bottom" data-aos="fade-up">
+            <div class="container">
+                <h2 class="pb-3 mb-4 h3 fw-light text-center">Explore Any Topic</h2>
+                <div class="row justify-content-center">
+                    <div class="col-md-10 col-lg-8">
+                        <div class="input-group mb-3">
+                            <input type="text" id="topicExploreInput" class="form-control form-control-lg" placeholder="Enter Topic (e.g., Electric Vehicles, Remote Work)">
+                            <button id="exploreTopicBtn" class="btn btn-success btn-lg" type="button">
+                                <i class="bi bi-search me-2"></i>Explore
+                            </button>
+                        </div>
+                        <div class="text-center mb-3">
+                            <label class="form-label me-2">Exploration Type:</label>
+                            <div id="exploreTypeSelector" class="btn-group" role="group" aria-label="Exploration type">
+                                <input type="radio" class="btn-check" name="exploreType" id="exploreWiki" value="wikipedia" autocomplete="off" checked>
+                                <label class="btn btn-outline-secondary" for="exploreWiki"><i class="bi bi-wikipedia me-1"></i>Wikipedia</label>
+
+                                <input type="radio" class="btn-check" name="exploreType" id="exploreGoogle" value="google" autocomplete="off">
+                                <label class="btn btn-outline-secondary" for="exploreGoogle"><i class="bi bi-google me-1"></i>Google Trends</label>
+
+                                <input type="radio" class="btn-check" name="exploreType" id="exploreReddit" value="reddit" autocomplete="off">
+                                <label class="btn btn-outline-secondary" for="exploreReddit"><i class="bi bi-reddit me-1"></i>Reddit Buzz</label>
+                                
+                                <input type="radio" class="btn-check" name="exploreType" id="exploreNews" value="news" autocomplete="off">
+                                <label class="btn btn-outline-secondary" for="exploreNews"><i class="bi bi-newspaper me-1"></i>News</label>
+                            </div>
+                        </div>
+                        <div id="exploreTopicStatus" class="text-center small"></div>
+                    </div>
+                </div>
+                <div id="exploreTopicOutput" class="mt-4">
+                </div>
+            </div>
+        </section>
+
+        <section id="filters" class="py-3 sticky-top">
+             <div class="container">
+                <div class="row g-3 align-items-center justify-content-center">
+                    <div class="col-md-3 col-lg-3">
+                        <label for="categoryFilter" class="form-label visually-hidden">Filter by Category:</label>
+                        <select id="categoryFilter" class="form-select form-select-lg">
+                            <option value="all" selected>All Categories</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 col-lg-3">
+                        <label for="timeRangeFilter" class="form-label visually-hidden">Filter by Time Range:</label>
+                        <select id="timeRangeFilter" class="form-select form-select-lg">
+                            <option value="12" selected>Last 12 Months</option>
+                            <option value="3">Last 3 Months</option>
+                            <option value="6">Last 6 Months</option>
+                            <option value="24">Last 24 Months</option>
+                            <option value="36">Last 36 Months</option>
+                        </select>
+                    </div>
+                    <div class="col-md-auto col-lg-auto text-center">
+                        <button id="compareTrendsBtn" class="btn btn-warning btn-lg d-none"><i class="bi bi-bar-chart-line-fill me-2"></i>Compare Selected (<span id="compareCount">0</span>)</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="dashboard" class="py-5" data-aos="fade-up" data-aos-delay="100">
+            <div class="container">
+                <h2 class="pb-3 mb-4 h3 fw-light text-center border-bottom">Trend Dashboard</h2>
+                <div id="trendGrid" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                </div>
+                <div id="noResultsMessage" class="alert alert-info mt-4 d-none text-center" role="alert">
+                    No trends match your current filter criteria. Try adjusting your filters!
+                </div>
+            </div>
+        </section>
+
+        <section id="spotlight" class="py-5 bg-white" data-aos="fade-up" data-aos-delay="200">
+            <div class="container">
+                <h2 class="pb-3 mb-4 h3 fw-light text-center border-bottom">Trend Spotlight</h2>
+                <div id="spotlightContent" class="row align-items-center">
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="py-4 mt-auto bg-dark text-white text-center">
+        <div class="container">
+            <p class="mb-1">&copy; <span id="currentYear"></span> trenndy. All Rights Reserved.</p>
+            <p class="small mb-1">Data sourced from Wikipedia, Reddit, simulated models, and insights linked from Google Trends & News.</p>
+            <ul class="list-inline mb-0 small">
+                <li class="list-inline-item"><a href="#" class="text-white-50 text-decoration-none">Privacy Policy</a></li>
+                <li class="list-inline-item">|</li>
+                <li class="list-inline-item"><a href="#" class="text-white-50 text-decoration-none">Terms of Service</a></li>
+            </ul>
+        </div>
+    </footer>
+
+    <div class="modal fade" id="trendModal" tabindex="-1" aria-labelledby="trendModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="trendModalLabel">Trend Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="trendModalBody">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="shareTrendBtn" class="btn btn-outline-success me-auto"><i class="bi bi-share-fill me-1"></i> Share Trend</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="comparisonModal" tabindex="-1" aria-labelledby="comparisonModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="comparisonModalLabel">Trend Comparison</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="comparisonModalBody">
+                    <div id="comparisonChartContainer" class="mb-4"></div>
+                    <h6 class="mt-4">Comparison Statistics</h6>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover" id="comparisonStatsTable">
+                            <thead>
+                                <tr>
+                                    <th>Trend Name</th>
+                                    <th>Current Index</th>
+                                    <th>Monthly Change (%)</th>
+                                    <th>Data Source</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="shareToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto"><i class="bi bi-check-circle-fill text-success me-2"></i>Success</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                Trend link copied to clipboard!
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script>
+(function() {
+    const AppConfig = {
+        wikiApiBaseUrl: 'https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia.org/all-access/user/',
+        redditApiBaseUrl: 'https://www.reddit.com/r/',
+        googleTrendsBaseUrl: 'https://trends.google.com/trends/explore?q=',
+        googleNewsSearchBaseUrl: 'https://news.google.com/search?q=',
+        defaultTimeRangeMonths: 12,
+        maxSimulatedDataMonths: 36,
+        cacheDurationMs: 3600000, 
+        aiImageAspectRatio: '16:9',
+        categories: [
+            { 
+                id: 'tech', name: 'Technology', color: '#0dcaf0',
+                trends: [
+                    { trendId: 'tech_ai', name: 'AI Development', dataSourceType: 'wikipedia', defaultArticle: 'Artificial_intelligence', description: 'Tracks interest in Artificial Intelligence based on Wikipedia pageviews.', googleTrendsQuery: 'Artificial Intelligence', relevantSubreddits: ['artificial', 'singularity', 'AIethics'], newsQuery: 'AI development breakthroughs' },
+                    { trendId: 'tech_quantum', name: 'Quantum Computing', dataSourceType: 'wikipedia', defaultArticle: 'Quantum_computing', description: 'Monitors discussion around Quantum Computing via Wikipedia pageviews.', googleTrendsQuery: 'Quantum Computing', relevantSubreddits: ['QuantumComputing', 'Physics'], newsQuery: 'Quantum Computing advances'}
+                ]
+            },
+            { 
+                id: 'social', name: 'Social Media', color: '#0d6efd',
+                trends: [
+                    { trendId: 'social_tiktok', name: 'TikTok Platform', dataSourceType: 'wikipedia', defaultArticle: 'TikTok', description: 'Pageviews for TikTok on Wikipedia, indicating public interest.', googleTrendsQuery: 'TikTok', relevantSubreddits: ['tiktokcringe', 'TikTokhelp'], newsQuery: 'TikTok news' },
+                    { trendId: 'social_metaverse', name: 'Metaverse Concepts', dataSourceType: 'simulated', simulationProfile: { type: 'volatile', base: 40, peak: 100, volatility: 0.6 }, description: 'Simulated trend for fluctuating interest in Metaverse concepts.', googleTrendsQuery: 'Metaverse', relevantSubreddits: ['metaverse', 'virtualreality'], newsQuery: 'Metaverse development'}
+                ]
+            },
+            { 
+                id: 'fashion', name: 'Fashion', color: '#d63384',
+                trends: [
+                     { trendId: 'fashion_sustainable', name: 'Sustainable Fashion', dataSourceType: 'simulated', simulationProfile: { type: 'cyclicalGrowth', base: 30, peak: 80, period: 12, growthFactor: 0.05 }, description: 'Simulated trend for growing interest in Sustainable Fashion, with seasonal peaks.', googleTrendsQuery: 'Sustainable Fashion', relevantSubreddits: ['SustainableFashion', 'ethicalfashion'], newsQuery: 'Sustainable Fashion trends'}
+                ]
+            },
+            { 
+                id: 'finance', name: 'Finance', color: '#198754',
+                trends: [
+                    { trendId: 'finance_crypto', name: 'Cryptocurrency Markets', dataSourceType: 'wikipedia', defaultArticle: 'Cryptocurrency', description: 'Wikipedia pageviews reflecting general interest in Cryptocurrencies.', googleTrendsQuery: 'Cryptocurrency', relevantSubreddits: ['CryptoCurrency', 'Bitcoin'], newsQuery: 'Cryptocurrency news'},
+                    { trendId: 'finance_esg', name: 'ESG Investing', dataSourceType: 'simulated', simulationProfile: { type: 'steadyGrowth', base: 50, peak: 150, growthFactor: 0.1 }, description: 'Simulated steady growth in ESG (Environmental, Social, Governance) investing.', googleTrendsQuery: 'ESG Investing', relevantSubreddits: ['ESGInvesting', 'SustainableFinance'], newsQuery: 'ESG Investing impact'}
+                ]
+            },
+            { 
+                id: 'environment', name: 'Environment', color: '#fd7e14',
+                trends: [
+                    { trendId: 'env_climate_change', name: 'Climate Change Action', dataSourceType: 'wikipedia', defaultArticle: 'Climate_change', description: 'Wikipedia pageviews for "Climate Change", indicating public awareness levels.', googleTrendsQuery: 'Climate Change', relevantSubreddits: ['climate', 'environment'], newsQuery: 'Climate Change solutions'},
+                ]
+            },
+            { 
+                id: 'popculture', name: 'Pop Culture', color: '#6f42c1',
+                trends: [
+                    { trendId: 'pop_streaming', name: 'Streaming Wars', dataSourceType: 'simulated', simulationProfile: { type: 'plateau', base: 60, peak: 120, growthDuration: 24 }, description: 'Simulated trend of streaming service adoption, reaching a plateau.', googleTrendsQuery: 'Streaming services comparison', relevantSubreddits: ['cordcutters', 'television'], newsQuery: 'Streaming service updates'}
+                ]
+            }
+        ],
+        imageAssetPaths: {}
+    };
+
+    const appState = {
+        allTrendsData: [],
+        currentFilterCategory: 'all',
+        currentFilterTimeRange: AppConfig.defaultTimeRangeMonths,
+        spotlightTrendId: null,
+        selectedTrendsForComparison: [],
+        isLoading: {
+            dashboard: true,
+            exploreTopic: false,
+            spotlightAI: false,
+            modalAI: false,
+            modalGoogleTrends: false,
+            modalReddit: false,
+            modalNews: false,
+            comparisonView: false
+        },
+        currentModalTrendId: null,
+        modalTabContentLoaded: {} 
+    };
+
+    const domElements = {};
+
+    const apiService = {
+        async fetchWikipediaTrend(articleName, months) {
+            const articleKey = articleName.replace(/ /g, '_');
+            const cacheKey = `trenndy_wiki_${articleKey}_${months}`;
+            
+            try {
+                const cachedItem = localStorage.getItem(cacheKey);
+                if (cachedItem) {
+                    const cached = JSON.parse(cachedItem);
+                    if (cached && (Date.now() - cached.timestamp < AppConfig.cacheDurationMs)) {
+                        return cached.data;
+                    }
+                }
+            } catch (error) {
+                console.error('Error reading from localStorage:', error);
+            }
+
+            const endDate = new Date();
+            endDate.setDate(endDate.getDate() - 1); 
+            const startDate = new Date();
+            startDate.setMonth(startDate.getMonth() - months);
+
+            const formatDateForApi = (date) => {
+                const y = date.getFullYear();
+                const m = (date.getMonth() + 1).toString().padStart(2, '0');
+                const d = date.getDate().toString().padStart(2, '0');
+                return `${y}${m}${d}`;
+            };
+
+            const url = `${AppConfig.wikiApiBaseUrl}${articleKey}/daily/${formatDateForApi(startDate)}/${formatDateForApi(endDate)}`;
+            
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => null);
+                    throw new Error(`Wikimedia API error ${response.status}: ${errorData?.title || response.statusText}`);
+                }
+                const rawData = await response.json();
+                
+                const monthlyData = {};
+                if (rawData.items) {
+                    rawData.items.forEach(item => {
+                        const year = item.timestamp.substring(0, 4);
+                        const month = item.timestamp.substring(4, 6);
+                        const day = item.timestamp.substring(6, 8);
+                        const itemDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+                        
+                        const monthKey = `${year}-${month}`;
+                        if (!monthlyData[monthKey]) {
+                            monthlyData[monthKey] = {
+                                sum: 0,
+                                count: 0,
+                                lastDayOfMonth: new Date(itemDate.getFullYear(), itemDate.getMonth() + 1, 0).getDate().toString().padStart(2, '0')
+                            };
+                        }
+                        monthlyData[monthKey].sum += item.views;
+                        monthlyData[monthKey].count++;
+                    });
+                }
+
+                const formattedData = Object.entries(monthlyData).map(([key, value]) => ({
+                    date: `${key}-${value.lastDayOfMonth}`, 
+                    value: Math.round(value.sum) 
+                })).sort((a, b) => new Date(a.date) - new Date(b.date));
+                
+                try {
+                    localStorage.setItem(cacheKey, JSON.stringify({ data: formattedData, timestamp: Date.now() }));
+                } catch (error) {
+                    console.error('Error writing to localStorage:', error);
+                }
+                return formattedData;
+
+            } catch (error) {
+                console.error(`Error fetching Wikipedia trend for ${articleName}:`, error);
+                throw error;
+            }
+        },
+
+        generateRealisticSimulatedData(totalMonths, profile) {
+            const data = [];
+            const endDate = new Date();
+            endDate.setDate(0); 
+
+            let currentValue = profile.base;
+            for (let i = totalMonths - 1; i >= 0; i--) {
+                const date = new Date(endDate);
+                date.setMonth(endDate.getMonth() - i);
+                date.setDate(0); 
+
+                const monthStr = (date.getMonth() + 1).toString().padStart(2, '0');
+                const yearStr = date.getFullYear();
+                const dayStr = date.getDate().toString().padStart(2, '0');
+                
+                let pointValue = currentValue;
+                
+                switch (profile.type) {
+                    case 'steadyGrowth':
+                        pointValue += (profile.peak - profile.base) * ((totalMonths - i) / totalMonths) * (1 + (Math.random() - 0.5) * 0.2);
+                        break;
+                    case 'cyclicalGrowth':
+                        const cycleProgress = ((totalMonths - 1 - i) % profile.period) / profile.period;
+                        const seasonalityFactor = 1 + Math.sin(cycleProgress * 2 * Math.PI) * 0.3; 
+                        pointValue = profile.base * Math.pow(1 + profile.growthFactor, (totalMonths - i)/12) * seasonalityFactor * (1 + (Math.random() - 0.1) * 0.1);
+                        break;
+                    case 'volatile':
+                        pointValue = profile.base + (Math.random() * (profile.peak - profile.base)) * (1 + (Math.random() - 0.7) * profile.volatility);
+                        break;
+                    case 'plateau':
+                        const growthPhase = (totalMonths - i) / profile.growthDuration;
+                        if (growthPhase < 1) {
+                            pointValue = profile.base + (profile.peak - profile.base) * growthPhase;
+                        } else {
+                            pointValue = profile.peak;
+                        }
+                        pointValue *= (1 + (Math.random() - 0.5) * 0.1);
+                        break;
+                    default:
+                        pointValue = profile.base + Math.random() * (profile.peak - profile.base);
+                }
+                data.push({ date: `${yearStr}-${monthStr}-${dayStr}`, value: Math.max(0, Math.round(pointValue)) });
+            }
+            return data;
+        },
+        
+        async fetchRedditHotPosts(subreddit) {
+            const cacheKey = `trenndy_reddit_${subreddit}`;
+            try {
+                const cachedItem = localStorage.getItem(cacheKey);
+                if (cachedItem) {
+                    const cached = JSON.parse(cachedItem);
+                    if (cached && (Date.now() - cached.timestamp < AppConfig.cacheDurationMs / 4 )) { 
+                        return cached.data;
+                    }
+                }
+            } catch (error) { console.error('Error reading Reddit cache:', error); }
+
+            const url = `${AppConfig.redditApiBaseUrl}${subreddit}/hot.json?limit=10&t=week`;
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Reddit API error ${response.status}`);
+                const rawData = await response.json();
+                const posts = rawData.data.children.map(child => ({
+                    title: child.data.title,
+                    permalink: `https://www.reddit.com${child.data.permalink}`
+                }));
+                
+                try {
+                    localStorage.setItem(cacheKey, JSON.stringify({ data: posts, timestamp: Date.now() }));
+                } catch (error) { console.error('Error writing Reddit cache:', error); }
+                return posts;
+            } catch (error) {
+                console.error(`Error fetching Reddit posts for r/${subreddit}:`, error);
+                throw error;
+            }
+        },
+
+        getGoogleTrendsLink(query) {
+            return `${AppConfig.googleTrendsBaseUrl}${encodeURIComponent(query)}`;
+        },
+
+        getNewsSearchLink(query) {
+            return `${AppConfig.googleNewsSearchBaseUrl}${encodeURIComponent(query)}&hl=en&gl=US&ceid=US:en`;
+        },
+
+        async handleAIGeneration(trendOrQuery, type, uiElements, categoryColor = '#0d6efd') {
+            if (!trendOrQuery && (type !== 'redditKeywords' && type !== 'redditWordCloudImage')) return;
+            const { loader, container, button } = uiElements;
+            
+            if(loader) loader.classList.remove('d-none');
+            if(button) button.disabled = true;
+            if (container && type !== 'redditWordCloudImage' && type !== 'redditKeywords') container.innerHTML = ''; 
+
+            try {
+                let prompt, userQuery, aiguidePrompt, apiPath, body;
+                let isImageApi = false;
+
+                switch(type) {
+                    case 'image': 
+                        prompt = `Create an abstract, artistic, and visually compelling conceptual image representing the core idea of the trend: "${trendOrQuery.name}". Description: "${trendOrQuery.description}". Source: ${trendOrQuery.dataSource}. The image should be suitable for a light-themed, modern data analytics website. Emphasize dynamism and insight. Aspect ratio ${AppConfig.aiImageAspectRatio}. Use colors that evoke innovation and clarity, perhaps with hints of ${categoryColor}.`;
+                        isImageApi = true;
+                        break;
+                    case 'summary':
+                        aiguidePrompt = `You are an insightful trend analyst. Provide a concise (1-2 sentences) summary or potential implication for the given trend. Be engaging and focus on key takeaways. Mention the data source (${trendOrQuery.dataSource}) if relevant.`;
+                        userQuery = `Trend Name: "${trendOrQuery.name}". Description: "${trendOrQuery.description}". Data Source: ${trendOrQuery.dataSource}. Provide your summary.`;
+                        break;
+                    case 'redditKeywords':
+                        aiguidePrompt = `You are a text analysis expert. Extract the top 5-7 most relevant and frequent keywords or key phrases from the following Reddit post titles. Return as a comma-separated list. Focus on nouns and impactful terms.`;
+                        userQuery = `Reddit Post Titles: ${trendOrQuery.map(p => p.title).join('; ')}. Extract keywords.`;
+                        break;
+                    case 'redditWordCloudImage':
+                        prompt = `Create a visually appealing word cloud image based on these keywords: ${trendOrQuery}. Style: modern, clean, light theme. Dominant colors: ${categoryColor}, #6c757d, #343a40. Make important words larger. Aspect ratio 16:9. Background should be light gray or off-white.`;
+                        isImageApi = true;
+                        break;
+                    case 'googleTrendSpeculation':
+                        aiguidePrompt = `You are a trend forecaster. Provide a brief (2-3 sentences) speculative analysis on the potential trend trajectory and public interest for the topic: '${trendOrQuery}'. Consider factors that might influence its popularity. This is for a general audience viewing trend data. Be neutral and objective.`;
+                        userQuery = `Topic: '${trendOrQuery}'. Provide speculative analysis.`;
+                        break;
+                    case 'newsImpactSummary':
+                        aiguidePrompt = `You are a news analyst. Summarize the recent news impact (positive, negative, key developments) for the topic: '${trendOrQuery}' in 2-3 sentences. This is for a trend analysis website. Focus on factual summarization of likely news themes.`;
+                        userQuery = `Topic: '${trendOrQuery}'. Summarize news impact.`;
+                        break;
+                }
+
+                if (isImageApi) {
+                    apiPath = '/api/generate-image-on-demand';
+                    body = JSON.stringify({ prompt: prompt, aspectRatio: AppConfig.aiImageAspectRatio });
+                } else {
+                    apiPath = '/api/ai';
+                    body = JSON.stringify({ aiguide: aiguidePrompt, msgforai: userQuery });
+                }
+
+                const response = await fetch(apiPath, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: body
+                });
+
+                if (!response.ok) throw new Error(`API request failed with status ${response.status}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    if (isImageApi && result.imageUrl) {
+                        if(container) container.innerHTML = `<img src="${result.imageUrl}" alt="AI generated visual for ${type === 'image' ? trendOrQuery.name : 'Reddit Buzz'}" class="img-fluid rounded shadow-sm">`;
+                        return result.imageUrl; 
+                    } else if (!isImageApi && result.response) {
+                        if (type === 'redditKeywords') {
+                            return result.response.split(',').map(k => k.trim()).filter(k => k);
+                        }
+                        if(container) container.innerHTML = `<p class="mb-0">${result.response}</p>`;
+                        return result.response; 
+                    } else {
+                        throw new Error(isImageApi ? 'Image URL not found in response.' : 'Response not found.');
+                    }
+                } else {
+                    throw new Error(result.error || `Failed to generate ${type}.`);
+                }
+            } catch (error) {
+                console.error(`Error generating AI ${type}:`, error);
+                if(container) container.innerHTML = `<small class="text-danger d-block text-center p-2">Oops! Error generating ${type}. ${error.message}</small>`;
+                if (type === 'redditKeywords') return [];
+                return null; 
+            } finally {
+                if(loader) loader.classList.add('d-none');
+                if(button) button.disabled = false;
+            }
+        }
+    };
+    
+    const uiUpdater = {
+        getCategoryById(categoryId) {
+            return AppConfig.categories.find(cat => cat.id === categoryId);
+        },
+        getTrendById(trendId) {
+            return appState.allTrendsData.find(t => t.id === trendId);
+        },
+        formatDate(dateString) {
+            if(!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        },
+        updateStatusMessage(elementId, message, type = 'info') {
+            const el = domElements[elementId] || document.getElementById(elementId);
+            if (el) {
+                el.innerHTML = `<div class="alert alert-${type} py-1 px-2 mb-0">${message}</div>`;
+            }
+        },
+        clearStatusMessage(elementId) {
+            const el = domElements[elementId] || document.getElementById(elementId);
+            if (el) el.innerHTML = '';
+        },
+        showLoadingSkeletonCard(container) {
+            const cardCol = document.createElement('div');
+            cardCol.className = 'col';
+            cardCol.innerHTML = `
+                <div class="card h-100 trend-card shadow-sm placeholder-glow" data-aos="fade-up">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="card-title mb-0 h6"><span class="placeholder col-6"></span></h3>
+                        <span class="placeholder rounded" style="width:28px; height:28px;"></span>
+                    </div>
+                    <div class="card-body">
+                        <p class="trend-description placeholder-glow"><span class="placeholder col-12"></span><span class="placeholder col-10"></span><span class="placeholder col-11"></span></p>
+                        <div class="mini-chart-container placeholder mb-3"><span class="placeholder col-12 h-100"></span></div>
+                        <div class="trend-stats placeholder-glow">
+                            <p class="mb-1"><span class="placeholder col-5"></span></p>
+                            <p class="mb-0"><span class="placeholder col-6"></span></p>
+                        </div>
+                    </div>
+                    <small class="text-muted px-3 pt-1 dataSource placeholder-glow"><span class="placeholder col-4"></span></small>
+                    <div class="card-footer text-center d-flex justify-content-around">
+                        <button class="btn btn-sm btn-outline-primary flex-fill me-1 disabled placeholder col-3" aria-hidden="true"></button>
+                        <button class="btn btn-sm btn-outline-info flex-fill me-1 disabled placeholder col-3" aria-hidden="true"></button>
+                        <button class="btn btn-sm btn-outline-success flex-fill disabled placeholder col-3" aria-hidden="true"></button>
+                    </div>
+                </div>`;
+            container.appendChild(cardCol);
+        },
+        renderTrendCard(trend) {
+            const category = uiUpdater.getCategoryById(trend.categoryId);
+            const trendValueCurrent = trend.data.length > 0 ? trend.data[trend.data.length - 1].value : 0;
+            const trendValuePrevious = trend.data.length > 1 ? trend.data[trend.data.length - 2].value : trendValueCurrent;
+            const change = trendValueCurrent - trendValuePrevious;
+            const percentChange = trendValuePrevious !== 0 ? (change / trendValuePrevious) * 100 : (trendValueCurrent > 0 ? 100 : 0);
+
+            let changeClass = 'neutral';
+            let changeIcon = '<i class="bi bi-dash"></i>';
+            if (percentChange > 0.5) { changeClass = 'positive'; changeIcon = '<i class="bi bi-arrow-up-right"></i>'; }
+            else if (percentChange < -0.5) { changeClass = 'negative'; changeIcon = '<i class="bi bi-arrow-down-left"></i>'; }
+            
+            const cardCol = document.createElement('div');
+            cardCol.className = 'col';
+            cardCol.setAttribute('data-aos', 'fade-up');
+            const categoryIconSrc = category.icon || appState.imageAssetPaths.defaultCategoryIcon;
+            const isSelectedForCompare = appState.selectedTrendsForComparison.includes(trend.id);
+
+            cardCol.innerHTML = `
+                <div class="card h-100 trend-card shadow-sm" data-trend-id="${trend.id}">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div class="form-check form-check-inline">
+                             <input class="form-check-input compare-checkbox" type="checkbox" id="compare_${trend.id}" data-trend-id="${trend.id}" ${isSelectedForCompare ? 'checked' : ''} aria-label="Select ${trend.name} for comparison">
+                             <label class="form-check-label card-title mb-0 h6" for="compare_${trend.id}">${trend.name}</label>
+                        </div>
+                        <img src="${categoryIconSrc}" alt="${category.name} category icon" class="category-icon">
+                    </div>
+                    <div class="card-body">
+                        <p class="trend-description">${trend.description.substring(0, 100)}${trend.description.length > 100 ? '...' : ''}</p>
+                        <div class="mini-chart-container mb-3"></div>
+                        <div class="trend-stats">
+                            <p class="mb-1">Index: <span class="fw-bold current-value">${Math.round(trendValueCurrent)}</span></p>
+                            <p class="mb-0">Change: <span class="change-value ${changeClass} fw-bold">${percentChange.toFixed(1)}% ${changeIcon}</span></p>
+                        </div>
+                    </div>
+                    <small class="text-muted px-3 pt-1 dataSource">Source: ${trend.dataSource}</small>
+                    <div class="card-footer text-center d-flex justify-content-between align-items-center">
+                        <button class="btn btn-sm btn-outline-primary view-details-btn flex-grow-1 me-1" aria-label="View details for ${trend.name}"><i class="bi bi-kanban me-1"></i>Details</button>
+                        <div class="btn-group btn-group-sm flex-grow-0" role="group" aria-label="Trend actions for ${trend.name}">
+                            ${trend.googleTrendsQuery ? `<button class="btn btn-outline-secondary btn-action-icon" data-action="viewGoogleTrends" title="View ${trend.name} on Google Trends" aria-label="View ${trend.name} on Google Trends"><i class="bi bi-google"></i></button>` : ''}
+                            ${trend.relevantSubreddits && trend.relevantSubreddits.length > 0 ? `<button class="btn btn-outline-secondary btn-action-icon" data-action="viewRedditBuzz" title="View Reddit Buzz for ${trend.name}" aria-label="View Reddit Buzz for ${trend.name}"><i class="bi bi-reddit"></i></button>` : ''}
+                            ${trend.newsQuery ? `<button class="btn btn-outline-secondary btn-action-icon" data-action="viewNewsImpact" title="View News Impact for ${trend.name}" aria-label="View News Impact for ${trend.name}"><i class="bi bi-newspaper"></i></button>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+            domElements.trendGrid.appendChild(cardCol);
+            const chartContainer = cardCol.querySelector('.mini-chart-container');
+            setTimeout(() => chartDrawer.drawSVGChart(chartContainer, trend.data, category.color, true), 0); 
+        },
+        renderDashboard() {
+            domElements.trendGrid.innerHTML = ''; 
+            const trendsToDisplay = eventHandlers.getFilteredTrends();
+
+            if (appState.isLoading.dashboard && trendsToDisplay.length === 0) {
+                for(let i=0; i < 6; i++) uiUpdater.showLoadingSkeletonCard(domElements.trendGrid);
+                domElements.noResultsMessage.classList.add('d-none');
+            } else if (trendsToDisplay.length === 0) {
+                domElements.noResultsMessage.classList.remove('d-none');
+            } else {
+                domElements.noResultsMessage.classList.add('d-none');
+                trendsToDisplay.forEach(trend => {
+                    if (trend.isLoading) uiUpdater.showLoadingSkeletonCard(domElements.trendGrid);
+                    else uiUpdater.renderTrendCard(trend);
+                });
+            }
+            uiUpdater.updateCompareButton();
+        },
+        populateCategoryFilter() {
+            AppConfig.categories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat.id;
+                option.textContent = cat.name;
+                domElements.categoryFilter.appendChild(option);
+            });
+        },
+        populateSpotlight(trendId = null) {
+            const trendToSpotlight = trendId ? uiUpdater.getTrendById(trendId) : appState.allTrendsData.find(t => !t.isLoading && t.data && t.data.length > 0);
+            
+            if (!trendToSpotlight || trendToSpotlight.isLoading) {
+                domElements.spotlightContent.innerHTML = `
+                <div class="col-12 placeholder-glow text-center">
+                    <h3 class="display-6 fw-bold lh-1 mb-3"><span class="placeholder col-5"></span></h3>
+                    <p class="lead"><span class="placeholder col-7"></span> <span class="placeholder col-6"></span></p>
+                    <div id="spotlightChartContainer" class="shadow-sm placeholder my-3" style="height:350px; background-color: #e9ecef;"></div>
+                    <p class="text-muted">Loading spotlight trend or select one from the dashboard...</p>
+                </div>`;
+                if (trendToSpotlight && trendToSpotlight.isLoading) appState.spotlightTrendId = trendToSpotlight.id;
+                return;
+            }
+            appState.spotlightTrendId = trendToSpotlight.id;
+            const category = uiUpdater.getCategoryById(trendToSpotlight.categoryId);
+
+            domElements.spotlightContent.innerHTML = `
+                <div class="col-lg-6" data-aos="fade-right">
+                    <h3 class="display-6 fw-bold lh-1 mb-3">${trendToSpotlight.name}</h3>
+                    <p class="lead"><span class="badge me-2" style="background-color:${category.color}; color:white;">${category.name}</span> ${trendToSpotlight.description}</p>
+                    <small class="text-muted dataSource">Source: ${trendToSpotlight.dataSource}</small>
+                    <div class="ai-content-area mt-3">
+                        <h6>AI Generated Insights:</h6>
+                        <div id="spotlightAISummaryText" class="fst-italic small" style="min-height: 40px;">Click "Get AI Insights" to generate notes...</div>
+                        <div id="spotlightAISummaryLoader" class="spinner-container d-none my-2"><div class="spinner-border spinner-border-sm text-info" role="status"><span class="visually-hidden">Loading...</span></div></div>
+                        <button id="getSpotlightAISummaryBtn" class="btn btn-sm btn-info mt-2 w-100">Get AI Insights</button>
+                    </div>
+                </div>
+                <div class="col-lg-6 mt-4 mt-lg-0" data-aos="fade-left" data-aos-delay="100">
+                    <div id="spotlightChartContainer" class="shadow-sm"></div>
+                    <div id="spotlightImageContainer" class="mt-3 text-center" style="min-height: 150px;">
+                         <small class="text-muted">Click "Generate AI Visual" for an artistic representation.</small>
+                    </div>
+                    <div id="spotlightImageLoader" class="spinner-container d-none my-2"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>
+                    <div class="text-center mt-3">
+                       <button id="spotlightGenerateImageBtn" class="btn btn-primary w-100">Generate AI Visual</button>
+                    </div>
+                </div>
+            `;
+            const chartContainer = domElements.spotlightContent.querySelector('#spotlightChartContainer');
+            setTimeout(() => chartDrawer.drawSVGChart(chartContainer, trendToSpotlight.data, category.color, false), 0);
+        },
+        showTrendModal(trendId, options = {}) {
+            const trend = uiUpdater.getTrendById(trendId); 
+            if (!trend || trend.isLoading) return;
+            appState.currentModalTrendId = trendId;
+            appState.modalTabContentLoaded = {};
+
+            const category = uiUpdater.getCategoryById(trend.categoryId);
+            domElements.trendModalLabel.textContent = trend.name;
+
+            domElements.trendModalBody.innerHTML = `
+                <ul class="nav nav-tabs mb-3" id="trendModalTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview-content" type="button" role="tab" aria-controls="overview-content" aria-selected="true"><i class="bi bi-graph-up me-1"></i>Overview</button>
+                    </li>
+                    ${trend.googleTrendsQuery ? `<li class="nav-item" role="presentation">
+                        <button class="nav-link" id="google-trends-tab" data-bs-toggle="tab" data-bs-target="#google-trends-content" type="button" role="tab" aria-controls="google-trends-content" aria-selected="false"><i class="bi bi-google me-1"></i>Google Trends</button>
+                    </li>` : ''}
+                    ${trend.relevantSubreddits && trend.relevantSubreddits.length > 0 ? `<li class="nav-item" role="presentation">
+                        <button class="nav-link" id="reddit-buzz-tab" data-bs-toggle="tab" data-bs-target="#reddit-buzz-content" type="button" role="tab" aria-controls="reddit-buzz-content" aria-selected="false"><i class="bi bi-reddit me-1"></i>Reddit Buzz</button>
+                    </li>` : ''}
+                    ${trend.newsQuery ? `<li class="nav-item" role="presentation">
+                        <button class="nav-link" id="news-impact-tab" data-bs-toggle="tab" data-bs-target="#news-impact-content" type="button" role="tab" aria-controls="news-impact-content" aria-selected="false"><i class="bi bi-newspaper me-1"></i>News Impact</button>
+                    </li>` : ''}
+                     <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="ai-visual-tab" data-bs-toggle="tab" data-bs-target="#ai-visual-content" type="button" role="tab" aria-controls="ai-visual-content" aria-selected="false"><i class="bi bi-image-alt me-1"></i>AI Visual</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="ai-summary-tab" data-bs-toggle="tab" data-bs-target="#ai-summary-content" type="button" role="tab" aria-controls="ai-summary-content" aria-selected="false"><i class="bi bi-chat-left-text me-1"></i>AI Summary</button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="trendModalTabContent">
+                    <div class="tab-pane fade show active" id="overview-content" role="tabpanel" aria-labelledby="overview-tab">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h4><span class="badge me-2" style="background-color:${category.color}; color:white;">${category.name}</span> ${trend.name}</h4>
+                                <p class="text-muted">${trend.description}</p>
+                                <small class="text-muted dataSource d-block mb-2">Source: ${trend.dataSource}</small>
+                                <div id="modalChartContainer" style="height: 300px; width:100%; background-color: #f8f9fa; border-radius: 6px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    ${trend.googleTrendsQuery ? `<div class="tab-pane fade" id="google-trends-content" role="tabpanel" aria-labelledby="google-trends-tab">
+                        <h5>Google Trends Insights for "${trend.name}"</h5>
+                        <p><a href="${apiService.getGoogleTrendsLink(trend.googleTrendsQuery)}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="bi bi-box-arrow-up-right me-1"></i>Explore on Google Trends</a></p>
+                        <div class="ai-content-area">
+                            <h6>AI Speculative Analysis</h6>
+                            <div id="modalGoogleTrendsText" class="fst-italic small my-2" style="min-height: 50px;">Click button to generate...</div>
+                            <div id="modalGoogleTrendsLoader" class="spinner-container d-none"><div class="spinner-border text-info" role="status"><span class="visually-hidden">Loading...</span></div></div>
+                            <button class="btn btn-sm btn-info w-100 generate-modal-content-btn" data-type="googleTrendSpeculation" data-trend-id="${trend.id}">Get AI Speculation</button>
+                        </div>
+                    </div>` : ''}
+                    ${trend.relevantSubreddits && trend.relevantSubreddits.length > 0 ? `<div class="tab-pane fade" id="reddit-buzz-content" role="tabpanel" aria-labelledby="reddit-buzz-tab">
+                        <h5>Reddit Community Buzz for "${trend.name}"</h5>
+                        <p class="small text-muted">Based on subreddits like: ${trend.relevantSubreddits.join(', ')}</p>
+                        <div id="modalRedditLoader" class="spinner-container d-none"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>
+                        <div id="modalRedditKeywords" class="mb-3"></div>
+                        <div id="modalRedditImage" class="text-center my-2" style="min-height:150px;"><small class="text-muted">Word cloud will appear here.</small></div>
+                        <h6>Top Posts (Examples):</h6>
+                        <div id="modalRedditPosts" class="list-group list-group-flush small" style="max-height: 150px; overflow-y:auto;"></div>
+                        <button class="btn btn-sm btn-primary w-100 mt-2 generate-modal-content-btn" data-type="redditWordCloud" data-trend-id="${trend.id}">Generate Keywords & Word Cloud</button>
+                    </div>` : ''}
+                    ${trend.newsQuery ? `<div class="tab-pane fade" id="news-impact-content" role="tabpanel" aria-labelledby="news-impact-tab">
+                        <h5>Recent News Impact for "${trend.name}"</h5>
+                        <p><a href="${apiService.getNewsSearchLink(trend.newsQuery)}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="bi bi-box-arrow-up-right me-1"></i>Search on Google News</a></p>
+                        <div class="ai-content-area">
+                             <h6>AI News Summary</h6>
+                            <div id="modalNewsSummaryText" class="fst-italic small my-2" style="min-height: 50px;">Click button to generate...</div>
+                            <div id="modalNewsLoader" class="spinner-container d-none"><div class="spinner-border text-info" role="status"><span class="visually-hidden">Loading...</span></div></div>
+                            <button class="btn btn-sm btn-info w-100 generate-modal-content-btn" data-type="newsImpactSummary" data-trend-id="${trend.id}">Get AI News Summary</button>
+                        </div>
+                    </div>` : ''}
+                    <div class="tab-pane fade" id="ai-visual-content" role="tabpanel" aria-labelledby="ai-visual-tab">
+                         <div class="ai-content-area mb-3">
+                            <h6>AI Generated Visual</h6>
+                            <div id="modalImageContainer" class="text-center my-2" style="min-height:150px;">
+                                <small class="text-muted">Click "Generate Visual" to create an AI image.</small>
+                            </div>
+                            <div id="modalImageLoader" class="spinner-container d-none"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>
+                            <button class="btn btn-sm btn-primary w-100 generate-modal-content-btn" data-type="image" data-trend-id="${trend.id}">Generate Visual</button>
+                        </div>
+                    </div>
+                     <div class="tab-pane fade" id="ai-summary-content" role="tabpanel" aria-labelledby="ai-summary-tab">
+                        <div class="ai-content-area">
+                            <h6>AI Generated Summary</h6>
+                            <div id="modalSummaryText" class="fst-italic small my-2" style="min-height: 50px;">Click "Generate Summary" for AI insights.</div>
+                            <div id="modalSummaryLoader" class="spinner-container d-none"><div class="spinner-border spinner-border-sm text-info" role="status"><span class="visually-hidden">Loading...</span></div></div>
+                            <button class="btn btn-sm btn-info w-100 generate-modal-content-btn" data-type="summary" data-trend-id="${trend.id}">Generate Summary</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const modalInstance = bootstrap.Modal.getInstance(domElements.trendModal) || new bootstrap.Modal(domElements.trendModal);
+            const chartContainer = domElements.trendModalBody.querySelector('#modalChartContainer');
+
+            const onModalShown = () => {
+                if (chartContainer) chartDrawer.drawSVGChart(chartContainer, trend.data, category.color, false);
+                
+                if (options.activeTab) {
+                    const tabToActivate = domElements.trendModalBody.querySelector(`#${options.activeTab}-tab`);
+                    if (tabToActivate) {
+                        const tab = new bootstrap.Tab(tabToActivate);
+                        tab.show();
+                        eventHandlers.handleModalTabShown({ target: tabToActivate }); 
+                    }
+                } else if (options.autoAction) {
+                    const actionType = options.autoAction;
+                    const button = domElements.trendModalBody.querySelector(`.generate-modal-content-btn[data-type="${actionType}"]`);
+                    if (button && !button.disabled) button.click();
+                }
+                domElements.trendModal.removeEventListener('shown.bs.modal', onModalShown);
+            };
+            
+            domElements.trendModal.addEventListener('shown.bs.modal', onModalShown, { once: true });
+            modalInstance.show();
+        },
+        async renderCustomTrackedTrend(topicName, type, resultData, error) {
+            domElements.exploreTopicOutput.innerHTML = '';
+            if (error) {
+                domElements.exploreTopicOutput.innerHTML = `<div class="alert alert-danger">${error.message || 'Failed to process request.'}</div>`;
+                return;
+            }
+            if (!resultData && type !== 'google' && type !== 'news') { 
+                domElements.exploreTopicOutput.innerHTML = `<div class="alert alert-warning">No data found for "${topicName}".</div>`;
+                return;
+            }
+
+            let outputHTML = `<div class="explore-output-block">`;
+            switch(type) {
+                case 'wikipedia':
+                    const trendValueCurrent = resultData.length > 0 ? resultData[resultData.length - 1].value : 0;
+                    outputHTML += `
+                        <h5 class="mb-3">Wikipedia Trend for: ${topicName.replace(/_/g, ' ')}</h5>
+                        <p>Current Monthly Views (approx): <span class="fw-bold current-value">${Math.round(trendValueCurrent)}</span></p>
+                        <div id="exploreTopicChartContainer"></div>`;
+                    break;
+                case 'google':
+                    outputHTML += `
+                        <h5 class="mb-3">Google Trends Insights for: ${topicName}</h5>
+                        <p><a href="${resultData.link}" target="_blank" class="btn btn-primary"><i class="bi bi-box-arrow-up-right me-1"></i>Explore "${topicName}" on Google Trends</a></p>
+                        <h6>AI Speculative Analysis:</h6>
+                        <div class="fst-italic small">${resultData.aiSpeculation || '<em class="text-muted">AI analysis pending or unavailable.</em>'}</div>`;
+                    break;
+                case 'reddit':
+                    outputHTML += `
+                        <h5 class="mb-3">Reddit Buzz for: ${topicName}</h5>
+                        <h6>Keywords:</h6>
+                        <div class="mb-2">
+                            ${resultData.keywords && resultData.keywords.length > 0 ? resultData.keywords.map(k => `<span class="badge bg-secondary keyword-badge">${k}</span>`).join('') : '<em class="small text-muted">No distinct keywords found.</em>'}
+                        </div>
+                        <h6>AI Generated Word Cloud:</h6>
+                        <div id="exploreRedditWordCloud" class="text-center my-2" style="min-height:150px;">${resultData.wordCloudHtml || '<em class="small text-muted">Word cloud pending or unavailable.</em>'}</div>
+                        <h6>Top Posts (Examples):</h6>
+                        <div class="list-group list-group-flush small" style="max-height: 200px; overflow-y:auto;">
+                            ${resultData.posts && resultData.posts.length > 0 ? resultData.posts.map(p => `<a href="${p.permalink}" target="_blank" class="list-group-item list-group-item-action reddit-post-link">${p.title}</a>`).join('') : '<em class="small text-muted">No posts found or subreddits not configured.</em>'}
+                        </div>`;
+                    break;
+                case 'news':
+                     outputHTML += `
+                        <h5 class="mb-3">Recent News for: ${topicName}</h5>
+                        <p><a href="${resultData.link}" target="_blank" class="btn btn-primary"><i class="bi bi-box-arrow-up-right me-1"></i>Search "${topicName}" on Google News</a></p>
+                        <h6>AI News Summary:</h6>
+                        <div class="fst-italic small">${resultData.aiSummary || '<em class="text-muted">AI summary pending or unavailable.</em>'}</div>`;
+                    break;
+            }
+            outputHTML += `</div>`;
+            domElements.exploreTopicOutput.innerHTML = outputHTML;
+
+            if (type === 'wikipedia' && resultData && resultData.length > 0) {
+                const chartContainer = domElements.exploreTopicOutput.querySelector('#exploreTopicChartContainer');
+                setTimeout(() => chartDrawer.drawSVGChart(chartContainer, resultData, '#0d6efd', false), 0);
+            }
+        },
+        renderComparisonModalContent(trendIds) {
+            const trendsToCompare = trendIds.map(id => uiUpdater.getTrendById(id)).filter(t => t && t.data && t.data.length > 0);
+            const chartContainer = domElements.comparisonModalBody.querySelector('#comparisonChartContainer');
+            const statsTableBody = domElements.comparisonModalBody.querySelector('#comparisonStatsTable tbody');
+            
+            chartContainer.innerHTML = '';
+            statsTableBody.innerHTML = '';
+
+            if (trendsToCompare.length < 2) {
+                chartContainer.innerHTML = '<p class="text-center text-danger">Please select at least two trends with data to compare.</p>';
+                const modal = bootstrap.Modal.getInstance(domElements.comparisonModal) || new bootstrap.Modal(domElements.comparisonModal);
+                modal.show();
+                return;
+            }
+            
+            chartContainer.innerHTML = '<div class="spinner-container"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+
+            const chartData = trendsToCompare.map(trend => {
+                const category = uiUpdater.getCategoryById(trend.categoryId);
+                return {
+                    name: trend.name,
+                    data: trend.data,
+                    color: category.color
+                };
+            });
+            
+            setTimeout(() => chartDrawer.drawComparisonChart(chartContainer, chartData), 0);
+
+            trendsToCompare.forEach(trend => {
+                const trendValueCurrent = trend.data.length > 0 ? trend.data[trend.data.length - 1].value : 0;
+                const trendValuePrevious = trend.data.length > 1 ? trend.data[trend.data.length - 2].value : trendValueCurrent;
+                const change = trendValueCurrent - trendValuePrevious;
+                const percentChange = trendValuePrevious !== 0 ? (change / trendValuePrevious) * 100 : (trendValueCurrent > 0 ? 100 : 0);
+                let changeClass = 'neutral';
+                if (percentChange > 0.5) { changeClass = 'positive'; }
+                else if (percentChange < -0.5) { changeClass = 'negative'; }
+
+                const row = statsTableBody.insertRow();
+                row.innerHTML = `
+                    <td>${trend.name}</td>
+                    <td>${Math.round(trendValueCurrent)}</td>
+                    <td class="${changeClass}">${percentChange.toFixed(1)}%</td>
+                    <td>${trend.dataSource}</td>
+                `;
+            });
+            
+            const modal = bootstrap.Modal.getInstance(domElements.comparisonModal) || new bootstrap.Modal(domElements.comparisonModal);
+            modal.show();
+        },
+        updateCompareButton() {
+            const count = appState.selectedTrendsForComparison.length;
+            domElements.compareCount.textContent = count;
+            if (count >= 2) {
+                domElements.compareTrendsBtn.classList.remove('d-none');
+            } else {
+                domElements.compareTrendsBtn.classList.add('d-none');
+            }
+        },
+        displayFeaturedTrendWelcome() {
+            const availableTrends = appState.allTrendsData.filter(t => !t.isLoading && t.data && t.data.length > 0);
+            if (availableTrends.length > 0) {
+                const randomIndex = Math.floor(Math.random() * availableTrends.length);
+                const featuredTrend = availableTrends[randomIndex];
+                if (domElements.featuredTrendWelcome) {
+                     domElements.featuredTrendWelcome.innerHTML = `✨ Today's Highlight: <a href="#spotlight" class="fw-bold text-decoration-none spotlight-link" data-trend-id-spotlight="${featuredTrend.id}">${featuredTrend.name}</a> - see it in the Spotlight!`;
+                }
+            } else {
+                if (domElements.featuredTrendWelcome) domElements.featuredTrendWelcome.innerHTML = 'Loading featured trends...';
+            }
+        }
+    };
+
+    const chartDrawer = {
+        drawSVGChart(container, dataPoints, categoryColor, isMini = true) {
+            container.innerHTML = ''; 
+            if (!dataPoints || dataPoints.length < 2) {
+                container.innerHTML = `<p class="text-center small text-muted p-2 d-flex align-items-center justify-content-center h-100">${isMini ? 'Not enough data' : 'Not enough data for chart.'}</p>`;
+                return;
+            }
+
+            const svgNS = "http://www.w3.org/2000/svg";
+            const svg = document.createElementNS(svgNS, "svg");
+            const padding = isMini ? { top: 5, right: 5, bottom: 5, left: 5 } : { top: 20, right: 20, bottom: 30, left: 50 };
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            if (width === 0 || height === 0) return; 
+
+            svg.setAttribute("width", "100%");
+            svg.setAttribute("height", "100%");
+            svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+            svg.style.overflow = "visible";
+            svg.setAttribute("aria-labelledby", "chartTitle_" + (isMini ? "mini_" : "full_") + Date.now());
+            svg.setAttribute("aria-describedby", "chartDesc_" + (isMini ? "mini_" : "full_") + Date.now());
+            svg.setAttribute("role", "img");
+
+            const titleEl = document.createElementNS(svgNS, "title");
+            titleEl.id = svg.getAttribute("aria-labelledby");
+            titleEl.textContent = isMini ? "Mini trend chart" : "Trend chart";
+            svg.appendChild(titleEl);
+
+            const descEl = document.createElementNS(svgNS, "desc");
+            descEl.id = svg.getAttribute("aria-describedby");
+            descEl.textContent = `Line chart showing trend data over time. First data point ${uiUpdater.formatDate(dataPoints[0].date)}, last data point ${uiUpdater.formatDate(dataPoints[dataPoints.length-1].date)}.`;
+            svg.appendChild(descEl);
+
+
+            const values = dataPoints.map(dp => dp.value);
+            const minVal = Math.min(...values);
+            const maxVal = Math.max(...values);
+            const valueRange = maxVal - minVal === 0 ? 1 : maxVal - minVal; 
+
+            const xStep = (dataPoints.length > 1) ? (width - padding.left - padding.right) / (dataPoints.length - 1) : (width - padding.left - padding.right);
+            
+            const normalizeY = val => height - padding.bottom - ((val - minVal) / valueRange) * (height - padding.top - padding.bottom);
+
+            let pathD = `M ${padding.left} ${normalizeY(values[0])}`;
+            for (let i = 1; i < values.length; i++) {
+                pathD += ` L ${padding.left + i * xStep} ${normalizeY(values[i])}`;
+            }
+
+            const line = document.createElementNS(svgNS, "path");
+            line.setAttribute("d", pathD);
+            line.setAttribute("class", "chart-line");
+            line.setAttribute("stroke", categoryColor || "#0d6efd");
+            svg.appendChild(line);
+
+            if (!isMini) {
+                const areaPathD = pathD + ` L ${padding.left + (values.length - 1) * xStep} ${height - padding.bottom} L ${padding.left} ${height - padding.bottom} Z`;
+                const area = document.createElementNS(svgNS, "path");
+                area.setAttribute("d", areaPathD);
+                area.setAttribute("class", "chart-area");
+                area.setAttribute("fill", categoryColor || "#0d6efd");
+                svg.appendChild(area);
+
+                dataPoints.forEach((dp, i) => {
+                    const circle = document.createElementNS(svgNS, "circle");
+                    circle.setAttribute("cx", padding.left + i * xStep);
+                    circle.setAttribute("cy", normalizeY(dp.value));
+                    circle.setAttribute("r", "3");
+                    circle.setAttribute("fill", categoryColor || "#0d6efd");
+                    circle.setAttribute("class", "chart-dot");
+                    svg.appendChild(circle);
+                });
+
+                const xAxisLine = document.createElementNS(svgNS, "line");
+                xAxisLine.setAttribute("x1", padding.left);
+                xAxisLine.setAttribute("y1", height - padding.bottom);
+                xAxisLine.setAttribute("x2", width - padding.right);
+                xAxisLine.setAttribute("y2", height - padding.bottom);
+                xAxisLine.setAttribute("class", "axis-line");
+                svg.appendChild(xAxisLine);
+
+                const yAxisLine = document.createElementNS(svgNS, "line");
+                yAxisLine.setAttribute("x1", padding.left);
+                yAxisLine.setAttribute("y1", padding.top);
+                yAxisLine.setAttribute("x2", padding.left);
+                yAxisLine.setAttribute("y2", height - padding.bottom);
+                yAxisLine.setAttribute("class", "axis-line");
+                svg.appendChild(yAxisLine);
+
+                const numYTicks = 5;
+                for (let i = 0; i <= numYTicks; i++) {
+                    const val = minVal + (valueRange / numYTicks) * i;
+                    const yPos = normalizeY(val);
+                    const tickLabel = document.createElementNS(svgNS, "text");
+                    tickLabel.setAttribute("x", padding.left - 8);
+                    tickLabel.setAttribute("y", yPos + 4);
+                    tickLabel.setAttribute("text-anchor", "end");
+                    tickLabel.setAttribute("class", "axis-text");
+                    tickLabel.textContent = Math.round(val);
+                    svg.appendChild(tickLabel);
+                }
+
+
+                const numXTicks = Math.min(dataPoints.length, 5);
+                 for (let i = 0; i < numXTicks; i++) {
+                    const dataIndex = Math.floor(i * (dataPoints.length -1) / (numXTicks -1 < 1 ? 1 : numXTicks -1));
+                    const xPos = padding.left + dataIndex * xStep;
+                    const dateLabel = document.createElementNS(svgNS, "text");
+                    dateLabel.setAttribute("x", xPos);
+                    dateLabel.setAttribute("y", height - padding.bottom + 15);
+                    dateLabel.setAttribute("text-anchor", i === 0 ? "start" : (i === numXTicks - 1 ? "end" : "middle"));
+                    dateLabel.setAttribute("class", "axis-text");
+                    dateLabel.textContent = uiUpdater.formatDate(dataPoints[dataIndex].date);
+                    svg.appendChild(dateLabel);
+                }
+            }
+            container.appendChild(svg);
+        },
+        drawComparisonChart(container, trendsArray) {
+            container.innerHTML = '';
+            if (!trendsArray || trendsArray.length === 0) {
+                container.innerHTML = '<p class="text-center small text-muted p-2">No data to compare.</p>';
+                return;
+            }
+
+            const svgNS = "http://www.w3.org/2000/svg";
+            const svg = document.createElementNS(svgNS, "svg");
+            const padding = { top: 20, right: 20, bottom: 60, left: 50 };
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            
+            if (width === 0 || height === 0) return;
+
+            svg.setAttribute("width", "100%");
+            svg.setAttribute("height", "100%");
+            svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+            svg.style.overflow = "visible";
+            svg.setAttribute("aria-labelledby", "chartTitle_comparison_" + Date.now());
+            svg.setAttribute("aria-describedby", "chartDesc_comparison_" + Date.now());
+            svg.setAttribute("role", "img");
+
+            const titleEl = document.createElementNS(svgNS, "title");
+            titleEl.id = svg.getAttribute("aria-labelledby");
+            titleEl.textContent = "Trend Comparison Chart";
+            svg.appendChild(titleEl);
+
+            const descEl = document.createElementNS(svgNS, "desc");
+            descEl.id = svg.getAttribute("aria-describedby");
+            descEl.textContent = `Line chart comparing multiple trends over time. Trends: ${trendsArray.map(t => t.name).join(', ')}.`;
+            svg.appendChild(descEl);
+
+            const allDataPoints = trendsArray.flatMap(t => t.data.map(dp => ({ ...dp, trendName: t.name, color: t.color })));
+            if (allDataPoints.length === 0) {
+                 container.innerHTML = '<p class="text-center small text-muted p-2">Not enough data points for comparison chart.</p>';
+                 return;
+            }
+            
+            const allDates = [...new Set(allDataPoints.map(dp => new Date(dp.date).getTime()))].sort((a,b) => a - b);
+            const values = allDataPoints.map(dp => dp.value);
+            const minVal = Math.min(...values, 0); 
+            const maxVal = Math.max(...values);
+            const valueRange = maxVal - minVal === 0 ? 1 : maxVal - minVal;
+
+            const xStep = (allDates.length > 1) ? (width - padding.left - padding.right) / (allDates.length - 1) : (width - padding.left - padding.right);
+            const normalizeY = val => height - padding.bottom - ((val - minVal) / valueRange) * (height - padding.top - padding.bottom);
+            const normalizeX = date => {
+                const time = new Date(date).getTime();
+                const index = allDates.indexOf(time);
+                return padding.left + index * xStep;
+            };
+
+
+            trendsArray.forEach(trend => {
+                if (!trend.data || trend.data.length < 1) return;
+                const sortedTrendData = [...trend.data].sort((a,b) => new Date(a.date) - new Date(b.date));
+                
+                let pathD = `M ${normalizeX(sortedTrendData[0].date)} ${normalizeY(sortedTrendData[0].value)}`;
+                for (let i = 1; i < sortedTrendData.length; i++) {
+                    pathD += ` L ${normalizeX(sortedTrendData[i].date)} ${normalizeY(sortedTrendData[i].value)}`;
+                }
+                const line = document.createElementNS(svgNS, "path");
+                line.setAttribute("d", pathD);
+                line.setAttribute("class", "chart-line");
+                line.setAttribute("stroke", trend.color || "#0d6efd");
+                svg.appendChild(line);
+
+                sortedTrendData.forEach(dp => {
+                    const circle = document.createElementNS(svgNS, "circle");
+                    circle.setAttribute("cx", normalizeX(dp.date));
+                    circle.setAttribute("cy", normalizeY(dp.value));
+                    circle.setAttribute("r", "3");
+                    circle.setAttribute("fill", trend.color || "#0d6efd");
+                    circle.setAttribute("class", "chart-dot");
+                    svg.appendChild(circle);
+                });
+            });
+
+            const xAxisLine = document.createElementNS(svgNS, "line");
+            xAxisLine.setAttribute("x1", padding.left);
+            xAxisLine.setAttribute("y1", height - padding.bottom);
+            xAxisLine.setAttribute("x2", width - padding.right);
+            xAxisLine.setAttribute("y2", height - padding.bottom);
+            xAxisLine.setAttribute("class", "axis-line");
+            svg.appendChild(xAxisLine);
+
+            const yAxisLine = document.createElementNS(svgNS, "line");
+            yAxisLine.setAttribute("x1", padding.left);
+            yAxisLine.setAttribute("y1", padding.top);
+            yAxisLine.setAttribute("x2", padding.left);
+            yAxisLine.setAttribute("y2", height - padding.bottom);
+            yAxisLine.setAttribute("class", "axis-line");
+            svg.appendChild(yAxisLine);
+
+            const numYTicks = 5;
+            for (let i = 0; i <= numYTicks; i++) {
+                const val = minVal + (valueRange / numYTicks) * i;
+                const yPos = normalizeY(val);
+                const tickLabel = document.createElementNS(svgNS, "text");
+                tickLabel.setAttribute("x", padding.left - 8);
+                tickLabel.setAttribute("y", yPos + 4);
+                tickLabel.setAttribute("text-anchor", "end");
+                tickLabel.setAttribute("class", "axis-text");
+                tickLabel.textContent = Math.round(val);
+                svg.appendChild(tickLabel);
+            }
+
+            const numXTicks = Math.min(allDates.length, 5);
+            for (let i = 0; i < numXTicks; i++) {
+                const dateIndex = Math.floor(i * (allDates.length -1) / (numXTicks -1 < 1 ? 1: numXTicks -1));
+                const xPos = padding.left + dateIndex * xStep;
+                const dateLabel = document.createElementNS(svgNS, "text");
+                dateLabel.setAttribute("x", xPos);
+                dateLabel.setAttribute("y", height - padding.bottom + 15);
+                dateLabel.setAttribute("text-anchor", i === 0 ? "start" : (i === numXTicks - 1 ? "end" : "middle"));
+                dateLabel.setAttribute("class", "axis-text");
+                dateLabel.textContent = uiUpdater.formatDate(new Date(allDates[dateIndex]).toISOString());
+                svg.appendChild(dateLabel);
+            }
+            
+            const legendGroup = document.createElementNS(svgNS, "g");
+            legendGroup.setAttribute("transform", `translate(${padding.left}, ${height - padding.bottom + 30})`);
+            trendsArray.forEach((trend, i) => {
+                const legendItem = document.createElementNS(svgNS, "g");
+                legendItem.setAttribute("transform", `translate(${i * 120}, 0)`); 
+                
+                const rect = document.createElementNS(svgNS, "rect");
+                rect.setAttribute("x", 0);
+                rect.setAttribute("y", 0);
+                rect.setAttribute("width", 10);
+                rect.setAttribute("height", 10);
+                rect.setAttribute("fill", trend.color);
+                legendItem.appendChild(rect);
+
+                const text = document.createElementNS(svgNS, "text");
+                text.setAttribute("x", 15);
+                text.setAttribute("y", 9);
+                text.setAttribute("class", "axis-text");
+                text.textContent = trend.name.substring(0,15) + (trend.name.length > 15 ? '...' : '');
+                legendItem.appendChild(text);
+                legendGroup.appendChild(legendItem);
+            });
+            svg.appendChild(legendGroup);
+
+            container.appendChild(svg);
+        }
+    };
+
+    const eventHandlers = {
+        getFilteredTrends() {
+            let trends = JSON.parse(JSON.stringify(appState.allTrendsData)); 
+            if (appState.currentFilterCategory !== 'all') {
+                trends = trends.filter(trend => trend.categoryId === appState.currentFilterCategory);
+            }
+            
+            const monthsToInclude = parseInt(appState.currentFilterTimeRange);
+            trends = trends.map(trend => {
+                if(trend.isLoading || !trend.data) return trend; 
+                const filteredData = trend.data.slice(-monthsToInclude);
+                return { ...trend, data: filteredData };
+            }).filter(trend => trend.isLoading || (trend.data && trend.data.length > 0));
+            return trends;
+        },
+        async handleFilterChange() {
+            const newCategory = domElements.categoryFilter.value;
+            const newTimeRange = parseInt(domElements.timeRangeFilter.value);
+
+            let needsRefresh = false;
+            if (appState.currentFilterCategory !== newCategory) {
+                appState.currentFilterCategory = newCategory;
+                needsRefresh = true; 
+            }
+            if (appState.currentFilterTimeRange !== newTimeRange) {
+                appState.currentFilterTimeRange = newTimeRange;
+                needsRefresh = true;
+            }
+
+            if (needsRefresh) {
+                 appState.isLoading.dashboard = true;
+                 uiUpdater.renderDashboard(); 
+                 await mainInit.loadInitialTrends(true); 
+            } else {
+                uiUpdater.renderDashboard();
+            }
+        },
+        handleGridActions(event) {
+            const target = event.target;
+            const card = target.closest('.trend-card');
+            if (!card) return;
+            const trendId = card.dataset.trendId;
+            if (!trendId) return;
+
+            if (target.classList.contains('compare-checkbox')) {
+                if (target.checked) {
+                    if (appState.selectedTrendsForComparison.length < 3 && !appState.selectedTrendsForComparison.includes(trendId)) {
+                        appState.selectedTrendsForComparison.push(trendId);
+                    } else {
+                        target.checked = false; 
+                        uiUpdater.updateStatusMessage('exploreTopicStatus', 'You can select a maximum of 3 trends for comparison.', 'warning');
+                        setTimeout(() => uiUpdater.clearStatusMessage('exploreTopicStatus'), 3000);
+                    }
+                } else {
+                    appState.selectedTrendsForComparison = appState.selectedTrendsForComparison.filter(id => id !== trendId);
+                }
+                uiUpdater.updateCompareButton();
+                return; 
+            }
+            
+            const cardButton = target.closest('.btn');
+            if (!cardButton) return;
+
+            if (cardButton.classList.contains('view-details-btn')) {
+                uiUpdater.showTrendModal(trendId);
+            } else if (cardButton.dataset.action === 'viewGoogleTrends') {
+                uiUpdater.showTrendModal(trendId, { activeTab: 'google-trends' });
+            } else if (cardButton.dataset.action === 'viewRedditBuzz') {
+                uiUpdater.showTrendModal(trendId, { activeTab: 'reddit-buzz' });
+            } else if (cardButton.dataset.action === 'viewNewsImpact') {
+                uiUpdater.showTrendModal(trendId, { activeTab: 'news-impact' });
+            }
+        },
+        async handleModalTabShown(event) {
+            const tabButton = event.target;
+            const trendId = appState.currentModalTrendId;
+            if (!trendId || !tabButton) return;
+
+            const trend = uiUpdater.getTrendById(trendId);
+            if(!trend) return;
+            const category = uiUpdater.getCategoryById(trend.categoryId);
+
+            const tabId = tabButton.id;
+            const contentAlreadyLoaded = appState.modalTabContentLoaded[tabId];
+
+            if (contentAlreadyLoaded) return;
+
+            let actionButton = null;
+            switch(tabId) {
+                case 'google-trends-tab':
+                    if (trend.googleTrendsQuery) {
+                       actionButton = domElements.trendModalBody.querySelector('.generate-modal-content-btn[data-type="googleTrendSpeculation"]');
+                    }
+                    break;
+                case 'reddit-buzz-tab':
+                    if (trend.relevantSubreddits && trend.relevantSubreddits.length > 0) {
+                       actionButton = domElements.trendModalBody.querySelector('.generate-modal-content-btn[data-type="redditWordCloud"]');
+                    }
+                    break;
+                case 'news-impact-tab':
+                     if (trend.newsQuery) {
+                        actionButton = domElements.trendModalBody.querySelector('.generate-modal-content-btn[data-type="newsImpactSummary"]');
+                    }
+                    break;
+                 case 'ai-visual-tab':
+                    actionButton = domElements.trendModalBody.querySelector('.generate-modal-content-btn[data-type="image"]');
+                    break;
+                case 'ai-summary-tab':
+                    actionButton = domElements.trendModalBody.querySelector('.generate-modal-content-btn[data-type="summary"]');
+                    break;
+            }
+            if (actionButton && !actionButton.disabled) {
+                actionButton.click();
+                appState.modalTabContentLoaded[tabId] = true;
+            }
+        },
+        async handleModalActions(event) {
+            const target = event.target.closest('.generate-modal-content-btn');
+            if (!target) return;
+
+            const trendId = target.dataset.trendId;
+            const type = target.dataset.type;
+            if (!trendId || !type) return;
+            
+            const trend = uiUpdater.getTrendById(trendId);
+            if(!trend) return;
+            const category = uiUpdater.getCategoryById(trend.categoryId);
+
+            let uiElements, queryOrData;
+
+            switch(type) {
+                case 'image':
+                    uiElements = { loader: domElements.trendModalBody.querySelector('#modalImageLoader'), container: domElements.trendModalBody.querySelector('#modalImageContainer'), button: target };
+                    queryOrData = trend;
+                    await apiService.handleAIGeneration(queryOrData, type, uiElements, category.color);
+                    break;
+                case 'summary':
+                    uiElements = { loader: domElements.trendModalBody.querySelector('#modalSummaryLoader'), container: domElements.trendModalBody.querySelector('#modalSummaryText'), button: target };
+                    queryOrData = trend;
+                    await apiService.handleAIGeneration(queryOrData, type, uiElements);
+                    break;
+                case 'googleTrendSpeculation':
+                    uiElements = { loader: domElements.trendModalBody.querySelector('#modalGoogleTrendsLoader'), container: domElements.trendModalBody.querySelector('#modalGoogleTrendsText'), button: target };
+                    queryOrData = trend.googleTrendsQuery;
+                    await apiService.handleAIGeneration(queryOrData, type, uiElements);
+                    break;
+                case 'redditWordCloud':
+                    uiElements = { loader: domElements.trendModalBody.querySelector('#modalRedditLoader'), container: domElements.trendModalBody.querySelector('#modalRedditKeywords'), button: target };
+                    const redditImageContainer = domElements.trendModalBody.querySelector('#modalRedditImage');
+                    const redditPostsContainer = domElements.trendModalBody.querySelector('#modalRedditPosts');
+                    
+                    if(uiElements.loader) uiElements.loader.classList.remove('d-none');
+                    if(uiElements.button) uiElements.button.disabled = true;
+                    if(redditPostsContainer) redditPostsContainer.innerHTML = '<div class="spinner-container"><div class="spinner-border spinner-border-sm text-muted" role="status"><span class="visually-hidden">Loading posts...</span></div></div>';
+                    if(redditImageContainer) redditImageContainer.innerHTML = '<div class="spinner-container"><div class="spinner-border spinner-border-sm text-muted" role="status"><span class="visually-hidden">Loading image...</span></div></div>';
+                    if(uiElements.container) uiElements.container.innerHTML = '<div class="spinner-container"><div class="spinner-border spinner-border-sm text-muted" role="status"><span class="visually-hidden">Loading keywords...</span></div></div>';
+                    
+                    try {
+                        const posts = await apiService.fetchRedditHotPosts(trend.relevantSubreddits[0]); 
+                        if(redditPostsContainer) redditPostsContainer.innerHTML = posts.length > 0 ? posts.map(p => `<a href="${p.permalink}" target="_blank" class="list-group-item list-group-item-action reddit-post-link">${p.title}</a>`).join('') : '<em class="small text-muted p-2 d-block">No recent posts found.</em>';
+                        
+                        const keywords = await apiService.handleAIGeneration(posts, 'redditKeywords', {loader:null, container:null, button:null});
+                        if(uiElements.container) uiElements.container.innerHTML = keywords && keywords.length > 0 ? keywords.map(k => `<span class="badge bg-secondary keyword-badge">${k}</span>`).join('') : '<em class="small text-muted d-block">No keywords extracted.</em>';
+                        
+                        if (keywords && keywords.length > 0) {
+                            await apiService.handleAIGeneration(keywords.join(', '), 'redditWordCloudImage', { loader: null, container: redditImageContainer, button: null }, category.color);
+                        } else {
+                           if(redditImageContainer) redditImageContainer.innerHTML = '<em class="small text-muted d-block">Not enough keywords for word cloud.</em>';
+                        }
+                    } catch (error) {
+                        if(uiElements.container) uiElements.container.innerHTML = `<small class="text-danger d-block">Error processing Reddit data: ${error.message}</small>`;
+                        if(redditImageContainer) redditImageContainer.innerHTML = '';
+                        if(redditPostsContainer) redditPostsContainer.innerHTML = '';
+                    } finally {
+                        if(uiElements.loader) uiElements.loader.classList.add('d-none');
+                        if(uiElements.button) uiElements.button.disabled = false;
+                    }
+                    break;
+                case 'newsImpactSummary':
+                    uiElements = { loader: domElements.trendModalBody.querySelector('#modalNewsLoader'), container: domElements.trendModalBody.querySelector('#modalNewsSummaryText'), button: target };
+                    queryOrData = trend.newsQuery;
+                    await apiService.handleAIGeneration(queryOrData, type, uiElements);
+                    break;
+            }
+        },
+        handleSpotlightOrWelcomeLink(event) {
+            const target = event.target;
+            let trendIdForSpotlight = null;
+            
+            if (target.id === 'getSpotlightAISummaryBtn' || target.id === 'spotlightGenerateImageBtn') {
+                trendIdForSpotlight = appState.spotlightTrendId;
+            } else {
+                const spotlightLink = target.closest('.spotlight-link');
+                if (spotlightLink && spotlightLink.dataset.trendIdSpotlight) {
+                    event.preventDefault();
+                    trendIdForSpotlight = spotlightLink.dataset.trendIdSpotlight;
+                    uiUpdater.populateSpotlight(trendIdForSpotlight);
+                    const spotlightSection = document.getElementById('spotlight');
+                    if (spotlightSection) {
+                        spotlightSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                    return; 
+                }
+            }
+
+            const trend = uiUpdater.getTrendById(trendIdForSpotlight);
+            if (!trendIdForSpotlight || !trend) return;
+            const category = uiUpdater.getCategoryById(trend.categoryId);
+
+            if (target.id === 'getSpotlightAISummaryBtn') {
+                apiService.handleAIGeneration(trend, 'summary', {
+                    loader: domElements.spotlightContent.querySelector('#spotlightAISummaryLoader'),
+                    container: domElements.spotlightContent.querySelector('#spotlightAISummaryText'),
+                    button: target
+                });
+            } else if (target.id === 'spotlightGenerateImageBtn') {
+                 apiService.handleAIGeneration(trend, 'image', {
+                    loader: domElements.spotlightContent.querySelector('#spotlightImageLoader'),
+                    container: domElements.spotlightContent.querySelector('#spotlightImageContainer'),
+                    button: target
+                }, category.color);
+            }
+        },
+        async handleExploreTopic() {
+            const topicName = domElements.topicExploreInput.value.trim();
+            const exploreType = document.querySelector('input[name="exploreType"]:checked').value;
+
+            if (!topicName) {
+                uiUpdater.updateStatusMessage('exploreTopicStatus', 'Please enter a topic to explore.', 'warning');
+                return;
+            }
+            uiUpdater.clearStatusMessage('exploreTopicStatus');
+            domElements.exploreTopicOutput.innerHTML = '<div class="d-flex justify-content-center mt-3"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+            domElements.exploreTopicBtn.disabled = true;
+            appState.isLoading.exploreTopic = true;
+
+            try {
+                let resultData = {};
+                let error = null;
+                const tempLoader = {classList:{add:()=>{}, remove:()=>{}}}; 
+                const tempContainer = {innerHTML:''};
+
+                switch(exploreType) {
+                    case 'wikipedia':
+                        const timeRangeMonths = parseInt(domElements.timeRangeFilter.value) || AppConfig.defaultTimeRangeMonths;
+                        resultData = await apiService.fetchWikipediaTrend(topicName, timeRangeMonths);
+                        break;
+                    case 'google':
+                        resultData.link = apiService.getGoogleTrendsLink(topicName);
+                        resultData.aiSpeculation = await apiService.handleAIGeneration(topicName, 'googleTrendSpeculation', {loader:tempLoader, container:tempContainer});
+                        break;
+                    case 'reddit':
+                        const subredditName = topicName.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9_]/gi, '');
+                        if (!subredditName) throw new Error("Invalid topic for Reddit exploration. Please provide a more specific term.");
+                        const posts = await apiService.fetchRedditHotPosts(subredditName); 
+                        resultData.posts = posts;
+                        const keywords = await apiService.handleAIGeneration(posts, 'redditKeywords', {loader:tempLoader, container:tempContainer});
+                        resultData.keywords = keywords;
+                        if (keywords && keywords.length > 0) {
+                            const imgContainer = document.createElement('div');
+                            await apiService.handleAIGeneration(keywords.join(', '), 'redditWordCloudImage', {loader:tempLoader, container:imgContainer}, '#0d6efd');
+                            resultData.wordCloudHtml = imgContainer.innerHTML;
+                        } else {
+                            resultData.wordCloudHtml = '<em class="small text-muted d-block">Not enough keywords for word cloud.</em>';
+                        }
+                        break;
+                    case 'news':
+                        resultData.link = apiService.getNewsSearchLink(topicName);
+                        resultData.aiSummary = await apiService.handleAIGeneration(topicName, 'newsImpactSummary', {loader:tempLoader, container:tempContainer});
+                        break;
+                }
+                uiUpdater.renderCustomTrackedTrend(topicName, exploreType, resultData, null);
+            } catch (e) {
+                console.error('Error exploring topic:', e);
+                uiUpdater.renderCustomTrackedTrend(topicName, exploreType, null, e);
+            } finally {
+                appState.isLoading.exploreTopic = false;
+                domElements.exploreTopicBtn.disabled = false;
+            }
+        },
+        handleCompareTrends() {
+            if (appState.selectedTrendsForComparison.length >= 2) {
+                uiUpdater.renderComparisonModalContent(appState.selectedTrendsForComparison);
+            } else {
+                uiUpdater.updateStatusMessage('exploreTopicStatus', 'Please select 2 or 3 trends to compare.', 'info');
+                 setTimeout(() => uiUpdater.clearStatusMessage('exploreTopicStatus'), 3000);
+            }
+        },
+        handleShareTrend() {
+            if (!appState.currentModalTrendId) return;
+            const trend = uiUpdater.getTrendById(appState.currentModalTrendId);
+            if (!trend) return;
+
+            const shareUrl = `${window.location.origin}${window.location.pathname}?trendId=${trend.id}&openModal=true`;
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                const toast = new bootstrap.Toast(domElements.shareToast);
+                toast.show();
+            }).catch(err => {
+                console.error('Failed to copy share link:', err);
+                 uiUpdater.updateStatusMessage('trendModalLabel', 'Failed to copy link.', 'danger');
+            });
+        }
+    };
+    
+    const mainInit = {
+        setAssetPaths(availableAssets) {
+            appState.imageAssetPaths = { ...availableAssets };
+            if (domElements.logoImage) domElements.logoImage.src = appState.imageAssetPaths.logoImage || '';
+            if (domElements.heroImageBanner) domElements.heroImageBanner.src = appState.imageAssetPaths.heroImageBanner || '';
+
+            AppConfig.categories.forEach(cat => {
+                if (cat.id === 'tech' && appState.imageAssetPaths.icon_tech_specific) {
+                    cat.icon = appState.imageAssetPaths.icon_tech_specific;
+                } else {
+                    cat.icon = appState.imageAssetPaths[`icon_${cat.id}`] || appState.imageAssetPaths.defaultCategoryIcon || '';
+                }
+            });
+        },
+        async loadInitialTrends(isFilterChange = false) {
+            const trendPromises = [];
+            const initialTrendObjects = [];
+
+            if (!isFilterChange) {
+                appState.isLoading.dashboard = true;
+                uiUpdater.renderDashboard(); 
+            }
+            
+            AppConfig.categories.forEach(category => {
+                category.trends.forEach(trendConfig => {
+                    const trendId = trendConfig.trendId;
+                    initialTrendObjects.push({
+                        id: trendId,
+                        name: trendConfig.name,
+                        categoryId: category.id,
+                        description: trendConfig.description,
+                        dataSource: trendConfig.dataSourceType === 'wikipedia' ? 'Wikipedia Pageviews' : 'Simulated Model',
+                        data: [],
+                        isLoading: true,
+                        defaultArticle: trendConfig.defaultArticle,
+                        simulationProfile: trendConfig.simulationProfile,
+                        dataSourceType: trendConfig.dataSourceType,
+                        googleTrendsQuery: trendConfig.googleTrendsQuery,
+                        relevantSubreddits: trendConfig.relevantSubreddits,
+                        newsQuery: trendConfig.newsQuery
+                    });
+                });
+            });
+            
+            appState.allTrendsData = initialTrendObjects;
+
+            appState.allTrendsData.forEach(trend => {
+                if (trend.dataSourceType === 'wikipedia') {
+                    trendPromises.push(
+                        apiService.fetchWikipediaTrend(trend.defaultArticle, appState.currentFilterTimeRange)
+                            .then(data => ({ id: trend.id, data }))
+                            .catch(error => ({ id: trend.id, error, data: [] }))
+                    );
+                } else if (trend.dataSourceType === 'simulated') {
+                     trendPromises.push(
+                        Promise.resolve().then(() => {
+                            const fullSimData = apiService.generateRealisticSimulatedData(AppConfig.maxSimulatedDataMonths, trend.simulationProfile);
+                            return { id: trend.id, data: fullSimData }; 
+                        })
+                    );
+                }
+            });
+
+            const results = await Promise.allSettled(trendPromises);
+            
+            results.forEach(result => {
+                if (result.status === 'fulfilled' && result.value) {
+                    const trendIdx = appState.allTrendsData.findIndex(t => t.id === result.value.id);
+                    if (trendIdx !== -1) {
+                        appState.allTrendsData[trendIdx].data = result.value.data;
+                        appState.allTrendsData[trendIdx].isLoading = false;
+                        if(result.value.error) appState.allTrendsData[trendIdx].error = result.value.error.message;
+                    }
+                } else if (result.status === 'rejected') {
+                    console.error("Failed to load a trend:", result.reason);
+                }
+            });
+            
+            appState.isLoading.dashboard = false;
+            uiUpdater.renderDashboard();
+            if (!isFilterChange || !appState.spotlightTrendId || !uiUpdater.getTrendById(appState.spotlightTrendId)) {
+                 uiUpdater.populateSpotlight();
+            } else {
+                 uiUpdater.populateSpotlight(appState.spotlightTrendId);
+            }
+            uiUpdater.displayFeaturedTrendWelcome();
+        },
+        parseUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            const trendId = params.get('trendId');
+            const openModal = params.get('openModal');
+
+            if (trendId && openModal === 'true') {
+                const checkDataLoaded = setInterval(() => {
+                    if (!appState.isLoading.dashboard && appState.allTrendsData.length > 0) {
+                        clearInterval(checkDataLoaded);
+                        const trendExists = uiUpdater.getTrendById(trendId);
+                        if (trendExists) {
+                            uiUpdater.showTrendModal(trendId);
+                        }
+                    }
+                }, 200);
+            }
+        },
+
+        init() {
+            domElements.logoImage = document.getElementById('logoImage');
+            domElements.heroImageBanner = document.getElementById('heroImageBanner');
+            domElements.categoryFilter = document.getElementById('categoryFilter');
+            domElements.timeRangeFilter = document.getElementById('timeRangeFilter');
+            domElements.trendGrid = document.getElementById('trendGrid');
+            domElements.noResultsMessage = document.getElementById('noResultsMessage');
+            domElements.spotlightContent = document.getElementById('spotlightContent');
+            domElements.trendModal = document.getElementById('trendModal');
+            domElements.trendModalLabel = document.getElementById('trendModalLabel');
+            domElements.trendModalBody = document.getElementById('trendModalBody');
+            domElements.currentYear = document.getElementById('currentYear');
+            domElements.featuredTrendWelcome = document.getElementById('featuredTrendWelcome');
+            domElements.topicExploreInput = document.getElementById('topicExploreInput');
+            domElements.exploreTopicBtn = document.getElementById('exploreTopicBtn');
+            domElements.exploreTopicOutput = document.getElementById('exploreTopicOutput');
+            domElements.exploreTopicStatus = document.getElementById('exploreTopicStatus');
+            domElements.compareTrendsBtn = document.getElementById('compareTrendsBtn');
+            domElements.compareCount = document.getElementById('compareCount');
+            domElements.comparisonModal = document.getElementById('comparisonModal');
+            domElements.comparisonModalBody = document.getElementById('comparisonModalBody');
+            domElements.shareTrendBtn = document.getElementById('shareTrendBtn');
+            domElements.shareToast = document.getElementById('shareToast');
+
+
+            const actualAssets = {
+                 logoImage: "/generated_images/dalle3_6e6da9d7-ef5.png",
+                 heroImageBanner: "/generated_images/dalle3_fa02ebd7-d57.png",
+                 defaultCategoryIcon: "/generated_images/dalle3_8eef466f-650.png",
+                 icon_tech_specific: "/generated_images/dalle3_7c0787e6-801.png",
+                 icon_social: "/generated_images/dalle3_713dddaf-396.png",
+                 icon_fashion: "/generated_images/dalle3_2e110fbd-2dd.png",
+                 icon_finance: "/generated_images/dalle3_01d68a2b-3a7.png",
+                 icon_environment: "/generated_images/dalle3_b14f9451-06e.png",
+                 icon_popculture: "/generated_images/dalle3_b30d69b5-980.png"
+            };
+            mainInit.setAssetPaths(actualAssets);
+            
+            AOS.init({
+                duration: 600,
+                once: true,
+                offset: 50
+            });
+            
+            if(domElements.currentYear) domElements.currentYear.textContent = new Date().getFullYear();
+            uiUpdater.populateCategoryFilter();
+            
+            appState.currentFilterTimeRange = parseInt(domElements.timeRangeFilter.value);
+            mainInit.loadInitialTrends().then(() => {
+                mainInit.parseUrlParams();
+            });
+
+            domElements.categoryFilter.addEventListener('change', eventHandlers.handleFilterChange);
+            domElements.timeRangeFilter.addEventListener('change', eventHandlers.handleFilterChange);
+            domElements.trendGrid.addEventListener('click', eventHandlers.handleGridActions);
+            if(domElements.trendModalBody) {
+                domElements.trendModal.addEventListener('click', eventHandlers.handleModalActions);
+                const trendModalTabs = domElements.trendModalBody.querySelectorAll('#trendModalTabs .nav-link');
+                trendModalTabs.forEach(tab => {
+                    tab.addEventListener('shown.bs.tab', eventHandlers.handleModalTabShown);
+                });
+            }
+            document.body.addEventListener('click', eventHandlers.handleSpotlightOrWelcomeLink);
+            domElements.exploreTopicBtn.addEventListener('click', eventHandlers.handleExploreTopic);
+            domElements.compareTrendsBtn.addEventListener('click', eventHandlers.handleCompareTrends);
+            if(domElements.shareTrendBtn) domElements.shareTrendBtn.addEventListener('click', eventHandlers.handleShareTrend);
+
+
+            const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    navLinks.forEach(nav => nav.classList.remove('active'));
+                    link.classList.add('active');
+                    const targetId = link.getAttribute('href');
+                    if (targetId && targetId.startsWith('#')) {
+                        const targetElement = document.querySelector(targetId);
+                        if (targetElement) {
+                            targetElement.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    }
+                });
+            });
+        }
+    };
+    
+    document.addEventListener('DOMContentLoaded', mainInit.init);
+
+})();
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

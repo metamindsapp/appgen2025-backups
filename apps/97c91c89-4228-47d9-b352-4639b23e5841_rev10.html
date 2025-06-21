@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AppGen Prompt Idea Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            min-height: 100vh;
+            background-color: #1a202c;
+            color: #e2e8f0;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            position: relative;
+            font-family: sans-serif;
+        }
+
+        #background-image {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('/generated_images/dalle_5333239a-08a.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: -2;
+        }
+
+        #background-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 960px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .header-container {
+                flex-direction: row;
+                align-items: center;
+            }
+            .header-container .header-text-content {
+                flex-grow: 1;
+            }
+            .header-title, .header-lead {
+                text-align: left;
+            }
+        }
+
+        #logo {
+            height: 80px;
+            width: auto;
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            margin-bottom: 0;
+            width: 100%;
+            text-align: center;
+        }
+
+        .header-lead {
+            width: 100%;
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+
+        #settingsButton {
+            height: 60px;
+            width: 60px;
+            padding: 0;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #settingsButton img {
+            height: 48px;
+            width: 48px;
+        }
+
+        .card {
+            border-color: rgba(255, 255, 255, 0.15);
+            background-color: #2d3748;
+            color: #e2e8f0;
+        }
+
+        .card-header {
+            border-bottom-color: rgba(255, 255, 255, 0.15);
+            background-color: #212935;
+        }
+
+        .form-control, .form-select {
+            background-color: #4a5568;
+            color: #e2e8f0;
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .form-control:focus, .form-select:focus {
+            background-color: #4a5568;
+            color: #e2e8f0;
+            border-color: #63b3ed;
+            box-shadow: 0 0 0 0.25rem rgba(99, 179, 237, 0.25);
+        }
+
+         .form-control::placeholder {
+            color: #a0aec0;
+            opacity: 1;
+        }
+
+
+        .form-select option {
+            background-color: #4a5568;
+            color: #e2e8f0;
+        }
+
+        .btn-primary {
+            background-color: #4299e1;
+            border-color: #4299e1;
+        }
+        .btn-primary:hover {
+            background-color: #63b3ed;
+            border-color: #63b3ed;
+        }
+        .btn-primary:focus {
+            background-color: #63b3ed;
+            border-color: #63b3ed;
+            box-shadow: 0 0 0 0.25rem rgba(66, 153, 225, 0.5);
+        }
+        .btn-primary:active {
+            background-color: #2b6cb0 !important;
+            border-color: #2c5282 !important;
+        }
+        .btn-primary:disabled, .btn-primary.disabled {
+            background-color: #4299e1;
+            border-color: #4299e1;
+            opacity: 0.65;
+        }
+
+
+        .btn-secondary {
+            background-color: #718096;
+            border-color: #718096;
+            color: #e2e8f0;
+        }
+        .btn-secondary:hover {
+            background-color: #a0aec0;
+            border-color: #a0aec0;
+        }
+        .btn-secondary:focus {
+            background-color: #a0aec0;
+            border-color: #a0aec0;
+            box-shadow: 0 0 0 0.25rem rgba(113, 128, 150, 0.5);
+        }
+         .btn-secondary:active {
+            background-color: #4a5568 !important;
+            border-color: #2d3748 !important;
+        }
+
+        .btn-success {
+            background-color: #48bb78;
+            border-color: #48bb78;
+            color: #e2e8f0;
+        }
+        .btn-success:hover {
+            background-color: #68d391;
+            border-color: #68d391;
+        }
+        .btn-success:focus {
+            background-color: #68d391;
+            border-color: #68d391;
+            box-shadow: 0 0 0 0.25rem rgba(72, 187, 120, 0.5);
+        }
+        .btn-success:active {
+            background-color: #38a169 !important;
+            border-color: #2f855a !important;
+        }
+        .btn-success:disabled, .btn-success.disabled {
+            background-color: #48bb78;
+            border-color: #48bb78;
+            opacity: 0.65;
+        }
+
+        .btn-danger {
+            background-color: #e53e3e;
+            border-color: #e53e3e;
+            color: #fff;
+        }
+        .btn-danger:hover, .btn-danger:focus {
+            background-color: #fc8181;
+            border-color: #fc8181;
+        }
+        .btn-danger:focus {
+            box-shadow: 0 0 0 0.25rem rgba(229, 62, 62, 0.5);
+        }
+        .btn-danger:active {
+            background-color: #c53030 !important;
+            border-color: #9b2c2c !important;
+        }
+
+        .btn-info {
+            background-color: #319795;
+            border-color: #319795;
+            color: #e2e8f0;
+        }
+         .btn-info:hover {
+            background-color: #38b2ac;
+            border-color: #38b2ac;
+        }
+         .btn-info:focus {
+            background-color: #38b2ac;
+            border-color: #38b2ac;
+            box-shadow: 0 0 0 0.25rem rgba(49, 159, 149, 0.5);
+        }
+        .btn-info:active {
+            background-color: #2c7a7b !important;
+            border-color: #28696c !important;
+        }
+         .btn-info:disabled, .btn-info.disabled {
+            background-color: #319795;
+            border-color: #319795;
+            opacity: 0.65;
+        }
+
+
+        #promptOutput {
+            background-color: #1a202c;
+            padding: 1rem;
+            border-radius: 0.25rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+            color: #cbd5e0;
+        }
+
+        .btn .spinner-border {
+            vertical-align: text-bottom;
+        }
+
+        #resultCard {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease-in-out, visibility 0s linear 0.5s;
+        }
+
+        #resultCard:not(.d-none) {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.5s ease-in-out, visibility 0s linear 0s;
+        }
+
+        .alert {
+            word-break: break-word;
+        }
+
+        .modal-content.text-bg-dark {
+            background-color: #2d3748;
+            color: #e2e8f0;
+        }
+
+        .modal-header {
+            border-bottom-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .modal-footer {
+            border-top-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .form-check-input:checked {
+            background-color: #48bb78;
+            border-color: #48bb78;
+        }
+        .form-check-input:focus {
+            border-color: #63b3ed;
+            box-shadow: 0 0 0 0.25rem rgba(99,179,237,.25);
+        }
+
+        .highlight-update {
+            animation: highlightFade 1s ease-out;
+        }
+
+        @keyframes highlightFade {
+            from {
+                background-color: rgba(66, 153, 225, 0.3);
+            }
+            to {
+                background-color: transparent;
+            }
+        }
+
+    </style>
+</head>
+<body class="text-bg-dark">
+
+    <div id="background-image"></div>
+    <div id="background-overlay"></div>
+
+    <div class="container py-4">
+        <header class="mb-4 header-container">
+            <img id="logo" src="/generated_images/dalle_de328a3e-c5d.png" alt="AppGen Logo Icon - abstract representation of idea generation">
+            <div class="header-text-content">
+                <h1 class="display-5 header-title">AppGen Prompt Idea Generator</h1>
+                <p class="lead header-lead">Get creative ideas for your next applet using the AppGen system.</p>
+            </div>
+            <button id="settingsButton" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#settingsModal" aria-label="Settings">
+                <img src="/generated_images/dalle_0e28dee3-98e.png" alt="Settings icon - gear symbol">
+            </button>
+        </header>
+
+        <main>
+            <div class="card mb-4">
+                <div class="card-header">Generate an Idea</div>
+                <div class="card-body">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="appTypeSelect" class="form-label">App Type Hint (Optional)</label>
+                            <select id="appTypeSelect" class="form-select">
+                                <option value="">Any</option>
+                                <option value="Creative Tool">Creative Tool</option>
+                                <option value="Data Visualization">Data Visualization</option>
+                                <option value="Educational">Educational</option>
+                                <option value="Finance">Finance</option>
+                                <option value="Game">Game</option>
+                                <option value="Interactive Story">Interactive Story</option>
+                                <option value="Productivity">Productivity</option>
+                                <option value="Simulation">Simulation</option>
+                                <option value="Utility">Utility</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="keywordsInput" class="form-label">Keywords / Constraints (Optional)</label>
+                            <input type="text" id="keywordsInput" class="form-control" placeholder="e.g., 'space theme', 'pixel art', 'todo list'">
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                        <button id="generateBtn" class="btn btn-primary flex-grow-1" aria-busy="false">
+                            Get Idea
+                            <span id="loadingSpinnerStandard" class="spinner-border spinner-border-sm d-none ms-2" role="status" aria-hidden="true"></span>
+                        </button>
+                        <button id="feelingLuckyBtn" class="btn btn-success flex-grow-1" aria-busy="false">
+                            Feelin' Lucky!
+                            <span id="loadingSpinnerLucky" class="spinner-border spinner-border-sm d-none ms-2" role="status" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="resultCard" class="card d-none" aria-live="polite">
+                 <div class="card-header d-flex justify-content-between align-items-center">
+                    Generated Prompt Idea
+                    <div class="d-flex gap-2">
+                        <button id="copyBtn" class="btn btn-sm btn-secondary">Copy</button>
+                        <button id="improveBtn" class="btn btn-sm btn-info" aria-busy="false">
+                            Improve
+                            <span id="loadingSpinnerImprove" class="spinner-border spinner-border-sm d-none ms-2" role="status" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                 </div>
+                <div class="card-body">
+                    <pre id="promptOutput"></pre>
+                </div>
+            </div>
+
+             <div id="errorAlert" class="alert alert-danger d-none mt-4" role="alert" aria-live="assertive">
+                An error occurred while generating the idea. Please try again.
+             </div>
+        </main>
+    </div>
+
+    <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content text-bg-dark">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="settingsModalLabel">Settings</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" role="switch" id="imageGenToggle" checked>
+                        <label class="form-check-label" for="imageGenToggle">Enable In-App Image Generation Suggestions</label>
+                    </div>
+                    <small class="form-text text-body-secondary mb-3 d-block">
+                        When enabled, generated ideas may include features or assets that require AI image generation (like Imagen 3). Turn off to exclude such suggestions.
+                    </small>
+
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="aiEndpointToggle" checked>
+                        <label class="form-check-label" for="aiEndpointToggle">Enable In-App AI Endpoint Usage Suggestions</label>
+                    </div>
+                    <small class="form-text text-body-secondary d-block">
+                        When enabled, generated ideas may include features that utilize the /api/ai endpoint for general AI tasks within the generated applet. Turn off to exclude such suggestions.
+                    </small>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const generateBtn = document.getElementById('generateBtn');
+            const feelingLuckyBtn = document.getElementById('feelingLuckyBtn');
+            const appTypeSelect = document.getElementById('appTypeSelect');
+            const keywordsInput = document.getElementById('keywordsInput');
+            const promptOutput = document.getElementById('promptOutput');
+            const resultCard = document.getElementById('resultCard');
+            const loadingSpinnerStandard = document.getElementById('loadingSpinnerStandard');
+            const loadingSpinnerLucky = document.getElementById('loadingSpinnerLucky');
+            const copyBtn = document.getElementById('copyBtn');
+            const improveBtn = document.getElementById('improveBtn');
+            const loadingSpinnerImprove = document.getElementById('loadingSpinnerImprove');
+            const errorAlert = document.getElementById('errorAlert');
+            const imageGenToggle = document.getElementById('imageGenToggle');
+            const aiEndpointToggle = document.getElementById('aiEndpointToggle');
+
+            const localStorageKeys = {
+                imageGen: 'appGenPromptIdeaGenerator_imageGenEnabled',
+                aiEndpoint: 'appGenPromptIdeaGenerator_aiEndpointEnabled'
+            };
+
+            let isLoading = false;
+            let lastGenerationContext = null;
+
+            loadSettings();
+            updateButtonStates();
+
+            generateBtn.addEventListener('click', () => generatePromptIdea(false));
+            feelingLuckyBtn.addEventListener('click', () => generatePromptIdea(true));
+            copyBtn.addEventListener('click', copyPrompt);
+            improveBtn.addEventListener('click', handleImproveClick);
+            imageGenToggle.addEventListener('change', saveSettings);
+            aiEndpointToggle.addEventListener('change', saveSettings);
+
+            function loadSettings() {
+                try {
+                    const imageGenState = localStorage.getItem(localStorageKeys.imageGen);
+                    imageGenToggle.checked = imageGenState !== null ? JSON.parse(imageGenState) : true;
+
+                    const aiEndpointState = localStorage.getItem(localStorageKeys.aiEndpoint);
+                    aiEndpointToggle.checked = aiEndpointState !== null ? JSON.parse(aiEndpointState) : true;
+                } catch (e) {
+                    console.error('Could not load settings from localStorage:', e);
+                    imageGenToggle.checked = true;
+                    aiEndpointToggle.checked = true;
+                }
+            }
+
+            function saveSettings() {
+                try {
+                    localStorage.setItem(localStorageKeys.imageGen, JSON.stringify(imageGenToggle.checked));
+                    localStorage.setItem(localStorageKeys.aiEndpoint, JSON.stringify(aiEndpointToggle.checked));
+                } catch (e) {
+                    console.error('Could not save settings to localStorage:', e);
+                }
+            }
+
+            function updateButtonStates() {
+                const promptDisplayed = !resultCard.classList.contains('d-none');
+                
+                const isGenerateBtnBusy = isLoading && !loadingSpinnerStandard.classList.contains('d-none');
+                generateBtn.disabled = isLoading;
+                generateBtn.setAttribute('aria-busy', isGenerateBtnBusy.toString());
+
+                const isFeelingLuckyBtnBusy = isLoading && !loadingSpinnerLucky.classList.contains('d-none');
+                feelingLuckyBtn.disabled = isLoading;
+                feelingLuckyBtn.setAttribute('aria-busy', isFeelingLuckyBtnBusy.toString());
+                
+                copyBtn.disabled = isLoading || !promptDisplayed;
+
+                const isImproveBtnBusy = isLoading && !loadingSpinnerImprove.classList.contains('d-none');
+                improveBtn.disabled = isLoading || !promptDisplayed;
+                improveBtn.setAttribute('aria-busy', isImproveBtnBusy.toString());
+            }
+
+            async function generatePromptIdea(isLucky) {
+                if (isLoading) return;
+
+                isLoading = true;
+                
+                resultCard.classList.add('d-none');
+                errorAlert.classList.add('d-none');
+                promptOutput.textContent = '';
+                lastGenerationContext = null;
+
+                if (isLucky) {
+                    loadingSpinnerLucky.classList.remove('d-none');
+                    loadingSpinnerStandard.classList.add('d-none');
+                } else {
+                    loadingSpinnerStandard.classList.remove('d-none');
+                    loadingSpinnerLucky.classList.add('d-none');
+                }
+                updateButtonStates();
+
+                const appType = appTypeSelect.value;
+                const keywords = keywordsInput.value.trim();
+                const isImageGenEnabled = imageGenToggle.checked;
+                const isAiEndpointEnabled = aiEndpointToggle.checked;
+
+                const aiguideText = `You are an expert AI Software Architect and Project Planner, specializing in generating highly detailed, creative, ambitious, and UNIQUE prompt ideas suitable for generating impressive web applets using the appgen system. Your goal is to consistently produce novel concepts, mechanics, and themes that have a strong "WOW" factor.`;
+
+                let msgForAi = `You are an expert AI Software Architect and Project Planner, specializing in generating highly detailed, creative, ambitious, and UNIQUE prompt ideas suitable for generating impressive web applets using the appgen system. Your goal is to consistently produce novel concepts, mechanics, and themes that have a strong "WOW" factor.
+
+STRICT INSTRUCTIONS:
+
+ORIGINALITY ABOVE ALL: You must not default to previously seen concepts like "Chronoscape," "Weaver," or any common tropes unless they are explicitly included by the user. Instead of banning specific terms, draw from a large, evolving pool of imaginative source concepts. You are encouraged to reference or be inspired by—but not copy—ideas like:
+"bioluminescent logic gardens, memory mazes, procedural rituals, holographic origami, generative myth machines, recursive sand paintings, multispecies diplomacy sims, ambient dream routers, ephemeral cities, quantum scavenger hunts, poetic time loops, sound-reactive foliage, kinetic glyphs, synesthetic scoreboards, narrative fossils, transdimensional vending machines."
+Use these only as launchpads. You are free to invent entirely new categories of interaction and aesthetic.
+
+BREAK THE PATTERN: If your idea resembles something common or overused, discard it and rethink. Avoid narrative templates, mechanics, or visual ideas that feel familiar. Surprise the user.
+
+FLEX THE FORMAT: Applets can be anything—rituals, social dynamics, soundscapes, interactive objects, evolving generative environments. Think beyond traditional UI and game logic.
+
+ADHERE TO SETTINGS: Strictly follow the user's settings regarding in-app image generation and general AI endpoint usage. If a feature is disabled, do NOT suggest anything that relies on it.
+
+NO AUDIO FEATURES: Crucially, do NOT suggest any audio-related features. This includes sound effects, background music, voice synthesis, speech input/recognition, or any other element relying on audio processing or output, as the target appgen system does not currently support these capabilities. Focus entirely on visual and interactive elements.
+
+USER SETTINGS:
+- IN-APP IMAGE GENERATION: ${isImageGenEnabled ? 'ENABLED' : 'DISABLED - DO NOT suggest features requiring Imagen 3 or similar image AI.'}
+- IN-APP GENERAL AI ENDPOINT USAGE (/api/ai): ${isAiEndpointEnabled ? 'ENABLED' : 'DISABLED - DO NOT suggest features using the /api/ai endpoint for text generation/analysis.'}
+
+APPLET IDEA REQUEST:
+Generate a detailed, ambitious, and creative appgen prompt idea for a single-file HTML applet.
+The prompt must include:
+
+Project Title:
+
+App Type Hint: (Suggest a suitable one if not provided by user input below. If user provides an App Type, use that.)
+
+Image Generation Mode: Imagen 3 (Explicitly state this if App Type is 'Game'. If not a game, you can state 'N/A' or omit, but if it's a game, it MUST be 'Imagen 3'.)
+
+Target Style Preferences: Theme: dark, CSS Framework: bootstrap, JS Structure: vanilla
+
+Detailed Description: Provide a compelling description covering:
+- Core concept and objective.
+- Key features and user interactions.
+- Potential "wow" factor (what makes it particularly impressive, engaging, or delightful?).
+- Any specific technical requirements or suggestions (e.g., canvas usage for games, API calls if enabled, dynamic image generation if enabled and relevant).
+`;
+
+                if (isLucky) {
+                    msgForAi += `
+FEELIN' LUCKY MODE:
+Embrace the unusual! Combine two or more disparate or seemingly incompatible concepts, themes, or mechanics to create a truly wild, unexpected, and ambitious idea. Push the boundaries of what a single-file HTML applet could be. The more unconventional, the better, as long as it remains feasible for a single-file applet.
+`;
+                    if (appType) {
+                        msgForAi += `\nFor this "Feelin' Lucky" idea, try to incorporate the user's selected App Type Hint: "${appType}". `;
+                    } else {
+                        msgForAi += `\nFor this "Feelin' Lucky" idea, suggest a suitable, possibly unusual, App Type Hint. `;
+                    }
+                } else {
+                    if (appType) {
+                        msgForAi += `\nFocus the idea around the user's selected App Type Hint: "${appType}". `;
+                    } else {
+                        msgForAi += `\nSuggest a suitable App Type Hint for the idea. `;
+                    }
+                }
+
+                if (keywords) {
+                    msgForAi += `\nIncorporate the following user-provided keywords/themes/constraints: "${keywords}". `;
+                }
+
+                msgForAi += `
+Ensure the idea is suitable for a single-file HTML applet.
+Provide only the prompt text, formatted exactly as requested (starting with 'Project Title:' and ending after the detailed description). Do NOT include any conversational text, preamble, or postamble outside of the structured prompt itself.
+`;
+                const payload = {
+                    aiguide: aiguideText,
+                    msgforai: msgForAi,
+                    llmSettings: {
+                        temperature: isLucky ? 1.1 : 0.9,
+                        model: "gemini-1.5-flash-latest"
+                    }
+                };
+
+                try {
+                    const response = await fetch('/api/ai', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(payload),
+                    });
+
+                    if (!response.ok) {
+                        let errorDetail = `HTTP error! status: ${response.status}`;
+                        try {
+                            const errorJson = await response.json();
+                            if (errorJson && errorJson.error) {
+                                errorDetail += ` - ${errorJson.error}`;
+                            } else if (errorJson && typeof errorJson === 'string') {
+                                 errorDetail += ` - ${errorJson}`;
+                            }
+                        } catch (jsonError) {
+                             errorDetail += ' (Could not parse error response body)';
+                        }
+                        throw new Error(errorDetail);
+                    }
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        const generatedText = data.response.trim();
+                        promptOutput.textContent = generatedText;
+                        resultCard.classList.remove('d-none');
+                        lastGenerationContext = {
+                            appType: appTypeSelect.value,
+                            keywords: keywordsInput.value.trim(),
+                            isImageGenEnabled: imageGenToggle.checked,
+                            isAiEndpointEnabled: aiEndpointToggle.checked,
+                            prompt: generatedText
+                        };
+                        
+                    } else {
+                        console.error('API Error:', data.error);
+                        errorAlert.textContent = `API Error: ${data.error || 'Unknown error from API.'}`;
+                        errorAlert.classList.remove('d-none');
+                        lastGenerationContext = null;
+                    }
+
+                } catch (error) {
+                    console.error('Fetch Error:', error);
+                    errorAlert.textContent = `Failed to generate idea: ${error.message || 'An unexpected error occurred.'}. Please check your network and try again.`;
+                    errorAlert.classList.remove('d-none');
+                    lastGenerationContext = null;
+                } finally {
+                    isLoading = false;
+                    loadingSpinnerStandard.classList.add('d-none');
+                    loadingSpinnerLucky.classList.add('d-none');
+                    updateButtonStates();
+                }
+            }
+
+            async function handleImproveClick() {
+                if (isLoading || !lastGenerationContext || !promptOutput.textContent) {
+                    return;
+                }
+
+                isLoading = true;
+                loadingSpinnerImprove.classList.remove('d-none');
+                updateButtonStates();
+                errorAlert.classList.add('d-none');
+
+                const currentPromptText = promptOutput.textContent;
+                const context = lastGenerationContext;
+
+                const aiguideImproveText = `You are an expert AI Software Architect and Project Planner, specializing in refining and enhancing existing appgen prompt ideas. Your goal is to take a given prompt idea and make it significantly more creative, detailed, ambitious, and impactful, while strictly adhering to the original Project Title and the core "essence" of the concept. Emphasize originality and avoid common tropes, drawing inspiration from a wide pool of imaginative concepts (like 'bioluminescent logic gardens, memory mazes, generative myth machines') to elevate the idea. Add innovative mechanics, unique visual ideas, or compelling user interactions. Ensure the improved prompt still adheres to the AppGen format and the original user settings for image/AI endpoint usage and the NO AUDIO constraint.`;
+
+                let msgForAiImprove = `You are an expert AI Software Architect and Project Planner, specializing in refining and enhancing existing appgen prompt ideas. Your goal is to take a given prompt idea and make it significantly more creative, detailed, ambitious, and impactful, while strictly adhering to the original Project Title and the core "essence" of the concept.
+
+STRICT INSTRUCTIONS FOR IMPROVEMENT:
+
+PRESERVE ESSENCE: Do NOT change the fundamental concept or Project Title of the provided prompt. Enhance it, don't replace it.
+
+MAXIMIZE ORIGINALITY & WOW FACTOR: Identify areas for improvement in creativity, flow, and detail. Infuse the idea with novel elements. Instead of common tropes, draw inspiration from imaginative concepts (e.g., "bioluminescent logic gardens, memory mazes, generative myth machines") to make the applet idea truly unique and impressive. Surprise the user with the depth and creativity of the improvement.
+
+ADHERE TO ORIGINAL SETTINGS: Respect the original user settings regarding in-app image generation and general AI endpoint usage that were active when the original prompt was generated. These settings are binding for the improved prompt.
+
+NO AUDIO FEATURES (CRITICAL CONSTRAINT): The target appgen system does not currently support audio capabilities. Ensure the improved idea absolutely does NOT introduce or suggest any audio-related features. All enhancements must be visual or interactive.
+
+ORIGINAL USER SETTINGS (These MUST be applied to the IMPROVED idea):
+- IN-APP IMAGE GENERATION: ${context.isImageGenEnabled ? 'ENABLED' : 'DISABLED - DO NOT suggest features requiring Imagen 3 or similar image AI in the improved prompt.'}
+- IN-APP GENERAL AI ENDPOINT USAGE (/api/ai): ${context.isAiEndpointEnabled ? 'ENABLED' : 'DISABLED - DO NOT suggest features using the /api/ai endpoint for text generation/analysis in the improved prompt.'}
+
+PROMPT IDEA TO IMPROVE:
+\`\`\`
+${currentPromptText}
+\`\`\`
+
+IMPROVEMENT REQUEST:
+Refine the above prompt idea. Keep the 'Project Title' exactly as is. Substantially enhance the 'Detailed Description' to make the concept more exciting, add innovative and unique features, clarify mechanics, or deepen the user experience, drawing from a wellspring of creative and non-standard ideas. Ensure the improved prompt still adheres to the AppGen format (Project Title, App Type Hint, Image Generation Mode, Target Style Preferences, Detailed Description).
+Provide only the improved prompt text, formatted exactly as requested (starting with 'Project Title:' and ending after the detailed description). Do NOT include any conversational text, preamble, or postamble outside of the structured prompt itself.
+`;
+
+                const payload = {
+                    aiguide: aiguideImproveText,
+                    msgforai: msgForAiImprove,
+                    llmSettings: {
+                        temperature: 1.0,
+                        model: "gemini-1.5-flash-latest"
+                    }
+                };
+
+                try {
+                    const response = await fetch('/api/ai', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(payload),
+                    });
+
+                    if (!response.ok) {
+                         let errorDetail = `HTTP error! status: ${response.status}`;
+                        try {
+                            const errorJson = await response.json();
+                            if (errorJson && errorJson.error) {
+                                errorDetail += ` - ${errorJson.error}`;
+                            } else if (errorJson && typeof errorJson === 'string') {
+                                 errorDetail += ` - ${errorJson}`;
+                            }
+                        } catch (jsonError) {
+                             errorDetail += ' (Could not parse error response body)';
+                        }
+                        throw new Error(errorDetail);
+                    }
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        const improvedText = data.response.trim();
+                        promptOutput.textContent = improvedText;
+                        lastGenerationContext.prompt = improvedText;
+                        promptOutput.classList.add('highlight-update');
+                        setTimeout(() => {
+                            promptOutput.classList.remove('highlight-update');
+                        }, 1000);
+
+                    } else {
+                        console.error('Improve API Error:', data.error);
+                        errorAlert.textContent = `Improve API Error: ${data.error || 'Unknown error from API.'}`;
+                        errorAlert.classList.remove('d-none');
+                    }
+
+                } catch (error) {
+                    console.error('Improve Fetch Error:', error);
+                    errorAlert.textContent = `Failed to improve idea: ${error.message || 'An unexpected error occurred.'}. Please check your network and try again.`;
+                    errorAlert.classList.remove('d-none');
+                } finally {
+                    isLoading = false;
+                    loadingSpinnerImprove.classList.add('d-none');
+                    updateButtonStates();
+                }
+            }
+
+
+            function copyPrompt() {
+                const textToCopy = promptOutput.textContent;
+                if (!textToCopy) {
+                    return;
+                }
+
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    const originalText = copyBtn.textContent;
+                    copyBtn.textContent = 'Copied!';
+                    copyBtn.classList.remove('btn-secondary');
+                    copyBtn.classList.add('btn-success');
+
+                    setTimeout(() => {
+                        copyBtn.textContent = originalText;
+                        copyBtn.classList.remove('btn-success');
+                        copyBtn.classList.add('btn-secondary');
+                    }, 1500);
+                }).catch(err => {
+                    console.error('Failed to copy text: ', err);
+                    const originalText = copyBtn.textContent;
+                    copyBtn.textContent = 'Error';
+                    copyBtn.classList.remove('btn-secondary');
+                    copyBtn.classList.remove('btn-success');
+                    copyBtn.classList.add('btn-danger');
+                    setTimeout(() => {
+                        copyBtn.textContent = originalText;
+                        copyBtn.classList.remove('btn-danger');
+                        copyBtn.classList.add('btn-secondary');
+                    }, 1500);
+                });
+            }
+        });
+    </script>
+
+    <div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+        <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+    </div>
+    <script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); if(typeof originalConsoleLog === 'function') originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); if(typeof originalConsoleError === 'function') originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); if(typeof originalConsoleWarn === 'function') originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); if(typeof originalConsoleInfo === 'function') originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); if(typeof originalConsoleDebug === 'function') originalConsoleDebug.apply(console, args); };
+
+            window.onerror = function(message, source, lineno, colno, error) {
+                const errorObj = error || {};
+                const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']);
+                logs.push(formatted);
+                if(typeof originalConsoleError === 'function') originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error);
+                return false;
+            };
+            window.onunhandledrejection = function(event) {
+                const reason = event.reason || {};
+                const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']);
+                logs.push(formatted);
+                if(typeof originalConsoleError === 'function') originalConsoleError.call(console, 'Unhandled Rejection:', event.reason);
+            };
+
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        if(typeof originalConsoleInfo === 'function') originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        if(typeof originalConsoleError === 'function') originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { if(typeof console === 'object' && typeof console.error === 'function') console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

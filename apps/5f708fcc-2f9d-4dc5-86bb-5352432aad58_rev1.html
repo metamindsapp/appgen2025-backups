@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Snake Game</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
+        body {
+            background-color: #f8f9fa;
+            color: #212529;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        #game-container {
+            width: 100%;
+            max-width: 500px;
+            background-color: #ffffff;
+        }
+        #gameCanvas {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            aspect-ratio: 1 / 1;
+            image-rendering: pixelated;
+        }
+        #main-menu, #game-over-screen, #pause-overlay {
+            z-index: 10;
+        }
+    </style>
+</head>
+<body class="bg-light text-dark d-flex flex-column min-vh-100 overflow-hidden">
+    <header class="container-fluid bg-primary text-white p-3 shadow-sm">
+        <h1 class="text-center mb-0">Simple Snake</h1>
+    </header>
+
+    <main class="container-fluid flex-grow-1 d-flex flex-column justify-content-center align-items-center p-3">
+        <div id="game-container" class="d-flex flex-column align-items-center border border-secondary rounded shadow p-3 bg-white">
+            <canvas id="gameCanvas" class="border border-dark"></canvas>
+            <div id="game-hud" class="d-flex justify-content-between w-100 mt-2 px-3 d-none">
+                <span class="fs-5">Score: <span id="score">0</span></span>
+                <span class="fs-5">High Score: <span id="high-score">0</span></span>
+                <button id="pause-button" class="btn btn-sm btn-outline-secondary">Pause</button>
+            </div>
+        </div>
+
+        <div id="main-menu" class="position-absolute top-50 start-50 translate-middle text-center bg-white p-4 rounded shadow border">
+            <h2 class="mb-4">Welcome to Snake!</h2>
+            <button id="start-game-btn" class="btn btn-primary btn-lg mb-3">Start Game</button>
+            <button id="instructions-btn" class="btn btn-info btn-lg mb-3">Instructions</sbutton>
+        </div>
+
+        <div id="game-over-screen" class="position-absolute top-50 start-50 translate-middle text-center bg-white p-4 rounded shadow border d-none">
+            <h2 class="mb-3 text-danger">Game Over!</h2>
+            <p class="fs-4">Your Score: <span id="final-score">0</span></p>
+            <p class="fs-5">High Score: <span id="game-over-high-score">0</span></p>
+            <button id="play-again-btn" class="btn btn-success btn-lg mt-3">Play Again</button>
+        </div>
+
+        <div id="pause-overlay" class="position-absolute top-50 start-50 translate-middle text-center bg-dark text-white p-4 rounded shadow d-none" style="opacity: 0.9;">
+            <h2 class="mb-0">PAUSED</h2>
+        </div>
+    </main>
+
+    <div class="modal fade" id="instructionsModal" tabindex="-1" aria-labelledby="instructionsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="instructionsModalLabel">How to Play Snake</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Use the <strong>Arrow Keys</strong> or <strong>WASD</strong> to change the snake's direction.</p>
+                    <p>Eat the <span class="badge bg-success">green food</span> to grow longer and increase your score.</p>
+                    <p>Avoid hitting the walls or your own tail!</p>
+                    <p>The game speeds up as you score more points.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Got It!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+    <script>
+        const GRID_SIZE = 20;
+        const CANVAS_WIDTH = 400;
+        const CANVAS_HEIGHT = 400;
+        const INITIAL_SNAKE_LENGTH = 5;
+        const INITIAL_GAME_SPEED = 150;
+
+        const GAME_STATE = {
+            MAIN_MENU: 'mainMenu',
+            PLAYING: 'playing',
+            PAUSED: 'paused',
+            GAME_OVER: 'gameOver'
+        };
+
+        class SoundManager {
+            constructor() {
+                this.eatSound = new Howl({ src: [] });
+                this.gameOverSound = new Howl({ src: [] });
+                this.startSound = new Howl({ src: [] });
+            }
+
+            playEat() {
+                if (this.eatSound && this.eatSound.state() === 'loaded') {
+                    this.eatSound.play();
+                }
+            }
+            playGameOver() {
+                if (this.gameOverSound && this.gameOverSound.state() === 'loaded') {
+                    this.gameOverSound.play();
+                }
+            }
+            playStart() {
+                if (this.startSound && this.startSound.state() === 'loaded') {
+                    this.startSound.play();
+                }
+            }
+        }
+
+        class Snake {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.body = [];
+                for (let i = 0; i < INITIAL_SNAKE_LENGTH; i++) {
+                    this.body.push({ x: Math.floor(CANVAS_WIDTH / 2 / GRID_SIZE) * GRID_SIZE, y: (Math.floor(CANVAS_HEIGHT / 2 / GRID_SIZE) + i) * GRID_SIZE });
+                }
+                this.direction = 'up';
+                this.nextDirection = 'up';
+            }
+
+            update() {
+                this.direction = this.nextDirection;
+
+                const head = { ...this.body[0] };
+
+                switch (this.direction) {
+                    case 'up': head.y -= GRID_SIZE; break;
+                    case 'down': head.y += GRID_SIZE; break;
+                    case 'left': head.x -= GRID_SIZE; break;
+                    case 'right': head.x += GRID_SIZE; break;
+                }
+
+                this.body.unshift(head);
+                this.body.pop();
+            }
+
+            grow() {
+                const tail = { ...this.body[this.body.length - 1] };
+                this.body.push(tail);
+            }
+
+            getHead() {
+                return this.body[0];
+            }
+
+            checkCollisionWithSelf() {
+                const head = this.getHead();
+                for (let i = 1; i < this.body.length; i++) {
+                    if (head.x === this.body[i].x && head.y === this.body[i].y) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            checkCollisionWithWalls() {
+                const head = this.getHead();
+                return head.x < 0 || head.x >= CANVAS_WIDTH || head.y < 0 || head.y >= CANVAS_HEIGHT;
+            }
+
+            setDirection(newDirection) {
+                if (this.direction === 'up' && newDirection === 'down') return;
+                if (this.direction === 'down' && newDirection === 'up') return;
+                if (this.direction === 'left' && newDirection === 'right') return;
+                if (this.direction === 'right' && newDirection === 'left') return;
+                this.nextDirection = newDirection;
+            }
+        }
+
+        class Food {
+            constructor() {
+                this.position = { x: 0, y: 0 };
+                this.spawned = false;
+            }
+
+            spawn(snakeBody) {
+                let newX, newY;
+                let collision;
+                do {
+                    newX = Math.floor(Math.random() * (CANVAS_WIDTH / GRID_SIZE)) * GRID_SIZE;
+                    newY = Math.floor(Math.random() * (CANVAS_HEIGHT / GRID_SIZE)) * GRID_SIZE;
+                    collision = false;
+                    for (const segment of snakeBody) {
+                        if (segment.x === newX && segment.y === newY) {
+                            collision = true;
+                            break;
+                        }
+                    }
+                } while (collision);
+                this.position = { x: newX, y: newY };
+                this.spawned = true;
+            }
+
+            getPosition() {
+                return this.position;
+            }
+        }
+
+        class CanvasRenderer {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.canvas.width = CANVAS_WIDTH;
+                this.canvas.height = CANVAS_HEIGHT;
+            }
+
+            clear() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+
+            drawSnake(snakeBody) {
+                this.ctx.strokeStyle = '#388E3C';
+                snakeBody.forEach((segment, index) => {
+                    if (index === 0) {
+                        this.ctx.fillStyle = '#2196F3';
+                    } else {
+                        this.ctx.fillStyle = '#4CAF50';
+                    }
+                    this.ctx.fillRect(segment.x, segment.y, GRID_SIZE, GRID_SIZE);
+                    this.ctx.strokeRect(segment.x, segment.y, GRID_SIZE, GRID_SIZE);
+                });
+            }
+
+            drawFood(foodPosition) {
+                this.ctx.fillStyle = '#FFC107';
+                this.ctx.strokeStyle = '#FFA000';
+                this.ctx.fillRect(foodPosition.x, foodPosition.y, GRID_SIZE, GRID_SIZE);
+                this.ctx.strokeRect(foodPosition.x, foodPosition.y, GRID_SIZE, GRID_SIZE);
+            }
+        }
+
+        class UIManager {
+            constructor() {
+                this.scoreElement = document.getElementById('score');
+                this.highScoreElement = document.getElementById('high-score');
+                this.finalScoreElement = document.getElementById('final-score');
+                this.gameOverHighScoreElement = document.getElementById('game-over-high-score');
+                this.mainMenu = document.getElementById('main-menu');
+                this.gameHud = document.getElementById('game-hud');
+                this.gameOverScreen = document.getElementById('game-over-screen');
+                this.pauseOverlay = document.getElementById('pause-overlay');
+                this.instructionsModal = new bootstrap.Modal(document.getElementById('instructionsModal'));
+            }
+
+            updateScore(score) {
+                this.scoreElement.textContent = score;
+            }
+
+            updateHighScore(highScore) {
+                this.highScoreElement.textContent = highScore;
+                this.gameOverHighScoreElement.textContent = highScore;
+            }
+
+            showMainMenu() {
+                this.mainMenu.classList.remove('d-none');
+                this.gameHud.classList.add('d-none');
+                this.gameOverScreen.classList.add('d-none');
+                this.pauseOverlay.classList.add('d-none');
+            }
+
+            showPlayingUI() {
+                this.mainMenu.classList.add('d-none');
+                this.gameHud.classList.remove('d-none');
+                this.gameOverScreen.classList.add('d-none');
+                this.pauseOverlay.classList.add('d-none');
+            }
+
+            showGameOver(finalScore, highScore) {
+                this.finalScoreElement.textContent = finalScore;
+                this.gameOverHighScoreElement.textContent = highScore;
+                this.mainMenu.classList.add('d-none');
+                this.gameHud.classList.add('d-none');
+                this.gameOverScreen.classList.remove('d-none');
+                this.pauseOverlay.classList.add('d-none');
+            }
+
+            showInstructions() {
+                this.instructionsModal.show();
+            }
+
+            showPausedOverlay() {
+                this.pauseOverlay.classList.remove('d-none');
+            }
+
+            hidePausedOverlay() {
+                this.pauseOverlay.classList.add('d-none');
+            }
+        }
+
+        class GameManager {
+            constructor() {
+                this.renderer = new CanvasRenderer('gameCanvas');
+                this.uiManager = new UIManager();
+                this.soundManager = new SoundManager();
+                this.snake = new Snake();
+                this.food = new Food();
+
+                this.score = 0;
+                this.highScore = parseInt(localStorage.getItem('snakeHighScore') || '0', 10);
+                this.gameSpeed = INITIAL_GAME_SPEED;
+                this.lastUpdateTime = 0;
+                this.animationFrameId = null;
+                this.gameState = GAME_STATE.MAIN_MENU;
+
+                this.initEventListeners();
+                this.uiManager.updateHighScore(this.highScore);
+                this.uiManager.showMainMenu();
+            }
+
+            initEventListeners() {
+                document.getElementById('start-game-btn').addEventListener('click', () => this.startGame());
+                document.getElementById('play-again-btn').addEventListener('click', () => this.startGame());
+                document.getElementById('instructions-btn').addEventListener('click', () => this.uiManager.showInstructions());
+                document.getElementById('pause-button').addEventListener('click', () => this.togglePause());
+
+                document.addEventListener('keydown', (e) => this.handleKeyDown(e));
+            }
+
+            handleKeyDown(e) {
+                if (this.gameState !== GAME_STATE.PLAYING && this.gameState !== GAME_STATE.PAUSED) return;
+
+                let newDirection;
+                switch (e.key) {
+                    case 'ArrowUp':
+                    case 'w':
+                    case 'W':
+                        newDirection = 'up';
+                        break;
+                    case 'ArrowDown':
+                    case 's':
+                    case 'S':
+                        newDirection = 'down';
+                        break;
+                    case 'ArrowLeft':
+                    case 'a':
+                    case 'A':
+                        newDirection = 'left';
+                        break;
+                    case 'ArrowRight':
+                    case 'd':
+                    case 'D':
+                        newDirection = 'right';
+                        break;
+                    case 'Escape':
+                        this.togglePause();
+                        return;
+                    default:
+                        return;
+                }
+                e.preventDefault();
+                this.snake.setDirection(newDirection);
+            }
+
+            startGame() {
+                this.score = 0;
+                this.gameSpeed = INITIAL_GAME_SPEED;
+                this.snake.reset();
+                this.food.spawn(this.snake.body);
+                this.uiManager.updateScore(this.score);
+                this.uiManager.updateHighScore(this.highScore);
+                this.uiManager.showPlayingUI();
+                this.soundManager.playStart();
+                this.gameState = GAME_STATE.PLAYING;
+                this.lastUpdateTime = performance.now();
+                this.gameLoop(performance.now());
+            }
+
+            togglePause() {
+                if (this.gameState === GAME_STATE.PLAYING) {
+                    this.gameState = GAME_STATE.PAUSED;
+                    cancelAnimationFrame(this.animationFrameId);
+                    this.uiManager.showPausedOverlay();
+                } else if (this.gameState === GAME_STATE.PAUSED) {
+                    this.gameState = GAME_STATE.PLAYING;
+                    this.lastUpdateTime = performance.now();
+                    this.uiManager.hidePausedOverlay();
+                    this.gameLoop(performance.now());
+                }
+            }
+
+            gameOver() {
+                this.gameState = GAME_STATE.GAME_OVER;
+                cancelAnimationFrame(this.animationFrameId);
+                this.soundManager.playGameOver();
+                if (this.score > this.highScore) {
+                    this.highScore = this.score;
+                    localStorage.setItem('snakeHighScore', this.highScore);
+                    this.uiManager.updateHighScore(this.highScore);
+                }
+                this.uiManager.showGameOver(this.score, this.highScore);
+                this.uiManager.hidePausedOverlay();
+            }
+
+            gameLoop(currentTime) {
+                this.animationFrameId = requestAnimationFrame(this.gameLoop.bind(this));
+
+                if (this.gameState !== GAME_STATE.PLAYING) {
+                    return;
+                }
+
+                const deltaTime = currentTime - this.lastUpdateTime;
+
+                if (deltaTime > this.gameSpeed) {
+                    this.lastUpdateTime = currentTime - (deltaTime % this.gameSpeed);
+
+                    this.snake.update();
+
+                    const head = this.snake.getHead();
+                    const foodPos = this.food.getPosition();
+
+                    if (head.x === foodPos.x && head.y === foodPos.y) {
+                        this.score++;
+                        this.uiManager.updateScore(this.score);
+                        this.snake.grow();
+                        this.food.spawn(this.snake.body);
+                        this.soundManager.playEat();
+                        this.gameSpeed = Math.max(50, INITIAL_GAME_SPEED - (this.score * 5));
+                    }
+
+                    if (this.snake.checkCollisionWithWalls() || this.snake.checkCollisionWithSelf()) {
+                        this.gameOver();
+                        return;
+                    }
+
+                    this.renderer.clear();
+                    this.renderer.drawFood(this.food.getPosition());
+                    this.renderer.drawSnake(this.snake.body);
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new GameManager();
+        });
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

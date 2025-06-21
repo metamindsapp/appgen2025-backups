@@ -1,0 +1,9 @@
+{
+  "projectId": "56872894-fac5-4c7c-99ed-1dd9479f2aeb",
+  "revisionString": "2",
+  "projectNameDisplay": "AI Muse: The Paradoxical Prompt Generator",
+  "userPromptForThisRevision": "Error generating prompts: Failed to parse paradoxical prompts: JSON error.\r\n\r\nlets convert to yaml and reinforce the ai prompts to return structured outputs with nothing before or after, and to be strict about it",
+  "basedOnRevisionString": "1",
+  "savedAt": "2025-05-23T10:07:25.382Z",
+  "imageAssets": []
+}

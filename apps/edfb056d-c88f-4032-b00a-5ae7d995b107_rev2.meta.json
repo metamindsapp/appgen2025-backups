@@ -1,0 +1,38 @@
+{
+  "projectId": "edfb056d-c88f-4032-b00a-5ae7d995b107",
+  "revisionString": "2",
+  "projectNameDisplay": "Dream Weaver's Loom",
+  "userPromptForThisRevision": "\"\"AI returned invalid keyword format: Unexpected token '`', \"```json [ \"... is not valid JSON. Please try again or enter manually.\"\"\r\n\r\nlets convert this using json to all yaml please.  wherever its using json, convert to yaml.   and while we're in there make sure the ai prompt reinforces that it must only return the yaml, nothing before or after",
+  "basedOnRevisionString": "1",
+  "savedAt": "2025-05-22T15:44:39.013Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/dalle_4a77a31c-494.png",
+      "url": "/generated_images/dalle_4a77a31c-494.png",
+      "description": "Breathtaking portal preview for 'Lost City of Eldoria'. An ancient, crumbling sandstone ruin, partially reclaimed by a lush, bioluminescent jungle under a twilight sky. A mysterious, shimmering portal or archway is central, exuding faint magical energy. Style: detailed fantasy illustration, atmospheric, sense of forgotten grandeur and hidden magic. Colors: deep greens, glowing blues, sandstone, twilight purples.",
+      "purpose": "Preview image for the 'Lost City of Eldoria' theme selection portal. ID: eldoriaPreview",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_7c667cf3-252.png",
+      "url": "/generated_images/dalle_7c667cf3-252.png",
+      "description": "Dynamic portal preview for 'Neon Cyberpunk Rhapsody'. A rain-slicked, neon-lit alley in a futuristic megacity. Towering skyscrapers with holographic ads loom in the background. A glitchy, data-stream-like portal flickers into existence against a graffiti-covered wall. Style: detailed cyberpunk art, cinematic lighting, vibrant neons. Colors: electric blue, magenta, deep purple, reflective wet surfaces.",
+      "purpose": "Preview image for the 'Neon Cyberpunk Rhapsody' theme selection portal. ID: cyberpunkPreview",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_01dfb0e7-723.png",
+      "url": "/generated_images/dalle_01dfb0e7-723.png",
+      "description": "Expansive portal preview for 'Cosmic Opera of Xylos'. A view from a spaceship cockpit or alien vista overlooking a swirling, multi-colored nebula. Crystalline alien structures or majestic, ringed planets are visible. A stable, shimmering wormhole or energy rift serves as the portal. Style: epic space opera art, vibrant cosmic colors, sense of immense scale. Colors: deep indigos, bright teals, gold, cosmic dust pinks.",
+      "purpose": "Preview image for the 'Cosmic Opera of Xylos' theme selection portal. ID: xylosPreview",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_3afaddd1-f15.png",
+      "url": "/generated_images/dalle_3afaddd1-f15.png",
+      "description": "Enchanting portal preview for 'Whispers of the Feywild'. A sun-dappled clearing in an ancient, magical forest. Giant, whimsical mushrooms glow softly. Twisted, moss-covered trees have subtle faces. The portal is a natural archway formed by intertwined, glowing vines and flowers, with shimmering light within. Style: enchanting fantasy illustration, whimsical, detailed, magical realism. Colors: emerald greens, earthy browns, pastel glows from flora, golden sunlight.",
+      "purpose": "Preview image for the 'Whispers of the Feywild' theme selection portal. ID: feywildPreview",
+      "isNewlyGenerated": true
+    }
+  ]
+}

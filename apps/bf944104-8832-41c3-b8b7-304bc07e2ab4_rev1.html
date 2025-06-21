@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrendSpark Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            background-color: #0a0e12;
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar, footer {
+            background-color: rgba(20, 24, 28, 0.85) !important;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        main {
+            padding-top: 70px;
+            padding-bottom: 1.5rem;
+        }
+
+        .trend-card {
+            background-color: var(--bs-body-bg);
+            border: 1px solid var(--bs-border-color-translucent);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            display: flex;
+            flex-direction: column;
+        }
+        .trend-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        .trend-card .card-header {
+            background-color: var(--bs-tertiary-bg);
+            font-weight: 500;
+        }
+        .trend-card .card-body {
+            max-height: 420px;
+            overflow-y: auto;
+            padding: 1rem;
+            flex-grow: 1;
+        }
+        .trend-card .list-group-item {
+            background-color: transparent !important;
+            border-color: var(--bs-border-color-translucent) !important;
+            padding: 0.75rem 1rem;
+            transition: background-color 0.15s ease-in-out;
+            display: flex;
+            flex-direction: column;
+        }
+        .trend-card .list-group-item:hover {
+            background-color: rgba(255, 255, 255, 0.03) !important;
+        }
+        .list-group-item-content {
+            flex-grow: 1;
+        }
+        .trend-card .list-group-item h6 a {
+            color: var(--bs-primary-text-emphasis);
+            text-decoration: none;
+        }
+        .trend-card .list-group-item h6 a:hover {
+            text-decoration: underline;
+            color: var(--bs-primary);
+        }
+        .trend-card .card-footer {
+            background-color: var(--bs-tertiary-bg);
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+
+        .trend-card .card-body::-webkit-scrollbar { width: 6px; }
+        .trend-card .card-body::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 3px; }
+        .trend-card .card-body::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
+        .trend-card .card-body::-webkit-scrollbar-thumb:hover { background: #777; }
+
+        .trend-icon {
+            width: 22px;
+            height: 22px;
+            vertical-align: text-bottom;
+        }
+        .ai-summary-container {
+            background-color: rgba(var(--bs-primary-rgb), 0.05);
+            border: 1px solid rgba(var(--bs-primary-rgb), 0.2);
+            border-radius: var(--bs-border-radius-sm);
+            font-size: 0.9em;
+        }
+        .ai-summary-text {
+            color: var(--bs-secondary-color);
+        }
+
+        #imageVisualizationModal .modal-content {
+            background-color: var(--bs-dark);
+            border: 1px solid var(--bs-border-color);
+        }
+        #imageDisplayArea {
+            background-color: var(--bs-dark-bg-subtle);
+            border: 1px dashed var(--bs-border-color-translucent);
+        }
+
+        .bi-spin {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .visualize-btn-container {
+            align-self: flex-end;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body data-bs-theme="dark" class="d-flex flex-column min-vh-100">
+    <header class="navbar navbar-expand-sm shadow-sm fixed-top">
+        <div class="container-fluid">
+            <a href="#" class="navbar-brand d-flex align-items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-graph-up-arrow me-2" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M0 0h1v15h15v1H0zm10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4.9l-3.613 4.417a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61L13.445 4H10.5a.5.5 0 0 1-.5-.5"/>
+                </svg>
+                <strong>TrendSpark Dashboard</strong>
+            </a>
+            <button class="btn btn-outline-primary" id="refreshAllBtn" title="Refresh All Trends">
+                <i class="bi bi-arrow-clockwise"></i> <span class="d-none d-sm-inline">Refresh All</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="container-fluid flex-grow-1">
+        <div class="row g-4" id="trendsRow">
+        </div>
+    </main>
+
+    <div class="modal fade" id="imageVisualizationModal" tabindex="-1" aria-labelledby="imageVisualizationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imageVisualizationModalLabel">Trend Visualization</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <p id="visualizationPromptText" class="mb-2 small text-secondary"></p>
+                    <div id="imageDisplayArea" class="mb-3 p-2 border border-secondary rounded" style="min-height: 300px; display: flex; align-items: center; justify-content: center;">
+                        <div class="spinner-border text-primary" role="status" id="visualizationSpinner" style="width: 3rem; height: 3rem;">
+                            <span class="visually-hidden">Generating image...</span>
+                        </div>
+                        <img src="#" alt="Generated Trend Visualization" id="generatedImageView" class="img-fluid rounded" style="display: none; max-height: 70vh; object-fit: contain;">
+                        <p id="visualizationErrorText" class="text-danger" style="display: none;"></p>
+                    </div>
+                    <button id="regenerateImageBtn" class="btn btn-primary"><i class="bi bi-arrow-repeat"></i> Regenerate</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center py-3 mt-auto border-top border-secondary-subtle small">
+        <p class="mb-0 text-secondary">&copy; <span id="currentYear"></span> TrendSpark Dashboard. Powered by AI.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    (function() {
+        'use strict';
+
+        const APP_CONFIG = {
+            sources: [
+                { id: 'reddit', name: 'Reddit Hot', colWidth: 'col-xl-6 col-md-12', icon: '/generated_images/dalle3_938e3dc2-e25.png' },
+                { id: 'github', name: 'GitHub Trending', colWidth: 'col-xl-6 col-md-12', icon: '/generated_images/dalle3_bfa17fce-b13.png' },
+                { id: 'wikipedia', name: 'Wikipedia Top Viewed', colWidth: 'col-xl-6 col-md-12', icon: '/generated_images/dalle3_0faeda1a-0b7.png' },
+                { id: 'googleTrends', name: 'Google Trends Insights', colWidth: 'col-xl-6 col-md-12', icon: '/generated_images/dalle3_f192bbf2-1fc.png' }
+            ],
+            api: {
+                reddit: {
+                    url: 'https://www.reddit.com/r/popular/hot.json?limit=7&raw_json=1',
+                    parser: parseRedditData
+                },
+                github: {
+                    url: () => {
+                        const oneWeekAgo = new Date();
+                        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                        const dateString = oneWeekAgo.toISOString().split('T')[0];
+                        return `https://api.github.com/search/repositories?q=stars:>1000+pushed:>${dateString}&sort=stars&order=desc&per_page=7`;
+                    },
+                    parser: parseGithubData
+                },
+                wikipedia: {
+                    url: () => {
+                        const yesterday = new Date();
+                        yesterday.setDate(yesterday.getDate() - 1);
+                        const yyyy = yesterday.getFullYear();
+                        const mm = String(yesterday.getMonth() + 1).padStart(2, '0');
+                        const dd = String(yesterday.getDate()).padStart(2, '0');
+                        return `https://wikimedia.org/api/rest_v1/metrics/pageviews/top/en.wikipedia.org/all-access/${yyyy}/${mm}/${dd}`;
+                    },
+                    parser: parseWikipediaData
+                },
+                googleTrends: {
+                    parser: fetchAndParseGoogleTrendsSimulated
+                }
+            },
+            dashboardBackgroundImage: '/generated_images/dalle3_4407d5f2-7d1.png'
+        };
+
+        const DOM_ELEMENTS = {};
+        const APP_STATE = {
+            currentVisualizationPrompt: '',
+            currentVisualizationTitle: ''
+        };
+
+        document.addEventListener('DOMContentLoaded', init);
+
+        function init() {
+            DOM_ELEMENTS.trendsRow = document.getElementById('trendsRow');
+            DOM_ELEMENTS.refreshAllBtn = document.getElementById('refreshAllBtn');
+            DOM_ELEMENTS.currentYearSpan = document.getElementById('currentYear');
+            
+            DOM_ELEMENTS.imageVisualizationModalElement = document.getElementById('imageVisualizationModal');
+            DOM_ELEMENTS.imageVisualizationModal = new bootstrap.Modal(DOM_ELEMENTS.imageVisualizationModalElement);
+            DOM_ELEMENTS.imageVisualizationModalLabel = document.getElementById('imageVisualizationModalLabel');
+            DOM_ELEMENTS.generatedImageView = document.getElementById('generatedImageView');
+            DOM_ELEMENTS.visualizationSpinner = document.getElementById('visualizationSpinner');
+            DOM_ELEMENTS.visualizationErrorText = document.getElementById('visualizationErrorText');
+            DOM_ELEMENTS.visualizationPromptText = document.getElementById('visualizationPromptText');
+            DOM_ELEMENTS.regenerateImageBtn = document.getElementById('regenerateImageBtn');
+            DOM_ELEMENTS.imageDisplayArea = document.getElementById('imageDisplayArea');
+
+            if (DOM_ELEMENTS.currentYearSpan) {
+                DOM_ELEMENTS.currentYearSpan.textContent = new Date().getFullYear();
+            }
+            
+            document.body.style.backgroundImage = `url('${APP_CONFIG.dashboardBackgroundImage}')`;
+
+            setupEventListeners();
+            createDashboardLayout();
+            loadAllTrends(false);
+        }
+
+        function setupEventListeners() {
+            DOM_ELEMENTS.refreshAllBtn.addEventListener('click', () => loadAllTrends(true));
+            DOM_ELEMENTS.trendsRow.addEventListener('click', handleCardActions);
+            DOM_ELEMENTS.regenerateImageBtn.addEventListener('click', handleRegenerateImage);
+        }
+
+        function createDashboardLayout() {
+            APP_CONFIG.sources.forEach(sourceInfo => {
+                const cardHTML = createTrendCardHTML(sourceInfo.id, sourceInfo.name, sourceInfo.icon);
+                const colDiv = document.createElement('div');
+                colDiv.className = `${sourceInfo.colWidth} mb-4`;
+                colDiv.innerHTML = cardHTML;
+                DOM_ELEMENTS.trendsRow.appendChild(colDiv);
+            });
+        }
+        
+        function createTrendCardHTML(sourceId, sourceName, iconPath) {
+            return `
+            <div class="card h-100 trend-card shadow-sm" data-source="${sourceId}">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 h6"><img src="${escapeHTML(iconPath)}" alt="${escapeHTML(sourceName)} Icon" class="trend-icon me-2">${escapeHTML(sourceName)}</h5>
+                    <div>
+                        <button class="btn btn-sm btn-outline-secondary me-1 action-btn" data-action="summarize" title="AI Summarize this section">
+                            <i class="bi bi-robot"></i> <span class="d-none d-md-inline">Summarize</span>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary action-btn" data-action="refresh" title="Refresh this section">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="ai-summary-container mb-3 p-2" style="display: none;">
+                        <div class="d-flex align-items-center mb-1">
+                           <i class="bi bi-lightbulb-fill text-warning me-2"></i> <p class="fw-bold mb-0">AI Insight:</p>
+                        </div>
+                        <div class="text-center ai-summary-spinner-container my-2" style="display: none;">
+                            <div class="spinner-border spinner-border-sm text-primary ai-summary-spinner me-2" role="status"></div>
+                        </div>
+                        <p class="ai-summary-text small"></p>
+                    </div>
+                    <ul class="list-group list-group-flush trend-list"></ul>
+                    <div class="text-center mt-3 trend-loader">
+                        <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>
+                    </div>
+                    <div class="text-center mt-3 trend-error p-3 bg-danger-subtle border border-danger rounded" style="display: none;">
+                        <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
+                        <span class="text-danger-emphasis">Could not load trends.</span>
+                    </div>
+                    <div class="text-center mt-3 trend-no-data p-3 bg-secondary-subtle border border-secondary rounded" style="display: none;">
+                        <i class="bi bi-info-circle-fill text-secondary me-2"></i>
+                        <span class="text-secondary-emphasis">No trends available at the moment.</span>
+                    </div>
+                </div>
+                <div class="card-footer text-body-secondary">
+                    Last updated: <span class="last-updated-time">Never</span>
+                </div>
+            </div>`;
+        }
+
+        async function loadAllTrends(isManualRefresh = false) {
+            DOM_ELEMENTS.refreshAllBtn.disabled = true;
+            const icon = DOM_ELEMENTS.refreshAllBtn.querySelector('i');
+            icon.classList.add('bi-spin');
+
+            const promises = APP_CONFIG.sources.map(source => fetchTrendData(source.id, isManualRefresh));
+            try {
+                await Promise.allSettled(promises);
+            } finally {
+                DOM_ELEMENTS.refreshAllBtn.disabled = false;
+                icon.classList.remove('bi-spin');
+            }
+        }
+
+        async function fetchTrendData(sourceId, isManualRefresh = false) {
+            const cardElement = DOM_ELEMENTS.trendsRow.querySelector(`.trend-card[data-source="${sourceId}"]`);
+            if (!cardElement) return;
+
+            const loader = cardElement.querySelector('.trend-loader');
+            const errorDisplay = cardElement.querySelector('.trend-error');
+            const noDataDisplay = cardElement.querySelector('.trend-no-data');
+            const listGroup = cardElement.querySelector('.trend-list');
+            const lastUpdatedSpan = cardElement.querySelector('.last-updated-time');
+            const refreshButtonIcon = cardElement.querySelector('button[data-action="refresh"] i');
+            const refreshButton = cardElement.querySelector('button[data-action="refresh"]');
+
+            loader.style.display = 'block';
+            errorDisplay.style.display = 'none';
+            noDataDisplay.style.display = 'none';
+            listGroup.innerHTML = ''; 
+            if (refreshButtonIcon) refreshButtonIcon.classList.add('bi-spin');
+            if (refreshButton) refreshButton.disabled = true;
+            
+            try {
+                let data;
+                if (sourceId === 'googleTrends') {
+                    data = await APP_CONFIG.api.googleTrends.parser(cardElement);
+                } else {
+                    const apiUrl = typeof APP_CONFIG.api[sourceId].url === 'function' ? APP_CONFIG.api[sourceId].url() : APP_CONFIG.api[sourceId].url;
+                    const response = await fetch(apiUrl);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status} for ${sourceId}`);
+                    const rawData = await response.json();
+                    data = APP_CONFIG.api[sourceId].parser(rawData);
+                }
+                renderTrendItems(cardElement, data, sourceId);
+                lastUpdatedSpan.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            } catch (err) {
+                console.error(`Failed to fetch ${sourceId}:`, err);
+                errorDisplay.style.display = 'block';
+                const errorSpan = errorDisplay.querySelector('.text-danger-emphasis');
+                if(errorSpan) errorSpan.textContent = `Could not load ${sourceId} trends. ${err.message}`;
+            } finally {
+                loader.style.display = 'none';
+                if (refreshButtonIcon) refreshButtonIcon.classList.remove('bi-spin');
+                if (refreshButton) refreshButton.disabled = false;
+            }
+        }
+
+        function parseRedditData(data) {
+            if (!data || !data.data || !data.data.children) return [];
+            return data.data.children.map(post => ({
+                title: post.data.title,
+                link: `https://www.reddit.com${post.data.permalink}`,
+                description: `r/${post.data.subreddit} - ${post.data.ups.toLocaleString()} upvotes`,
+                meta: `Comments: ${post.data.num_comments.toLocaleString()}`,
+                rawTitleForPrompt: post.data.title
+            })).slice(0, 7);
+        }
+
+        function parseGithubData(data) {
+            if (!data || !data.items) return [];
+            return data.items.map(repo => ({
+                title: repo.full_name,
+                link: repo.html_url,
+                description: repo.description ? (repo.description.length > 120 ? repo.description.substring(0, 117) + '...' : repo.description) : 'No description.',
+                meta: `⭐ ${repo.stargazers_count.toLocaleString()} | ${repo.language || 'N/A'}`,
+                rawTitleForPrompt: `${repo.name}: ${repo.description || 'A popular GitHub repository.'}`
+            })).slice(0, 7);
+        }
+
+        function parseWikipediaData(data) {
+            if (!data || !data.items || !data.items[0] || !data.items[0].articles) return [];
+            return data.items[0].articles
+                .filter(article => article.article !== "Main_Page" && !article.article.startsWith("Special:") && !article.article.startsWith("Portal:"))
+                .map(article => ({
+                    title: article.article.replace(/_/g, ' '),
+                    link: `https://en.wikipedia.org/wiki/${article.article}`,
+                    description: `${article.views.toLocaleString()} views yesterday`,
+                    meta: `Rank: ${article.rank}`,
+                    rawTitleForPrompt: article.article.replace(/_/g, ' ')
+                })).slice(0, 7);
+        }
+
+        async function fetchAndParseGoogleTrendsSimulated(cardElement) {
+            const aiPrompt = "List 5 diverse, current global trending search topics or news headlines. Format as a simple numbered list. Each item should be concise. No extra text or preamble, just the list items each on a new line.";
+            try {
+                const response = await fetch('/api/ai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ msgforai: aiPrompt, aiguide: "You are an AI assistant that provides trending topics." })
+                });
+                if (!response.ok) throw new Error(`AI API error! status: ${response.status}`);
+                const aiData = await response.json();
+                if (!aiData.success || !aiData.response) throw new Error(aiData.error || 'AI response invalid');
+                
+                const topics = aiData.response.split('\n')
+                    .map(line => line.replace(/^\d+\.\s*/, '').trim()) 
+                    .filter(topic => topic.length > 0);
+
+                return topics.map(topic => ({
+                    title: topic,
+                    link: `https://trends.google.com/trends/explore?q=${encodeURIComponent(topic)}`,
+                    description: 'Explore on Google Trends',
+                    meta: 'Simulated',
+                    rawTitleForPrompt: topic
+                })).slice(0, 5);
+            } catch (err) {
+                console.error('Google Trends Simulation Error:', err);
+                throw err; 
+            }
+        }
+
+        function renderTrendItems(cardElement, items, sourceId) {
+            const listGroup = cardElement.querySelector('.trend-list');
+            const noDataDisplay = cardElement.querySelector('.trend-no-data');
+            listGroup.innerHTML = '';
+            if (!items || items.length === 0) {
+                noDataDisplay.style.display = 'block';
+                return;
+            }
+            noDataDisplay.style.display = 'none';
+
+            items.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item';
+                li.innerHTML = `
+                    <div class="list-group-item-content">
+                        <div class="d-flex w-100 justify-content-between align-items-start">
+                            <div class="flex-grow-1 me-2">
+                                <h6 class="mb-1"><a href="${escapeHTML(item.link)}" target="_blank" rel="noopener noreferrer">${escapeHTML(item.title)}</a></h6>
+                                <p class="mb-1 small text-body-secondary">${escapeHTML(item.description)}</p>
+                            </div>
+                            <small class="text-nowrap text-body-secondary ms-2">${escapeHTML(item.meta)}</small>
+                        </div>
+                    </div>
+                    <div class="visualize-btn-container">
+                        <button class="btn btn-sm btn-outline-primary mt-1 action-btn visualize-btn" data-action="visualize" data-title="${escapeHTML(item.title)}" data-rawtitle="${escapeHTML(item.rawTitleForPrompt)}" title="Visualize this trend">
+                            <i class="bi bi-magic"></i> <span class="d-none d-sm-inline">Visualize</span>
+                        </button>
+                    </div>
+                `;
+                listGroup.appendChild(li);
+            });
+        }
+
+        async function handleCardActions(event) {
+            const targetButton = event.target.closest('.action-btn');
+            if (!targetButton) return;
+
+            const action = targetButton.dataset.action;
+            const cardElement = targetButton.closest('.trend-card');
+            const sourceId = cardElement.dataset.source;
+
+            if (action === 'refresh') {
+                fetchTrendData(sourceId, true);
+            } else if (action === 'summarize') {
+                generateAISummary(sourceId, cardElement, targetButton);
+            } else if (action === 'visualize') {
+                const trendTitle = targetButton.dataset.title;
+                const trendRawTitle = targetButton.dataset.rawtitle;
+                initiateImageGeneration(trendTitle, trendRawTitle);
+            }
+        }
+
+        async function generateAISummary(sourceId, cardElement, summarizeButton) {
+            const summaryContainer = cardElement.querySelector('.ai-summary-container');
+            const summaryTextElement = cardElement.querySelector('.ai-summary-text');
+            const summarySpinnerContainer = cardElement.querySelector('.ai-summary-spinner-container');
+            
+            if (summarizeButton) summarizeButton.disabled = true;
+            const originalButtonIcon = summarizeButton ? summarizeButton.querySelector('i').className : '';
+            if (summarizeButton) summarizeButton.querySelector('i').className = 'spinner-border spinner-border-sm';
+
+
+            summaryContainer.style.display = 'block';
+            summaryTextElement.textContent = '';
+            summarySpinnerContainer.style.display = 'block';
+
+            const trendItems = Array.from(cardElement.querySelectorAll('.trend-list .list-group-item h6 a'))
+                                  .map(a => a.textContent.trim())
+                                  .slice(0, 5); 
+
+            if (trendItems.length === 0) {
+                summaryTextElement.textContent = 'No trends to summarize.';
+                summarySpinnerContainer.style.display = 'none';
+                if (summarizeButton) {
+                    summarizeButton.disabled = false;
+                    summarizeButton.querySelector('i').className = originalButtonIcon;
+                }
+                return;
+            }
+
+            const promptItems = trendItems.map((item, index) => `${index + 1}. ${item}`).join('\n');
+            const sourceName = APP_CONFIG.sources.find(s => s.id === sourceId)?.name || 'these';
+            const aiPrompt = `Concisely summarize these trending ${sourceName} items in one short paragraph (2-3 sentences):\n${promptItems}`;
+
+            try {
+                const response = await fetch('/api/ai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ msgforai: aiPrompt, aiguide: `You are an AI assistant providing concise summaries for a trends dashboard.` })
+                });
+                if (!response.ok) throw new Error(`AI summary API error! status: ${response.status}`);
+                const data = await response.json();
+                if (!data.success || !data.response) throw new Error(data.error || 'Invalid AI summary response');
+                summaryTextElement.textContent = data.response;
+            } catch (err) {
+                console.error(`AI Summary Error for ${sourceId}:`, err);
+                summaryTextElement.textContent = `Could not generate summary. ${err.message}`;
+            } finally {
+                summarySpinnerContainer.style.display = 'none';
+                if (summarizeButton) {
+                    summarizeButton.disabled = false;
+                    summarizeButton.querySelector('i').className = originalButtonIcon;
+                }
+            }
+        }
+        
+        async function _generateImage(titleForModal, promptForApi) {
+            DOM_ELEMENTS.imageVisualizationModalLabel.textContent = `Visualization: ${escapeHTML(titleForModal)}`;
+            DOM_ELEMENTS.visualizationPromptText.textContent = `Prompt: "${escapeHTML(promptForApi)}"`;
+            DOM_ELEMENTS.visualizationSpinner.style.display = 'block';
+            DOM_ELEMENTS.generatedImageView.style.display = 'none';
+            DOM_ELEMENTS.generatedImageView.src = '#'; 
+            DOM_ELEMENTS.visualizationErrorText.style.display = 'none';
+            DOM_ELEMENTS.imageDisplayArea.style.minHeight = '300px';
+            DOM_ELEMENTS.regenerateImageBtn.disabled = true;
+
+
+            try {
+                const response = await fetch('/api/generate-image-on-demand', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: `Abstract, artistic, digital art visualization: '${promptForApi}'. Dark theme, tech-inspired, vibrant accents.`, aspectRatio: "16:9" })
+                });
+                const data = await response.json();
+
+                if (!data.success || !data.imageUrl) {
+                    throw new Error(data.error || 'Image generation failed.');
+                }
+                
+                DOM_ELEMENTS.generatedImageView.src = data.imageUrl;
+                DOM_ELEMENTS.generatedImageView.onload = () => {
+                    DOM_ELEMENTS.generatedImageView.style.display = 'block';
+                    DOM_ELEMENTS.visualizationSpinner.style.display = 'none';
+                    DOM_ELEMENTS.imageDisplayArea.style.minHeight = 'auto';
+                };
+                DOM_ELEMENTS.generatedImageView.onerror = () => {
+                    console.error('Failed to load generated image from URL:', data.imageUrl);
+                    DOM_ELEMENTS.visualizationErrorText.textContent = 'Error: Failed to load generated image.';
+                    DOM_ELEMENTS.visualizationErrorText.style.display = 'block';
+                    DOM_ELEMENTS.visualizationSpinner.style.display = 'none';
+                };
+
+            } catch (err) {
+                console.error('Image Generation Error:', err);
+                DOM_ELEMENTS.visualizationErrorText.textContent = `Error: ${err.message}`;
+                DOM_ELEMENTS.visualizationErrorText.style.display = 'block';
+                DOM_ELEMENTS.visualizationSpinner.style.display = 'none';
+            } finally {
+                DOM_ELEMENTS.regenerateImageBtn.disabled = false;
+            }
+        }
+
+
+        async function initiateImageGeneration(trendTitle, trendRawTitleForPrompt) {
+            APP_STATE.currentVisualizationPrompt = trendRawTitleForPrompt;
+            APP_STATE.currentVisualizationTitle = trendTitle;
+            DOM_ELEMENTS.imageVisualizationModal.show();
+            await _generateImage(APP_STATE.currentVisualizationTitle, APP_STATE.currentVisualizationPrompt);
+        }
+
+        async function handleRegenerateImage() {
+            if (APP_STATE.currentVisualizationPrompt && APP_STATE.currentVisualizationTitle) {
+                await _generateImage(APP_STATE.currentVisualizationTitle, APP_STATE.currentVisualizationPrompt);
+            }
+        }
+
+        function escapeHTML(str) {
+            if (typeof str !== 'string') return '';
+            return str.replace(/[&<>"']/g, function (match) {
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                }[match];
+            });
+        }
+    })();
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

@@ -1,0 +1,151 @@
+{
+  "projectId": "d3b0c63b-24c7-4844-8fe6-4a09c903d5a3",
+  "revisionString": "2",
+  "projectNameDisplay": "Ella Park Honey education",
+  "projectType": "website",
+  "userPromptForThisRevision": "Need all the images working",
+  "basedOnRevisionString": "1",
+  "savedAt": "2025-05-29T14:37:48.331Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/imagen3_1b466b87-d7a.png",
+      "url": "/generated_images/imagen3_1b466b87-d7a.png",
+      "description": "Expansive, sun-drenched panoramic photograph of a beautiful apiary (Ella Park Honey) in Sooke, British Columbia. Show 10-15 well-maintained beehives arranged neatly in a lush green meadow, surrounded by vibrant wildflowers (various colors like purple, yellow, white) and a backdrop of temperate forest. The Sooke hills or a hint of the Pacific coastline could be in the distant background. Bright, clear day, golden hour light casting long shadows. Style: photorealistic, warm, inviting.",
+      "purpose": "Main hero background image for website homepage (#home section, .hero-section .image-placeholder-bg).",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_5073b0b2-493.png",
+      "url": "/generated_images/imagen3_5073b0b2-493.png",
+      "description": "Artistic still life photo of several glass jars filled with rich, golden Ella Park Honey. Jars of varying sizes, some with simple, elegant labels saying 'Ella Park Honey - Sooke Wildflower'. One jar could be open with a honey dipper resting on it, a little honey dripping. Background: rustic wooden table, perhaps some out-of-focus wildflowers or honeycomb. Warm, natural light. Style: photorealistic, appetizing, high detail.",
+      "purpose": "Image for 'Our Delicious Honey' card in Offerings section on homepage.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_c8ca355a-165.png",
+      "url": "/generated_images/imagen3_c8ca355a-165.png",
+      "description": "Action shot of a small group of 2-3 diverse guests (adults, perhaps one older child) wearing white beekeeping suits and veils, attentively listening to a friendly beekeeper (also in suit) who is holding up a beehive frame. Focus on engagement and gentle interaction. Sunny day, apiary setting. Style: photorealistic, engaging, educational.",
+      "purpose": "Image for 'Beekeeping Experiences' card in Offerings section on homepage.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_a9ceb487-456.png",
+      "url": "/generated_images/imagen3_a9ceb487-456.png",
+      "description": "Charming, cozy wooden cabin (Airbnb) nestled in a natural Sooke setting. The cabin should look inviting, perhaps with a small porch and flowers around it. A few beehives are visible in the middle distance, safely and picturesquely located. Lush greenery, sunny day. Style: photorealistic, peaceful, unique.",
+      "purpose": "Image for 'Unique Bee & Bee Stays' card in Offerings section on homepage.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_d4283581-02b.png",
+      "url": "/generated_images/imagen3_d4283581-02b.png",
+      "description": "Photo of one or two friendly, approachable people (representing founders of Ella Park Honey), possibly in their 40s-50s, smiling. They could be standing near their beehives, perhaps one holding a frame or a jar of honey. Casual, authentic attire. Sooke apiary background. Style: photorealistic, warm, trustworthy.",
+      "purpose": "Image for 'About Us' section, illustrating the founders or beekeeping passion.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_3504f49c-0bb.png",
+      "url": "/generated_images/imagen3_3504f49c-0bb.png",
+      "description": "Beautiful landscape photograph showcasing the lush natural environment of Sooke, BC. Focus on diverse local flora: wildflowers, native plants, trees. Could include a hint of the rugged coastline or dense forest. Emphasize biodiversity. Sunny, clear day. Style: photorealistic, vibrant, natural beauty.",
+      "purpose": "Image for 'About Us' section, illustrating the Sooke environment.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_384202f8-3e3.png",
+      "url": "/generated_images/imagen3_384202f8-3e3.png",
+      "description": "Extreme close-up, detailed macro shot of a section of natural honeycomb, with cells filled with rich, glistening golden honey. Some cells might be capped. Texture and viscosity of honey should be apparent. Warm, natural lighting. Style: photorealistic, appetizing, detailed.",
+      "purpose": "Image for 'Our Honey' section, showcasing the honey's quality.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_8d7c7291-bfb.png",
+      "url": "/generated_images/imagen3_8d7c7291-bfb.png",
+      "description": "Engaging photo of a diverse group of participants (3-4 people, various ages) in full beekeeping suits, actively engaged in a beekeeping experience. One participant might be carefully holding a frame with bees, guided by an instructor. Expressions of curiosity and learning. Apiary setting. Style: photorealistic, interactive, educational.",
+      "purpose": "Main image for 'Beekeeping Experience Days' section.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_faf000d4-0f3.png",
+      "url": "/generated_images/imagen3_faf000d4-0f3.png",
+      "description": "Exterior shot of the unique Airbnb cabin at Ella Park Honey. Focus on its charming architecture and integration with the natural Sooke surroundings. Show blooming flowers, perhaps a comfortable outdoor seating area. Beehives are subtly visible in the background, suggesting the unique 'bee & bee' theme. Late afternoon light. Style: photorealistic, inviting, tranquil.",
+      "purpose": "Main image for 'Unique Stays: Our Bee & Bee' section.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_e2a9f63b-8a2.png",
+      "url": "/generated_images/imagen3_e2a9f63b-8a2.png",
+      "description": "Clear, detailed educational illustration of the three types of honeybees: Queen (larger, elongated abdomen), Worker (smaller, with pollen baskets if visible), and Drone (larger eyes, robust body). Bees should be distinct and accurately depicted. Light background. Style: scientific illustration, clear, informative.",
+      "purpose": "Image for 'The Hive Hierarchy' card in Education section, and for use within the corresponding article modal.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_07c1581f-f2b.png",
+      "url": "/generated_images/imagen3_07c1581f-f2b.png",
+      "description": "Vibrant photo of diverse Sooke wildflowers (e.g., fireweed, lupine, daisies) in full bloom, with several bees and a butterfly actively pollinating them. Close-up enough to see the pollinators clearly. Sunny, natural setting. Style: photorealistic, lively, ecological.",
+      "purpose": "Image for 'Pollinators in Peril' card in Education section.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_a8baba81-f6d.png",
+      "url": "/generated_images/imagen3_a8baba81-f6d.png",
+      "description": "A composite image or a visually appealing collage showing Ella Park Honey beehives in four distinct seasons: Spring (surrounded by blossoms, bees active), Summer (lush greenery, peak activity), Autumn (golden foliage, honey harvest possibly hinted), Winter (hives perhaps lightly dusted with snow or prepared for cold). Style: photorealistic, seasonal, informative.",
+      "purpose": "Image for 'A Year at Ella Park' card in Education section.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_58c7fc09-66c.png",
+      "url": "/generated_images/imagen3_58c7fc09-66c.png",
+      "description": "Close-up photograph of honeybees diligently working on a honeycomb frame. Show bees actively moving, some entering cells, others capping honey. Good detail on bees and comb structure. Style: photorealistic, macro, active.",
+      "purpose": "Gallery Item 1: Bees at work on honeycomb.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_72559e61-3bc.png",
+      "url": "/generated_images/imagen3_72559e61-3bc.png",
+      "description": "Scenic wide shot of the Ella Park Honey farm landscape in Sooke. Show the apiary integrated into the natural surroundings, with fields, trees, and perhaps Sooke hills in the background. Early morning or late afternoon light. Style: photorealistic, picturesque, serene.",
+      "purpose": "Gallery Item 2: Ella Park Honey farm landscape.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_2fb35ddd-f18.png",
+      "url": "/generated_images/imagen3_2fb35ddd-f18.png",
+      "description": "Candid shot of a happy, smiling participant (adult or older child) during a beekeeping experience, wearing a bee suit (veil might be up if safe distance or post-interaction). They could be holding a small jar of honey or looking fascinated. Style: photorealistic, joyful, authentic.",
+      "purpose": "Gallery Item 3: Beekeeping experience participant smiling.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_bd4ae568-ce4.png",
+      "url": "/generated_images/imagen3_bd4ae568-ce4.png",
+      "description": "Artistic close-up of a single jar of Ella Park Honey, clearly showing the label. The honey should look golden and pure. Soft, natural lighting. Background slightly blurred, perhaps hinting at nature or wood. Style: photorealistic, product shot, appealing.",
+      "purpose": "Gallery Item 4: Close-up of Ella Park Honey jar.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_6eec1c03-c8d.png",
+      "url": "/generated_images/imagen3_6eec1c03-c8d.png",
+      "description": "Beautiful photograph of a sunset over the Sooke hills, with the Ella Park Honey apiary silhouetted or gently illuminated in the foreground. Warm colors: oranges, purples, reds. Peaceful and evocative. Style: photorealistic, atmospheric, beautiful.",
+      "purpose": "Gallery Item 5: Sunset over Sooke hills near the apiary.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_0f4af782-448.png",
+      "url": "/generated_images/imagen3_0f4af782-448.png",
+      "description": "Detailed macro shot of a wooden beehive frame, showing the intricate structure of beeswax cells. Some cells might contain pollen (various colors), larvae, or capped honey. Educational and visually interesting. Style: photorealistic, detailed, informative.",
+      "purpose": "Gallery Item 6: Detail of a beehive frame.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_554055ee-a91.png",
+      "url": "/generated_images/imagen3_554055ee-a91.png",
+      "description": "Close-up image of a single honeybee diligently pollinating a vibrant Sooke wildflower (e.g., a bright purple fireweed or a yellow dandelion). The bee should be in sharp focus, with pollen visible on its legs. Background softly blurred. Symbolizes the delicate balance of nature and the importance of pollinators. Style: photorealistic, macro, vibrant.",
+      "purpose": "Image for 'Pollinators in Peril' article modal content.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_2c78fef5-784.png",
+      "url": "/generated_images/imagen3_2c78fef5-784.png",
+      "description": "A montage image showing four distinct scenes of beekeeping activities across the seasons at Ella Park: 1. Spring hive inspection with new blooms. 2. Summer honey super addition during peak flow. 3. Autumn honey extraction process. 4. Winter hive preparation (e.g., wrapping or ensuring ventilation). Each scene should be clear and representative. Style: photorealistic, informative series.",
+      "purpose": "Image for 'A Year at Ella Park' article modal content.",
+      "isNewlyGenerated": true
+    }
+  ]
+}

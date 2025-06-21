@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Image Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+        .main-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .image-display-area {
+            background-color: #2d3748;
+            border: 1px solid #4a5568;
+            min-height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+        .image-display-area img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .image-history-container {
+            max-height: 300px;
+            overflow-y: auto;
+            padding-top: 1rem;
+        }
+        .history-item {
+            width: 100px;
+            height: 100px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.2s ease-in-out;
+            box-sizing: content-box;
+        }
+        .history-item:hover {
+            border-color: #0d6efd;
+        }
+        .history-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .history-actions {
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 5px;
+            box-sizing: border-box;
+        }
+        .history-item:hover .history-actions {
+            opacity: 1;
+        }
+        .prompt-tips-card {
+            background-color: #2d3748;
+            border-color: #4a5568;
+        }
+        .form-control, .form-select {
+            background-color: #4a5568;
+            color: #e2e8f0;
+            border-color: #6a7385;
+        }
+        .form-control::placeholder {
+            color: #a0aec0;
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: #4a5568;
+            color: #e2e8f0;
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+        .list-group-item {
+            background-color: #2d3748;
+            border-color: #4a5568;
+            color: #e2e8f0;
+        }
+        .list-group-item:hover {
+            background-color: #4a5568;
+        }
+        .modal-content {
+            background-color: #2d3748;
+            color: #e2e8f0;
+        }
+        .modal-header, .modal-footer {
+            border-color: #4a5568;
+        }
+        .btn-close-white {
+            filter: invert(1) grayscale(100%) brightness(200%);
+        }
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            flex-direction: column;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid main-container p-4">
+        <h1 class="text-center mb-4 text-primary">AI Image Generator</h1>
+
+        <div class="row g-4 flex-grow-1">
+            <div class="col-lg-4 d-flex flex-column">
+                <div class="card bg-dark text-light p-4 shadow-sm flex-grow-1">
+                    <div class="mb-3">
+                        <label for="promptInput" class="form-label">Image Prompt</label>
+                        <div class="input-group">
+                            <textarea class="form-control" id="promptInput" rows="5" placeholder="Describe the image you want to generate (e.g., 'A futuristic city at sunset, neon lights, flying cars, photorealistic, cinematic lighting')"></textarea>
+                            <button class="btn btn-outline-secondary" type="button" id="clearPromptBtn" title="Clear Prompt"><i class="bi bi-x-lg"></i></button>
+                        </div>
+                        <div class="invalid-feedback" id="promptError">Prompt cannot be empty.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="aspectRatioSelect" class="form-label">Aspect Ratio</label>
+                        <select class="form-select" id="aspectRatioSelect">
+                            <option value="1:1" selected>1:1 (Square)</option>
+                            <option value="16:9">16:9 (Landscape)</option>
+                            <option value="9:16">9:16 (Portrait)</option>
+                            <option value="4:3">4:3 (Traditional)</option>
+                            <option value="3:4">3:4 (Portrait Traditional)</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label for="seedInput" class="form-label">Seed (Optional)</label>
+                        <input type="number" class="form-control" id="seedInput" placeholder="Enter a number for reproducibility">
+                    </div>
+                    <button id="generateBtn" class="btn btn-primary w-100 py-3">Generate Image</button>
+                    <div id="loadingIndicator" class="text-center mt-3 d-none">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Generating image...</p>
+                    </div>
+                    <div id="errorDisplay" class="alert alert-danger mt-3 d-none" role="alert"></div>
+                </div>
+
+                <div class="card bg-dark text-light mt-4 shadow-sm">
+                    <div class="card-header">Style Presets</div>
+                    <div class="card-body d-flex flex-wrap gap-2" id="stylePresetsContainer">
+                        <button class="btn btn-outline-primary btn-sm" data-style="photorealistic">Photorealistic</button>
+                        <button class="btn btn-outline-primary btn-sm" data-style="digital art">Digital Art</button>
+                        <button class="btn btn-outline-primary btn-sm" data-style="watercolor painting">Watercolor</button>
+                        <button class="btn btn-outline-primary btn-sm" data-style="pixel art">Pixel Art</button>
+                        <button class="btn btn-outline-primary btn-sm" data-style="cinematic lighting">Cinematic</button>
+                        <button class="btn btn-outline-primary btn-sm" data-style="anime style">Anime</button>
+                        <button class="btn btn-outline-primary btn-sm" data-style="cyberpunk">Cyberpunk</button>
+                        <button class="btn btn-outline-primary btn-sm" data-style="fantasy art">Fantasy Art</button>
+                    </div>
+                </div>
+
+                <div class="card prompt-tips-card text-light mt-4 shadow-sm">
+                    <div class="card-header" id="promptTipsHeader">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link text-light text-decoration-none w-100 text-start d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#promptTipsCollapse" aria-expanded="false" aria-controls="promptTipsCollapse">
+                                Prompting Tips <i class="bi bi-chevron-down"></i>
+                            </button>
+                        </h5>
+                    </div>
+                    <div id="promptTipsCollapse" class="collapse">
+                        <div class="card-body">
+                            <p><strong>Be Specific:</strong> Instead of "dog", try "a golden retriever puppy playing in a field of sunflowers".</p>
+                            <p><strong>Add Styles:</strong> Include artistic styles like "photorealistic", "oil painting", "pixel art", "digital art", "cinematic".</p>
+                            <p><strong>Specify Details:</strong> Think about lighting ("golden hour", "neon glow"), mood ("serene", "dramatic"), and composition ("close-up", "wide shot").</p>
+                            <p><strong>Use Keywords:</strong> "4K", "8K", "highly detailed", "vibrant colors", "masterpiece" can improve quality.</p>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-secondary w-100" id="aiSuggestPromptBtn" data-bs-toggle="modal" data-bs-target="#aiSuggestionsModal">Get AI Prompt Suggestions</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8 d-flex flex-column">
+                <div class="card bg-dark text-light p-4 shadow-sm flex-grow-1">
+                    <h5 class="card-title text-primary mb-3">Generated Image</h5>
+                    <div class="image-display-area rounded mb-3 flex-grow-1">
+                        <img id="generatedImage" src="" alt="Generated image will appear here" class="img-fluid d-none">
+                        <p id="imagePlaceholder" class="text-muted">Your generated image will appear here.</p>
+                        <div id="mainImageLoadingOverlay" class="loading-overlay d-none">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <p class="mt-2">Loading image...</p>
+                        </div>
+                    </div>
+                    <div id="currentImageMetadata" class="mt-3 d-none">
+                        <p class="mb-1"><strong>Prompt:</strong> <span id="currentImagePrompt"></span> <button class="btn btn-sm btn-outline-secondary ms-2" id="copyCurrentImagePromptBtn" title="Copy Prompt"><i class="bi bi-clipboard"></i></button></p>
+                        <p class="mb-1"><strong>Aspect Ratio:</strong> <span id="currentImageAspectRatio"></span></p>
+                        <p class="mb-1"><strong>Seed:</strong> <span id="currentImageSeed"></span></p>
+                    </div>
+                    <div class="d-flex justify-content-end mt-3">
+                        <button id="downloadBtn" class="btn btn-success" disabled>Download Image</button>
+                    </div>
+                </div>
+
+                <div class="card bg-dark text-light p-4 shadow-sm mt-4">
+                    <h5 class="card-title text-primary mb-3">Generation History</h5>
+                    <div id="imageHistoryContainer" class="d-flex flex-wrap gap-3 image-history-container">
+                        <p class="text-muted w-100 text-center" id="historyPlaceholder">No images generated yet.</p>
+                    </div>
+                    <div class="d-flex justify-content-end mt-3">
+                        <button id="clearHistoryBtn" class="btn btn-outline-danger btn-sm" disabled>Clear History</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="aiSuggestionsModal" tabindex="-1" aria-labelledby="aiSuggestionsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header border-bottom border-secondary">
+                    <h5 class="modal-title" id="aiSuggestionsModalLabel">AI Prompt Suggestions</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted">Enter a starting idea below to get AI-powered prompt enhancements:</p>
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" id="aiSuggestionInput" placeholder="e.g., 'A cat in space'">
+                        <button class="btn btn-primary" type="button" id="getAiSuggestionsBtn">Suggest</button>
+                    </div>
+                    <div id="aiSuggestionsLoading" class="loading-overlay d-none">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2">Generating suggestions...</p>
+                    </div>
+                    <div id="aiSuggestionsError" class="alert alert-danger d-none mt-3"></div>
+                    <div id="aiSuggestionsList" class="list-group"></div>
+                </div>
+                <div class="modal-footer border-top border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="clearHistoryConfirmModal" tabindex="-1" aria-labelledby="clearHistoryConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header border-bottom border-secondary">
+                    <h5 class="modal-title" id="clearHistoryConfirmModalLabel">Confirm Clear History</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to clear all generated image history? This action cannot be undone.
+                </div>
+                <div class="modal-footer border-top border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmClearHistoryBtn">Clear All</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="errorExplanationModal" tabindex="-1" aria-labelledby="errorExplanationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header border-bottom border-secondary">
+                    <h5 class="modal-title" id="errorExplanationModalLabel">Understanding API Errors (HTTP 401)</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>HTTP Status Code 401 (Unauthorized):</h6>
+                    <p>An HTTP 401 status code indicates that the request has not been applied because it lacks valid authentication credentials for the target resource. In simpler terms, the server rejected the request because it didn't recognize or trust the identity of the client trying to access it.</p>
+                    <h6>Context for this Application:</h6>
+                    <p>This AI Image Generator web app uses a special internal endpoint, <code>/api/generate-image-on-demand</code>, to communicate with the underlying AI model (Imagen 3). This endpoint acts as a proxy, meaning your client-side JavaScript code does not directly handle API keys or authentication tokens for the AI service. Instead, the AppGen platform (the environment running this app) is responsible for authenticating with the AI model on your behalf.</p>
+                    <h6>Probable Cause of the 401 Error:</h6>
+                    <p>Since your client-side code is correctly structured to make the <code>fetch</code> request to <code>/api/generate-image-on-demand</code>, the <code>401 Unauthorized</code> error strongly suggests an issue on the <em>server-side</em> (the AppGen platform's internal proxy). This could be due to:</p>
+                    <ul>
+                        <li><strong>Expired or Invalid Internal Credentials:</strong> The AppGen platform's internal authentication token or API key used to access the Imagen 3 service may have expired or become invalid.</li>
+                        <li><strong>Service Downtime/Misconfiguration:</strong> There might be a temporary issue or misconfiguration with the AppGen platform's connection to the AI model.</li>
+                        <li><strong>Rate Limiting (Less Likely for 401, More for 429/403):</strong> While less common for a 401, if the platform's internal account hit a strict rate limit, it could sometimes manifest as an authorization issue, though typically it would be a 429 (Too Many Requests) or 403 (Forbidden).</li>
+                    </ul>
+                    <h6>What This Means for You:</h6>
+                    <p>The good news is that the error is highly unlikely to be caused by a bug in the generated client-side HTML/JavaScript code itself. The code is correctly attempting to use the provided internal API. The problem lies within the environment that hosts and proxies the AI service.</p>
+                    <h6>Recommended Action:</h6>
+                    <p>If you encounter this error persistently, it is advisable to report it to the platform provider (the service running AppGen) as an issue with the <code>/api/generate-image-on-demand</code> endpoint.</p>
+                </div>
+                <div class="modal-footer border-top border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function() {
+            const promptInput = document.getElementById('promptInput');
+            const clearPromptBtn = document.getElementById('clearPromptBtn');
+            const aspectRatioSelect = document.getElementById('aspectRatioSelect');
+            const seedInput = document.getElementById('seedInput');
+            const generateBtn = document.getElementById('generateBtn');
+            const generatedImage = document.getElementById('generatedImage');
+            const imagePlaceholder = document.getElementById('imagePlaceholder');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const errorDisplay = document.getElementById('errorDisplay');
+            const promptError = document.getElementById('promptError');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const imageHistoryContainer = document.getElementById('imageHistoryContainer');
+            const historyPlaceholder = document.getElementById('historyPlaceholder');
+            const stylePresetsContainer = document.getElementById('stylePresetsContainer');
+            const aiSuggestPromptBtn = document.getElementById('aiSuggestPromptBtn');
+            const aiSuggestionsModal = new bootstrap.Modal(document.getElementById('aiSuggestionsModal'));
+            const aiSuggestionInput = document.getElementById('aiSuggestionInput');
+            const getAiSuggestionsBtn = document.getElementById('getAiSuggestionsBtn');
+            const aiSuggestionsLoading = document.getElementById('aiSuggestionsLoading');
+            const aiSuggestionsError = document.getElementById('aiSuggestionsError');
+            const aiSuggestionsList = document.getElementById('aiSuggestionsList');
+            const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+            const clearHistoryConfirmModal = new bootstrap.Modal(document.getElementById('clearHistoryConfirmModal'));
+            const confirmClearHistoryBtn = document.getElementById('confirmClearHistoryBtn');
+            const currentImageMetadata = document.getElementById('currentImageMetadata');
+            const currentImagePrompt = document.getElementById('currentImagePrompt');
+            const currentImageAspectRatio = document.getElementById('currentImageAspectRatio');
+            const currentImageSeed = document.getElementById('currentImageSeed');
+            const copyCurrentImagePromptBtn = document.getElementById('copyCurrentImagePromptBtn');
+            const mainImageLoadingOverlay = document.getElementById('mainImageLoadingOverlay');
+
+            const appState = {
+                currentImageUrl: null,
+                currentPrompt: null,
+                currentAspectRatio: null,
+                currentSeed: null,
+                generatedImages: [],
+                isLoading: false,
+                isAISuggesting: false,
+                error: null,
+                aiSuggestions: []
+            };
+
+            function updateUI() {
+                if (appState.isLoading) {
+                    loadingIndicator.classList.remove('d-none');
+                    generateBtn.disabled = true;
+                    promptInput.disabled = true;
+                    aspectRatioSelect.disabled = true;
+                    seedInput.disabled = true;
+                } else {
+                    loadingIndicator.classList.add('d-none');
+                    generateBtn.disabled = false;
+                    promptInput.disabled = false;
+                    aspectRatioSelect.disabled = false;
+                    seedInput.disabled = false;
+                }
+
+                if (appState.error) {
+                    errorDisplay.innerHTML = appState.error;
+                    if (appState.error.includes('HTTP error! status: 401')) {
+                        errorDisplay.innerHTML += ' <button class="btn btn-sm btn-outline-info ms-2" data-bs-toggle="modal" data-bs-target="#errorExplanationModal">Why this error?</button>';
+                    }
+                    errorDisplay.classList.remove('d-none');
+                } else {
+                    errorDisplay.classList.add('d-none');
+                }
+
+                if (appState.currentImageUrl) {
+                    generatedImage.src = appState.currentImageUrl;
+                    generatedImage.classList.remove('d-none');
+                    imagePlaceholder.classList.add('d-none');
+                    downloadBtn.disabled = false;
+
+                    currentImageMetadata.classList.remove('d-none');
+                    currentImagePrompt.textContent = appState.currentPrompt;
+                    currentImageAspectRatio.textContent = appState.currentAspectRatio || 'N/A';
+                    currentImageSeed.textContent = appState.currentSeed !== undefined ? appState.currentSeed : 'N/A';
+                } else {
+                    generatedImage.src = '';
+                    generatedImage.classList.add('d-none');
+                    imagePlaceholder.classList.remove('d-none');
+                    downloadBtn.disabled = true;
+                    currentImageMetadata.classList.add('d-none');
+                }
+
+                renderImageHistory();
+                renderAISuggestions();
+
+                clearHistoryBtn.disabled = appState.generatedImages.length === 0;
+            }
+
+            function renderImageHistory() {
+                imageHistoryContainer.innerHTML = '';
+
+                if (appState.generatedImages.length === 0) {
+                    historyPlaceholder.classList.remove('d-none');
+                } else {
+                    historyPlaceholder.classList.add('d-none');
+                }
+
+                appState.generatedImages.forEach((imgData, index) => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.classList.add('history-item', 'position-relative', 'rounded', 'overflow-hidden');
+
+                    const imgElement = document.createElement('img');
+                    imgElement.src = imgData.imageUrl;
+                    imgElement.alt = `Generated image: ${imgData.prompt}`;
+                    imgElement.title = imgData.prompt;
+
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.classList.add('history-actions', 'position-absolute', 'top-0', 'start-0', 'w-100', 'h-100', 'd-none');
+
+                    const regenerateBtn = document.createElement('button');
+                    regenerateBtn.classList.add('btn', 'btn-sm', 'btn-primary', 'mb-1');
+                    regenerateBtn.innerHTML = '<i class="bi bi-arrow-repeat"></i>';
+                    regenerateBtn.title = 'Regenerate';
+                    regenerateBtn.addEventListener('click', (event) => {
+                        event.stopPropagation();
+                        promptInput.value = imgData.prompt;
+                        aspectRatioSelect.value = imgData.aspectRatio || '1:1';
+                        seedInput.value = imgData.seed !== undefined ? imgData.seed : '';
+                        handleGenerateImage();
+                    });
+
+                    const copyPromptBtn = document.createElement('button');
+                    copyPromptBtn.classList.add('btn', 'btn-sm', 'btn-secondary', 'mb-1');
+                    copyPromptBtn.innerHTML = '<i class="bi bi-clipboard"></i>';
+                    copyPromptBtn.title = 'Copy Prompt';
+                    copyPromptBtn.addEventListener('click', (event) => {
+                        event.stopPropagation();
+                        navigator.clipboard.writeText(imgData.prompt).then(() => {
+                            alert('Prompt copied to clipboard!');
+                        }).catch(err => {
+                            console.error('Failed to copy prompt:', err);
+                        });
+                    });
+
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.classList.add('btn', 'btn-sm', 'btn-danger');
+                    deleteBtn.innerHTML = '<i class="bi bi-trash"></i>';
+                    deleteBtn.title = 'Delete';
+                    deleteBtn.addEventListener('click', (event) => {
+                        event.stopPropagation();
+                        handleDeleteHistoryItem(index);
+                    });
+
+                    actionsDiv.appendChild(regenerateBtn);
+                    actionsDiv.appendChild(copyPromptBtn);
+                    actionsDiv.appendChild(deleteBtn);
+
+                    itemDiv.appendChild(imgElement);
+                    itemDiv.appendChild(actionsDiv);
+
+                    itemDiv.addEventListener('click', () => {
+                        appState.currentImageUrl = imgData.imageUrl;
+                        appState.currentPrompt = imgData.prompt;
+                        appState.currentAspectRatio = imgData.aspectRatio;
+                        appState.currentSeed = imgData.seed;
+                        updateUI();
+                    });
+
+                    itemDiv.addEventListener('mouseenter', () => {
+                        actionsDiv.classList.remove('d-none');
+                    });
+                    itemDiv.addEventListener('mouseleave', () => {
+                        actionsDiv.classList.add('d-none');
+                    });
+
+                    imageHistoryContainer.appendChild(itemDiv);
+                });
+            }
+
+            function saveHistory() {
+                try {
+                    localStorage.setItem('imageGenHistory', JSON.stringify(appState.generatedImages));
+                } catch (e) {
+                    console.error('Failed to save history to localStorage:', e);
+                }
+            }
+
+            function loadHistory() {
+                try {
+                    const history = localStorage.getItem('imageGenHistory');
+                    if (history) {
+                        appState.generatedImages = JSON.parse(history);
+                        if (appState.generatedImages.length > 0) {
+                            const lastImage = appState.generatedImages[appState.generatedImages.length - 1];
+                            appState.currentImageUrl = lastImage.imageUrl;
+                            appState.currentPrompt = lastImage.prompt;
+                            appState.currentAspectRatio = lastImage.aspectRatio;
+                            appState.currentSeed = lastImage.seed;
+                        }
+                    }
+                } catch (e) {
+                    console.error('Failed to load history from localStorage:', e);
+                    appState.generatedImages = [];
+                }
+            }
+
+            async function handleGenerateImage() {
+                const prompt = promptInput.value.trim();
+                const aspectRatio = aspectRatioSelect.value;
+                const seed = seedInput.value ? parseInt(seedInput.value, 10) : undefined;
+
+                if (!prompt) {
+                    promptInput.classList.add('is-invalid');
+                    promptError.textContent = 'Prompt cannot be empty.';
+                    return;
+                } else {
+                    promptInput.classList.remove('is-invalid');
+                }
+
+                appState.isLoading = true;
+                appState.error = null;
+                appState.currentImageUrl = null;
+                mainImageLoadingOverlay.classList.remove('d-none');
+                updateUI();
+
+                try {
+                    const response = await fetch('/api/generate-image-on-demand', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prompt, aspectRatio, seed })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        appState.currentImageUrl = data.imageUrl;
+                        appState.currentPrompt = prompt;
+                        appState.currentAspectRatio = aspectRatio;
+                        appState.currentSeed = seed;
+                        appState.generatedImages.push({ prompt, imageUrl: data.imageUrl, aspectRatio, seed });
+                        saveHistory();
+                    } else {
+                        appState.error = data.error || 'Unknown error occurred during image generation.';
+                    }
+                } catch (e) {
+                    console.error('Error generating image:', e);
+                    appState.error = `Failed to generate image: ${e.message}. Please try again.`;
+                } finally {
+                    appState.isLoading = false;
+                    mainImageLoadingOverlay.classList.add('d-none');
+                    updateUI();
+                }
+            }
+
+            function handleDownloadImage() {
+                if (appState.currentImageUrl) {
+                    const link = document.createElement('a');
+                    link.href = appState.currentImageUrl;
+                    const filename = `generated_image_${Date.now()}.png`;
+                    link.download = filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+            }
+
+            function handleStylePresetClick(event) {
+                const style = event.target.dataset.style;
+                if (style) {
+                    const currentPrompt = promptInput.value.trim();
+                    if (currentPrompt && !currentPrompt.endsWith(',')) {
+                        promptInput.value = `${currentPrompt}, ${style}`;
+                    } else if (currentPrompt) {
+                        promptInput.value = `${currentPrompt} ${style}`;
+                    } else {
+                        promptInput.value = style;
+                    }
+                }
+            }
+
+            async function handleGetAISuggestions() {
+                const initialIdea = aiSuggestionInput.value.trim();
+                aiSuggestionsList.innerHTML = '';
+                aiSuggestionsError.classList.add('d-none');
+
+                appState.isAISuggesting = true;
+                aiSuggestionsLoading.classList.remove('d-none');
+                getAiSuggestionsBtn.disabled = true;
+
+                try {
+                    const promptForAI = `Please provide 3 creative and detailed image prompt enhancements/expansions based on this initial idea: "${initialIdea}". Focus on adding artistic styles, lighting, mood, and specific details. Format each suggestion as a numbered list item.`;
+
+                    const response = await fetch('/api/ai', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            aiguide: "You are an AI image prompt generator. Provide creative and detailed prompts.",
+                            msgforai: promptForAI,
+                            llmSettings: { temperature: 0.7, model: "gemini-1.5-flash-latest" }
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        const suggestionsText = data.response;
+                        const suggestionsArray = suggestionsText.split('\n')
+                            .filter(line => line.trim().match(/^\d+\./))
+                            .map(line => line.replace(/^\d+\.\s*/, '').trim());
+                        appState.aiSuggestions = suggestionsArray;
+                    } else {
+                        appState.aiSuggestions = [];
+                        aiSuggestionsError.textContent = data.error || 'Unknown error occurred generating suggestions.';
+                        aiSuggestionsError.classList.remove('d-none');
+                    }
+                } catch (e) {
+                    console.error('Error getting AI suggestions:', e);
+                    appState.aiSuggestions = [];
+                    aiSuggestionsError.textContent = `Failed to get suggestions: ${e.message}.`;
+                    aiSuggestionsError.classList.remove('d-none');
+                } finally {
+                    appState.isAISuggesting = false;
+                    aiSuggestionsLoading.classList.add('d-none');
+                    getAiSuggestionsBtn.disabled = false;
+                    updateUI();
+                }
+            }
+
+            function renderAISuggestions() {
+                aiSuggestionsList.innerHTML = '';
+                if (appState.aiSuggestions.length === 0 && !appState.isAISuggesting && !aiSuggestionsError.classList.contains('d-none')) {
+                    return;
+                }
+
+                appState.aiSuggestions.forEach(suggestion => {
+                    const listItem = document.createElement('div');
+                    listItem.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center', 'mb-2');
+                    listItem.innerHTML = `<span>${suggestion}</span>`;
+
+                    const useBtn = document.createElement('button');
+                    useBtn.classList.add('btn', 'btn-sm', 'btn-outline-success');
+                    useBtn.textContent = 'Use This';
+                    useBtn.addEventListener('click', () => {
+                        const currentPrompt = promptInput.value.trim();
+                        if (currentPrompt && !currentPrompt.endsWith(',')) {
+                            promptInput.value = `${currentPrompt}, ${suggestion}`;
+                        } else if (currentPrompt) {
+                            promptInput.value = `${currentPrompt} ${suggestion}`;
+                        } else {
+                            promptInput.value = suggestion;
+                        }
+                        aiSuggestionsModal.hide();
+                    });
+
+                    listItem.appendChild(useBtn);
+                    aiSuggestionsList.appendChild(listItem);
+                });
+            }
+
+            function handleDeleteHistoryItem(index) {
+                if (index > -1 && index < appState.generatedImages.length) {
+                    appState.generatedImages.splice(index, 1);
+                    saveHistory();
+                    if (appState.generatedImages.length === 0) {
+                        appState.currentImageUrl = null;
+                        appState.currentPrompt = null;
+                        appState.currentAspectRatio = null;
+                        appState.currentSeed = null;
+                    } else if (index === appState.generatedImages.length) {
+                        const lastImage = appState.generatedImages[appState.generatedImages.length - 1];
+                        appState.currentImageUrl = lastImage.imageUrl;
+                        appState.currentPrompt = lastImage.prompt;
+                        appState.currentAspectRatio = lastImage.aspectRatio;
+                        appState.currentSeed = lastImage.seed;
+                    }
+                    updateUI();
+                }
+            }
+
+            function handleClearHistory() {
+                appState.generatedImages = [];
+                appState.currentImageUrl = null;
+                appState.currentPrompt = null;
+                appState.currentAspectRatio = null;
+                appState.currentSeed = null;
+                saveHistory();
+                updateUI();
+                clearHistoryConfirmModal.hide();
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                generateBtn.addEventListener('click', handleGenerateImage);
+                downloadBtn.addEventListener('click', handleDownloadImage);
+                clearPromptBtn.addEventListener('click', () => promptInput.value = '');
+                copyCurrentImagePromptBtn.addEventListener('click', () => {
+                    if (appState.currentPrompt) {
+                        navigator.clipboard.writeText(appState.currentPrompt).then(() => {
+                            alert('Prompt copied to clipboard!');
+                        }).catch(err => {
+                            console.error('Failed to copy prompt:', err);
+                        });
+                    }
+                });
+
+                stylePresetsContainer.addEventListener('click', handleStylePresetClick);
+                aiSuggestPromptBtn.addEventListener('click', () => {
+                    aiSuggestionInput.value = promptInput.value.trim();
+                    aiSuggestionsList.innerHTML = '';
+                    aiSuggestionsError.classList.add('d-none');
+                });
+                getAiSuggestionsBtn.addEventListener('click', handleGetAISuggestions);
+                clearHistoryBtn.addEventListener('click', () => clearHistoryConfirmModal.show());
+                confirmClearHistoryBtn.addEventListener('click', handleClearHistory);
+
+                promptInput.addEventListener('input', () => {
+                    if (promptInput.classList.contains('is-invalid') && promptInput.value.trim()) {
+                        promptInput.classList.remove('is-invalid');
+                    }
+                });
+
+                loadHistory();
+                updateUI();
+
+                new bootstrap.Collapse(document.getElementById('promptTipsCollapse'), {
+                    toggle: false
+                });
+            });
+        })();
+    </script>
+...
+</body>
+</html>

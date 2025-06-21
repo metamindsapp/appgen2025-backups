@@ -1,0 +1,74 @@
+{
+  "projectId": "18a03d93-7a4e-4e31-80e1-18d9c3d56b1b",
+  "revisionString": "1",
+  "projectNameDisplay": "  Educational website for ella park honey our business in sooke. we have 15 hives. we offer beekeeping experience days and airbnb where you sleep over beehives",
+  "projectType": "website",
+  "userPromptForThisRevision": "\r\n\r\nEducational website for ella park honey our business in sooke. we have 15 hives. we offer beekeeping experience days and airbnb where you sleep over beehives. gold and green color theme\r\n\r\n",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-05-29T14:43:41.103Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/imagen3_901bf777-1b6.png",
+      "url": "/generated_images/imagen3_901bf777-1b6.png",
+      "description": "Warm, inviting hero image for a honey farm website. Golden hour sunlight filtering through trees onto a picturesque Sooke landscape (coastal British Columbia feel, lush greenery). In the foreground, neatly arranged beehives with bees subtly active. A sense of peace and natural abundance. Colors: dominant natural greens, golden sunlight, blue sky hints. Style: photorealistic, slightly dreamy.",
+      "purpose": "Main hero banner for website homepage (#home section).",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_33d8ba22-d49.png",
+      "url": "/generated_images/imagen3_33d8ba22-d49.png",
+      "description": "Authentic, friendly image for 'About Us' section. Two people (representing beekeepers, can be diverse, age 30s-50s) in partial beekeeping gear (e.g., veils up, or just casual outdoor attire), smiling warmly, standing near well-maintained beehives on a sunny day. Background shows a glimpse of a charming Sooke farm or lush garden. Focus on approachability and passion. Colors: natural greens, browns, blues, with pops of color from flowers. Style: naturalistic digital art.",
+      "purpose": "Image for the 'About Us' section, conveying personality and connection to the land.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_6787c511-8bc.png",
+      "url": "/generated_images/imagen3_6787c511-8bc.png",
+      "description": "Artistic still life of honey products. Several glass jars of varying sizes filled with rich, golden amber honey. One jar could be slightly open with a honey dipper resting on it. Include elements like fresh honeycomb, a few sprigs of local Sooke wildflowers (e.g., fireweed, clover), and perhaps a rustic wooden surface. Soft, natural lighting. Colors: rich golds, ambers, greens, and whites. Style: photorealistic, food photography aesthetic.",
+      "purpose": "Showcase image for 'Our Honey' section.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_ab84624a-608.png",
+      "url": "/generated_images/imagen3_ab84624a-608.png",
+      "description": "Engaging action shot for 'Beekeeping Experience'. A small group of people (2-3) in full white beekeeping suits and veils, attentively observing a beekeeper (also in full suit) holding up a frame covered in bees. Focus on the sense of discovery and safe interaction. Sunny day, green apiary background. Style: photorealistic, bright and inviting.",
+      "purpose": "Primary image for 'Beekeeping Experience Days' section, possibly for a carousel.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_2633504d-833.png",
+      "url": "/generated_images/imagen3_2633504d-833.png",
+      "description": "Another angle for 'Beekeeping Experience'. Close-up on a gloved hand gently holding a honeycomb frame, with bees visible. Highlights the detail and beauty of the hive. Soft focus background. Style: photorealistic, detailed macro.",
+      "purpose": "Supporting image for 'Beekeeping Experience Days' section, possibly for a carousel.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_9a1a51f8-646.png",
+      "url": "/generated_images/imagen3_9a1a51f8-646.png",
+      "description": "Cozy and unique interior of the 'Sleep Over Beehives' Airbnb. A well-lit room with a comfortable bed, bee-themed decor (e.g., honeycomb patterned throw, bee artwork). A key feature is a safely integrated observation window looking directly into a section of a beehive, or a clear view of the apiary outside. Warm, inviting atmosphere. Natural materials like wood. Colors: warm neutrals, accents of gold and soft green. Style: photorealistic, interior design photography.",
+      "purpose": "Main image for the 'Airbnb - Sleep Over Beehives' section, possibly for a carousel.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_214ba217-06f.png",
+      "url": "/generated_images/imagen3_214ba217-06f.png",
+      "description": "Exterior shot of the Airbnb accommodation showing its unique connection to the beehives. Could be a charming cabin or small structure with beehives neatly arranged nearby, in a beautiful Sooke garden setting. Emphasize harmony with nature. Style: photorealistic, architectural/travel photography.",
+      "purpose": "Supporting exterior image for 'Airbnb' section, possibly for a carousel.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_e8ebd6e6-065.png",
+      "url": "/generated_images/imagen3_e8ebd6e6-065.png",
+      "description": "Vibrant, detailed close-up of a honeybee on a blooming flower (native to Sooke/Vancouver Island if possible, e.g., lavender, salal, or a fruit blossom). Bright, natural lighting, sharp focus on the bee, slightly blurred background. Colors: vibrant flower colors, greens, detailed bee coloration. Style: macro photography, digital art.",
+      "purpose": "Banner or illustrative image for the 'Learn About Bees' section.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_195eef8a-06d.png",
+      "url": "/generated_images/imagen3_195eef8a-06d.png",
+      "description": "A subtle, elegant honeycomb pattern background texture. Light gold lines forming a hexagonal pattern on a very light cream or off-white base. Not too busy, suitable for a section background overlay or a card background. Style: flat design, geometric pattern.",
+      "purpose": "Subtle background texture for use in various sections to reinforce the bee theme, if needed.",
+      "isNewlyGenerated": true
+    }
+  ]
+}

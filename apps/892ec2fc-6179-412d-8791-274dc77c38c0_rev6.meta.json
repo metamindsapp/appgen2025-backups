@@ -1,0 +1,9 @@
+{
+  "projectId": "892ec2fc-6179-412d-8791-274dc77c38c0",
+  "revisionString": "6",
+  "projectNameDisplay": "MetaMind Insights: Your AI-Powered Research Assistant",
+  "userPromptForThisRevision": "fix it so it runs this\r\n\r\ncurl -X POST \\\r\n  -H \"Content-Type: application/json\" \\\r\n  -d '{\"query\": \"latest advancements in artificial intelligence\"}' \\\r\n  http://MetaMindsSearch-dev.eba-q5t7qk5a.us-east-2.elasticbeanstalk.com/api/bing-search",
+  "basedOnRevisionString": "5",
+  "savedAt": "2025-05-28T12:54:59.327Z",
+  "imageAssets": []
+}

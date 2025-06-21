@@ -1,0 +1,9 @@
+{
+  "projectId": "892ec2fc-6179-412d-8791-274dc77c38c0",
+  "revisionString": "4",
+  "projectNameDisplay": "MetaMind Insights: Your AI-Powered Research Assistant",
+  "userPromptForThisRevision": "can you fix this ? \r\n\r\nFailed to fetch results. This might be due to a network issue, the API server being unavailable, or a browser security restriction (e.g., accessing an HTTP API from an HTTPS page). Please check your network, the API status, and ensure the page context allows requests to the API's address.",
+  "basedOnRevisionString": "3",
+  "savedAt": "2025-05-28T12:18:23.326Z",
+  "imageAssets": []
+}

@@ -1,0 +1,13 @@
+{
+  "projectId": "f2bed103-0a59-4390-b697-3db46c17a532",
+  "revisionString": "1",
+  "projectNameDisplay": "awesome image",
+  "projectType": "webapp",
+  "ownerPublicKey": "EZxuU9mZRqgsYxoFgDEnwNvWu4DYVjWiCFnSB3jSj7Hq",
+  "userPromptForThisRevision": "an ai image generator where no matter what image the user asks for,  the text \"AWESOME\" must always appear in the image somewhere big or small",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-06-04T13:46:01.919Z",
+  "imageAssets": [],
+  "isPublished": false,
+  "isShowcased": false
+}

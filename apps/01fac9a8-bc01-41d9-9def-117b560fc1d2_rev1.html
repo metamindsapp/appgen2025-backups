@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AppGen Gallery</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+        }
+        body {
+            background-color: #0d1117;
+            color: #c9d1d9;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+        }
+        .container-fluid {
+            flex-grow: 1;
+        }
+        .card {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            overflow: hidden; 
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        }
+        .card-title a {
+            color: #58a6ff;
+            text-decoration: none;
+        }
+        .card-title a:hover {
+            color: #80baff;
+            text-decoration: underline !important; 
+        }
+        .card-img-top {
+            border-bottom: 1px solid #30363d;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+            background-color: #23272f;
+        }
+        .app-card {
+            opacity: 0;
+        }
+        .app-card.fade-in {
+            animation: fadeInEntry 0.5s ease-out forwards;
+        }
+        @keyframes fadeInEntry {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        #refreshButton svg {
+            margin-right: 0.5em;
+            vertical-align: text-bottom;
+        }
+        .stretched-link::after {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 1;
+            content: "";
+        }
+        .card-body .card-title a,
+        .card-link-image {
+            position: relative;
+            z-index: 2;
+        }
+        .card-link-image {
+            display: block;
+        }
+        .filename-text {
+            word-break: break-all;
+        }
+        .btn-outline-primary {
+            color: #58a6ff;
+            border-color: #58a6ff;
+        }
+        .btn-outline-primary:hover, .btn-outline-primary:focus {
+            color: #fff;
+            background-color: #58a6ff;
+            border-color: #58a6ff;
+        }
+         .btn-outline-primary:active {
+            color: #fff !important; /* Important to override BS active states */
+            background-color: #4a91e0 !important; 
+            border-color: #4a91e0 !important;
+        }
+        .lead.text-muted {
+            color: #8b949e !important; 
+        }
+        .border-bottom, .border-top {
+            border-color: #30363d !important;
+        }
+        .text-body-secondary {
+            color: #8b949e !important;
+        }
+        .card.border-danger {
+            border-color: var(--bs-danger) !important; /* Use Bootstrap variable for consistency */
+        }
+        .card.border-danger .card-title {
+             color: var(--bs-danger-text-emphasis) !important;
+        }
+        .card.border-danger .card-text {
+             color: var(--bs-warning-text-emphasis) !important;
+        }
+
+    </style>
+</head>
+<body data-bs-theme="dark">
+
+    <div class="container-fluid py-4">
+        <header class="text-center mb-4 pb-3 border-bottom">
+            <h1 class="display-5 fw-bold">AppGen Showcase</h1>
+            <p class="lead text-muted">A curated gallery of AI-powered applets.</p>
+        </header>
+
+        <div id="controlsArea" class="text-center mb-4">
+            <button id="refreshButton" class="btn btn-outline-primary btn-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+                    <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+                </svg>
+                Refresh All Apps
+            </button>
+        </div>
+
+        <div id="loadingIndicator" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status" style="width: 3.5rem; height: 3.5rem;">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p id="loadingMessage" class="mt-3 lead">Initializing gallery...</p>
+        </div>
+
+        <div id="errorDisplay" class="alert alert-danger d-none col-md-8 mx-auto" role="alert"></div>
+
+        <div id="galleryGrid" class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
+        </div>
+         <div id="emptyGalleryMessage" class="text-center py-5 lead d-none">No apps to display or all failed to load.</div>
+    </div>
+
+    <footer class="text-center mt-auto py-3 border-top text-muted">
+        <p class="mb-0">&copy; <span id="currentYear"></span> AppGen Gallery. Powered by AI.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const GITHUB_API_URL = "https://api.github.com/repos/metamindsapp/appgen2025-backups/contents/apps?ref=main";
+        const RAW_CONTENT_BASE_URL = "https://raw.githubusercontent.com/metamindsapp/appgen2025-backups/main/apps/";
+        
+        const determineAppBaseUrl = () => {
+            const origin = window.location.origin;
+            if (origin.includes('replit.dev')) {
+                const hostnameParts = window.location.hostname.split('.');
+                const slug = hostnameParts[0]; 
+                return `https://${slug}--apps.${hostnameParts.slice(1).join('.')}/`;
+            }
+            return origin + "/apps/";
+        };
+        const REPLIT_APP_BASE_URL = determineAppBaseUrl();
+
+        const CACHE_DURATION_MS = 24 * 60 * 60 * 1000; 
+        const AI_TITLE_API_ENDPOINT = "/api/ai";
+        const AI_IMAGE_API_ENDPOINT = "/api/generate-image-on-demand";
+        const PLACEHOLDER_IMAGE_SVG = "data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22320%22%20height%3D%22180%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20320%20180%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3Etext%20%7B%20fill%3A%238b949e%3Bfont-weight%3Abold%3Bfont-family%3Ainherit%3Bfont-size%3A14pt%20%7D%20%3C%2Fstyle%3E%3C%2Fdefs%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%2323272f%22%3E%3C%2Frect%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20dominant-baseline%3D%22middle%22%20text-anchor%3D%22middle%22%3EImage%20Pending%3C%2Ftext%3E%3C%2Fsvg%3E";
+        const MAX_HTML_CONTENT_LENGTH = 15000;
+
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const errorDisplay = document.getElementById('errorDisplay');
+        const galleryGrid = document.getElementById('galleryGrid');
+        const refreshButton = document.getElementById('refreshButton');
+        const emptyGalleryMessage = document.getElementById('emptyGalleryMessage');
+
+        function updateLoadingMessage(message) {
+            if (loadingMessage) loadingMessage.textContent = message;
+        }
+
+        function showError(message) {
+            if (errorDisplay) {
+                errorDisplay.textContent = message;
+                errorDisplay.classList.remove('d-none');
+            }
+            if (loadingIndicator) loadingIndicator.classList.add('d-none');
+        }
+
+        function getCachedData(key) {
+            try {
+                const item = localStorage.getItem(key);
+                if (!item) return null;
+                const parsed = JSON.parse(item);
+                if (Date.now() - parsed.timestamp > CACHE_DURATION_MS) {
+                    localStorage.removeItem(key);
+                    return null;
+                }
+                return parsed;
+            } catch (e) {
+                console.error(`Error getting cached data for key ${key}:`, e);
+                localStorage.removeItem(key); 
+                return null;
+            }
+        }
+
+        function setCachedData(key, data) {
+            try {
+                localStorage.setItem(key, JSON.stringify(data));
+            } catch (e) {
+                console.error(`Error setting cached data for key ${key}:`, e);
+            }
+        }
+
+        async function fetchWithTimeout(resource, options = {}, timeout = 15000) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeout);
+            try {
+                const response = await fetch(resource, {
+                    ...options,
+                    signal: controller.signal  
+                });
+                clearTimeout(id);
+                return response;
+            } catch (error) {
+                clearTimeout(id);
+                if (error.name === 'AbortError') {
+                    throw new Error(`Request timed out after ${timeout/1000} seconds`);
+                }
+                throw error;
+            }
+        }
+
+
+        async function fetchRawHTML(url) {
+            try {
+                const response = await fetchWithTimeout(url, {}, 20000); 
+                if (!response.ok) throw new Error(`HTTP error ${response.status} fetching HTML`);
+                return await response.text();
+            } catch (error) {
+                console.error(`Failed to fetch HTML from ${url}:`, error);
+                throw error; 
+            }
+        }
+
+        async function fetchTitleFromAI(htmlContent, fallbackTitle) {
+            try {
+                const payload = {
+                    aiguide: "Analyze the following HTML content. Extract the text content of the <title> tag. If not present, extract the text content of the most prominent <h1> tag. If neither is found or content is unsuitable, return 'Untitled App'. Return ONLY the extracted title text, with no prefixes, explanations, or quotation marks. Ensure the title is concise and suitable for a gallery card. Maximum 60 characters.",
+                    msgforai: htmlContent.substring(0, MAX_HTML_CONTENT_LENGTH),
+                    llmSettings: { temperature: 0.1, model: "gemini-1.5-flash-latest" }
+                };
+                const response = await fetchWithTimeout(AI_TITLE_API_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                }, 20000); 
+                if (!response.ok) throw new Error(`HTTP error ${response.status} fetching title`);
+                const data = await response.json();
+                if (data.success && data.response && data.response.trim() !== "") {
+                    let title = data.response.trim();
+                    if (title.length > 60) title = title.substring(0, 57) + "...";
+                    return title;
+                }
+                console.warn("AI title extraction unsuccessful or empty, using fallback:", data.error || "Empty response");
+                return fallbackTitle.length > 60 ? fallbackTitle.substring(0, 57) + "..." : fallbackTitle;
+            } catch (error) {
+                console.error("Error fetching title from AI:", error);
+                return fallbackTitle.length > 60 ? fallbackTitle.substring(0, 57) + "..." : fallbackTitle;
+            }
+        }
+
+        async function fetchImageFromAI(title) {
+            try {
+                const payload = {
+                    prompt: `Generate an illustrative, visually appealing icon or abstract graphic for a web application titled '${title}'. Emphasis on modern, clean, dark-theme compatible design. Aspect ratio 16:9. Style: minimalist digital art or sleek flat icon. Avoid text unless it's highly stylized as part of the graphic. Ensure the image is safe for work and universally appealing.`,
+                    aspectRatio: "16:9",
+                    style: "hd" 
+                };
+                const response = await fetchWithTimeout(AI_IMAGE_API_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                }, 45000); 
+                if (!response.ok) throw new Error(`HTTP error ${response.status} fetching image`);
+                const data = await response.json();
+                if (data.success && data.imageUrl) {
+                    return data.imageUrl;
+                }
+                console.warn("AI image generation unsuccessful, using placeholder:", data.error || "No image URL");
+                return PLACEHOLDER_IMAGE_SVG;
+            } catch (error) {
+                console.error("Error fetching image from AI:", error);
+                return PLACEHOLDER_IMAGE_SVG;
+            }
+        }
+
+        function renderAppCard(appData, index) {
+            const col = document.createElement('div');
+            col.className = 'col app-card';
+
+            const card = document.createElement('div');
+            card.className = 'card h-100 shadow-sm';
+
+            const imgLink = document.createElement('a');
+            imgLink.href = appData.appUrl;
+            imgLink.target = '_blank';
+            imgLink.rel = 'noopener noreferrer';
+            imgLink.className = 'card-link-image';
+            imgLink.setAttribute('aria-label', `Launch ${appData.title}`);
+
+            const img = document.createElement('img');
+            img.src = appData.imageUrl;
+            img.className = 'card-img-top';
+            img.alt = `Preview for ${appData.title}`;
+            img.loading = 'lazy';
+            img.onerror = () => { 
+                img.src = PLACEHOLDER_IMAGE_SVG; 
+                img.alt = `Placeholder image for ${appData.title}`;
+            };
+            imgLink.appendChild(img);
+
+            const cardBody = document.createElement('div');
+            cardBody.className = 'card-body d-flex flex-column';
+
+            const cardTitle = document.createElement('h5');
+            cardTitle.className = 'card-title mb-2';
+            const titleLink = document.createElement('a');
+            titleLink.href = appData.appUrl;
+            titleLink.target = '_blank';
+            titleLink.rel = 'noopener noreferrer';
+            titleLink.textContent = appData.title;
+            titleLink.setAttribute('aria-label', `Launch ${appData.title}`);
+            titleLink.classList.add('stretched-link'); 
+            cardTitle.appendChild(titleLink);
+
+            const fileNameText = document.createElement('p');
+            fileNameText.className = 'card-text small text-muted mb-1 filename-text';
+            fileNameText.innerHTML = `File: <span class="fw-semibold">${appData.filename}</span>`;
+            
+            cardBody.appendChild(cardTitle);
+            cardBody.appendChild(fileNameText);
+            
+            const cardFooter = document.createElement('div');
+            cardFooter.className = 'card-footer text-body-secondary small mt-auto';
+            try {
+                const lastRefreshedDate = new Date(appData.timestamp).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+                const lastRefreshedTime = new Date(appData.timestamp).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+                cardFooter.innerHTML = `Refreshed: <span class="timestamp-text">${lastRefreshedDate} ${lastRefreshedTime}</span>`;
+            } catch (e) {
+                 cardFooter.innerHTML = `Refreshed: <span class="timestamp-text">Invalid date</span>`;
+            }
+
+
+            card.appendChild(imgLink);
+            card.appendChild(cardBody);
+            card.appendChild(cardFooter);
+            col.appendChild(card);
+            galleryGrid.appendChild(col);
+
+            requestAnimationFrame(() => {
+                 setTimeout(() => col.classList.add('fade-in'), 50 * (index % 20));
+            });
+        }
+        
+        function renderErrorCard(filename, errorMessage, index) {
+            const col = document.createElement('div');
+            col.className = 'col app-card';
+
+            const card = document.createElement('div');
+            card.className = 'card h-100 shadow-sm border-danger';
+
+            const cardBody = document.createElement('div');
+            cardBody.className = 'card-body d-flex flex-column align-items-center justify-content-center text-center p-3';
+
+            const cardTitle = document.createElement('h5');
+            cardTitle.className = 'card-title mb-2';
+            cardTitle.textContent = filename || 'Processing Error';
+            
+            const errorText = document.createElement('p');
+            errorText.className = 'card-text small';
+            errorText.textContent = errorMessage || "Failed to load app details.";
+
+            cardBody.appendChild(cardTitle);
+            cardBody.appendChild(errorText);
+            card.appendChild(cardBody);
+            col.appendChild(card);
+            galleryGrid.appendChild(col);
+            requestAnimationFrame(() => {
+                setTimeout(() => col.classList.add('fade-in'), 50 * (index % 20));
+            });
+        }
+
+        async function processAppFile(fileInfo, index, totalFiles, forceRefresh) {
+            const filename = fileInfo.name;
+            const cacheKey = `gallery_item_${filename}`;
+            const fallbackTitle = filename.replace(/\.html$/i, '').replace(/[-_]/g, ' ');
+            
+            if (!forceRefresh) {
+                const cached = getCachedData(cacheKey);
+                if (cached) {
+                    updateLoadingMessage(`Loading ${filename} from cache... (${index + 1}/${totalFiles})`);
+                    return cached;
+                }
+            } else {
+                 localStorage.removeItem(cacheKey);
+            }
+
+            updateLoadingMessage(`Fetching ${filename}... (${index + 1}/${totalFiles})`);
+            let htmlContent, title, imageUrl;
+
+            try {
+                htmlContent = await fetchRawHTML(RAW_CONTENT_BASE_URL + filename);
+            } catch (err) {
+                console.error(`Failed to fetch HTML for ${filename}:`, err.message);
+                throw { filename, error: `Could not fetch HTML. ${err.message}` };
+            }
+            
+            updateLoadingMessage(`Extracting title for ${filename}... (${index + 1}/${totalFiles})`);
+            title = await fetchTitleFromAI(htmlContent, fallbackTitle);
+            
+            updateLoadingMessage(`Generating image for '${title}'... (${index + 1}/${totalFiles})`);
+            imageUrl = await fetchImageFromAI(title);
+
+            const appData = { 
+                filename, 
+                title, 
+                imageUrl, 
+                appUrl: REPLIT_APP_BASE_URL + filename, 
+                timestamp: Date.now() 
+            };
+            setCachedData(cacheKey, appData);
+            return appData;
+        }
+
+        async function initApp(forceRefresh = false) {
+            galleryGrid.innerHTML = '';
+            emptyGalleryMessage.classList.add('d-none');
+            loadingIndicator.classList.remove('d-none');
+            errorDisplay.classList.add('d-none');
+            refreshButton.disabled = true;
+            updateLoadingMessage("Fetching app list from GitHub...");
+
+            if (forceRefresh) {
+                updateLoadingMessage("Clearing cache and refreshing all apps...");
+                try {
+                    Object.keys(localStorage).forEach(key => {
+                        if (key.startsWith('gallery_item_')) {
+                            localStorage.removeItem(key);
+                        }
+                    });
+                } catch (e) {
+                    console.error("Error clearing localStorage:", e);
+                }
+            }
+
+            let files;
+            try {
+                const response = await fetchWithTimeout(GITHUB_API_URL, {}, 10000);
+                if (!response.ok) throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+                files = await response.json();
+                if (!Array.isArray(files)) throw new Error("GitHub API response is not an array. Check API endpoint or network.");
+            } catch (error) {
+                showError(`Failed to fetch app list from GitHub: ${error.message}`);
+                refreshButton.disabled = false;
+                return;
+            }
+
+            const htmlFiles = files.filter(file => file && file.name && file.name.toLowerCase().endsWith('.html') && file.type === 'file');
+
+            if (htmlFiles.length === 0) {
+                updateLoadingMessage("No HTML apps found in the repository.");
+                loadingIndicator.classList.add('d-none');
+                emptyGalleryMessage.classList.remove('d-none');
+                emptyGalleryMessage.textContent = "No HTML apps found in the repository.";
+                refreshButton.disabled = false;
+                return;
+            }
+            
+            const processingPromises = htmlFiles.map((file, idx) => 
+                processAppFile(file, idx, htmlFiles.length, forceRefresh)
+            );
+
+            const results = await Promise.allSettled(processingPromises);
+            
+            loadingIndicator.classList.add('d-none');
+            let succeededCount = 0;
+            results.forEach((result, index) => {
+                if (result.status === 'fulfilled') {
+                    renderAppCard(result.value, index);
+                    succeededCount++;
+                } else {
+                    const fileWithError = htmlFiles[index] ? htmlFiles[index].name : 'Unknown File';
+                    const errorMessage = result.reason && result.reason.error ? result.reason.error : (result.reason ? String(result.reason) : 'An unexpected error occurred.');
+                    console.error(`Error processing file ${fileWithError}:`, result.reason);
+                    renderErrorCard(fileWithError, errorMessage, index);
+                }
+            });
+
+            if (succeededCount === 0 && htmlFiles.length > 0) {
+                 emptyGalleryMessage.classList.remove('d-none');
+                 emptyGalleryMessage.textContent = "All apps failed to load. Check console for details or try refreshing.";
+            } else if (succeededCount === 0 && htmlFiles.length === 0){ 
+                 emptyGalleryMessage.classList.remove('d-none');
+                 emptyGalleryMessage.textContent = "No apps to display.";
+            }
+            refreshButton.disabled = false;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+            refreshButton.addEventListener('click', () => initApp(true));
+            initApp();
+        });
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

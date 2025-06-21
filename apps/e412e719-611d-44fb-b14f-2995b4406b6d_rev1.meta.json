@@ -1,0 +1,116 @@
+{
+  "projectId": "e412e719-611d-44fb-b14f-2995b4406b6d",
+  "revisionString": "1",
+  "projectNameDisplay": "Gene's Beans website",
+  "projectType": "website",
+  "userPromptForThisRevision": "Website for my new chilli truck that travels the lower mainland BC",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-05-29T15:51:21.499Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/dalle3_23c088cf-ab2.png",
+      "url": "/generated_images/dalle3_23c088cf-ab2.png",
+      "description": "A vibrant, inviting image of a modern food truck named 'Gene's Beans' with steam rising from its serving window, parked in a sunny, bustling urban park setting in the Lower Mainland, BC, with people enjoying food in the background. The truck is clean, has a friendly design, and features warm, inviting colors (predominantly a chili-red/orange, with cream/light accents). The 'Gene's Beans' logo is clearly visible on the truck. The overall mood is cheerful, appetizing, and lively.",
+      "purpose": "Main hero banner background for the website homepage. Will be overlaid with text.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_f01a2842-87f.png",
+      "url": "/generated_images/dalle3_f01a2842-87f.png",
+      "description": "A close-up, mouth-watering shot of a steaming bowl of 'Smokin' Hot Mess' chili. The chili is rich red-brown, with visible chunks of tender smoked brisket, vibrant chipotle peppers, and a light sprinkle of fresh green cilantro. It is served in a rustic, light-colored ceramic bowl on a clean wooden surface, with a piece of golden-brown, crispy cornbread beside it. The lighting is warm and highlights the textures and steam, making it look incredibly appetizing.",
+      "purpose": "Image for the 'Today's Special' section on the homepage.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_ac6dca2d-ddc.png",
+      "url": "/generated_images/dalle3_ac6dca2d-ddc.png",
+      "description": "A hearty bowl of classic beef chili, generously topped with melted shredded sharp cheddar cheese and a dollop of cool sour cream. A few chopped green onions are sprinkled on top for garnish. The chili itself is a deep red-brown with visible kidney beans and ground beef. Served in a clean white ceramic bowl on a dark, textured wooden table. The lighting is soft and inviting, emphasizing the comfort food aspect.",
+      "purpose": "Menu item image for 'Classic Beef Chili'.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_0d06b003-039.png",
+      "url": "/generated_images/dalle3_0d06b003-039.png",
+      "description": "A vibrant, colorful bowl of vegetarian chili, clearly showcasing a rich variety of ingredients: black beans, kidney beans, corn kernels, diced red, yellow, and green bell peppers, and possibly some visible spices like chili powder or cumin. No meat is present. Served in a light-colored ceramic bowl, perhaps a light beige or off-white. The image should convey freshness and a healthy, yet satisfying, meal.",
+      "purpose": "Menu item image for 'Spicy Veggie Chili'.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_4736e893-eeb.png",
+      "url": "/generated_images/dalle3_4736e893-eeb.png",
+      "description": "A rich, dark bowl of chili topped with tender, fall-apart shredded smoked pork carnitas. The pork should have crispy edges from smoking. The chili base is deep and savory, with visible pinto beans. Served in a dark stoneware bowl to enhance the rustic feel. The focus is on the smoky, savory flavors.",
+      "purpose": "Menu item image for 'Smoked Pork Carnitas Chili'.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_f3951ea8-dcc.png",
+      "url": "/generated_images/dalle3_f3951ea8-dcc.png",
+      "description": "A professional, inviting image of the 'Gene's Beans' food truck, showcasing its side profile. The truck is clean, modern, and painted in warm, appealing colors (a primary chili-red/orange with clean cream or white accents). The 'Gene's Beans' logo is prominently displayed and clearly legible. It is parked in a pleasant, well-lit outdoor setting, perhaps a local park or a bustling market square, with a clear blue sky.",
+      "purpose": "Image for the 'About Us' section, showcasing the truck itself.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_837334d1-780.png",
+      "url": "/generated_images/dalle3_837334d1-780.png",
+      "description": "A smiling, diverse person (e.g., a young woman) with a warm, genuine expression, looking directly at the camera. Her face conveys satisfaction and happiness, as if she just enjoyed a delicious meal. The background is softly blurred to keep the focus on her. The lighting is natural and flattering. She should be dressed casually and appear approachable.",
+      "purpose": "Testimonial section image for happy customer 1.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_86396e83-824.png",
+      "url": "/generated_images/dalle3_86396e83-824.png",
+      "description": "A smiling, diverse person (e.g., a middle-aged man) with a friendly, contented expression, possibly holding a spoon or a small bowl, looking relaxed and pleased. The background is softly blurred. Natural lighting, conveying warmth and authenticity.",
+      "purpose": "Testimonial section image for happy customer 2.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_7001d9d0-347.png",
+      "url": "/generated_images/dalle3_7001d9d0-347.png",
+      "description": "A smiling, diverse person (e.g., an older woman) with a kind, happy expression, perhaps gesturing subtly with her hand, as if sharing a positive experience. The background is softly blurred. Soft, inviting lighting.",
+      "purpose": "Testimonial section image for happy customer 3.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_89c3c16b-4fc.png",
+      "url": "/generated_images/dalle3_89c3c16b-4fc.png",
+      "description": "A high-angle, close-up shot of a steaming bowl of chili, emphasizing its rich texture, vibrant colors, and deliciousness. The focus is entirely on the food, with visible chunks of meat/beans and a glossy sauce. The steam rising adds to the appeal. Served in a rustic bowl. Photorealistic, macro, appetizing.",
+      "purpose": "Gallery image: extreme close-up of chili bowl.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_41f3d2d1-693.png",
+      "url": "/generated_images/dalle3_41f3d2d1-693.png",
+      "description": "A dynamic scene showing the 'Gene's Beans' food truck with a customer at the serving window. The truck is clean and inviting, and the customer is smiling while receiving their order. The background shows a lively, but not overly crowded, outdoor market or street scene on a sunny day. The interaction between the server and customer should be clear and friendly.",
+      "purpose": "Gallery image: truck serving a happy customer.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_3baedc11-1ef.png",
+      "url": "/generated_images/dalle3_3baedc11-1ef.png",
+      "description": "A vibrant, artfully arranged flat lay of fresh, high-quality chili ingredients: colorful bell peppers (red, yellow, green), ripe tomatoes, various dried chilies (e.g., ancho, guajillo), plump kidney beans and black beans (some loose, some in a small bowl), fresh corn kernels, and a selection of spices (cumin, chili powder, oregano) in small piles. The composition is clean and visually appealing, with natural light. The mood is fresh and wholesome.",
+      "purpose": "Gallery image: fresh chili ingredients.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_6b091ab4-e8b.png",
+      "url": "/generated_images/dalle3_6b091ab4-e8b.png",
+      "description": "A happy customer, mid-bite, enjoying a spoonful of chili with a satisfied and joyful expression. The focus is on the customer's face and the chili, conveying the pleasure of eating. The background is softly blurred. Natural, warm lighting.",
+      "purpose": "Gallery image: happy customer enjoying chili.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_17e1ea97-718.png",
+      "url": "/generated_images/dalle3_17e1ea97-718.png",
+      "description": "A beautifully presented bowl of chili with a variety of classic toppings arranged artfully: a generous layer of shredded cheddar cheese, a dollop of sour cream, a sprinkle of fresh chopped green onions, and a few crispy tortilla chips standing upright. The chili itself is rich and dark. Served in an appealing bowl on a simple, clean surface. Photorealistic, detailed, and highly appetizing.",
+      "purpose": "Gallery image: chili with various toppings.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle3_3c70190f-0bf.png",
+      "url": "/generated_images/dalle3_3c70190f-0bf.png",
+      "description": "A clear, crisp, and professional close-up of the 'Gene's Beans' logo. The logo should be clean, friendly, and incorporate chili-related elements (e.g., stylized bean or chili pepper shape) in a tasteful, modern way. The dominant colors should align with the brand's warm red/orange and clean light background, making it suitable for branding. Simple illustration or flat design style.",
+      "purpose": "Gallery image: Gene's Beans logo/branding.",
+      "isNewlyGenerated": true
+    }
+  ]
+}

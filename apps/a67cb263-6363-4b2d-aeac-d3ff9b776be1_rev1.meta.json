@@ -1,0 +1,32 @@
+{
+  "projectId": "a67cb263-6363-4b2d-aeac-d3ff9b776be1",
+  "revisionString": "1",
+  "projectNameDisplay": "NeuroFlow",
+  "projectType": "webapp",
+  "userPromptForThisRevision": "Project Title: NeuroFlow: A Neuroscience-Backed Productivity Timer\r\n\r\nApp Type Hint: Utility\r\n\r\nImage Generation Mode: imagen 3\r\n\r\nTarget Style Preferences: Theme: dark, CSS Framework: bootstrap, JS Structure: vanilla\r\n\r\nDetailed Description: NeuroFlow is a productivity timer applet designed to optimize focus and break intervals based on principles of neuroscience.  The core objective is to help users achieve deep work sessions and avoid burnout by dynamically adjusting break durations and task timings according to user-reported focus levels.\r\n\r\nKey Features:\r\n\r\n* **Dynamic Pomodoro:**  Instead of fixed intervals, NeuroFlow uses a sophisticated algorithm (implemented using vanilla JS) to adjust the length of work and break periods based on user-reported focus levels (using a simple 1-5 rating system).  Lower focus levels lead to shorter work intervals and longer breaks.\r\n* **Personalized Focus Profiles:**  Users can create profiles to store their personalized focus patterns and preferences, allowing the algorithm to adapt over time and learn optimal work rhythms. Data is stored locally in the browser using localStorage.\r\n\r\n* **Visual Focus Tracking:**  A simple, visually appealing chart (using Chart.js or similar within the single HTML file) tracks the user's focus levels and productivity over time.\r\n* **In-App Image Generation (imagen 3):** During breaks, users can optionally generate mood-boosting images (using a simplified, pre-populated prompt system) to enhance relaxation and creativity.  The prompts are related to nature scenes, abstract art, or calming patterns. We run an ai text call to get an ai to create novel prompts every time. \r\n\r\nPotential \"Wow\" Factor:  The dynamic adjustment of work/break periods based on user-reported focus levels creates a personalized and adaptive experience, unlike traditional Pomodoro timers. The combination of this personalized approach with the optional image generation provides a holistic approach to productivity enhancement, significantly enhancing user engagement and making it stand out from other productivity apps.\r\n\r\nSpecific Technical Requirements:\r\n\r\n* Vanilla JavaScript for core logic, including the focus level algorithm and dynamic Pomodoro implementation.\r\n* Bootstrap for styling and layout.\r\n* LocalStorage for storing user profiles and data.\r\n* Simple, pre-populated imagen 3 prompts for image generation during breaks (limited to reduce API usage).\r\n* Chart.js or similar library for visual focus tracking (included directly in the HTML file).",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-05-29T10:53:10.524Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/imagen3_a325c57b-e8c.png",
+      "url": "/generated_images/imagen3_a325c57b-e8c.png",
+      "description": "A sleek, modern logo for 'NeuroFlow'. The logo should subtly incorporate elements related to brain activity (e.g., stylized neuron, abstract brainwave pattern) and time/flow (e.g., a gentle curve, circular element). The style should be minimalist and abstract, fitting a tech/productivity app. Dominant colors: a cool blue (e.g., Bootstrap primary #0D6EFD) or a vibrant teal, with white or light gray (#E2E8F0) accents. It must look sharp on a very dark background (e.g., #000000 or #0a0a0a). Avoid overly complex details. Text 'NeuroFlow' is NOT part of the logo image itself, it will be text next to it. Ensure it's clean and professional.",
+      "purpose": "Navbar brand logo for the NeuroFlow webapp. To be used as a small icon (e.g., 30x30px).",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_4dbf9b18-947.png",
+      "url": "/generated_images/imagen3_4dbf9b18-947.png",
+      "description": "A subtle, abstract background pattern image. The pattern should consist of very faint, dark gray (#222222) or dark blue (#101025) interwoven lines or soft, flowing organic shapes, reminiscent of neural pathways or calm energy flows. It should be almost imperceptible and not distracting, designed to add subtle depth to a primary dark background (e.g., #0a0a0a). The overall mood should be calm, focused, and sophisticated. Ensure it tiles seamlessly if possible, or is large enough to cover typical screen backgrounds without obvious repetition.",
+      "purpose": "Optional subtle background texture for the main body of the webapp to add depth to the dark theme. If used, it would be `body { background-image: url(...); background-size: cover; background-attachment: fixed; }`.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_f84d3052-27a.png",
+      "url": "/generated_images/imagen3_f84d3052-27a.png",
+      "description": "An icon for browser notifications. A simple, clean design combining an abstract brain/neuron silhouette with a small, modern notification bell symbol. Colors should be high contrast for visibility as a small icon: primary blue (#0D6EFD) for the main element on a transparent background, or white (#FFFFFF) on transparent. Style: flat icon, minimalist.",
+      "purpose": "Icon to be used with the Web Notifications API (e.g., 192x192px or similar standard notification icon size).",
+      "isNewlyGenerated": true
+    }
+  ]
+}

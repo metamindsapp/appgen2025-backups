@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kye's Diamond Quest</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        #game-container {
+            background-color: #f0f2f5;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #game-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            border-radius: 0.5rem;
+            background-color: #ffffff;
+        }
+
+        .game-screen {
+            display: none;
+            width: 100%;
+            height: 100%;
+            background-color: #ffffff;
+        }
+        .active-screen {
+            display: flex !important;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #game-canvas-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #ffffff;
+        }
+
+        #game-canvas {
+            display: block;
+            background-color: #202020; 
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -webkit-crisp-edges;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        #level-select-grid .row {
+            justify-content: center;
+        }
+        #level-select-grid .btn {
+            aspect-ratio: 1 / 1;
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0.5rem;
+            margin: 0.25rem;
+        }
+
+        .modal-content {
+            border: 1px solid #ccc;
+        }
+        .modal-header {
+            border-bottom: 1px solid #eee;
+        }
+        .modal-footer {
+            border-top: 1px solid #eee;
+        }
+
+        #instructions-screen img {
+            border: 1px solid #ddd;
+            background-color: #f8f8f8;
+            padding: 2px;
+            border-radius: 3px;
+            width: 24px; 
+            height: 24px; 
+            vertical-align: middle;
+        }
+        #game-hud {
+            font-size: 0.9rem;
+        }
+        #game-hud button {
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container" class="container-fluid vh-100 d-flex flex-column justify-content-center align-items-center p-0 m-0">
+        <div id="game-area" class="shadow-lg">
+            <div id="loading-screen" class="game-screen active-screen text-center p-3">
+                <h2 class="mb-3">Loading Kye's Diamond Quest...</h2>
+                <div class="spinner-border text-primary mb-3" role="status"><span class="visually-hidden">Loading...</span></div>
+                <div class="progress w-75 mx-auto" style="height: 20px;"><div id="loading-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div></div>
+            </div>
+
+            <div id="main-menu-screen" class="game-screen text-center p-3">
+                <h1 class="mb-4">Kye's Diamond Quest</h1>
+                <div class="d-grid gap-3 col-sm-8 col-md-6 col-lg-4 mx-auto">
+                    <button id="start-game-btn" class="btn btn-primary btn-lg">Start Game</button>
+                    <button id="level-select-btn" class="btn btn-secondary btn-lg">Level Select</button>
+                    <button id="instructions-btn" class="btn btn-info btn-lg">How to Play</button>
+                </div>
+            </div>
+
+            <div id="level-select-screen" class="game-screen p-3">
+                <h2 class="mb-4 text-center">Select Level</h2>
+                <div id="level-select-grid" class="container-fluid" style="max-width: 600px; overflow-y: auto; max-height: calc(100% - 120px);">
+                </div>
+                <button id="back-to-menu-from-level-select-btn" class="btn btn-outline-secondary mt-4 mx-auto d-block">Back to Main Menu</button>
+            </div>
+
+            <div id="instructions-screen" class="game-screen p-3">
+                <h2 class="mb-3 text-center">How to Play</h2>
+                <div class="card w-100" style="max-width: 700px; max-height: calc(100% - 100px); overflow-y: auto;"><div class="card-body text-start">
+                    <p><strong>Objective:</strong> Guide Kye <img id="instr-kye-img" src="" alt="Kye"> to collect all the diamonds <img id="instr-diamond-img" src="" alt="Diamond"> in each level!</p>
+                    <p><strong>Controls:</strong> Use <strong>Arrow Keys</strong> to move Kye. Press <strong>Escape</strong> to pause.</p>
+                    <h5 class="mt-3">Key Objects:</h5>
+                    <ul class="list-unstyled">
+                        <li><img id="instr-floor-img" src="" alt="Floor"> Floor: Walkable space.</li>
+                        <li><img id="instr-wall-img" src="" alt="Wall"> Wall: Impassable.</li>
+                        <li><img id="instr-box-img" src="" alt="Box"> Box: Pushable into empty space or onto diamonds.</li>
+                        <li><img id="instr-magnet-img" src="" alt="Magnet"> Magnet Block: Push it and Kye sticks to it, moving together!</li>
+                        <li><img id="instr-arrow-up-img" src="" alt="Arrow Up"> <img id="instr-arrow-down-img" src="" alt="Arrow Down"> <img id="instr-arrow-left-img" src="" alt="Arrow Left"> <img id="instr-arrow-right-img" src="" alt="Arrow Right"> Arrow Block: One-way passage (when entering the tile).</li>
+                        <li><img id="instr-rocker-img" src="" alt="Rocker"> Rocker: Moves back and forth. Avoid it!</li>
+                        <li><img id="instr-eater-img" src="" alt="Eater"> Eater: Moves and eats diamonds. Get them first! Avoid it!</li>
+                    </ul>
+                </div></div>
+                <button id="back-to-menu-from-instructions-btn" class="btn btn-outline-secondary mt-4 mx-auto d-block">Back to Main Menu</button>
+            </div>
+
+            <div id="game-canvas-container" class="game-screen position-relative">
+                <div id="game-hud" class="position-absolute top-0 start-0 end-0 p-2 bg-light bg-opacity-75 d-flex justify-content-between align-items-center" style="z-index:10;">
+                    <span>Level: <strong id="hud-level-name">1</strong></span>
+                    <span>Diamonds: <strong id="hud-diamonds-left">0</strong></span>
+                    <div>
+                        <button id="pause-game-btn" class="btn btn-warning btn-sm py-1 px-2" title="Pause (Esc)"><i class="bi bi-pause-fill"></i></button>
+                        <button id="restart-level-btn-ingame" class="btn btn-danger btn-sm py-1 px-2" title="Restart Level"><i class="bi bi-arrow-clockwise"></i></button>
+                        <button id="menu-btn-ingame" class="btn btn-secondary btn-sm py-1 px-2" title="Main Menu"><i class="bi bi-list"></i></button>
+                    </div>
+                </div>
+                <canvas id="game-canvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="pause-modal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">Game Paused</h5></div>
+            <div class="modal-body text-center"><div class="d-grid gap-2 col-8 mx-auto">
+                <button id="resume-game-btn" class="btn btn-success">Resume Game</button>
+                <button id="restart-level-modal-btn" class="btn btn-warning">Restart Level</button>
+                <button id="main-menu-modal-btn" class="btn btn-secondary">Main Menu</button>
+            </div></div>
+        </div></div>
+    </div>
+    <div class="modal fade" id="level-complete-modal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+         <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+            <div class="modal-header bg-success text-white"><h5 class="modal-title">Level Complete!</h5></div>
+            <div class="modal-body text-center"><p>Fantastic! You got all the diamonds!</p><div class="d-grid gap-2 col-8 mx-auto">
+                <button id="next-level-btn" class="btn btn-primary">Next Level</button>
+                <button id="replay-level-lc-btn" class="btn btn-info">Replay This Level</button>
+                <button id="main-menu-lc-btn" class="btn btn-secondary">Main Menu</button>
+            </div></div>
+        </div></div>
+    </div>
+    <div class="modal fade" id="game-over-modal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+            <div class="modal-header bg-danger text-white"><h5 class="modal-title">Game Over!</h5></div>
+            <div class="modal-body text-center"><p id="game-over-message">Oh no, Kye met an untimely end!</p><div class="d-grid gap-2 col-8 mx-auto">
+                <button id="restart-level-go-btn" class="btn btn-warning">Try Again</button>
+                <button id="main-menu-go-btn" class="btn btn-secondary">Main Menu</button>
+            </div></div>
+        </div></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const App = (() => {
+            const TILE_SIZE = 32;
+            const MOVEMENT_ANIMATION_DURATION = 150; 
+
+            const OBJECT_TYPES = {
+                PLAYER: 'P', DIAMOND: 'D', WALL: '#', FLOOR: ' ',
+                PUSHABLE_BOX: 'B', STICKY_MAGNET: 'M',
+                ARROW_UP: '^', ARROW_DOWN: 'v', ARROW_LEFT: '<', ARROW_RIGHT: '>',
+                ROCKER: 'R', EATER: 'E'
+            };
+
+            const ASSET_PATHS = {
+                [OBJECT_TYPES.PLAYER]: "/generated_images/dalle3_61fdba94-633.png",
+                [OBJECT_TYPES.DIAMOND]: "/generated_images/dalle3_50a60a9d-b6b.png",
+                [OBJECT_TYPES.WALL]: "/generated_images/dalle3_a88e9439-483.png",
+                [OBJECT_TYPES.FLOOR]: "/generated_images/dalle3_f9932b71-4f4.png",
+                [OBJECT_TYPES.PUSHABLE_BOX]: "/generated_images/dalle3_f6602569-3d4.png",
+                [OBJECT_TYPES.STICKY_MAGNET]: "/generated_images/dalle3_3e47a10d-25b.png",
+                [OBJECT_TYPES.ROCKER]: "/generated_images/dalle3_48f3f382-4cf.png",
+                [OBJECT_TYPES.EATER]: "/generated_images/dalle3_22580a7e-825.png",
+                [OBJECT_TYPES.ARROW_UP]: "/generated_images/dalle3_2fed1623-1ba.png",
+                [OBJECT_TYPES.ARROW_DOWN]: "/generated_images/dalle3_7471ad32-926.png",
+                [OBJECT_TYPES.ARROW_LEFT]: "/generated_images/dalle3_a7489d18-a58.png",
+                [OBJECT_TYPES.ARROW_RIGHT]: "/generated_images/dalle3_a4cdf779-3b7.png",
+            };
+
+            let currentScreen = 'Loading';
+            let currentLevelIndex = 0;
+            let player, entities, currentLevelData, images = {}, gameGrid = [];
+            let canvas, ctx;
+            let pauseModal, levelCompleteModal, gameOverModal;
+            let isPaused = false;
+            let isLoading = true;
+            let playerIsAnimating = false; 
+            let activeAnimations = [];
+            let nextEntityId = 0;
+            let totalDiamondsInLevel = 0;
+            let animationFrameId;
+
+            const levels = [
+                { name: "First Steps", data: [
+                    "#######",
+                    "#P D  #",
+                    "#  D  #",
+                    "#  D D#",
+                    "#######"
+                ]},
+                { name: "Box Pusher", data: [
+                    "#######",
+                    "#P B D#",
+                    "#     #",
+                    "# DB D#",
+                    "#######"
+                ]},
+                { name: "Sticky Situation", data: [
+                    "#########",
+                    "#P  M D #",
+                    "#       #",
+                    "# D M  D#",
+                    "#########"
+                ]},
+                { name: "Rocker Danger", data: [
+                    "#########",
+                    "#P  R D #",
+                    "#       #",
+                    "# D  R D#",
+                    "#########"
+                ]},
+                { name: "Diamond Eater", data: [
+                    "#########",
+                    "#P E D  #",
+                    "#   D   #",
+                    "#  D E D#",
+                    "#########"
+                ]},
+                { name: "One Way Out", data: [
+                    "#######",
+                    "#P>vD #",
+                    "#^#< #",
+                    "#D D< #",
+                    "#######"
+                ]},
+                { name: "Tricky Paths", data: [
+                    "###########",
+                    "#P BvM D R#",
+                    "#   # #   #",
+                    "#R D<M^B D#",
+                    "###########"
+                ]},
+                { name: "Full Test", data: [
+                    "###########",
+                    "#P B D M >#",
+                    "# #R# #v# #",
+                    "#  D E D< #",
+                    "# #^# # # #",
+                    "#D  D D D #",
+                    "###########"
+                ]}
+            ];
+
+            class GameObject {
+                constructor(gridX, gridY, type) {
+                    this.id = nextEntityId++;
+                    this.gridX = gridX;
+                    this.gridY = gridY;
+                    this.pixelX = gridX * TILE_SIZE;
+                    this.pixelY = gridY * TILE_SIZE;
+                    this.type = type;
+                    this.spriteKey = type;
+                    this.isSolid = false;
+                    this.isPushable = false;
+                    this.isSticky = false;
+                    this.isLethal = false;
+                    this.isCollected = false; 
+                }
+
+                render(ctx) {
+                    if (this.isCollected && this.type === OBJECT_TYPES.DIAMOND) return;
+                    const sprite = images[this.spriteKey];
+                    if (sprite && sprite.complete) {
+                        ctx.drawImage(sprite, this.pixelX, this.pixelY, TILE_SIZE, TILE_SIZE);
+                    } else if (sprite) {
+                         ctx.fillStyle = 'rgba(255,0,255,0.5)'; 
+                         ctx.fillRect(this.pixelX, this.pixelY, TILE_SIZE, TILE_SIZE);
+                    }
+                }
+                
+                update(dt) {}
+
+                async animateMoveTo(targetGridX, targetGridY) {
+                    return new Promise(resolve => {
+                        const startTime = performance.now();
+                        const startX = this.pixelX;
+                        const startY = this.pixelY;
+                        const endX = targetGridX * TILE_SIZE;
+                        const endY = targetGridY * TILE_SIZE;
+
+                        activeAnimations.push({
+                            obj: this, startTime, startX, startY, endX, endY,
+                            duration: MOVEMENT_ANIMATION_DURATION, resolve
+                        });
+                    });
+                }
+            }
+
+            class Player extends GameObject {
+                constructor(gridX, gridY) {
+                    super(gridX, gridY, OBJECT_TYPES.PLAYER);
+                    this.diamondsCollected = 0;
+                }
+
+                async move(dx, dy) {
+                    if (playerIsAnimating || isPaused) return;
+                    playerIsAnimating = true;
+                
+                    const nextGridX = this.gridX + dx;
+                    const nextGridY = this.gridY + dy;
+                
+                    const objectsToAnimate = [];
+                    let finalPlayerGridX = nextGridX;
+                    let finalPlayerGridY = nextGridY;
+                
+                    const targetCellObject = getObjectAt(nextGridX, nextGridY);
+                
+                    if (targetCellObject) {
+                        if (targetCellObject.type === OBJECT_TYPES.WALL) {
+                            playerIsAnimating = false; return;
+                        }
+                        if (targetCellObject.type === OBJECT_TYPES.ARROW_UP && dy === 1) { playerIsAnimating = false; return;} // Moving down onto UP arrow
+                        if (targetCellObject.type === OBJECT_TYPES.ARROW_DOWN && dy === -1) { playerIsAnimating = false; return;} // Moving up onto DOWN arrow
+                        if (targetCellObject.type === OBJECT_TYPES.ARROW_LEFT && dx === 1) { playerIsAnimating = false; return;} // Moving right onto LEFT arrow
+                        if (targetCellObject.type === OBJECT_TYPES.ARROW_RIGHT && dx === -1) { playerIsAnimating = false; return;} // Moving left onto RIGHT arrow
+                        
+                        if (targetCellObject.isPushable) {
+                            const block = targetCellObject;
+                            const blockNextGridX = block.gridX + dx;
+                            const blockNextGridY = block.gridY + dy;
+                            const objectInBlockNextCell = getObjectAt(blockNextGridX, blockNextGridY);
+                
+                            if (!objectInBlockNextCell || objectInBlockNextCell.type === OBJECT_TYPES.FLOOR || (objectInBlockNextCell.type === OBJECT_TYPES.DIAMOND && !objectInBlockNextCell.isCollected)) {
+                                objectsToAnimate.push({ obj: block, newGridX: blockNextGridX, newGridY: blockNextGridY });
+                                if (block.isSticky) {
+                                    finalPlayerGridX = blockNextGridX; 
+                                    finalPlayerGridY = blockNextGridY;
+                                }
+                            } else {
+                                playerIsAnimating = false; return; 
+                            }
+                        } else if (targetCellObject.isLethal) {
+                            gameOver(`Kye bumped into a ${targetCellObject.constructor.name}!`);
+                            playerIsAnimating = false; return;
+                        } else if (targetCellObject.isSolid) { 
+                            playerIsAnimating = false; return;
+                        }
+                    }
+                
+                    objectsToAnimate.unshift({ obj: this, newGridX: finalPlayerGridX, newGridY: finalPlayerGridY });
+                
+                    const animationPromises = objectsToAnimate.map(item => item.obj.animateMoveTo(item.newGridX, item.newGridY));
+                    await Promise.all(animationPromises);
+                
+                    for (const item of objectsToAnimate) {
+                        gameGrid[item.obj.gridY][item.obj.gridX] = createFloorTile(item.obj.gridX, item.obj.gridY);
+                    }
+                    for (const item of objectsToAnimate) {
+                        item.obj.gridX = item.newGridX;
+                        item.obj.gridY = item.newGridY;
+                        gameGrid[item.obj.gridY][item.obj.gridX] = item.obj;
+                    }
+                
+                    const objectPlayerLandedOn = getObjectAt(this.gridX, this.gridY); 
+                    if (objectPlayerLandedOn && objectPlayerLandedOn.type === OBJECT_TYPES.DIAMOND && !objectPlayerLandedOn.isCollected) {
+                        objectPlayerLandedOn.isCollected = true;
+                        this.diamondsCollected++;
+                        updateHud();
+                        checkWinCondition();
+                    } else if (objectPlayerLandedOn && objectPlayerLandedOn !== this && objectPlayerLandedOn.isLethal) {
+                        gameOver(`Kye landed on a ${objectPlayerLandedOn.constructor.name}!`);
+                        playerIsAnimating = false; return;
+                    }
+                
+                    await processMonsterTurns();
+                    playerIsAnimating = false;
+                }                
+            }
+
+            class Wall extends GameObject { constructor(x,y) { super(x,y,OBJECT_TYPES.WALL); this.isSolid = true; } }
+            class Diamond extends GameObject { constructor(x,y) { super(x,y,OBJECT_TYPES.DIAMOND); } }
+            class Floor extends GameObject { constructor(x,y) { super(x,y,OBJECT_TYPES.FLOOR); } }
+            class PushableBlock extends GameObject { constructor(x,y,type) { super(x,y,type); this.isSolid = true; this.isPushable = true; } }
+            class StickyBlock extends PushableBlock { constructor(x,y) { super(x,y,OBJECT_TYPES.STICKY_MAGNET); this.isSticky = true; } }
+            class ArrowBlock extends GameObject { constructor(x,y,type) { super(x,y,type); this.isSolid = true; } } 
+            
+            class Monster extends GameObject {
+                constructor(x,y,type) { 
+                    super(x,y,type); 
+                    this.isLethal = true; 
+                    this.isSolid = true;
+                    this.moveDirection = { dx: 1, dy: 0 }; 
+                    if (Math.random() < 0.5) { // Randomize initial horizontal direction
+                        this.moveDirection.dx = Math.random() < 0.5 ? 1: -1;
+                        this.moveDirection.dy = 0;
+                    } else { // Randomize initial vertical direction
+                        this.moveDirection.dx = 0;
+                        this.moveDirection.dy = Math.random() < 0.5 ? 1: -1;
+                    }
+                }
+                
+                _checkCell(x, y) {
+                    const obj = getObjectAt(x, y);
+                    if (!obj) return 'empty'; 
+                    if (obj.type === OBJECT_TYPES.FLOOR) return 'empty';
+                    if (obj.type === OBJECT_TYPES.DIAMOND && !obj.isCollected) return 'diamond';
+                    if (obj.type === OBJECT_TYPES.PLAYER) return 'player';
+                    if (obj.isSolid) return 'solid';
+                    return 'empty';
+                }
+
+                async aiMove() {
+                    if (playerIsAnimating || isPaused) return false;
+
+                    let nextGridX = this.gridX + this.moveDirection.dx;
+                    let nextGridY = this.gridY + this.moveDirection.dy;
+                    let movedThisTurn = false;
+
+                    if (this.type === OBJECT_TYPES.ROCKER) {
+                        let targetType = this._checkCell(nextGridX, nextGridY);
+                        if (targetType === 'empty' || targetType === 'diamond') {
+                           // Valid move
+                        } else if (targetType === 'player') {
+                            gameOver(`Kye was crushed by a Rocker!`); return false;
+                        } else { 
+                            this.moveDirection.dx *= -1;
+                            this.moveDirection.dy *= -1;
+                            nextGridX = this.gridX + this.moveDirection.dx;
+                            nextGridY = this.gridY + this.moveDirection.dy;
+                            targetType = this._checkCell(nextGridX, nextGridY);
+                            if (targetType === 'empty' || targetType === 'diamond') {
+                               // Valid move in new direction
+                            } else if (targetType === 'player') {
+                                gameOver(`Kye was crushed by a Rocker!`); return false;
+                            } else {
+                                return false; 
+                            }
+                        }
+                    } else if (this.type === OBJECT_TYPES.EATER) {
+                        const directions = [ {dx:0,dy:-1}, {dx:1,dy:0}, {dx:0,dy:1}, {dx:-1,dy:0} ].sort(() => Math.random() - 0.5); // Shuffle for variety
+                        let foundDiamondMove = null;
+                        let possibleMoves = [];
+
+                        for (const dir of directions) {
+                            const checkX = this.gridX + dir.dx;
+                            const checkY = this.gridY + dir.dy;
+                            const cellType = this._checkCell(checkX, checkY);
+
+                            if (cellType === 'diamond') {
+                                foundDiamondMove = { dx: dir.dx, dy: dir.dy };
+                                break; 
+                            }
+                            if (cellType === 'empty') {
+                                possibleMoves.push({ dx: dir.dx, dy: dir.dy });
+                            }
+                            if (cellType === 'player') { 
+                                possibleMoves.push({ dx: dir.dx, dy: dir.dy, isPlayerTarget: true });
+                            }
+                        }
+                        
+                        let chosenMove = null;
+                        if (foundDiamondMove) {
+                            chosenMove = foundDiamondMove;
+                        } else {
+                            const playerTargets = possibleMoves.filter(m => m.isPlayerTarget);
+                            if (playerTargets.length > 0) {
+                                chosenMove = playerTargets[0]; // Prefer player if adjacent
+                            } else if (possibleMoves.length > 0) {
+                                const continueCurrentDir = possibleMoves.find(m => m.dx === this.moveDirection.dx && m.dy === this.moveDirection.dy);
+                                if (continueCurrentDir) {
+                                    chosenMove = continueCurrentDir;
+                                } else {
+                                    chosenMove = possibleMoves[0]; // Pick first random valid move
+                                }
+                            }
+                        }
+
+                        if (chosenMove) {
+                            this.moveDirection = chosenMove;
+                            nextGridX = this.gridX + this.moveDirection.dx;
+                            nextGridY = this.gridY + this.moveDirection.dy;
+                            const finalTargetType = this._checkCell(nextGridX, nextGridY);
+                            if (finalTargetType === 'player') {
+                                gameOver(`Kye was eaten by an Eater!`); return false;
+                            }
+                            if (finalTargetType === 'solid') return false; 
+
+                            if (finalTargetType === 'diamond') {
+                                const diamondToEat = getObjectAt(nextGridX, nextGridY);
+                                if (diamondToEat && diamondToEat.type === OBJECT_TYPES.DIAMOND && !diamondToEat.isCollected) {
+                                    diamondToEat.isCollected = true; 
+                                }
+                            }
+                        } else {
+                            return false; // Eater is stuck
+                        }
+                    }
+                    
+                    const finalTargetObject = getObjectAt(nextGridX, nextGridY);
+                    if(finalTargetObject && finalTargetObject.type === OBJECT_TYPES.PLAYER) {
+                         gameOver(`Kye was caught by a ${this.constructor.name}!`); return false;
+                    }
+
+
+                    await this.animateMoveTo(nextGridX, nextGridY);
+                    gameGrid[this.gridY][this.gridX] = createFloorTile(this.gridX, this.gridY);
+                    this.gridX = nextGridX;
+                    this.gridY = nextGridY;
+                    gameGrid[this.gridY][this.gridX] = this;
+                    movedThisTurn = true;
+
+                    if (this.gridX === player.gridX && this.gridY === player.gridY) {
+                       gameOver(`Kye was caught by a ${this.constructor.name}!`); return false;
+                    }
+                    return movedThisTurn;
+                }
+            }
+            class Rocker extends Monster { constructor(x,y) { super(x,y,OBJECT_TYPES.ROCKER); } }
+            class Eater extends Monster { constructor(x,y) { super(x,y,OBJECT_TYPES.EATER); } }
+
+
+            function createFloorTile(x, y) { return new Floor(x, y); }
+
+            function getObjectAt(gridX, gridY) {
+                if (gridY < 0 || gridY >= gameGrid.length || gridX < 0 || gridX >= gameGrid[0].length) {
+                    return new Wall(gridX, gridY); 
+                }
+                return gameGrid[gridY][gridX];
+            }
+
+            function switchScreen(screenId) {
+                document.querySelectorAll('.game-screen').forEach(s => s.classList.remove('active-screen'));
+                const targetScreen = document.getElementById(screenId + '-screen');
+                if (targetScreen) {
+                    targetScreen.classList.add('active-screen');
+                }
+                currentScreen = screenId;
+                
+                const gameWasPlaying = (currentScreen === 'Playing');
+                isPaused = (screenId !== 'Playing');
+
+                if (currentScreen === 'Playing' && !gameWasPlaying) { // Transitioning TO playing
+                    isPaused = false;
+                    resizeCanvasAndGameArea(); 
+                    requestAnimationFrame(gameLoop);
+                } else if (currentScreen !== 'Playing' && animationFrameId) { // Transitioning AWAY from playing
+                    cancelAnimationFrame(animationFrameId);
+                    animationFrameId = null;
+                }
+            }
+
+            function loadAssets() {
+                const assetKeys = Object.values(OBJECT_TYPES).filter(val => val !== ' ' && val !== 'P'); // All object types that have sprites
+                const assetPathsToLoad = Object.keys(ASSET_PATHS);
+                let loadedCount = 0;
+                const totalAssets = assetPathsToLoad.length;
+                const progressBar = document.getElementById('loading-progress-bar');
+
+                if (totalAssets === 0) {
+                    onAssetsLoaded(); return;
+                }
+
+                assetPathsToLoad.forEach(key => {
+                    const img = new Image();
+                    img.src = ASSET_PATHS[key];
+                    images[key] = img;
+                    img.onload = () => {
+                        loadedCount++;
+                        const progress = Math.round((loadedCount / totalAssets) * 100);
+                        progressBar.style.width = progress + '%';
+                        progressBar.textContent = progress + '%';
+                        progressBar.setAttribute('aria-valuenow', progress);
+                        if (loadedCount === totalAssets) {
+                            onAssetsLoaded();
+                        }
+                    };
+                    img.onerror = () => {
+                        loadedCount++; 
+                        if (loadedCount === totalAssets) {
+                            onAssetsLoaded();
+                        }
+                    };
+                });
+            }
+
+            function onAssetsLoaded() {
+                isLoading = false;
+                populateInstructionIcons();
+                populateLevelSelectScreen();
+                switchScreen('main-menu');
+            }
+            
+            function populateInstructionIcons() {
+                document.getElementById('instr-kye-img').src = ASSET_PATHS[OBJECT_TYPES.PLAYER];
+                document.getElementById('instr-diamond-img').src = ASSET_PATHS[OBJECT_TYPES.DIAMOND];
+                document.getElementById('instr-wall-img').src = ASSET_PATHS[OBJECT_TYPES.WALL];
+                document.getElementById('instr-floor-img').src = ASSET_PATHS[OBJECT_TYPES.FLOOR];
+                document.getElementById('instr-box-img').src = ASSET_PATHS[OBJECT_TYPES.PUSHABLE_BOX];
+                document.getElementById('instr-magnet-img').src = ASSET_PATHS[OBJECT_TYPES.STICKY_MAGNET];
+                document.getElementById('instr-rocker-img').src = ASSET_PATHS[OBJECT_TYPES.ROCKER];
+                document.getElementById('instr-eater-img').src = ASSET_PATHS[OBJECT_TYPES.EATER];
+                document.getElementById('instr-arrow-up-img').src = ASSET_PATHS[OBJECT_TYPES.ARROW_UP];
+                document.getElementById('instr-arrow-down-img').src = ASSET_PATHS[OBJECT_TYPES.ARROW_DOWN];
+                document.getElementById('instr-arrow-left-img').src = ASSET_PATHS[OBJECT_TYPES.ARROW_LEFT];
+                document.getElementById('instr-arrow-right-img').src = ASSET_PATHS[OBJECT_TYPES.ARROW_RIGHT];
+            }
+
+            function populateLevelSelectScreen() {
+                const gridContainer = document.getElementById('level-select-grid');
+                gridContainer.innerHTML = '';
+                let row;
+                levels.forEach((level, index) => {
+                    if (index % 4 === 0) { 
+                        row = document.createElement('div');
+                        row.className = 'row mb-2';
+                        gridContainer.appendChild(row);
+                    }
+                    const col = document.createElement('div');
+                    col.className = 'col-3';
+                    const btn = document.createElement('button');
+                    btn.className = 'btn btn-primary w-100';
+                    btn.textContent = index + 1;
+                    btn.onclick = () => startGame(index);
+                    col.appendChild(btn);
+                    row.appendChild(col);
+                });
+            }
+
+            function loadLevel(levelIdx) {
+                currentLevelIndex = levelIdx;
+                const level = levels[levelIdx];
+                currentLevelData = {
+                    name: level.name,
+                    data: level.data.map(rowStr => rowStr.split('')), // Ensure it's array of arrays of chars
+                    logicalWidth: level.data[0].length,
+                    logicalHeight: level.data.length
+                };
+                
+                entities = [];
+                gameGrid = [];
+                player = null;
+                totalDiamondsInLevel = 0;
+                nextEntityId = 0; 
+
+                for (let y = 0; y < currentLevelData.logicalHeight; y++) {
+                    gameGrid[y] = [];
+                    for (let x = 0; x < currentLevelData.logicalWidth; x++) {
+                        const char = currentLevelData.data[y][x];
+                        let entity = null;
+                        switch (char) {
+                            case OBJECT_TYPES.PLAYER:
+                                if (!player) { player = new Player(x, y); entity = player; }
+                                else { entity = createFloorTile(x,y); } // Only one player
+                                break;
+                            case OBJECT_TYPES.DIAMOND: entity = new Diamond(x, y); totalDiamondsInLevel++; break;
+                            case OBJECT_TYPES.WALL: entity = new Wall(x, y); break;
+                            case OBJECT_TYPES.PUSHABLE_BOX: entity = new PushableBlock(x, y, OBJECT_TYPES.PUSHABLE_BOX); break;
+                            case OBJECT_TYPES.STICKY_MAGNET: entity = new StickyBlock(x, y); break;
+                            case OBJECT_TYPES.ARROW_UP: entity = new ArrowBlock(x,y,OBJECT_TYPES.ARROW_UP); break;
+                            case OBJECT_TYPES.ARROW_DOWN: entity = new ArrowBlock(x,y,OBJECT_TYPES.ARROW_DOWN); break;
+                            case OBJECT_TYPES.ARROW_LEFT: entity = new ArrowBlock(x,y,OBJECT_TYPES.ARROW_LEFT); break;
+                            case OBJECT_TYPES.ARROW_RIGHT: entity = new ArrowBlock(x,y,OBJECT_TYPES.ARROW_RIGHT); break;
+                            case OBJECT_TYPES.ROCKER: entity = new Rocker(x,y); break;
+                            case OBJECT_TYPES.EATER: entity = new Eater(x,y); break;
+                            default: entity = createFloorTile(x,y); break;
+                        }
+                        gameGrid[y][x] = entity;
+                        if (entity && entity.type !== OBJECT_TYPES.FLOOR) entities.push(entity); 
+                    }
+                }
+                if (!player) { 
+                    player = new Player(1,1); 
+                    if(gameGrid[1] && gameGrid[1][1] && gameGrid[1][1].type === OBJECT_TYPES.FLOOR) {
+                        gameGrid[1][1] = player;
+                        entities.push(player);
+                    } else {
+                         for (let y = 0; y < currentLevelData.logicalHeight; y++) {
+                            for (let x = 0; x < currentLevelData.logicalWidth; x++) {
+                                if (gameGrid[y][x].type === OBJECT_TYPES.FLOOR) {
+                                    player.gridX = x; player.gridY = y;
+                                    player.pixelX = x * TILE_SIZE; player.pixelY = y * TILE_SIZE;
+                                    gameGrid[y][x] = player; entities.push(player);
+                                    break;
+                                }
+                            }
+                            if(player.gridX !== 1 || player.gridY !== 1) break;
+                         }
+                    }
+                }
+                player.diamondsCollected = 0;
+                updateHud();
+            }
+
+            function startGame(levelIdx) {
+                loadLevel(levelIdx);
+                switchScreen('Playing');
+            }
+            
+            function updateHud() {
+                document.getElementById('hud-level-name').textContent = levels[currentLevelIndex].name + ` (${currentLevelIndex + 1})`;
+                document.getElementById('hud-diamonds-left').textContent = `${player.diamondsCollected} / ${totalDiamondsInLevel}`;
+            }
+
+            function checkWinCondition() {
+                if (player.diamondsCollected >= totalDiamondsInLevel && totalDiamondsInLevel > 0) {
+                    isPaused = true;
+                    document.getElementById('next-level-btn').style.display = (currentLevelIndex < levels.length - 1) ? 'block' : 'none';
+                    levelCompleteModal.show();
+                } else if (totalDiamondsInLevel === 0) { // Handle levels with no diamonds (e.g. tutorial)
+                     isPaused = true;
+                    document.getElementById('next-level-btn').style.display = (currentLevelIndex < levels.length - 1) ? 'block' : 'none';
+                    levelCompleteModal.show();
+                }
+            }
+
+            function gameOver(message) {
+                isPaused = true;
+                document.getElementById('game-over-message').textContent = message;
+                gameOverModal.show();
+            }
+
+            async function processMonsterTurns() {
+                if (playerIsAnimating || isPaused) return;
+                const monsters = entities.filter(e => e instanceof Monster);
+                for (const monster of monsters) {
+                    if (isPaused || playerIsAnimating) break; 
+                    await monster.aiMove();
+                    if (isPaused || playerIsAnimating) break;
+                }
+            }
+
+            function resizeCanvasAndGameArea() {
+                if (!currentLevelData || !canvas) return;
+
+                const gameContainer = document.getElementById('game-container');
+                const gameArea = document.getElementById('game-area');
+                
+                const logicalWidth = currentLevelData.logicalWidth * TILE_SIZE;
+                const logicalHeight = currentLevelData.logicalHeight * TILE_SIZE;
+                canvas.width = logicalWidth; 
+                canvas.height = logicalHeight;
+
+                const gameAspectRatio = logicalWidth / logicalHeight;
+                const availableWidth = gameContainer.clientWidth;
+                const availableHeight = gameContainer.clientHeight;
+
+                let newCanvasDisplayWidth = availableWidth;
+                let newCanvasDisplayHeight = newCanvasDisplayWidth / gameAspectRatio;
+
+                if (newCanvasDisplayHeight > availableHeight) {
+                    newCanvasDisplayHeight = availableHeight;
+                    newCanvasDisplayWidth = newCanvasDisplayHeight * gameAspectRatio;
+                }
+                
+                gameArea.style.width = `${newCanvasDisplayWidth}px`;
+                gameArea.style.height = `${newCanvasDisplayHeight}px`;
+                
+                canvas.style.width = `100%`; 
+                canvas.style.height = `100%`;
+            }
+
+            function gameLoop(timestamp) {
+                if (isPaused || isLoading || currentScreen !== 'Playing') {
+                     if (animationFrameId) cancelAnimationFrame(animationFrameId);
+                     animationFrameId = null;
+                     return;
+                }
+                animationFrameId = requestAnimationFrame(gameLoop);
+                
+                updateAnimations(timestamp);
+                renderGame();
+            }
+
+            function updateAnimations(timestamp) {
+                for (let i = activeAnimations.length - 1; i >= 0; i--) {
+                    const anim = activeAnimations[i];
+                    const elapsed = timestamp - anim.startTime;
+                    const progress = Math.min(1, elapsed / anim.duration);
+                    
+                    const easeOutQuad = t => t * (2 - t);
+                    const easedProgress = easeOutQuad(progress);
+
+                    anim.obj.pixelX = anim.startX + (anim.endX - anim.startX) * easedProgress;
+                    anim.obj.pixelY = anim.startY + (anim.endY - anim.startY) * easedProgress;
+
+                    if (progress === 1) {
+                        anim.obj.pixelX = anim.endX; 
+                        anim.obj.pixelY = anim.endY;
+                        activeAnimations.splice(i, 1);
+                        anim.resolve();
+                    }
+                }
+            }
+
+            function renderGame() {
+                if (!ctx || !currentLevelData) return;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                const floorSprite = images[OBJECT_TYPES.FLOOR];
+                if (floorSprite && floorSprite.complete) {
+                    for (let y = 0; y < currentLevelData.logicalHeight; y++) {
+                        for (let x = 0; x < currentLevelData.logicalWidth; x++) {
+                            ctx.drawImage(floorSprite, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                        }
+                    }
+                }
+                
+                const renderOrder = [OBJECT_TYPES.DIAMOND, OBJECT_TYPES.PUSHABLE_BOX, OBJECT_TYPES.STICKY_MAGNET, OBJECT_TYPES.ARROW_UP, OBJECT_TYPES.ARROW_DOWN, OBJECT_TYPES.ARROW_LEFT, OBJECT_TYPES.ARROW_RIGHT, OBJECT_TYPES.WALL, OBJECT_TYPES.ROCKER, OBJECT_TYPES.EATER, OBJECT_TYPES.PLAYER];
+                
+                entities.sort((a, b) => {
+                    let aOrder = renderOrder.indexOf(a.type);
+                    let bOrder = renderOrder.indexOf(b.type);
+                    if (aOrder === -1) aOrder = Infinity; // Draw unknown types last
+                    if (bOrder === -1) bOrder = Infinity;
+                    return aOrder - bOrder;
+                });
+
+
+                entities.forEach(entity => {
+                     if (entity.type !== OBJECT_TYPES.FLOOR) entity.render(ctx);
+                });
+            }
+
+            function handleKeyDown(e) {
+                if (currentScreen !== 'Playing' && e.key !== 'Escape') return;
+                if (isPaused && e.key !== 'Escape') return; 
+                if (playerIsAnimating && e.key !== 'Escape') return;
+
+                let moved = false;
+                switch (e.key) {
+                    case 'ArrowUp': case 'w': player.move(0, -1); moved = true; break;
+                    case 'ArrowDown': case 's': player.move(0, 1); moved = true; break;
+                    case 'ArrowLeft': case 'a': player.move(-1, 0); moved = true; break;
+                    case 'ArrowRight': case 'd': player.move(1, 0); moved = true; break;
+                    case 'Escape':
+                        if (currentScreen === 'Playing') {
+                            if (!isPaused) {
+                                isPaused = true;
+                                pauseModal.show();
+                            } else {
+                                isPaused = false;
+                                pauseModal.hide();
+                                requestAnimationFrame(gameLoop);
+                            }
+                        }
+                        e.preventDefault();
+                        break;
+                }
+                if(moved) e.preventDefault();
+            }
+
+            function init() {
+                canvas = document.getElementById('game-canvas');
+                ctx = canvas.getContext('2d');
+
+                pauseModal = new bootstrap.Modal(document.getElementById('pause-modal'));
+                levelCompleteModal = new bootstrap.Modal(document.getElementById('level-complete-modal'));
+                gameOverModal = new bootstrap.Modal(document.getElementById('game-over-modal'));
+
+                document.getElementById('start-game-btn').onclick = () => startGame(0);
+                document.getElementById('level-select-btn').onclick = () => switchScreen('level-select');
+                document.getElementById('instructions-btn').onclick = () => switchScreen('instructions');
+                
+                document.getElementById('back-to-menu-from-level-select-btn').onclick = () => switchScreen('main-menu');
+                document.getElementById('back-to-menu-from-instructions-btn').onclick = () => switchScreen('main-menu');
+
+                document.getElementById('pause-game-btn').onclick = () => { isPaused = true; pauseModal.show(); };
+                document.getElementById('restart-level-btn-ingame').onclick = () => { isPaused = false; startGame(currentLevelIndex); };
+                document.getElementById('menu-btn-ingame').onclick = () => { isPaused = true; switchScreen('main-menu'); };
+
+                document.getElementById('resume-game-btn').onclick = () => { isPaused = false; pauseModal.hide(); requestAnimationFrame(gameLoop);};
+                document.getElementById('restart-level-modal-btn').onclick = () => { pauseModal.hide(); isPaused = false; startGame(currentLevelIndex); };
+                document.getElementById('main-menu-modal-btn').onclick = () => { pauseModal.hide(); isPaused = true; switchScreen('main-menu'); };
+
+                document.getElementById('next-level-btn').onclick = () => { levelCompleteModal.hide(); isPaused = false; startGame(currentLevelIndex + 1); };
+                document.getElementById('replay-level-lc-btn').onclick = () => { levelCompleteModal.hide(); isPaused = false; startGame(currentLevelIndex); };
+                document.getElementById('main-menu-lc-btn').onclick = () => { levelCompleteModal.hide(); isPaused = true; switchScreen('main-menu'); };
+                
+                document.getElementById('restart-level-go-btn').onclick = () => { gameOverModal.hide(); isPaused = false; startGame(currentLevelIndex); };
+                document.getElementById('main-menu-go-btn').onclick = () => { gameOverModal.hide(); isPaused = true; switchScreen('main-menu'); };
+
+                window.addEventListener('resize', resizeCanvasAndGameArea);
+                document.addEventListener('keydown', handleKeyDown);
+                
+                switchScreen('loading');
+                loadAssets();
+            }
+
+            return { init };
+        })();
+
+        document.addEventListener('DOMContentLoaded', App.init);
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

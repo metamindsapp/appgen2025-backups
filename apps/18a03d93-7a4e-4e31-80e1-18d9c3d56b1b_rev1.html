@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ella Park Honey - Sooke Beekeeping & Unique Stays</title>
+    <meta name="description" content="Discover Ella Park Honey in Sooke. Offering unique beekeeping experiences, an Airbnb where you can sleep over beehives, and pure local honey.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: #FCFBF8;
+            color: #4A4A4A;
+            padding-top: 70px;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Merriweather', serif;
+            color: #4A5D23;
+        }
+        .text-gold { color: #C7A46A !important; }
+        .text-green { color: #4A5D23 !important; }
+        .bg-gold { background-color: #C7A46A !important; }
+        .bg-green { background-color: #4A5D23 !important; }
+        .bg-light-accent {
+            background-color: #F0F2EB;
+            background-image: linear-gradient(rgba(255,255,255,0.92), rgba(255,255,255,0.92)), url('/generated_images/imagen3_195eef8a-06d.png');
+            background-repeat: repeat;
+        }
+        .btn-custom-gold {
+            background-color: #C7A46A;
+            border-color: #C7A46A;
+            color: #FFFFFF;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+        .btn-custom-gold:hover, .btn-custom-gold:focus {
+            background-color: #B08D57;
+            border-color: #B08D57;
+            color: #FFFFFF;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .btn-custom-outline-green {
+            color: #4A5D23;
+            border-color: #4A5D23;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+        .btn-custom-outline-green:hover, .btn-custom-outline-green:focus {
+            background-color: #4A5D23;
+            color: #FFFFFF;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .section-title {
+            font-size: 2.8rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+        .section-subtitle {
+            font-size: 1.2rem;
+            color: #6c757d;
+            margin-bottom: 3rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .card-custom {
+            border: 1px solid #E0E0E0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+        }
+        .card-custom:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        .icon-large {
+            font-size: 3rem;
+            color: #C7A46A;
+            margin-bottom: 1rem;
+        }
+        .navbar-brand {
+            font-family: 'Merriweather', serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+        .navbar-light .navbar-nav .nav-link {
+            color: #4A4A4A;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            transition: color 0.3s ease;
+        }
+        .navbar-light .navbar-nav .nav-link:hover,
+        .navbar-light .navbar-nav .nav-link:focus {
+            color: #C7A46A;
+        }
+        .navbar-light .navbar-nav .nav-link.active {
+            color: #4A5D23;
+            font-weight: 700;
+            border-bottom: 2px solid #C7A46A;
+            padding-bottom: calc(0.5rem - 2px);
+        }
+        .navbar.scrolled {
+            background-color: rgba(252, 251, 248, 0.98) !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        #home {
+            background: url('/generated_images/imagen3_901bf777-1b6.png') no-repeat center center;
+            background-size: cover;
+            position: relative;
+        }
+        .hero-overlay-content {
+            position: relative;
+            z-index: 1;
+            background-color: rgba(255, 255, 255, 0.85);
+            padding: 2.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        #home::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(74, 93, 35, 0.1);
+            z-index: 0;
+        }
+        .carousel-item img {
+            max-height: 500px;
+            object-fit: cover;
+            width: 100%;
+        }
+        .accordion-button:not(.collapsed) {
+            color: #4A5D23;
+            background-color: #e7f1d7;
+        }
+        .accordion-button:focus {
+            box-shadow: 0 0 0 0.25rem rgba(74, 93, 35, 0.25);
+        }
+        footer {
+            background-color: #4A5D23;
+            color: #FCFBF8;
+        }
+        footer a {
+            color: #C7A46A;
+            text-decoration: none;
+        }
+        footer a:hover {
+            color: #FFFFFF;
+            text-decoration: underline;
+        }
+        .social-icons a {
+            font-size: 1.5rem;
+            margin: 0 0.5rem;
+        }
+        .map-container {
+            position: relative;
+            overflow: hidden;
+            padding-top: 75%;
+            border-radius: 0.25rem;
+        }
+        .map-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav id="mainNavbar" class="navbar navbar-expand-lg navbar-light fixed-top py-3" style="background-color: rgba(252, 251, 248, 0.85); transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;">
+            <div class="container">
+                <a class="navbar-brand text-green" href="#home">Ella Park Honey</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#about">About Us</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#honey">Our Honey</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#experience">Experiences</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#airbnb">Airbnb</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#learn">Learn</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="home" class="d-flex align-items-center min-vh-100 text-center">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-md-10 col-lg-8">
+                        <div class="hero-overlay-content" data-aos="fade-up">
+                            <h1 class="display-4 fw-bold text-green">Ella Park Honey</h1>
+                            <p class="lead my-4" style="font-size: 1.4rem; color: #333;">Experience the Sweetness of Sooke: Pure Honey, Unique Stays, and Unforgettable Beekeeping Adventures.</p>
+                            <p class="mb-4">Nestled in the heart of beautiful Sooke, British Columbia, Ella Park Honey invites you to discover the magic of bees and the pure taste of local, artisan honey.</p>
+                            <a href="#experience" class="btn btn-custom-gold btn-lg me-2 mb-2 mb-md-0">Explore Experiences</a>
+                            <a href="#airbnb" class="btn btn-custom-outline-green btn-lg mb-2 mb-md-0">Discover Our Unique Stay</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="py-5">
+            <div class="container">
+                <div class="text-center mb-5" data-aos="fade-up">
+                    <h2 class="section-title">Our Story</h2>
+                    <p class="section-subtitle">Rooted in Sooke, Inspired by Bees.</p>
+                </div>
+                <div class="row align-items-center">
+                    <div class="col-lg-6" data-aos="fade-right" data-aos-delay="100">
+                        <h3 class="text-green mb-3">Welcome to Ella Park Honey</h3>
+                        <p>At Ella Park Honey, we are more than just beekeepers; we are custodians of nature, passionate about the incredible world of honeybees and the pristine environment of Sooke. Our journey began with a simple love for these amazing pollinators and a desire to share their gifts with our community.</p>
+                        <p>With 15 thriving hives, we practice sustainable and ethical beekeeping, ensuring our bees are healthy, happy, and have ample access to the diverse local flora that makes Sooke honey so special. Our philosophy is simple: work in harmony with nature, prioritize bee welfare, and produce the purest, most delicious honey possible.</p>
+                        <h4 class="text-gold mt-4">Our Values:</h4>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle-fill text-gold me-2"></i>Quality & Purity</li>
+                            <li><i class="bi bi-check-circle-fill text-gold me-2"></i>Education & Awareness</li>
+                            <li><i class="bi bi-check-circle-fill text-gold me-2"></i>Sustainability & Bee Welfare</li>
+                            <li><i class="bi bi-check-circle-fill text-gold me-2"></i>Community Connection</li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-6 mt-4 mt-lg-0" data-aos="fade-left" data-aos-delay="200">
+                        <img src="/generated_images/imagen3_33d8ba22-d49.png" alt="Ella Park Honey beekeepers with veils up, smiling warmly near hives in a Sooke farm setting" class="img-fluid rounded shadow">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="honey" class="py-5 bg-light-accent">
+            <div class="container">
+                <div class="text-center mb-5" data-aos="fade-up">
+                    <h2 class="section-title">Pure Sooke Gold</h2>
+                    <p class="section-subtitle">Taste Our Local, Artisanal Honey.</p>
+                </div>
+                <div class="row align-items-center">
+                    <div class="col-lg-7" data-aos="fade-right" data-aos-delay="100">
+                        <h3 class="text-green mb-3">From Our Hives to Your Home</h3>
+                        <p>Ella Park Honey is a true taste of Sooke's natural bounty. Our bees forage on a rich tapestry of wildflowers, berry blossoms, and native trees, resulting in a unique, multi-floral honey with complex flavor notes that change with the seasons. We harvest our honey in small batches, ensuring it remains raw and unprocessed, retaining all its natural enzymes, pollen, and delicate aromas.</p>
+                        <p>Our commitment to quality means you receive honey that is: </p>
+                        <ul>
+                            <li><strong>100% Pure & Raw:</strong> Never heated or overly filtered.</li>
+                            <li><strong>Locally Sourced:</strong> Exclusively from our 15 hives in Sooke.</li>
+                            <li><strong>Sustainably Harvested:</strong> We always leave plenty for our bees.</li>
+                        </ul>
+                        <p class="mt-3"><strong>How to get our honey:</strong> We primarily offer our honey for direct pickup. Please contact us to inquire about current availability and to arrange a time to collect your liquid gold. We occasionally attend local Sooke markets – follow our (future) social media for updates!</p>
+                    </div>
+                    <div class="col-lg-5 mt-4 mt-lg-0" data-aos="fade-left" data-aos-delay="200">
+                        <img src="/generated_images/imagen3_6787c511-8bc.png" alt="Artistic still life of Ella Park Honey jars with honeycomb, wildflowers on a rustic surface" class="img-fluid rounded shadow">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="experience" class="py-5">
+            <div class="container">
+                <div class="text-center mb-5" data-aos="fade-up">
+                    <h2 class="section-title">Step Into the World of Bees</h2>
+                    <p class="section-subtitle">Our Immersive Beekeeping Experiences.</p>
+                </div>
+                <div class="row align-items-center">
+                    <div class="col-lg-6" data-aos="fade-right" data-aos-delay="100">
+                        <h3 class="text-green mb-3">A Hands-On Adventure</h3>
+                        <p>Ever wondered what it's like inside a beehive? Join us for an unforgettable Beekeeping Experience Day at Ella Park Honey! This is a unique opportunity to don a bee suit, get up close and personal with our gentle bees, and learn directly from experienced beekeepers.</p>
+                        <p><strong>What you'll experience:</strong></p>
+                        <ul>
+                            <li>Learn about bee biology, hive society, and the importance of pollinators.</li>
+                            <li>Safely open a hive and observe the colony in action.</li>
+                            <li>Identify the queen, workers, and drones.</li>
+                            <li>Hold a frame of bees and honeycomb (if you're comfortable!).</li>
+                            <li>Understand the basics of honey extraction (seasonal).</li>
+                            <li>Ask all your buzzing questions!</li>
+                        </ul>
+                        <p>Our experiences are perfect for curious individuals, families, aspiring beekeepers, or anyone looking for a unique connection with nature. We provide all necessary protective gear and ensure a safe, educational, and fun environment.</p>
+                        <a href="mailto:info@ellaparkhoney.example.com?subject=Beekeeping%20Experience%20Inquiry&body=Hello%20Ella%20Park%20Honey,%0A%0AI'm%20interested%20in%20learning%20more%20about%20your%20Beekeeping%20Experience%20Days.%20Please%20provide%20details%20on%20availability,%20pricing,%20and%20what's%20included.%0A%0AThank%20you!" class="btn btn-custom-gold mt-3">Inquire About an Experience Day</a>
+                    </div>
+                    <div class="col-lg-6 mt-4 mt-lg-0" data-aos="fade-left" data-aos-delay="200">
+                        <div id="experienceCarousel" class="carousel slide shadow rounded" data-bs-ride="carousel" data-bs-interval="7000">
+                            <div class="carousel-indicators">
+                                <button type="button" data-bs-target="#experienceCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                                <button type="button" data-bs-target="#experienceCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                            </div>
+                            <div class="carousel-inner rounded">
+                                <div class="carousel-item active">
+                                    <img src="/generated_images/imagen3_ab84624a-608.png" class="d-block w-100" alt="People in beekeeping suits observing a hive frame at Ella Park Honey">
+                                    <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 p-2 rounded">
+                                        <h5>Hands-on Learning</h5>
+                                        <p>Safely interact with our amazing bees.</p>
+                                    </div>
+                                </div>
+                                <div class="carousel-item">
+                                    <img src="/generated_images/imagen3_2633504d-833.png" class="d-block w-100" alt="Close-up of a gloved hand holding a honeycomb frame covered in bees">
+                                    <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 p-2 rounded">
+                                        <h5>The Heart of the Hive</h5>
+                                        <p>Discover the intricate world of honeycomb.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#experienceCarousel" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#experienceCarousel" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="airbnb" class="py-5 bg-light-accent">
+            <div class="container">
+                <div class="text-center mb-5" data-aos="fade-up">
+                    <h2 class="section-title">A Buzz-Worthy Stay</h2>
+                    <p class="section-subtitle">Sleep Over Our Beehives in Sooke.</p>
+                </div>
+                <div class="row align-items-center">
+                     <div class="col-lg-6 order-lg-2" data-aos="fade-left" data-aos-delay="100">
+                        <h3 class="text-green mb-3">Your Unique Sooke Getaway</h3>
+                        <p>Looking for an accommodation experience unlike any other? At Ella Park Honey, we offer a truly unique Airbnb where you can safely and comfortably sleep in close proximity to our gentle honeybee hives. Immerse yourself in the soothing hum of the apiary and connect with nature in a profound way.</p>
+                        <p>Our specially designed guest space offers:</p>
+                        <ul>
+                            <li>A cozy and beautifully appointed room with bee-themed decor.</li>
+                            <li>A safe observation window allowing you to peek into the world of bees.</li>
+                            <li>Private entrance and amenities for a comfortable stay.</li>
+                            <li>Stunning views of our Sooke apiary and gardens.</li>
+                            <li>The gentle, therapeutic sound of bees at work.</li>
+                        </ul>
+                        <p>This is more than just a place to stay; it's an opportunity to relax, rejuvenate, and gain a new appreciation for these incredible creatures. Perfect for nature lovers, those seeking tranquility, or anyone wanting a memorable Sooke experience.</p>
+                        <a href="mailto:info@ellaparkhoney.example.com?subject=Airbnb%20Inquiry&body=Hello%20Ella%20Park%20Honey,%0A%0AI'm%20interested%20in%20your%20'Sleep%20Over%20Beehives'%20Airbnb.%20Could%20you%20please%20provide%20more%20information%20on%20availability,%20rates,%20and%20booking?%0A%0AThank%20you!" class="btn btn-custom-gold mt-3">Check Availability & Inquire</a>
+                    </div>
+                    <div class="col-lg-6 order-lg-1 mt-4 mt-lg-0" data-aos="fade-right" data-aos-delay="200">
+                         <div id="airbnbCarousel" class="carousel slide shadow rounded" data-bs-ride="carousel" data-bs-interval="7500">
+                            <div class="carousel-indicators">
+                                <button type="button" data-bs-target="#airbnbCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                                <button type="button" data-bs-target="#airbnbCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                            </div>
+                            <div class="carousel-inner rounded">
+                                <div class="carousel-item active">
+                                    <img src="/generated_images/imagen3_9a1a51f8-646.png" class="d-block w-100" alt="Cozy interior of the 'Sleep Over Beehives' Airbnb with bee-themed decor and observation window">
+                                     <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 p-2 rounded">
+                                        <h5>Unique & Cozy Interior</h5>
+                                        <p>Relax in comfort with a touch of bee magic.</p>
+                                    </div>
+                                </div>
+                                <div class="carousel-item">
+                                    <img src="/generated_images/imagen3_214ba217-06f.png" class="d-block w-100" alt="Exterior of the Airbnb accommodation near beehives in a Sooke garden, showing harmony with nature">
+                                     <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 p-2 rounded">
+                                        <h5>Harmony with Nature</h5>
+                                        <p>Your peaceful retreat nestled by the apiary.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#airbnbCarousel" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#airbnbCarousel" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="learn" class="py-5">
+            <div class="container">
+                <div class="text-center mb-5" data-aos="fade-up">
+                    <h2 class="section-title">The Amazing World of Honeybees</h2>
+                    <p class="section-subtitle">Discover Fascinating Facts About Our Pollinators.</p>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 mb-4 mb-lg-0 d-flex align-items-center" data-aos="fade-right" data-aos-delay="100">
+                        <img src="/generated_images/imagen3_e8ebd6e6-065.png" alt="Vibrant close-up of a honeybee on a blooming flower, highlighting pollination" class="img-fluid rounded shadow">
+                    </div>
+                    <div class="col-lg-8" data-aos="fade-left" data-aos-delay="200">
+                        <div class="accordion" id="beeFactsAccordion">
+                            <div class="accordion-item card-custom mb-3">
+                                <h2 class="accordion-header" id="headingOne">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                        Why Are Bees So Important?
+                                    </button>
+                                </h2>
+                                <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#beeFactsAccordion">
+                                    <div class="accordion-body">
+                                        Honeybees are vital pollinators, responsible for about one-third of the food we eat. They play a crucial role in maintaining biodiversity by pollinating countless species of wildflowers, trees, and crops. Without bees, our ecosystems and food supply would be drastically different, affecting everything from the fruits and vegetables we enjoy to the health of our natural landscapes.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item card-custom mb-3">
+                                <h2 class="accordion-header" id="headingTwo">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                        Life Inside the Hive
+                                    </button>
+                                </h2>
+                                <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#beeFactsAccordion">
+                                    <div class="accordion-body">
+                                        A honeybee colony is a highly organized superorganism. It consists of a single queen bee (responsible for laying all the eggs, up to 2,000 a day!), thousands of sterile female worker bees (who forage for nectar and pollen, build comb, care for young, clean, and defend the hive), and, seasonally, a few hundred male drone bees (whose main purpose is to mate with a virgin queen from another colony). Each bee has a specific role that changes with age and contributes to the survival of the colony.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item card-custom mb-3">
+                                <h2 class="accordion-header" id="headingThree">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                        From Flower to Honey: A Sweet Journey
+                                    </button>
+                                </h2>
+                                <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#beeFactsAccordion">
+                                    <div class="accordion-body">
+                                        Worker bees collect nectar from flowers using their long, tube-like tongues (proboscis). They store it in a special "honey stomach" (crop), separate from their digestive stomach, where enzymes begin to break down complex sugars into simpler ones (glucose and fructose). Back at the hive, they regurgitate the nectar to other "house" bees who further process it by adding more enzymes and reducing its water content. This processed nectar is then deposited into honeycomb cells. The bees fan their wings vigorously to evaporate excess water, transforming the nectar into rich, stable honey, which they cap with beeswax for storage.
+                                    </div>
+                                </div>
+                            </div>
+                             <div class="accordion-item card-custom">
+                                <h2 class="accordion-header" id="headingFour">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                        Ella Park Honey's Commitment to Bee Welfare
+                                    </button>
+                                </h2>
+                                <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#beeFactsAccordion">
+                                    <div class="accordion-body">
+                                        At Ella Park Honey, we prioritize the health and well-being of our bees above all else. We practice natural and sustainable beekeeping methods, avoid harsh chemicals and antibiotics, ensure our bees have diverse forage in the Sooke area, and never over-harvest honey, always leaving ample stores for the bees themselves, especially for winter. We believe that happy, healthy bees produce the best honey and are essential for a thriving local environment. Our practices focus on minimizing stress to the colonies and supporting their natural behaviors.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="py-5">
+            <div class="container">
+                <div class="text-center mb-5" data-aos="fade-up">
+                    <h2 class="section-title">Get in Touch</h2>
+                    <p class="section-subtitle">We'd Love to Hear From You!</p>
+                </div>
+                <div class="row">
+                    <div class="col-lg-7 mb-4 mb-lg-0" data-aos="fade-right" data-aos-delay="100">
+                        <h3 class="text-green mb-3">Send Us a Message</h3>
+                        <form id="contactForm" class="needs-validation" novalidate>
+                            <div class="mb-3">
+                                <label for="contactName" class="form-label">Full Name</label>
+                                <input type="text" class="form-control form-control-lg" id="contactName" placeholder="Your Name" required>
+                                <div class="invalid-feedback">Please enter your name.</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="contactEmail" class="form-label">Email Address</label>
+                                <input type="email" class="form-control form-control-lg" id="contactEmail" placeholder="your.email@example.com" required>
+                                <div class="invalid-feedback">Please enter a valid email address.</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="contactSubject" class="form-label">Subject</label>
+                                <input type="text" class="form-control form-control-lg" id="contactSubject" placeholder="Inquiry about..." required>
+                                 <div class="invalid-feedback">Please enter a subject.</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="contactMessage" class="form-label">Message</label>
+                                <textarea class="form-control form-control-lg" id="contactMessage" rows="5" placeholder="Your message here..." required></textarea>
+                                <div class="invalid-feedback">Please enter your message.</div>
+                            </div>
+                            <button type="submit" class="btn btn-custom-gold btn-lg">Send Message</button>
+                            <div id="formStatusMessage" class="mt-3"></div>
+                        </form>
+                    </div>
+                    <div class="col-lg-5" data-aos="fade-left" data-aos-delay="200">
+                        <h3 class="text-green mb-3">Contact Details</h3>
+                        <p><i class="bi bi-geo-alt-fill text-gold me-2"></i>Ella Park Honey, Sooke, British Columbia, Canada</p>
+                        <p><i class="bi bi-envelope-fill text-gold me-2"></i><a href="mailto:info@ellaparkhoney.example.com" class="text-decoration-none text-gold">info@ellaparkhoney.example.com</a></p>
+                        <p><i class="bi bi-telephone-fill text-gold me-2"></i><a href="tel:+12505552337" class="text-decoration-none text-gold">(250) 555-BEES (2337)</a></p>
+                        
+                        <h4 class="text-green mt-4 mb-3">Find Us in Sooke</h4>
+                        <div class="map-container shadow">
+                            <iframe src="https://www.openstreetmap.org/export/embed.html?bbox=-123.7450,48.3650,-123.6950,48.3850&layer=mapnik&marker=48.3750,-123.7200" title="Map of Sooke showing approximate location of Ella Park Honey"></iframe>
+                        </div>
+
+                        <h4 class="text-green mt-4 mb-2">Connect With Us (Soon!)</h4>
+                         <div class="social-icons">
+                            <a href="#" class="text-gold" aria-label="Ella Park Honey on Instagram (coming soon)"><i class="bi bi-instagram"></i></a>
+                            <a href="#" class="text-gold" aria-label="Ella Park Honey on Facebook (coming soon)"><i class="bi bi-facebook"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="py-4 text-center">
+        <div class="container">
+            <div class="social-icons mb-2">
+                <a href="#" aria-label="Ella Park Honey on Instagram (coming soon)"><i class="bi bi-instagram"></i></a>
+                <a href="#" aria-label="Ella Park Honey on Facebook (coming soon)"><i class="bi bi-facebook"></i></a>
+            </div>
+            <p class="mb-1">&copy; <span id="currentYear"></span> Ella Park Honey. All Rights Reserved.</p>
+            <p class="mb-0 small"><a href="#">Privacy Policy</a> | <a href="#">Terms of Use</a> (Placeholders)</p>
+            <p class="small mt-2 opacity-75">Website lovingly crafted by AppGen2025</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script>
+        function initApp() {
+            setupNavbarScroll();
+            setupSmoothScroll();
+            setupScrollSpy();
+            setupAOS();
+            setupContactForm();
+            updateCopyrightYear();
+            initializeCarousels();
+        }
+
+        function setupNavbarScroll() {
+            const navbar = document.getElementById('mainNavbar');
+            if (navbar) {
+                window.addEventListener('scroll', () => {
+                    if (window.scrollY > 50) {
+                        navbar.classList.add('scrolled');
+                    } else {
+                        navbar.classList.remove('scrolled');
+                    }
+                });
+            }
+        }
+
+        function setupSmoothScroll() {
+            const links = document.querySelectorAll('a[href^="#"]');
+            links.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    const targetId = this.getAttribute('href');
+                    if (targetId === "#" || !document.querySelector(targetId)) return;
+                    e.preventDefault();
+                    
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        const navbarHeight = document.getElementById('mainNavbar')?.offsetHeight || 70;
+                        const elementPosition = targetElement.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - navbarHeight;
+                        
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: 'smooth'
+                        });
+
+                        const navbarCollapseElement = document.getElementById('navbarNav');
+                        if (navbarCollapseElement && navbarCollapseElement.classList.contains('show')) {
+                            const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapseElement);
+                            if (bsCollapse) {
+                                bsCollapse.hide();
+                            }
+                        }
+                    }
+                });
+            });
+        }
+        
+        function setupScrollSpy() {
+            const sections = document.querySelectorAll('main section[id]');
+            const navLinks = document.querySelectorAll('#navbarNav .nav-link');
+            const navbarHeight = document.getElementById('mainNavbar')?.offsetHeight || 70;
+
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href').substring(1) === entry.target.id) {
+                                link.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }, { 
+                rootMargin: `-${navbarHeight + 50}px 0px -${Math.max(150, window.innerHeight - navbarHeight - 250)}px 0px`,
+                threshold: 0.01 
+            });
+            
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+        }
+
+        function setupAOS() {
+            AOS.init({
+                duration: 800,
+                once: true,
+                offset: 50 
+            });
+        }
+
+        function setupContactForm() {
+            const form = document.getElementById('contactForm');
+            const formStatusMessage = document.getElementById('formStatusMessage');
+
+            if (form) {
+                form.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    if (!form.checkValidity()) {
+                        form.classList.add('was-validated');
+                        if (formStatusMessage) formStatusMessage.innerHTML = '<div class="alert alert-danger alert-dismissible fade show" role="alert">Please fill out all required fields correctly.<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
+                        return;
+                    }
+                    
+                    form.classList.add('was-validated');
+
+                    const name = document.getElementById('contactName').value;
+                    const email = document.getElementById('contactEmail').value;
+                    const subject = document.getElementById('contactSubject').value;
+                    const message = document.getElementById('contactMessage').value;
+
+                    const mailtoLink = `mailto:info@ellaparkhoney.example.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message + "\n\nFrom: " + name + " (" + email + ")")}`;
+                    
+                    if (formStatusMessage) {
+                         formStatusMessage.innerHTML = '<div class="alert alert-success alert-dismissible fade show" role="alert">Thank you! Your message is being prepared in your email client.<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
+                    }
+                    
+                    try {
+                        window.location.href = mailtoLink;
+                    } catch (e) {
+                        console.error("Mailto link failed:", e);
+                        if (formStatusMessage) {
+                            formStatusMessage.innerHTML = '<div class="alert alert-warning alert-dismissible fade show" role="alert">Could not open email client. Please copy details manually.<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
+                        }
+                    }
+                    
+                    setTimeout(() => {
+                        form.reset();
+                        form.classList.remove('was-validated');
+                        if (formStatusMessage) {
+                            const alertElement = formStatusMessage.querySelector('.alert');
+                            if (alertElement) {
+                                const bsAlert = bootstrap.Alert.getInstance(alertElement);
+                                if (bsAlert) {
+                                     bsAlert.close();
+                                } else {
+                                    formStatusMessage.innerHTML = '';
+                                }
+                            } else {
+                                 formStatusMessage.innerHTML = '';
+                            }
+                        }
+                    }, 5000);
+                });
+            }
+        }
+
+        function updateCopyrightYear() {
+            const yearSpan = document.getElementById('currentYear');
+            if (yearSpan) {
+                yearSpan.textContent = new Date().getFullYear();
+            }
+        }
+
+        function initializeCarousels() {
+            const experienceCarouselElement = document.getElementById('experienceCarousel');
+            if (experienceCarouselElement) {
+                new bootstrap.Carousel(experienceCarouselElement, { interval: 7000, ride: 'carousel' });
+            }
+            const airbnbCarouselElement = document.getElementById('airbnbCarousel');
+            if (airbnbCarouselElement) {
+                new bootstrap.Carousel(airbnbCarouselElement, { interval: 7500, ride: 'carousel' });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

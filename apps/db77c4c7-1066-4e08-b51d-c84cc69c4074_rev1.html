@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kitten Kaboodle - Parisian Cat Café | Welcome!</title>
+    <meta name="description" content="Visit Kitten Kaboodle, Paris's coziest cat café! Enjoy coffee, pastries, and quality time with our adorable resident cats. Book your visit today!">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bs-primary: #FF6B6B;
+            --bs-primary-rgb: 255, 107, 107;
+            --bs-link-color: #FF6B6B;
+            --bs-link-hover-color: #e05252;
+            --font-family-sans-serif: 'Poppins', sans-serif;
+            --font-family-headings: 'Pacifico', cursive;
+        }
+
+        body {
+            font-family: var(--font-family-sans-serif);
+            padding-top: 70px;
+            scroll-behavior: smooth;
+        }
+
+        .navbar-brand {
+            font-family: var(--font-family-headings);
+            font-size: 1.8rem;
+            color: var(--bs-primary) !important;
+        }
+
+        .nav-link {
+            font-weight: 600;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: var(--bs-primary) !important;
+        }
+
+        #home {
+            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('/generated_images/dalle3_0a2b5353-47c.png') no-repeat center center;
+            background-size: cover;
+            padding-top: 70px;
+        }
+        #home h1 {
+             font-family: var(--font-family-headings);
+        }
+
+        .section-title {
+            font-family: var(--font-family-headings);
+            color: var(--bs-primary);
+        }
+        .title-hr {
+            width: 80px;
+            height: 4px;
+            background-color: var(--bs-primary);
+            opacity: 1;
+            border: none;
+            margin-top: 0.5rem;
+        }
+        
+        .menu-category-title {
+            font-family: var(--font-family-headings);
+            color: #555;
+            font-size: 1.8rem;
+        }
+
+        .card.cat-card {
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        .card.cat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+        }
+        .cat-card .card-img-top {
+            height: 250px;
+            object-fit: cover;
+        }
+        .cat-card .card-title {
+            font-family: var(--font-family-headings);
+            color: var(--bs-primary);
+        }
+
+        #galleryGridContainer img {
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        #galleryGridContainer img:hover {
+            transform: scale(1.05);
+            opacity: 0.8;
+        }
+        
+        .rule-icon { display: inline-flex; align-items: center; justify-content: center; width: 24px; height:24px; text-align: center; font-size: 1.1rem; margin-right: 0.5rem; }
+        .rule-do { color: #198754; } 
+        .rule-dont { color: #dc3545; }
+        .rule-info { color: #0dcaf0; }
+
+        .btn-primary {
+            background-color: var(--bs-primary);
+            border-color: var(--bs-primary);
+        }
+        .btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+            background-color: var(--bs-link-hover-color);
+            border-color: var(--bs-link-hover-color);
+        }
+        .btn-check:checked+.btn-primary, .btn-check:active+.btn-primary, .btn-primary:active, .btn-primary.active, .show>.btn-primary.dropdown-toggle {
+            background-color: var(--bs-link-hover-color);
+            border-color: var(--bs-link-hover-color);
+        }
+
+        .btn-outline-light:hover {
+            color: #333;
+        }
+        .badge.bg-primary {
+            background-color: var(--bs-primary) !important;
+        }
+        #aiCatImageResult img {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: .375rem;
+            box-shadow: 0 .125rem .25rem rgba(0,0,0,.075);
+        }
+        footer a .bi {
+            transition: color 0.2s ease-in-out;
+            font-size: 1.5rem;
+        }
+        footer a:hover .bi {
+            color: var(--bs-primary) !important;
+        }
+        .map-container {
+             overflow: hidden;
+        }
+        .list-group-item {
+            display: flex;
+            align-items: flex-start;
+        }
+        .list-group-item .rule-icon {
+             margin-top: 0.125rem; 
+        }
+    </style>
+</head>
+<body data-bs-spy="scroll" data-bs-target="#mainNavbar" data-bs-offset="80">
+
+    <header>
+        <nav id="mainNavbar" class="navbar navbar-expand-lg navbar-light bg-light fixed-top shadow-sm">
+            <div class="container">
+                <a class="navbar-brand" href="#home">Kitten Kaboodle</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavContent" aria-controls="navbarNavContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNavContent">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#about">About Us</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#cats">Our Cats</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#menu">Menu</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#visit">Visit Us</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#gallery">Gallery</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#ai-companion">Purrfect Companion</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="home" class="d-flex align-items-center min-vh-100 text-white">
+            <div class="container text-center">
+                <h1 class="display-2 fw-bold">Bienvenue à Kitten Kaboodle!</h1>
+                <p class="lead my-4 fs-4">Paris's most charming cat café, where purrs and pastries meet.</p>
+                <a href="#cats" class="btn btn-primary btn-lg me-md-2 mb-2 mb-md-0">Meet Our Furry Friends</a>
+                <a href="#visit" class="btn btn-outline-light btn-lg">Plan Your Visit</a>
+            </div>
+        </section>
+
+        <section id="about" class="py-5 bg-white">
+            <div class="container">
+                <div class="text-center mb-5">
+                    <h2 class="display-5 fw-bold section-title">Our Story</h2>
+                    <hr class="title-hr mx-auto">
+                </div>
+                <div class="row align-items-center">
+                    <div class="col-md-6 mb-4 mb-md-0">
+                        <img id="aboutImage" src="/generated_images/dalle3_9d14677b-43c.png" alt="Kitten Kaboodle cafe interior with cozy armchairs and natural light" class="img-fluid rounded shadow-lg">
+                    </div>
+                    <div class="col-md-6">
+                        <h3 class="mb-3">More Than Just Coffee & Croissants</h3>
+                        <p>At Kitten Kaboodle, nestled in the heart of Paris, we've brewed up a unique blend of comfort, companionship, and caffeine. Our dream was to create a serene sanctuary where Parisians and travelers alike can unwind in the delightful company of our friendly rescue cats.</p>
+                        <p>We are passionate about animal welfare and providing a loving, stimulating environment for our feline residents. Each cat at Kitten Kaboodle is a cherished member of our family, enjoying a life of leisure, play, and endless affection. We also partner with local shelters to help our adoptable cats find their forever homes.</p>
+                        <p>Join us for artisanal coffee, delectable French pastries, and the soothing purrs of our adorable cats. It's an experience that will warm your heart and lift your spirits.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="cats" class="py-5">
+            <div class="container">
+                <div class="text-center mb-5">
+                    <h2 class="display-5 fw-bold section-title">Meet Our Furry Residents</h2>
+                    <hr class="title-hr mx-auto">
+                </div>
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="catsGridContainer">
+                </div>
+            </div>
+        </section>
+
+        <section id="menu" class="py-5 bg-white">
+            <div class="container">
+                <div class="text-center mb-5">
+                    <h2 class="display-5 fw-bold section-title">Our Delights</h2>
+                    <hr class="title-hr mx-auto">
+                </div>
+                <div class="row">
+                    <div class="col-lg-6 mb-4 mb-lg-0">
+                        <h3 class="mb-3 menu-category-title">Boissons Chaudes & Froides</h3>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">Espresso / Double <span class="badge bg-primary rounded-pill">€2.50 / €3.00</span></li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">Café Crème / Latte <span class="badge bg-primary rounded-pill">€3.50</span></li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">Cappuccino <span class="badge bg-primary rounded-pill">€3.80</span></li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">Chocolat Chaud Viennois <span class="badge bg-primary rounded-pill">€4.50</span></li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">Selection de Thés Mariage Frères <span class="badge bg-primary rounded-pill">€4.00</span></li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">Jus de Fruits Frais <span class="badge bg-primary rounded-pill">€4.20</span></li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-6">
+                        <h3 class="mb-3 menu-category-title">Pâtisseries & Gourmandises</h3>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">Croissant au Beurre <span class="badge bg-primary rounded-pill">€2.00</span></li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">Pain au Chocolat <span class="badge bg-primary rounded-pill">€2.50</span></li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">Macarons (Assortiment de 3) <span class="badge bg-primary rounded-pill">€5.00</span></li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">Tartelette du Jour <span class="badge bg-primary rounded-pill">€5.50</span></li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">Cookies "Chat-Licious" <span class="badge bg-primary rounded-pill">€3.00</span></li>
+                        </ul>
+                    </div>
+                </div>
+                 <p class="text-center mt-4 fst-italic"><small>All our products are sourced locally where possible. Please inform us of any allergies.</small></p>
+            </div>
+        </section>
+
+        <section id="visit" class="py-5">
+            <div class="container">
+                <div class="text-center mb-5">
+                    <h2 class="display-5 fw-bold section-title">Venez Nous Voir! (Visit Us!)</h2>
+                    <hr class="title-hr mx-auto">
+                </div>
+                <div class="row">
+                    <div class="col-lg-6 mb-4 mb-lg-0">
+                        <h3 class="mb-3">Our Parisian Hideaway</h3>
+                        <p><i class="bi bi-geo-alt-fill me-2 text-primary"></i>123 Rue des Félins, 75010 Paris, France</p>
+                        <div class="map-container rounded shadow mb-4" style="height: 350px;">
+                            <iframe title="Kitten Kaboodle Location Map" src="https://www.openstreetmap.org/export/embed.html?bbox=2.3488%2C48.8534%2C2.3588%2C48.8584&layer=mapnik&marker=48.8559%2C2.3538" style="border:0; width: 100%; height: 100%;" allowfullscreen="" loading="lazy"></iframe>
+                        </div>
+                        <h3 class="mb-3">Opening Hours</h3>
+                        <ul class="list-unstyled">
+                            <li><strong>Tuesday - Friday:</strong> 12:00 PM - 7:00 PM</li>
+                            <li><strong>Saturday - Sunday:</strong> 11:00 AM - 8:00 PM</li>
+                            <li><strong>Monday:</strong> Closed (Our cats are recharging their purr-engines!)</li>
+                        </ul>
+                        <h3 class="mt-4 mb-3">Reservations & Contact</h3>
+                        <p>Reservations are highly recommended, especially on weekends.</p>
+                        <p><i class="bi bi-telephone-fill me-2 text-primary"></i>Call us: <a href="tel:+33123456789">+33 1 23 45 67 89</a></p>
+                        <p><i class="bi bi-envelope-fill me-2 text-primary"></i>Email us: <a href="mailto:miaou@kittenkaboodle.paris?subject=Inquiry%20from%20Website">miaou@kittenkaboodle.paris</a></p>
+                    </div>
+                    <div class="col-lg-6">
+                        <h3 class="mb-3">Café Etiquette (For Happy Cats & Guests)</h3>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item"><span class="rule-icon rule-do"><i class="bi bi-droplet-fill"></i></span>Please sanitize hands upon entry.</li>
+                            <li class="list-group-item"><span class="rule-icon rule-do"><i class="bi bi-mic-mute-fill"></i></span>Speak softly and move calmly.</li>
+                            <li class="list-group-item"><span class="rule-icon rule-do"><i class="bi bi-heart-fill"></i></span>Let cats approach you; don't force interaction.</li>
+                            <li class="list-group-item"><span class="rule-icon rule-dont"><i class="bi bi-slash-circle-fill"></i></span>Do not pick up the cats unless invited by staff.</li>
+                            <li class="list-group-item"><span class="rule-icon rule-dont"><i class="bi bi-camera-fill"></i></span>No flash photography, please.</li>
+                            <li class="list-group-item"><span class="rule-icon rule-dont"><i class="bi bi-egg-fried"></i></span>Do not feed human food to the cats.</li>
+                            <li class="list-group-item"><span class="rule-icon rule-info"><i class="bi bi-info-circle-fill"></i></span>Children must be supervised by an adult at all times.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="gallery" class="py-5 bg-white">
+            <div class="container">
+                <div class="text-center mb-5">
+                     <h2 class="display-5 fw-bold section-title">A Glimpse of Kaboodle</h2>
+                     <hr class="title-hr mx-auto">
+                </div>
+                <div class="row row-cols-2 row-cols-md-3 g-3" id="galleryGridContainer">
+                </div>
+            </div>
+        </section>
+
+        <div class="modal fade" id="galleryModal" tabindex="-1" aria-labelledby="galleryModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="galleryModalLabel">Kitten Kaboodle Moments</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <img src="" id="modalImage" class="img-fluid" alt="Enlarged gallery image">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section id="ai-companion" class="py-5">
+            <div class="container">
+                <div class="text-center mb-5">
+                    <h2 class="display-5 fw-bold section-title">Imagine Your Purrfect Companion!</h2>
+                    <hr class="title-hr mx-auto">
+                    <p class="lead mt-3">Curious about your dream cat? Describe it below and let our AI artist bring it to virtual life!</p>
+                </div>
+                <div class="row justify-content-center">
+                    <div class="col-md-8 col-lg-7">
+                        <div class="card shadow">
+                            <div class="card-body p-4">
+                                <div class="mb-3">
+                                    <label for="catPromptInput" class="form-label fs-5">Describe your dream cat:</label>
+                                    <textarea class="form-control" id="catPromptInput" rows="3" placeholder="e.g., A fluffy white Persian cat with striking blue eyes, peacefully napping on a luxurious velvet cushion in a sunbeam."></textarea>
+                                    <div class="form-text">Be as creative and detailed as you like! Mention breed, color, activity, mood, or setting.</div>
+                                </div>
+                                <button id="generateCatBtn" class="btn btn-primary btn-lg w-100">
+                                    <span class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true"></span>
+                                    Generate My Feline Friend
+                                </button>
+                                <div id="aiCatImageResult" class="mt-4 text-center bg-light p-3 rounded" style="min-height: 300px; display: flex; align-items: center; justify-content: center;">
+                                    <p class="text-muted m-0">Your AI-generated cat masterpiece will appear here.</p>
+                                </div>
+                                <div id="aiCatError" class="alert alert-danger mt-3 d-none" role="alert"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="py-4 bg-dark text-white text-center">
+        <div class="container">
+            <div class="mb-3">
+                <a href="#" class="text-white me-3" aria-label="Kitten Kaboodle on Instagram">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-instagram" viewBox="0 0 16 16"><path d="M8 0C5.829 0 5.556.01 4.703.048 3.85.088 3.269.222 2.76.42a3.917 3.917 0 0 0-1.417.923A3.927 3.927 0 0 0 .42 2.76C.222 3.268.087 3.85.048 4.7.01 5.555 0 5.827 0 8.001c0 2.172.01 2.444.048 3.297.04.852.174 1.433.372 1.942.205.526.478.972.923 1.417.444.445.89.719 1.416.923.51.198 1.09.333 1.942.372C5.555 15.99 5.827 16 8 16s2.444-.01 3.298-.048c.851-.04 1.434-.174 1.943-.372a3.916 3.916 0 0 0 1.416-.923c.445-.445.718-.891.923-1.417.197-.509.332-1.09.372-1.942C15.99 10.445 16 10.173 16 8s-.01-2.445-.048-3.299c-.04-.851-.175-1.433-.372-1.941a3.926 3.926 0 0 0-.923-1.417A3.911 3.911 0 0 0 13.24.42c-.51-.198-1.092-.333-1.943-.372C10.443.01 10.172 0 7.998 0h.003zm-.717 1.442h.718c2.136 0 2.389.007 3.232.046.78.035 1.204.166 1.486.275.373.145.64.319.92.599.28.28.453.546.598.92.11.281.24.705.275 1.485.039.843.047 1.096.047 3.231s-.008 2.389-.047 3.232c-.035.78-.166 1.203-.275 1.485a2.47 2.47 0 0 1-.599.919c-.28.28-.546.453-.92.598-.28.11-.704.24-1.485.276-.843.038-1.096.047-3.232.047s-2.39-.009-3.233-.047c-.78-.036-1.203-.166-1.485-.276a2.478 2.478 0 0 1-.92-.598 2.48 2.48 0 0 1-.6-.92c-.109-.281-.24-.705-.275-1.485-.038-.843-.046-1.096-.046-3.231 0-2.136.008-2.388.046-3.231.036-.78.166-1.204.275-1.486.145-.373.319-.64.599-.92.28-.28.546-.453.92-.598.282-.11.705-.24 1.485-.276.738-.034 1.024-.044 2.515-.045v.002zm4.988 1.328a.96.96 0 1 0 0 1.92.96.96 0 0 0 0-1.92zm-4.27 1.122a4.109 4.109 0 1 0 0 8.217 4.109 4.109 0 0 0 0-8.217zm0 1.441a2.667 2.667 0 1 1 0 5.334 2.667 2.667 0 0 1 0-5.334z"/></svg>
+                </a>
+                <a href="#" class="text-white me-3" aria-label="Kitten Kaboodle on Facebook">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-facebook" viewBox="0 0 16 16"><path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0 0 3.604 0 8.049c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951z"/></svg>
+                </a>
+                <a href="#" class="text-white" aria-label="Kitten Kaboodle on Twitter X">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-twitter-x" viewBox="0 0 16 16"><path d="M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 .75h5.063l3.495 4.633L12.601.75Zm-.86 13.028h1.36L4.323 2.145H2.865l8.875 11.633Z"/></svg>
+                </a>
+            </div>
+            <p class="mb-0">&copy; <span id="currentYear"></span> Kitten Kaboodle Paris. All Rights Reserved.</p>
+            <p class="mb-0 small">Purr-fectly Crafted with Love.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const catsData = [
+            { id: "leo", name: "Léo", imgSrc: "/generated_images/dalle3_991c6bf6-976.png", bio: "A brave ginger tabby who loves exploring, feather wands, and sunny afternoon naps. He's the king of the climbing tree!", age: "3 years", breed: "Tabby Roux" },
+            { id: "chloe", name: "Chloé", imgSrc: "/generated_images/dalle3_2193e077-b68.png", bio: "Our serene calico queen. Chloé enjoys gentle pets, bird watching from the window, and curling up in the coziest spots.", age: "4 years", breed: "Calico" },
+            { id: "noir", name: "Noir", imgSrc: "/generated_images/dalle3_c0d30a2d-35b.png", bio: "A sleek and mysterious black cat with a playful streak. Noir loves chasing shadows and will suddenly appear for cuddles.", age: "2 years", breed: "Panthère de Maison" }
+        ];
+
+        const galleryImagesData = [
+            { src: "/generated_images/dalle3_2ef18d02-111.png", alt: "Delicious Parisian pastries and coffee at Kitten Kaboodle" },
+            { src: "/generated_images/dalle3_157bd0a0-d02.png", alt: "Happy customer gently petting a relaxed cat at Kitten Kaboodle" },
+            { src: "/generated_images/dalle3_0f75e643-852.png", alt: "Inviting ambiance of Kitten Kaboodle cafe with cats lounging" },
+            { src: "/generated_images/dalle3_991c6bf6-976.png", alt: "Charming portrait of Léo, the ginger tabby" },
+            { src: "/generated_images/dalle3_2193e077-b68.png", alt: "Elegant portrait of Chloé, the calico cat" },
+            { src: "/generated_images/dalle3_c0d30a2d-35b.png", alt: "Striking portrait of Noir, the black cat" }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCurrentYear();
+            populateCatProfiles();
+            populateGallery();
+            setupGalleryModal();
+            setupAiCatGenerator();
+            
+            const mainNavbar = document.getElementById('mainNavbar');
+            if (mainNavbar) {
+                new bootstrap.ScrollSpy(document.body, {
+                    target: '#mainNavbar',
+                    offset: 80 
+                });
+            }
+        });
+
+        function updateCurrentYear() {
+            const yearSpan = document.getElementById('currentYear');
+            if (yearSpan) {
+                yearSpan.textContent = new Date().getFullYear();
+            }
+        }
+
+        function populateCatProfiles() {
+            const container = document.getElementById('catsGridContainer');
+            if (!container) return;
+            let html = '';
+            catsData.forEach(cat => {
+                html += `
+                    <div class="col">
+                        <div class="card h-100 shadow-sm cat-card">
+                            <img src="${cat.imgSrc}" class="card-img-top" alt="Photo of ${cat.name}, a ${cat.breed} resident cat at Kitten Kaboodle.">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title text-center mb-2">${cat.name}</h5>
+                                <p class="card-text small flex-grow-1">${cat.bio}</p>
+                                <p class="card-text text-muted small mt-auto text-center"><strong>Age:</strong> ${cat.age} | <strong>Breed:</strong> ${cat.breed}</p>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function populateGallery() {
+            const container = document.getElementById('galleryGridContainer');
+            if (!container) return;
+            let html = '';
+            galleryImagesData.forEach((img) => {
+                html += `
+                    <div class="col">
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#galleryModal" data-img-src="${img.src}" data-img-alt="${img.alt}" aria-label="View larger image of ${img.alt}">
+                            <img src="${img.src}" class="img-fluid rounded shadow-sm" alt="${img.alt}">
+                        </a>
+                    </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function setupGalleryModal() {
+            const galleryModalElement = document.getElementById('galleryModal');
+            if (!galleryModalElement) return;
+
+            const modalImage = document.getElementById('modalImage');
+            const modalTitle = document.getElementById('galleryModalLabel');
+
+            galleryModalElement.addEventListener('show.bs.modal', event => {
+                const button = event.relatedTarget;
+                const imgSrc = button.getAttribute('data-img-src');
+                const imgAlt = button.getAttribute('data-img-alt');
+                
+                if (modalImage) {
+                    modalImage.src = imgSrc;
+                    modalImage.alt = imgAlt;
+                }
+                if (modalTitle) {
+                    modalTitle.textContent = imgAlt || "Kitten Kaboodle Moment";
+                }
+            });
+        }
+
+        function setupAiCatGenerator() {
+            const generateBtn = document.getElementById('generateCatBtn');
+            const promptInput = document.getElementById('catPromptInput');
+            const resultDiv = document.getElementById('aiCatImageResult');
+            const errorDiv = document.getElementById('aiCatError');
+
+            if (!generateBtn || !promptInput || !resultDiv || !errorDiv) return;
+
+            generateBtn.addEventListener('click', async () => {
+                const userPrompt = promptInput.value.trim();
+                if (!userPrompt) {
+                    errorDiv.textContent = 'Please enter a description for your cat.';
+                    errorDiv.classList.remove('d-none');
+                    promptInput.focus();
+                    return;
+                }
+
+                const spinner = generateBtn.querySelector('.spinner-border');
+                if (spinner) spinner.classList.remove('d-none');
+                generateBtn.disabled = true;
+                errorDiv.classList.add('d-none');
+                resultDiv.innerHTML = '<div class="d-flex align-items-center justify-content-center text-muted p-3"><div class="spinner-border text-primary me-2" role="status"></div><span>Generating your purrfect companion... This may take a moment.</span></div>';
+
+                try {
+                    const response = await fetch('/api/generate-image-on-demand', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prompt: userPrompt, aspectRatio: '1:1' })
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.error || `Server error: ${response.status}`);
+                    }
+
+                    if (data.success && data.imageUrl) {
+                        const img = document.createElement('img');
+                        img.alt = `AI generated cat based on prompt: ${userPrompt.substring(0,100)}`;
+                        img.className = 'img-fluid';
+                        
+                        img.onload = () => {
+                            resultDiv.innerHTML = '';
+                            resultDiv.appendChild(img);
+                        };
+                        img.onerror = () => {
+                             resultDiv.innerHTML = '<p class="text-danger m-0 p-3">Failed to load the generated image. Please try again.</p>';
+                        };
+                        img.src = data.imageUrl;
+
+                    } else {
+                        throw new Error(data.error || 'Image generation failed. Please try again.');
+                    }
+                } catch (err) {
+                    console.error('AI Cat Generation Error:', err);
+                    errorDiv.textContent = err.message || 'An unexpected error occurred. Please try again.';
+                    errorDiv.classList.remove('d-none');
+                    resultDiv.innerHTML = '<p class="text-danger m-0 p-3">Could not generate image. Please check your prompt or try again later.</p>';
+                } finally {
+                    if (spinner) spinner.classList.add('d-none');
+                    generateBtn.disabled = false;
+                }
+            });
+        }
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

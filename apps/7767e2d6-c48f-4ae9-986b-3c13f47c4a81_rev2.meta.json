@@ -1,0 +1,24 @@
+{
+  "projectId": "7767e2d6-c48f-4ae9-986b-3c13f47c4a81",
+  "revisionString": "2",
+  "projectNameDisplay": "AI Genius Oracle",
+  "userPromptForThisRevision": "seems incomplete. could you review, maybe add background and banner images?",
+  "basedOnRevisionString": "1",
+  "savedAt": "2025-05-22T18:15:42.412Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/dalle_652ffdb9-76d.png",
+      "url": "/generated_images/dalle_652ffdb9-76d.png",
+      "description": "A subtle, abstract background pattern or image fitting a dark, intellectual, and slightly mystical theme. Think flowing ethereal lines, faint geometric patterns, or cosmic textures in dark blues, purples, and blacks. It should be visually interesting but not distracting, suitable to be placed behind text content. High resolution for a full-screen background.",
+      "purpose": "Persistent background image for the entire applet.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_f5d52dc4-0c8.png",
+      "url": "/generated_images/dalle_f5d52dc4-0c8.png",
+      "description": "A banner image for the 'AI Genius Oracle' title on the input screen. Should visually represent 'AI', 'Genius', and 'Oracle' concepts in a dark, futuristic, or mystical style. Could feature abstract glowing neural networks, stylized oracle symbols, or a wise, abstract AI entity. Avoid text. Suitable for a header/banner area.",
+      "purpose": "Banner image for the initial input section.",
+      "isNewlyGenerated": true
+    }
+  ]
+}

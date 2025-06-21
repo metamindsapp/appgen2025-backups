@@ -1,0 +1,13 @@
+{
+  "projectId": "88e3d2de-aee9-4a22-b94e-010a2e969256",
+  "revisionString": "2",
+  "projectNameDisplay": "imageGen",
+  "projectType": "webapp",
+  "ownerPublicKey": "EZxuU9mZRqgsYxoFgDEnwNvWu4DYVjWiCFnSB3jSj7Hq",
+  "userPromptForThisRevision": "Failed to generate image: HTTP error! status: 401. Please try again.\r\n\r\n\r\ncreate a readme and tell me what you think the issue is in it. \r\n",
+  "basedOnRevisionString": "1",
+  "savedAt": "2025-06-04T15:00:00.680Z",
+  "imageAssets": [],
+  "isPublished": false,
+  "isShowcased": false
+}

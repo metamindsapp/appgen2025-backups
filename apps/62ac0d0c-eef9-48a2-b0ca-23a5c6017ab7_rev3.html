@@ -1,0 +1,1799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cellular Automata Playground</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body[data-bs-theme="dark"] {
+            background-color: var(--bs-body-bg);
+            color: var(--bs-body-color);
+        }
+
+        #controlsSidebar {
+            background-color: var(--bs-dark-bg-subtle, #212529);
+            scrollbar-width: thin;
+            scrollbar-color: var(--bs-secondary) var(--bs-dark-bg-subtle, #212529);
+        }
+
+        #controlsSidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #controlsSidebar::-webkit-scrollbar-track {
+            background: var(--bs-dark-bg-subtle, #212529);
+        }
+
+        #controlsSidebar::-webkit-scrollbar-thumb {
+            background-color: var(--bs-secondary);
+            border-radius: 4px;
+            border: 2px solid var(--bs-dark-bg-subtle, #212529);
+        }
+        
+        #canvasWrapper {
+            background-color: #111;
+        }
+
+        #caCanvas {
+            display: block;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            cursor: cell;
+            background-color: transparent;
+            touch-action: none;
+        }
+        
+        #aiChatHistory {
+            background-color: var(--bs-body-bg);
+            border-color: var(--bs-border-color) !important;
+        }
+        #aiChatHistory .user-message {
+            text-align: right;
+            margin-left: auto;
+            background-color: var(--bs-primary-bg-subtle);
+            color: var(--bs-emphasis-color);
+            border-radius: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        #aiChatHistory .assistant-message {
+            text-align: left;
+            margin-right: auto;
+            background-color: var(--bs-secondary-bg-subtle);
+            color: var(--bs-emphasis-color);
+            border-radius: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        #generatedImageContainer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 150px; 
+            background-color: #343a40; 
+            border-radius: 0.25rem;
+            color: #adb5bd;
+            text-align: center;
+        }
+        #generatedImageContainer img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: auto;
+            border-radius: 0.25rem;
+        }
+        .form-control-color {
+            min-height: 38px; 
+            padding: 0.25rem;
+        }
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .modal-backdrop.show {
+            opacity: 0.75;
+        }
+        .btn:focus, .form-control:focus, .form-select:focus {
+            box-shadow: 0 0 0 0.25rem rgba(var(--bs-info-rgb), 0.35) !important;
+        }
+        .dropdown-item.active, .dropdown-item:active {
+            background-color: var(--bs-primary);
+        }
+        .toast-container {
+            z-index: 1100; 
+        }
+    </style>
+</head>
+<body data-bs-theme="dark">
+    <div class="container-fluid d-flex flex-column vh-100 p-0">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#"><i class="bi bi-grid-3x3-gap-fill"></i> Cellular Automata Playground</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="rulesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Rules</a>
+                            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="rulesDropdown" id="rulesList">
+                                <li><a class="dropdown-item" href="#" data-rule="GOL">Conway's Game of Life</a></li>
+                                <li><a class="dropdown-item" href="#" data-rule="BB">Brian's Brain</a></li>
+                                <li><a class="dropdown-item" href="#" data-rule="Rule30">Rule 30 (1D)</a></li>
+                                <li><a class="dropdown-item" href="#" data-rule="Rule110">Rule 110 (1D)</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#customRuleModal">Custom Rule...</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="patternsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Load Pattern</a>
+                            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="patternsDropdown" id="patternList">
+                                <li><a class="dropdown-item disabled" href="#">(Select a rule first)</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#exportModal" title="Export pattern or image"><i class="bi bi-download"></i> Export</a>
+                        </li>
+                         <li class="nav-item">
+                            <a class="nav-link" href="#" id="shareBtnTrigger" data-bs-toggle="modal" data-bs-target="#shareModal" title="Share current configuration"><i class="bi bi-share-fill"></i> Share</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" id="tutorialBtnTrigger" data-bs-toggle="modal" data-bs-target="#tutorialModal" title="Learn how to use the playground"><i class="bi bi-info-circle-fill"></i> Tutorial</a>
+                        </li>
+                    </ul>
+                    <button class="btn btn-outline-info me-4" id="aiAssistantBtn" data-bs-toggle="modal" data-bs-target="#aiAssistantModal" title="Ask the AI for help or inspiration">
+                        <i class="bi bi-robot"></i> AI Assistant
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <div class="flex-grow-1 d-flex overflow-hidden">
+            <div id="controlsSidebar" class="border-end p-3 d-flex flex-column" style="width: 320px; min-width: 280px; overflow-y: auto;">
+                <h5><i class="bi bi-joystick"></i> Controls</h5>
+                <div class="btn-group mb-2 w-100" role="group">
+                    <button type="button" class="btn btn-success" id="playBtn" title="Start simulation (Spacebar)"><i class="bi bi-play-fill"></i> Play</button>
+                    <button type="button" class="btn btn-warning" id="pauseBtn" disabled title="Pause simulation (Spacebar)"><i class="bi bi-pause-fill"></i> Pause</button>
+                </div>
+                <div class="btn-group mb-3 w-100" role="group">
+                    <button type="button" class="btn btn-primary" id="stepBtn" title="Advance one generation (ArrowRight)"><i class="bi bi-skip-end-fill"></i> Step</button>
+                    <button type="button" class="btn btn-danger" id="resetBtn" title="Clear grid and reset (R)"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+                </div>
+                <div class="mb-3">
+                    <label for="speedRange" class="form-label">Speed: <span id="speedValueDisplay">10</span> FPS</label>
+                    <input type="range" class="form-range" id="speedRange">
+                </div>
+
+                <h5 class="mt-2"><i class="bi bi-rulers"></i> Grid Settings</h5>
+                <div class="row g-2 mb-2">
+                    <div class="col">
+                        <label for="gridWidthInput" class="form-label">Width</label>
+                        <input type="number" class="form-control form-control-sm" id="gridWidthInput" step="1">
+                    </div>
+                    <div class="col">
+                        <label for="gridHeightInput" class="form-label">Height</label>
+                        <input type="number" class="form-control form-control-sm" id="gridHeightInput" step="1">
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <label for="cellSizeInput" class="form-label">Cell Size (px)</label>
+                    <input type="number" class="form-control form-control-sm" id="cellSizeInput" step="1">
+                </div>
+                <button class="btn btn-info btn-sm w-100 mb-3" id="applyGridSettingsBtn">Apply Grid Settings</button>
+
+                <h5 class="mt-2"><i class="bi bi-palette"></i> Visualization</h5>
+                <div class="mb-2">
+                    <label for="aliveColorPicker" class="form-label">State 1 (Alive/Firing)</label>
+                    <input type="color" class="form-control form-control-color w-100" id="aliveColorPicker">
+                </div>
+                <div class="mb-2">
+                    <label for="deadColorPicker" class="form-label">State 0 (Dead/Off)</label>
+                    <input type="color" class="form-control form-control-color w-100" id="deadColorPicker">
+                </div>
+                <div id="briansBrainColorsContainer" class="d-none">
+                    <div class="mb-2">
+                        <label for="dyingColorPicker" class="form-label">State 2 (Dying/Refractory)</label>
+                        <input type="color" class="form-control form-control-color w-100" id="dyingColorPicker">
+                    </div>
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" role="switch" id="showGridLinesSwitch" checked>
+                    <label class="form-check-label" for="showGridLinesSwitch">Show Grid Lines</label>
+                </div>
+                
+                <h5 class="mt-auto pt-3"><i class="bi bi-brush"></i> Pattern Art</h5>
+                <button class="btn btn-outline-light w-100" id="generateArtBtn" title="Generate AI art based on the current pattern">
+                    <i class="bi bi-magic"></i> Generate Art from Pattern
+                </button>
+                <div id="artGenerationStatus" class="mt-2 text-center" style="min-height: 30px;">
+                    <div id="artSpinner" class="spinner-border spinner-border-sm text-primary d-none" role="status">
+                        <span class="visually-hidden">Generating...</span>
+                    </div>
+                    <small id="artErrorText" class="text-danger d-none"></small>
+                </div>
+                <div id="generatedImageContainer" class="mt-1 p-1">
+                    Art will appear here
+                </div>
+            </div>
+
+            <div id="canvasWrapper" class="flex-grow-1 d-flex justify-content-center align-items-center overflow-hidden position-relative p-2">
+                <canvas id="caCanvas" style="border: 1px solid #495057;"></canvas>
+                <div id="zoomControlsOverlay" class="position-absolute bottom-0 end-0 p-2 btn-group-vertical">
+                    <button class="btn btn-dark btn-sm" id="zoomInBtn" title="Zoom In (+)"><i class="bi bi-zoom-in"></i></button>
+                    <button class="btn btn-dark btn-sm" id="zoomOutBtn" title="Zoom Out (-)"><i class="bi bi-zoom-out"></i></button>
+                    <button class="btn btn-dark btn-sm" id="resetViewBtn" title="Reset View (0)"><i class="bi bi-aspect-ratio"></i></button>
+                </div>
+                <div id="generationDisplay" class="position-absolute top-0 start-0 p-2 bg-dark bg-opacity-75 text-light rounded-pill small m-2">Generation: <span id="generationCountDisplay">0</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="customRuleModal" tabindex="-1" aria-labelledby="customRuleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="customRuleModalLabel"><i class="bi bi-pencil-square"></i> Custom Rule Editor</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="ruleTypeSelect" class="form-label">Rule Type</label>
+                        <select class="form-select" id="ruleTypeSelect">
+                            <option value="BS" selected>Birth/Survival (e.g., B3/S23)</option>
+                            <option value="Elementary1D">Elementary 1D (Rule Number 0-255)</option>
+                        </select>
+                    </div>
+                    <div id="bsRuleConfig">
+                        <div class="mb-3">
+                            <label for="ruleStringInput" class="form-label">Rule String (e.g., B3/S23 or B36/S125)</label>
+                            <input type="text" class="form-control" id="ruleStringInput" placeholder="B3/S23">
+                        </div>
+                        <div class="mb-3">
+                            <label for="neighborhoodTypeSelect" class="form-label">Neighborhood (for B/S)</label>
+                            <select class="form-select" id="neighborhoodTypeSelect">
+                                <option value="moore" selected>Moore (8 neighbors)</option>
+                                <option value="vonneumann">Von Neumann (4 neighbors)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="numStatesInput" class="form-label">Number of States (for B/S)</label>
+                            <input type="number" class="form-control" id="numStatesInput" value="2" min="2" max="2" title="Standard B/S rules are 2-state. This implementation supports 2 states for B/S." readonly>
+                        </div>
+                    </div>
+                    <div id="elementary1DRuleConfig" class="d-none">
+                        <div class="mb-3">
+                            <label for="elementaryRuleNumberInput" class="form-label">Rule Number (0-255)</label>
+                            <input type="number" class="form-control" id="elementaryRuleNumberInput">
+                        </div>
+                    </div>
+                    <p class="form-text">Note: For 1D rules, simulation evolves downwards. Grid width defines 1D space, height defines generations shown. For B/S, it's a 2D CA.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="applyCustomRuleBtn">Apply Rule</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="aiAssistantModal" tabindex="-1" aria-labelledby="aiAssistantModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="aiAssistantModalLabel"><i class="bi bi-robot"></i> AI Assistant</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body d-flex flex-column" style="min-height: 400px;">
+                    <div id="aiChatHistory" class="mb-3 p-2 border rounded flex-grow-1" style="overflow-y: auto;">
+                        <p class="assistant-message">Hello! I can help you understand rules, suggest new ones, or discuss patterns. How can I assist?</p>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="aiQueryInput" placeholder="Ask about rules, patterns, or request a new rule idea...">
+                        <button class="btn btn-primary" type="button" id="sendAiQueryBtn"><i class="bi bi-send-fill"></i> Send</button>
+                    </div>
+                    <div id="aiLoadingSpinner" class="mt-2 d-none"><div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Thinking...</span></div> Thinking...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exportModalLabel"><i class="bi bi-download"></i> Export Options</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary" id="exportPngBtn"><i class="bi bi-image-fill"></i> Download as PNG</button>
+                        <button class="btn btn-info" id="exportJsonBtn"><i class="bi bi-file-earmark-code-fill"></i> Download as JSON</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="shareModalLabel"><i class="bi bi-share-fill"></i> Share Pattern & Rule</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Copy the link below to share the current configuration:</p>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="shareLinkInput" readonly title="Generated shareable link">
+                        <button class="btn btn-outline-secondary" id="copyShareLinkBtn" type="button" title="Copy link to clipboard"><i class="bi bi-clipboard"></i> Copy</button>
+                    </div>
+                    <p class="form-text mt-2">Note: Large patterns might result in very long URLs. Sharing is experimental.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade" id="tutorialModal" tabindex="-1" aria-labelledby="tutorialModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="tutorialModalLabel"><i class="bi bi-info-circle-fill"></i> Educational Tutorial</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="tutorialContent" style="min-height: 400px;">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="prevTutorialStepBtn" disabled>Previous</button>
+                    <span id="tutorialStepIndicator" class="mx-2">Step 1/X</span>
+                    <button type="button" class="btn btn-primary" id="nextTutorialStepBtn">Next</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
+    <script>
+    (function() {
+        'use strict';
+
+        const GAME_CONFIG = {
+            DEFAULT_ROWS: 50,
+            DEFAULT_COLS: 50,
+            DEFAULT_CELL_SIZE: 10,
+            MIN_ROWS: 10, MAX_ROWS: 300,
+            MIN_COLS: 10, MAX_COLS: 300,
+            MIN_CELL_SIZE: 2, MAX_CELL_SIZE: 40,
+            DEFAULT_SPEED: 10, MIN_SPEED: 1, MAX_SPEED: 60,
+            DEFAULT_ALIVE_COLOR: '#00FF00',
+            DEFAULT_DEAD_COLOR: '#222227',
+            DEFAULT_DYING_COLOR: '#FFA500',
+            DEFAULT_GRID_LINE_COLOR: '#444444',
+            MAX_ZOOM: 50, MIN_ZOOM: 0.05, ZOOM_INTENSITY: 0.1,
+            ELEMENTARY_RULE_MIN: 0, ELEMENTARY_RULE_MAX: 255,
+            DEFAULT_ELEMENTARY_RULE: 30,
+            CUSTOM_BS_NUM_STATES: 2,
+        };
+
+        const DOM_ELEMENTS = {
+            canvas: document.getElementById('caCanvas'),
+            canvasWrapper: document.getElementById('canvasWrapper'),
+            playBtn: document.getElementById('playBtn'),
+            pauseBtn: document.getElementById('pauseBtn'),
+            stepBtn: document.getElementById('stepBtn'),
+            resetBtn: document.getElementById('resetBtn'),
+            speedRange: document.getElementById('speedRange'),
+            speedValueDisplay: document.getElementById('speedValueDisplay'),
+            gridWidthInput: document.getElementById('gridWidthInput'),
+            gridHeightInput: document.getElementById('gridHeightInput'),
+            cellSizeInput: document.getElementById('cellSizeInput'),
+            applyGridSettingsBtn: document.getElementById('applyGridSettingsBtn'),
+            aliveColorPicker: document.getElementById('aliveColorPicker'),
+            deadColorPicker: document.getElementById('deadColorPicker'),
+            dyingColorPicker: document.getElementById('dyingColorPicker'),
+            briansBrainColorsContainer: document.getElementById('briansBrainColorsContainer'),
+            showGridLinesSwitch: document.getElementById('showGridLinesSwitch'),
+            rulesDropdown: document.getElementById('rulesDropdown'),
+            rulesList: document.getElementById('rulesList'),
+            patternsDropdown: document.getElementById('patternsDropdown'),
+            patternList: document.getElementById('patternList'),
+            generationCountDisplay: document.getElementById('generationCountDisplay'),
+            zoomInBtn: document.getElementById('zoomInBtn'),
+            zoomOutBtn: document.getElementById('zoomOutBtn'),
+            resetViewBtn: document.getElementById('resetViewBtn'),
+            customRuleModalEl: document.getElementById('customRuleModal'),
+            ruleTypeSelect: document.getElementById('ruleTypeSelect'),
+            bsRuleConfig: document.getElementById('bsRuleConfig'),
+            elementary1DRuleConfig: document.getElementById('elementary1DRuleConfig'),
+            ruleStringInput: document.getElementById('ruleStringInput'),
+            neighborhoodTypeSelect: document.getElementById('neighborhoodTypeSelect'),
+            numStatesInput: document.getElementById('numStatesInput'),
+            elementaryRuleNumberInput: document.getElementById('elementaryRuleNumberInput'),
+            applyCustomRuleBtn: document.getElementById('applyCustomRuleBtn'),
+            aiAssistantModalEl: document.getElementById('aiAssistantModal'),
+            aiChatHistory: document.getElementById('aiChatHistory'),
+            aiQueryInput: document.getElementById('aiQueryInput'),
+            sendAiQueryBtn: document.getElementById('sendAiQueryBtn'),
+            aiLoadingSpinner: document.getElementById('aiLoadingSpinner'),
+            generateArtBtn: document.getElementById('generateArtBtn'),
+            artSpinner: document.getElementById('artSpinner'),
+            artErrorText: document.getElementById('artErrorText'),
+            generatedImageContainer: document.getElementById('generatedImageContainer'),
+            exportPngBtn: document.getElementById('exportPngBtn'),
+            exportJsonBtn: document.getElementById('exportJsonBtn'),
+            shareBtnTrigger: document.getElementById('shareBtnTrigger'),
+            shareLinkInput: document.getElementById('shareLinkInput'),
+            copyShareLinkBtn: document.getElementById('copyShareLinkBtn'),
+            tutorialModalEl: document.getElementById('tutorialModal'),
+            tutorialContent: document.getElementById('tutorialContent'),
+            prevTutorialStepBtn: document.getElementById('prevTutorialStepBtn'),
+            nextTutorialStepBtn: document.getElementById('nextTutorialStepBtn'),
+            tutorialStepIndicator: document.getElementById('tutorialStepIndicator'),
+            toastContainer: document.querySelector('.toast-container'),
+        };
+
+        const ctx = DOM_ELEMENTS.canvas.getContext('2d');
+
+        const STATE = {
+            grid: [],
+            numRows: GAME_CONFIG.DEFAULT_ROWS,
+            numCols: GAME_CONFIG.DEFAULT_COLS,
+            cellSize: GAME_CONFIG.DEFAULT_CELL_SIZE,
+            logicalCanvasWidth: GAME_CONFIG.DEFAULT_COLS * GAME_CONFIG.DEFAULT_CELL_SIZE,
+            logicalCanvasHeight: GAME_CONFIG.DEFAULT_ROWS * GAME_CONFIG.DEFAULT_CELL_SIZE,
+            isPlaying: false,
+            simulationSpeed: GAME_CONFIG.DEFAULT_SPEED,
+            generationCount: 0,
+            currentRuleKey: 'GOL',
+            currentRuleName: "Conway's Game of Life",
+            currentRuleType: '2D', 
+            currentRuleLogic: null,
+            is1DInitialized: false,
+            lastStepTime: 0,
+            aliveColor: GAME_CONFIG.DEFAULT_ALIVE_COLOR,
+            deadColor: GAME_CONFIG.DEFAULT_DEAD_COLOR,
+            dyingColor: GAME_CONFIG.DEFAULT_DYING_COLOR,
+            gridLineColor: GAME_CONFIG.DEFAULT_GRID_LINE_COLOR,
+            showGridLines: true,
+            viewTransform: { scale: 1, offsetX: 0, offsetY: 0 },
+            isMouseDown: false,
+            isDraggingCell: false,
+            lastMouseGridX: -1,
+            lastMouseGridY: -1,
+            isPanning: false,
+            panStart: { x: 0, y: 0 },
+            currentTutorialStep: 0,
+            customRule: {
+                type: 'BS', 
+                bs: { birth: [3], survival: [2, 3], states: GAME_CONFIG.CUSTOM_BS_NUM_STATES, neighborhood: 'moore', ruleString: 'B3/S23' },
+                elementary1D: { ruleNumber: GAME_CONFIG.DEFAULT_ELEMENTARY_RULE, ruleBits: [] }
+            }
+        };
+        
+        const B64_SOUNDS = {
+            CLICK_A: 'data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YVgDAAAAAQABAAEAQAEAAQAEAAQAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAIAAgACAAIABAAIAAgACAAIQAgACAAIAAgACAAIABAAAAAQAAAAEAAQ==',
+            CLICK_B: 'data:audio/wav;base64,UklGRjRoT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YSAhAAAA//8CAP/+AAP/+wD//gACAAYACQAJAAcABQACAP7+/v78/QD5+fn5+ff39vb29vb19fX09PTz8/Ly8fHx8PDw7+/u7g==',
+            SUCCESS: 'data:audio/wav;base64,UklGRkRoT19XQVZFZm10IBAAAAABAAEARKwAAESsAAABAAgAZGF0YQAxAAAA//8CAP/+AAL/7gD9/AABAAYACAAJAAgABwAEAAIA/v78/Pv6+fj49/b19PPy8fDv7g==',
+            ERROR: 'data:audio/wav;base64,UklGRkRoT19XQVZFZm10IBAAAAABAAEARKwAAESsAAABAAgAZGF0YQAxAAAA//4A/v4A+voA9vcA7vIA5u8A2uwA0+sAtecAr+YAovIAmvEAhuoAAdsA/PMAAAA=',
+            STEP: 'data:audio/wav;base64,UklGRkBoT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAhAAAA//4A/v4A/PwA/fsA+vgA+PgA9/YA9fUA8/MAAAAAAPLy8fHx8PDw7+/u7g=='
+        };
+        
+        const SOUNDS = {
+            click: new Howl({ src: [B64_SOUNDS.CLICK_A], volume: 0.5 }),
+            step: new Howl({ src: [B64_SOUNDS.STEP], volume: 0.4 }),
+            ui: new Howl({ src: [B64_SOUNDS.CLICK_B], volume: 0.6 }),
+            error: new Howl({ src: [B64_SOUNDS.ERROR], volume: 0.7 }),
+            success: new Howl({ src: [B64_SOUNDS.SUCCESS], volume: 0.6 })
+        };
+        Object.values(SOUNDS).forEach(sound => sound.load());
+
+        function playSound(soundKey) {
+            try {
+                if (SOUNDS[soundKey] && (SOUNDS[soundKey].state() === 'loaded' || !SOUNDS[soundKey].playing())) {
+                    SOUNDS[soundKey].play();
+                } else if (SOUNDS[soundKey]) {
+                    SOUNDS[soundKey].once('load', () => { if (!SOUNDS[soundKey].playing()) SOUNDS[soundKey].play(); });
+                }
+            } catch (e) {
+                console.error(`Error playing sound ${soundKey}:`, e);
+            }
+        }
+
+        function showToast(message, type = 'info', duration = 3000) {
+            const toastId = 'toast-' + Date.now();
+            const bgClass = type === 'info' ? 'bg-info' : `text-bg-${type}`;
+            const toastHTML = `
+                <div id="${toastId}" class="toast align-items-center ${bgClass} border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="${duration}">
+                    <div class="d-flex">
+                        <div class="toast-body">${message}</div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>`;
+            
+            if (DOM_ELEMENTS.toastContainer) {
+                DOM_ELEMENTS.toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+                const toastElement = document.getElementById(toastId);
+                const toast = new bootstrap.Toast(toastElement);
+                toastElement.addEventListener('hidden.bs.toast', () => toastElement.remove());
+                toast.show();
+                playSound(type === 'success' ? 'success' : (type === 'danger' ? 'error' : 'ui'));
+            } else {
+                alert(message); 
+            }
+        }
+
+        const TUTORIAL_STEPS = [
+            { title: "Welcome!", content: "<h5>Welcome to the Cellular Automata Playground!</h5><p>This interactive tool lets you explore the fascinating world of cellular automata (CAs). CAs are simple rule-based systems that can generate surprisingly complex patterns.</p><p>Click 'Next' to learn how to use the playground.</p>" },
+            { title: "The Grid", content: "<h5>The Interactive Grid</h5><p>The main area is a grid of cells. Each cell can be in different states (e.g., 'alive' or 'dead').</p><p><strong>Try it:</strong> Click on cells in the canvas (the large grid area) to toggle their state. You can also click and drag to draw patterns.</p><p>This creates the *initial state* for the simulation.</p>" },
+            { title: "Simulation Controls", content: "<h5>Simulation Controls</h5><p>Use the controls in the sidebar:</p><ul><li><strong>Play (Spacebar):</strong> Starts the simulation, evolving the pattern generation by generation.</li><li><strong>Pause (Spacebar):</strong> Pauses the simulation.</li><li><strong>Step (ArrowRight):</strong> Advances the simulation by one generation.</li><li><strong>Reset (R):</strong> Clears the grid and resets the generation count.</li><li><strong>Speed Slider:</strong> Adjusts how many generations are simulated per second when playing.</li></ul><p>The current generation number is displayed above the canvas.</p>" },
+            { title: "Core Concept: Rules (e.g., Conway's Game of Life)", content: "<h5>Core Concept: Rules (e.g., Conway's Game of Life)</h5><p>Cellular automata evolve based on rules that determine a cell's next state based on its current state and the states of its neighbors.</p><p><strong>Conway's Game of Life (Default Rule: B3/S23):</strong></p><ul><li>A <strong>dead</strong> cell with exactly <strong>3 live</strong> neighbors becomes <strong>alive</strong> (Birth).</li><li>A <strong>live</strong> cell with <strong>2 or 3 live</strong> neighbors <strong>stays alive</strong> (Survival).</li><li>All other live cells die (overpopulation or loneliness), and all other dead cells stay dead.</li></ul><p>Select different rules from the 'Rules' dropdown in the top navbar.</p>" },
+            { title: "Brian's Brain", content: "<h5>Brian's Brain</h5><p>This is a 3-state CA:</p><ul><li><strong>State 0: Off (Dead)</strong> - Uses 'State 0' color.</li><li><strong>State 1: Firing (Alive)</strong> - Uses 'State 1' color.</li><li><strong>State 2: Refractory (Dying)</strong> - Uses 'State 2' color.</li></ul><p><strong>Rule:</strong> An OFF cell with exactly two FIRING neighbors becomes FIRING. A FIRING cell becomes REFRACTORY. A REFRACTORY cell becomes OFF.</p><p>You can customize these three colors in the Visualization section of the sidebar.</p>" },
+            { title: "Changing Rules & Loading Patterns", content: "<h5>Changing Rules & Loading Patterns</h5><p>You can change the active CA rule using the 'Rules' dropdown in the top navbar. The simulation will then follow the newly selected rule.</p><p>Once a rule is selected, the 'Load Pattern' dropdown (also in the navbar) will show predefined starting configurations suitable for that rule. Selecting a pattern will clear the grid and set up the chosen configuration.</p><p><strong>Example:</strong></p><ol><li>Select 'Conway's Game of Life' from 'Rules'.</li><li>Select 'Glider' from 'Load Pattern'. The Glider will appear on the grid.</li><li>Click 'Play' to see it move.</li></ol><p>For 1D rules like 'Rule 30', the 'Load Pattern' option will typically be 'Single Cell Start', which initializes the grid correctly for 1D evolution.</p>" },
+            { title: "1D Automata (e.g., Rule 30)", content: "<h5>1D Automata (e.g., Rule 30)</h5><p>Some rules like 'Rule 30' are 1-dimensional. In this playground, they evolve downwards:</p><ul><li>The <strong>Grid Width</strong> defines the 1D space.</li><li>Each <strong>row</strong> below the first represents a new generation.</li><li>The simulation starts with a single 'alive' (State 1) cell in the middle of the <strong>first row</strong>. The grid's height determines how many generations are displayed.</li></ul><p>Try 'Rule 30' or 'Rule 110' to see their distinctive patterns. The 'Load Pattern' option for these will typically be 'Single Cell Start'.</p>" },
+            { title: "Custom Rules", content: "<h5>Custom Rules</h5><p>Explore further by creating your own rules! Click 'Custom Rule...' in the 'Rules' dropdown.</p><ul><li><strong>Birth/Survival (B/S):</strong> Define which neighbor counts cause a dead cell to become alive (Birth) and an alive cell to stay alive (Survival). Example: B3/S23 is Game ofLife. Select Moore (8 neighbors including diagonals) or Von Neumann (4 orthogonal neighbors).</li><li><strong>Elementary 1D:</strong> Enter a rule number from 0-255 for 1D automata.</li></ul></p>" },
+            { title: "Zoom & Pan", content: "<h5>Zoom & Pan</h5><p>Navigate large grids easily:</p><ul><li><strong>Mouse Wheel:</strong> Zoom in and out on the canvas.</li><li><strong>Middle Mouse Button + Drag (or Shift + Left Mouse Drag):</strong> Pan the view.</li><li><strong>Zoom Buttons (+, -, <i class='bi bi-aspect-ratio'></i>):</strong> Use the +/- buttons at the bottom-right of the canvas. The middle button (<i class='bi bi-aspect-ratio'></i>) resets the view.</li></ul></p>" },
+            { title: "AI Assistant", content: "<h5>AI Assistant</h5><p>Need help or inspiration? Click the <i class='bi bi-robot'></i> 'AI Assistant' button in the navbar.</p><p>You can ask it to:</p><ul><li>Explain the current rule.</li><li>Suggest a rule for a behavior you describe (e.g., 'a rule that creates blinking patterns').</li><li>Offer insights into patterns you observe.</li></ul></p>" },
+            { title: "Generate Pattern Art", content: "<h5>Generate Pattern Art</h5><p>Turn your CA patterns into unique art! Find the 'Generate Art from Pattern' button in the sidebar.</p><p>This feature uses AI to create an artistic interpretation of the current pattern on your grid. Results can be surprising!</p>" },
+            { title: "Export & Share", content: "<h5>Export & Share</h5><p>Save your creations or share them with others:</p><ul><li><strong>Export (Navbar):</strong> Download the current canvas view as a PNG image or save the pattern and rule as a JSON file.</li><li><strong>Share (Navbar):</strong> Generate a unique URL that encodes your current grid, rule, and settings. Send this link to others to let them see your CA setup! (Note: very large patterns might create long URLs).</li></ul><p>That's it! Enjoy exploring the infinite possibilities of cellular automata.</p>" }
+        ];
+
+        const PATTERN_LIBRARY = {
+            GOL: [
+                { name: "Glider", data: [[0,1], [1,2], [2,0], [2,1], [2,2]] },
+                { name: "Small Exploder", data: [[0,1], [1,0], [1,1], [1,2], [2,0], [2,2], [3,1]] },
+                { name: "Gosper Glider Gun", data: [
+                    [4,0],[4,1],[5,0],[5,1],[4,10],[5,10],[6,10],[3,11],[7,11],[2,12],[2,13],
+                    [8,12],[8,13],[5,14],[3,15],[7,15],[4,16],[5,16],[6,16],[5,17],[2,20],
+                    [3,20],[4,20],[2,21],[3,21],[4,21],[1,22],[5,22],[0,24],[1,24],[5,24],
+                    [6,24],[2,34],[3,34],[2,35],[3,35]]
+                },
+                { name: "LWSS", data: [[0,1],[0,2],[0,3],[0,4],[1,0],[1,4],[2,4],[3,0],[3,3]] },
+            ],
+            BB: [
+                 { name: "Central Cross", data: [[-1,0],[0,-1],[0,0],[0,1],[1,0]], type: 'firing' }, 
+                 { name: "Glider (BB)", data: [[0,0],[0,1],[0,2],[1,0],[2,1]], type: 'firing' },
+            ],
+            Rule30: [ { name: "Single Cell Start (Default)", data: [] } ], 
+            Rule110: [ { name: "Single Cell Start (Default)", data: [] } ]
+        };
+        
+        function clearGridAndResetGeneration() {
+            STATE.grid = Array(STATE.numRows).fill(null).map(() => Array(STATE.numCols).fill(0));
+            STATE.generationCount = 0;
+            STATE.is1DInitialized = false;
+            updateGenerationDisplay();
+        }
+
+        function initialize1DGrid() {
+            if (STATE.numCols > 0 && STATE.numRows > 0) {
+                 for(let r=0; r < STATE.numRows; r++) {
+                    for(let c=0; c < STATE.numCols; c++) {
+                        STATE.grid[r][c] = 0;
+                    }
+                }
+                STATE.grid[0][Math.floor(STATE.numCols / 2)] = 1; 
+                STATE.is1DInitialized = true;
+                STATE.generationCount = 0; 
+            }
+        }
+        
+        function initGridStructure() {
+            clearGridAndResetGeneration();
+            if (STATE.currentRuleType === '1D') {
+                initialize1DGrid();
+            }
+            resetViewTransform();
+            resizeCanvasElement();
+        }
+
+        function applyGridSettings() {
+            const newRows = parseInt(DOM_ELEMENTS.gridHeightInput.value);
+            const newCols = parseInt(DOM_ELEMENTS.gridWidthInput.value);
+            const newCellSize = parseInt(DOM_ELEMENTS.cellSizeInput.value);
+
+            if (isNaN(newRows) || newRows < GAME_CONFIG.MIN_ROWS || newRows > GAME_CONFIG.MAX_ROWS ||
+                isNaN(newCols) || newCols < GAME_CONFIG.MIN_COLS || newCols > GAME_CONFIG.MAX_COLS ||
+                isNaN(newCellSize) || newCellSize < GAME_CONFIG.MIN_CELL_SIZE || newCellSize > GAME_CONFIG.MAX_CELL_SIZE) {
+                showToast(`Invalid grid settings. Width/Height: ${GAME_CONFIG.MIN_COLS}-${GAME_CONFIG.MAX_COLS}, Cell Size: ${GAME_CONFIG.MIN_CELL_SIZE}-${GAME_CONFIG.MAX_CELL_SIZE}.`, "danger");
+                DOM_ELEMENTS.gridHeightInput.value = STATE.numRows;
+                DOM_ELEMENTS.gridWidthInput.value = STATE.numCols;
+                DOM_ELEMENTS.cellSizeInput.value = STATE.cellSize;
+                return;
+            }
+            
+            STATE.numRows = newRows;
+            STATE.numCols = newCols;
+            STATE.cellSize = newCellSize;
+            
+            initGridStructure();
+            resizeCanvasAndRender(); 
+            playSound('ui');
+        }
+        
+        function resizeCanvasElement() {
+            STATE.logicalCanvasWidth = STATE.numCols * STATE.cellSize;
+            STATE.logicalCanvasHeight = STATE.numRows * STATE.cellSize;
+            DOM_ELEMENTS.canvas.width = STATE.logicalCanvasWidth;
+            DOM_ELEMENTS.canvas.height = STATE.logicalCanvasHeight;
+        }
+
+        function fitCanvasToWrapper() {
+            const wrapperWidth = DOM_ELEMENTS.canvasWrapper.clientWidth;
+            const wrapperHeight = DOM_ELEMENTS.canvasWrapper.clientHeight;
+            
+            if (!STATE.logicalCanvasWidth || !STATE.logicalCanvasHeight || !wrapperWidth || !wrapperHeight) return;
+
+            const canvasAspectRatio = STATE.logicalCanvasWidth / STATE.logicalCanvasHeight;
+            const wrapperAspectRatio = wrapperWidth / wrapperHeight;
+
+            let scaledWidth, scaledHeight;
+
+            if (wrapperAspectRatio > canvasAspectRatio) {
+                scaledHeight = wrapperHeight;
+                scaledWidth = scaledHeight * canvasAspectRatio;
+            } else {
+                scaledWidth = wrapperWidth;
+                scaledHeight = scaledWidth / canvasAspectRatio;
+            }
+
+            DOM_ELEMENTS.canvas.style.width = Math.floor(scaledWidth) + 'px';
+            DOM_ELEMENTS.canvas.style.height = Math.floor(scaledHeight) + 'px';
+        }
+        
+        function resizeCanvasAndRender() {
+            resizeCanvasElement();
+            fitCanvasToWrapper();
+            requestAnimationFrame(render); 
+        }
+        
+        function countMooreNeighbors(row, col) {
+            let count = 0;
+            for (let i = -1; i <= 1; i++) {
+                for (let j = -1; j <= 1; j++) {
+                    if (i === 0 && j === 0) continue;
+                    const r = (row + i + STATE.numRows) % STATE.numRows;
+                    const c = (col + j + STATE.numCols) % STATE.numCols;
+                    if (STATE.grid[r][c] === 1) { 
+                        count++;
+                    }
+                }
+            }
+            return count;
+        }
+
+        function countVonNeumannNeighbors(row, col) {
+            let count = 0;
+            const offsets = [[-1,0], [1,0], [0,-1], [0,1]];
+            for (const [dr, dc] of offsets) {
+                const r = (row + dr + STATE.numRows) % STATE.numRows;
+                const c = (col + dc + STATE.numCols) % STATE.numCols;
+                if (STATE.grid[r][c] === 1) {
+                    count++;
+                }
+            }
+            return count;
+        }
+
+        function countBrianBrainFiringNeighbors(row, col) {
+            let count = 0;
+            for (let i = -1; i <= 1; i++) {
+                for (let j = -1; j <= 1; j++) {
+                    if (i === 0 && j === 0) continue;
+                    const r = (row + i + STATE.numRows) % STATE.numRows;
+                    const c = (col + j + STATE.numCols) % STATE.numCols;
+                    if (STATE.grid[r][c] === 1) { 
+                        count++;
+                    }
+                }
+            }
+            return count;
+        }
+
+        function get1DNeighborhood(parentRowIndex, col) {
+            const left = (col === 0) ? STATE.grid[parentRowIndex][STATE.numCols - 1] : STATE.grid[parentRowIndex][col - 1];
+            const middle = STATE.grid[parentRowIndex][col];
+            const right = (col === STATE.numCols - 1) ? STATE.grid[parentRowIndex][0] : STATE.grid[parentRowIndex][col + 1];
+            return (left << 2) | (middle << 1) | right; 
+        }
+        
+        function applyRuleGOL(currentState, neighbors) {
+            if (currentState === 1) { 
+                return (neighbors === 2 || neighbors === 3) ? 1 : 0;
+            } else { 
+                return (neighbors === 3) ? 1 : 0;
+            }
+        }
+
+        function applyRuleBrianBrain(currentState, firingNeighbors) {
+            if (currentState === 0) { 
+                return (firingNeighbors === 2) ? 1 : 0; 
+            } else if (currentState === 1) { 
+                return 2; 
+            } else { 
+                return 0; 
+            }
+        }
+        
+        function applyCustomBSRule(currentState, neighbors) {
+            const rule = STATE.customRule.bs;
+            if (currentState === 1) { 
+                return rule.survival.includes(neighbors) ? 1 : 0;
+            } else { 
+                return rule.birth.includes(neighbors) ? 1 : 0;
+            }
+        }
+
+        function applyElementary1DRule(neighborhoodPattern) {
+            const ruleBits = STATE.customRule.elementary1D.ruleBits;
+            return ruleBits[7 - neighborhoodPattern]; 
+        }
+
+
+        function updateSimulationStep() {
+            if (!STATE.currentRuleLogic) return;
+            const newGrid = STATE.grid.map(arr => arr.slice());
+            let changed = false;
+
+            if (STATE.currentRuleType === '1D') {
+                if (!STATE.is1DInitialized) initialize1DGrid();
+                const nextRow = STATE.generationCount + 1;
+                if (nextRow < STATE.numRows) {
+                    for (let col = 0; col < STATE.numCols; col++) {
+                        const neighborhood = get1DNeighborhood(STATE.generationCount, col); 
+                        const newState = STATE.currentRuleLogic(neighborhood);
+                        if (newGrid[nextRow][col] !== newState) {
+                            newGrid[nextRow][col] = newState;
+                            changed = true;
+                        }
+                    }
+                    if(changed) STATE.generationCount = nextRow;
+                } else {
+                    pauseSimulation(); 
+                }
+            } else { 
+                for (let row = 0; row < STATE.numRows; row++) {
+                    for (let col = 0; col < STATE.numCols; col++) {
+                        const currentState = STATE.grid[row][col];
+                        let newState;
+                        if (STATE.currentRuleKey === 'BB') {
+                            const firingNeighbors = countBrianBrainFiringNeighbors(row, col);
+                            newState = STATE.currentRuleLogic(currentState, firingNeighbors);
+                        } else if (STATE.currentRuleKey === 'Custom' && STATE.customRule.type === 'BS') {
+                            const neighbors = STATE.customRule.bs.neighborhood === 'moore' ? countMooreNeighbors(row, col) : countVonNeumannNeighbors(row, col);
+                            newState = STATE.currentRuleLogic(currentState, neighbors);
+                        } else { 
+                            const neighbors = countMooreNeighbors(row, col); 
+                            newState = STATE.currentRuleLogic(currentState, neighbors);
+                        }
+                        
+                        if (newGrid[row][col] !== newState) {
+                             newGrid[row][col] = newState;
+                             changed = true;
+                        }
+                    }
+                }
+                if (changed) STATE.generationCount++;
+                else if (STATE.isPlaying) pauseSimulation(); 
+            }
+            
+            STATE.grid = newGrid;
+            updateGenerationDisplay();
+            if(changed && STATE.isPlaying) playSound('step');
+        }
+
+        function render() {
+            ctx.save();
+            ctx.fillStyle = STATE.deadColor; 
+            ctx.fillRect(0, 0, STATE.logicalCanvasWidth, STATE.logicalCanvasHeight);
+
+            ctx.translate(STATE.viewTransform.offsetX, STATE.viewTransform.offsetY);
+            ctx.scale(STATE.viewTransform.scale, STATE.viewTransform.scale);
+
+            for (let row = 0; row < STATE.numRows; row++) {
+                for (let col = 0; col < STATE.numCols; col++) {
+                    const cellState = STATE.grid[row][col];
+                    if (cellState === 1) {
+                        ctx.fillStyle = STATE.aliveColor;
+                    } else if (cellState === 2) {
+                        ctx.fillStyle = STATE.dyingColor;
+                    } else {
+                        ctx.fillStyle = STATE.deadColor;
+                    }
+                    ctx.fillRect(col * STATE.cellSize, row * STATE.cellSize, STATE.cellSize, STATE.cellSize);
+                }
+            }
+
+            if (STATE.showGridLines && STATE.cellSize * STATE.viewTransform.scale > 3) { 
+                ctx.strokeStyle = STATE.gridLineColor;
+                ctx.lineWidth = Math.max(0.1, 0.5 / STATE.viewTransform.scale); 
+                for (let row = 0; row <= STATE.numRows; row++) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, row * STATE.cellSize);
+                    ctx.lineTo(STATE.numCols * STATE.cellSize, row * STATE.cellSize);
+                    ctx.stroke();
+                }
+                for (let col = 0; col <= STATE.numCols; col++) {
+                    ctx.beginPath();
+                    ctx.moveTo(col * STATE.cellSize, 0);
+                    ctx.lineTo(col * STATE.cellSize, STATE.numRows * STATE.cellSize);
+                    ctx.stroke();
+                }
+            }
+            ctx.restore();
+        }
+
+        function gameLoop(timestamp) {
+            if (STATE.isPlaying) {
+                const elapsed = timestamp - STATE.lastStepTime;
+                const interval = 1000 / STATE.simulationSpeed;
+                if (elapsed >= interval) {
+                    STATE.lastStepTime = timestamp - (elapsed % interval);
+                    updateSimulationStep();
+                }
+            }
+            render();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        function playSimulation() {
+            if(STATE.isPlaying) return;
+            STATE.isPlaying = true;
+            DOM_ELEMENTS.playBtn.disabled = true;
+            DOM_ELEMENTS.pauseBtn.disabled = false;
+            DOM_ELEMENTS.stepBtn.disabled = true;
+            DOM_ELEMENTS.rulesDropdown.classList.add('disabled');
+            DOM_ELEMENTS.patternsDropdown.classList.add('disabled');
+            DOM_ELEMENTS.applyGridSettingsBtn.disabled = true;
+            playSound('ui');
+        }
+
+        function pauseSimulation() {
+            if(!STATE.isPlaying) return;
+            STATE.isPlaying = false;
+            DOM_ELEMENTS.playBtn.disabled = false;
+            DOM_ELEMENTS.pauseBtn.disabled = true;
+            DOM_ELEMENTS.stepBtn.disabled = false;
+            DOM_ELEMENTS.rulesDropdown.classList.remove('disabled');
+            DOM_ELEMENTS.patternsDropdown.classList.remove('disabled');
+            DOM_ELEMENTS.applyGridSettingsBtn.disabled = false;
+            playSound('ui');
+        }
+        
+        function stepSimulation() {
+            if (STATE.isPlaying) pauseSimulation();
+            updateSimulationStep();
+        }
+
+        function resetSimulation() {
+            if (STATE.isPlaying) pauseSimulation();
+            clearGridAndResetGeneration();
+            if (STATE.currentRuleType === '1D') {
+                initialize1DGrid();
+            }
+            resizeCanvasAndRender();
+            playSound('ui');
+        }
+
+        function updateSpeed() {
+            STATE.simulationSpeed = parseInt(DOM_ELEMENTS.speedRange.value);
+            DOM_ELEMENTS.speedValueDisplay.textContent = STATE.simulationSpeed;
+        }
+
+        function updateGenerationDisplay() {
+            DOM_ELEMENTS.generationCountDisplay.textContent = STATE.generationCount;
+        }
+
+        function _configureRuleLogic(ruleKey) {
+            STATE.currentRuleKey = ruleKey;
+            DOM_ELEMENTS.briansBrainColorsContainer.classList.toggle('d-none', ruleKey !== 'BB');
+            
+            const ruleLink = DOM_ELEMENTS.rulesList.querySelector(`[data-rule="${ruleKey}"]`);
+            if (ruleLink) {
+                 STATE.currentRuleName = ruleLink.textContent;
+                 DOM_ELEMENTS.rulesDropdown.textContent = STATE.currentRuleName;
+                 DOM_ELEMENTS.rulesList.querySelectorAll('.dropdown-item').forEach(item => item.classList.remove('active'));
+                 ruleLink.classList.add('active');
+            } else if (ruleKey === 'Custom') {
+                STATE.currentRuleName = "Custom: " + (STATE.customRule.type === 'BS' ? STATE.customRule.bs.ruleString : `Rule ${STATE.customRule.elementary1D.ruleNumber}`);
+                DOM_ELEMENTS.rulesDropdown.textContent = STATE.currentRuleName;
+                DOM_ELEMENTS.rulesList.querySelectorAll('.dropdown-item').forEach(item => item.classList.remove('active'));
+                const customRuleLink = DOM_ELEMENTS.rulesList.querySelector('[data-bs-target="#customRuleModal"]');
+                if (customRuleLink) customRuleLink.classList.add('active');
+            }
+
+            switch (ruleKey) {
+                case 'GOL':
+                    STATE.currentRuleLogic = applyRuleGOL;
+                    STATE.currentRuleType = '2D';
+                    break;
+                case 'BB':
+                    STATE.currentRuleLogic = applyRuleBrianBrain;
+                    STATE.currentRuleType = '2D';
+                    break;
+                case 'Rule30':
+                    STATE.customRule.type = 'Elementary1D';
+                    STATE.customRule.elementary1D.ruleNumber = 30;
+                    parseElementaryRule();
+                    STATE.currentRuleLogic = applyElementary1DRule;
+                    STATE.currentRuleType = '1D';
+                    break;
+                case 'Rule110':
+                    STATE.customRule.type = 'Elementary1D';
+                    STATE.customRule.elementary1D.ruleNumber = 110;
+                    parseElementaryRule();
+                    STATE.currentRuleLogic = applyElementary1DRule;
+                    STATE.currentRuleType = '1D';
+                    break;
+                case 'Custom':
+                    if (STATE.customRule.type === 'BS') {
+                        STATE.currentRuleLogic = applyCustomBSRule;
+                        STATE.currentRuleType = '2D';
+                    } else { 
+                        parseElementaryRule();
+                        STATE.currentRuleLogic = applyElementary1DRule;
+                        STATE.currentRuleType = '1D';
+                    }
+                    break;
+                default:
+                    STATE.currentRuleLogic = applyRuleGOL; STATE.currentRuleType = '2D'; STATE.currentRuleKey = 'GOL';
+                    STATE.currentRuleName = "Conway's Game of Life";
+                    DOM_ELEMENTS.rulesDropdown.textContent = STATE.currentRuleName;
+                    const defaultRuleLink = DOM_ELEMENTS.rulesList.querySelector(`[data-rule="GOL"]`);
+                    if (defaultRuleLink) defaultRuleLink.classList.add('active');
+            }
+            updatePatternList();
+        }
+
+        function selectRule(ruleKey){
+            _configureRuleLogic(ruleKey);
+            resetSimulation();
+            playSound('ui');
+            showToast(`Rule set to: ${STATE.currentRuleName}`, 'info', 2500);
+        }
+
+
+        function handleColorChange() {
+            STATE.aliveColor = DOM_ELEMENTS.aliveColorPicker.value;
+            STATE.deadColor = DOM_ELEMENTS.deadColorPicker.value;
+            STATE.dyingColor = DOM_ELEMENTS.dyingColorPicker.value;
+        }
+
+        function getMousePos(event) {
+            const rect = DOM_ELEMENTS.canvas.getBoundingClientRect();
+            const style = window.getComputedStyle(DOM_ELEMENTS.canvas);
+            const cssWidth = parseFloat(style.width);
+            const cssHeight = parseFloat(style.height);
+            
+            const scaleX = STATE.logicalCanvasWidth / cssWidth;
+            const scaleY = STATE.logicalCanvasHeight / cssHeight;
+
+            const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+            const clientY = event.touches ? event.touches[0].clientY : event.clientY;
+
+            const canvasX = (clientX - rect.left) * scaleX;
+            const canvasY = (clientY - rect.top) * scaleY;
+
+            const gridX = Math.floor((canvasX - STATE.viewTransform.offsetX) / STATE.viewTransform.scale / STATE.cellSize);
+            const gridY = Math.floor((canvasY - STATE.viewTransform.offsetY) / STATE.viewTransform.scale / STATE.cellSize);
+            
+            return { x: gridX, y: gridY, rawX: clientX, rawY: clientY };
+        }
+
+        function handleCanvasMouseDown(event) {
+            event.preventDefault();
+            const pos = getMousePos(event);
+            
+            if (event.button === 1 || (event.button === 0 && event.shiftKey) || (event.touches && event.touches.length === 2)) { 
+                STATE.isPanning = true;
+                STATE.panStart.x = pos.rawX;
+                STATE.panStart.y = pos.rawY;
+                DOM_ELEMENTS.canvas.style.cursor = 'grabbing';
+            } else if (event.button === 0 || (event.touches && event.touches.length === 1)) { 
+                STATE.isMouseDown = true;
+                STATE.isDraggingCell = true;
+                toggleCell(pos.y, pos.x);
+                STATE.lastMouseGridX = pos.x;
+                STATE.lastMouseGridY = pos.y;
+            }
+        }
+        
+        function handleCanvasMouseMove(event) {
+            event.preventDefault();
+            const pos = getMousePos(event);
+
+            if (STATE.isPanning) {
+                const dx = pos.rawX - STATE.panStart.x;
+                const dy = pos.rawY - STATE.panStart.y;
+                STATE.viewTransform.offsetX += dx;
+                STATE.viewTransform.offsetY += dy;
+                STATE.panStart.x = pos.rawX;
+                STATE.panStart.y = pos.rawY;
+            } else if (STATE.isMouseDown && STATE.isDraggingCell) {
+                if (pos.x !== STATE.lastMouseGridX || pos.y !== STATE.lastMouseGridY) {
+                    toggleCell(pos.y, pos.x, true); 
+                    STATE.lastMouseGridX = pos.x;
+                    STATE.lastMouseGridY = pos.y;
+                }
+            }
+        }
+
+        function handleCanvasMouseUp(event) {
+            event.preventDefault();
+            STATE.isMouseDown = false;
+            if (STATE.isPanning) {
+                DOM_ELEMENTS.canvas.style.cursor = 'cell';
+            }
+            STATE.isPanning = false;
+            STATE.isDraggingCell = false;
+        }
+
+        function handleCanvasWheel(event) {
+            event.preventDefault();
+            const zoomFactor = event.deltaY < 0 ? 1 + GAME_CONFIG.ZOOM_INTENSITY : 1 / (1 + GAME_CONFIG.ZOOM_INTENSITY);
+            
+            const rect = DOM_ELEMENTS.canvas.getBoundingClientRect();
+            const mouseRawX = event.clientX - rect.left; 
+            const mouseRawY = event.clientY - rect.top;
+
+            const style = window.getComputedStyle(DOM_ELEMENTS.canvas);
+            const cssWidth = parseFloat(style.width);
+            const cssHeight = parseFloat(style.height);
+            const scaleXFactor = STATE.logicalCanvasWidth / cssWidth;
+            const scaleYFactor = STATE.logicalCanvasHeight / cssHeight;
+
+            const mouseLogicalX = mouseRawX * scaleXFactor;
+            const mouseLogicalY = mouseRawY * scaleYFactor;
+            
+            const pointX = (mouseLogicalX - STATE.viewTransform.offsetX) / STATE.viewTransform.scale;
+            const pointY = (mouseLogicalY - STATE.viewTransform.offsetY) / STATE.viewTransform.scale;
+            
+            const newScale = Math.max(GAME_CONFIG.MIN_ZOOM, Math.min(STATE.viewTransform.scale * zoomFactor, GAME_CONFIG.MAX_ZOOM));
+
+            STATE.viewTransform.offsetX = mouseLogicalX - pointX * newScale;
+            STATE.viewTransform.offsetY = mouseLogicalY - pointY * newScale;
+            STATE.viewTransform.scale = newScale;
+        }
+
+        function zoom(factor) {
+            const rect = DOM_ELEMENTS.canvas.getBoundingClientRect();
+            const centerRawX = rect.width / 2; 
+            const centerRawY = rect.height / 2;
+            
+            const style = window.getComputedStyle(DOM_ELEMENTS.canvas);
+            const cssWidth = parseFloat(style.width);
+            const cssHeight = parseFloat(style.height);
+            const scaleXFactor = STATE.logicalCanvasWidth / cssWidth;
+            const scaleYFactor = STATE.logicalCanvasHeight / cssHeight;
+
+            const centerLogicalX = centerRawX * scaleXFactor;
+            const centerLogicalY = centerRawY * scaleYFactor;
+
+            const pointX = (centerLogicalX - STATE.viewTransform.offsetX) / STATE.viewTransform.scale;
+            const pointY = (centerLogicalY - STATE.viewTransform.offsetY) / STATE.viewTransform.scale;
+
+            const newScale = Math.max(GAME_CONFIG.MIN_ZOOM, Math.min(STATE.viewTransform.scale * factor, GAME_CONFIG.MAX_ZOOM));
+            
+            STATE.viewTransform.offsetX = centerLogicalX - pointX * newScale;
+            STATE.viewTransform.offsetY = centerLogicalY - pointY * newScale;
+            STATE.viewTransform.scale = newScale;
+            playSound('ui');
+        }
+
+        function resetViewTransform() {
+            STATE.viewTransform.scale = 1;
+            STATE.viewTransform.offsetX = 0;
+            STATE.viewTransform.offsetY = 0;
+            playSound('ui');
+        }
+
+        function toggleCell(row, col, isDragging = false) {
+            if (row >= 0 && row < STATE.numRows && col >= 0 && col < STATE.numCols) {
+                if (STATE.currentRuleKey === 'BB') {
+                    STATE.grid[row][col] = (STATE.grid[row][col] + 1) % 3;
+                } else {
+                    STATE.grid[row][col] = STATE.grid[row][col] === 0 ? 1 : 0;
+                }
+                if (!isDragging) playSound('click');
+
+                if (STATE.isPlaying) pauseSimulation();
+                if (STATE.currentRuleType !== '1D') { 
+                    STATE.generationCount = 0; 
+                    updateGenerationDisplay();
+                } else { 
+                    if (row === 0) {
+                        STATE.generationCount = 0;
+                        updateGenerationDisplay();
+                         for(let r=1; r < STATE.numRows; r++) { 
+                            for(let c=0; c < STATE.numCols; c++) {
+                                STATE.grid[r][c] = 0;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        function parseBSRuleString(ruleString) {
+            const match = ruleString.toUpperCase().match(/^B([0-8]+)\/S([0-8]+)$/);
+            if (!match) return null;
+            return {
+                birth: match[1].split('').map(Number),
+                survival: match[2].split('').map(Number),
+                ruleString: ruleString
+            };
+        }
+
+        function parseElementaryRule() {
+            const ruleNum = STATE.customRule.elementary1D.ruleNumber;
+            const binaryString = ruleNum.toString(2).padStart(8, '0');
+            STATE.customRule.elementary1D.ruleBits = binaryString.split('').map(Number);
+        }
+
+        function handleApplyCustomRule() {
+            const type = DOM_ELEMENTS.ruleTypeSelect.value;
+            STATE.customRule.type = type;
+
+            if (type === 'BS') {
+                const ruleStr = DOM_ELEMENTS.ruleStringInput.value;
+                const parsedRule = parseBSRuleString(ruleStr);
+                if (!parsedRule) {
+                    showToast("Invalid B/S rule string format. Use e.g., B3/S23.", 'danger');
+                    return;
+                }
+                STATE.customRule.bs = { ...parsedRule, states: GAME_CONFIG.CUSTOM_BS_NUM_STATES, neighborhood: DOM_ELEMENTS.neighborhoodTypeSelect.value };
+            } else { 
+                const ruleNum = parseInt(DOM_ELEMENTS.elementaryRuleNumberInput.value);
+                if (isNaN(ruleNum) || ruleNum < GAME_CONFIG.ELEMENTARY_RULE_MIN || ruleNum > GAME_CONFIG.ELEMENTARY_RULE_MAX) {
+                    showToast(`Invalid Elementary Rule number. Must be ${GAME_CONFIG.ELEMENTARY_RULE_MIN}-${GAME_CONFIG.ELEMENTARY_RULE_MAX}.`, 'danger');
+                    return;
+                }
+                STATE.customRule.elementary1D.ruleNumber = ruleNum;
+            }
+            
+            selectRule('Custom');
+            const modalInstance = bootstrap.Modal.getInstance(DOM_ELEMENTS.customRuleModalEl);
+            if (modalInstance) modalInstance.hide();
+            playSound('success');
+        }
+
+        function updateCustomRuleModalView() {
+            const type = DOM_ELEMENTS.ruleTypeSelect.value;
+            DOM_ELEMENTS.bsRuleConfig.classList.toggle('d-none', type !== 'BS');
+            DOM_ELEMENTS.elementary1DRuleConfig.classList.toggle('d-none', type !== 'Elementary1D');
+        }
+
+        function addChatMessage(message, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('mb-2', type === 'user' ? 'user-message' : 'assistant-message');
+            
+            const escapedMessage = message.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            messageDiv.innerHTML = escapedMessage.replace(/\n/g, "<br>");
+
+            DOM_ELEMENTS.aiChatHistory.appendChild(messageDiv);
+            DOM_ELEMENTS.aiChatHistory.scrollTop = DOM_ELEMENTS.aiChatHistory.scrollHeight;
+        }
+
+        async function handleSendAiQuery() {
+            const query = DOM_ELEMENTS.aiQueryInput.value.trim();
+            if (!query) return;
+
+            addChatMessage(query, 'user');
+            DOM_ELEMENTS.aiQueryInput.value = '';
+            DOM_ELEMENTS.aiLoadingSpinner.classList.remove('d-none');
+            DOM_ELEMENTS.sendAiQueryBtn.disabled = true;
+            playSound('ui');
+
+            try {
+                const currentRuleInfo = STATE.currentRuleKey === 'Custom' ? 
+                    `Custom rule (${STATE.customRule.type === 'BS' ? STATE.customRule.bs.ruleString : 'Rule ' + STATE.customRule.elementary1D.ruleNumber})` 
+                    : STATE.currentRuleName;
+
+                const aiguide = `You are a helpful assistant in a Cellular Automata Playground.
+Current CA rule is: ${currentRuleInfo}.
+Grid size: ${STATE.numCols}x${STATE.numRows}. Generation: ${STATE.generationCount}.
+Focus on CA concepts, rule explanations, pattern analysis, or new rule ideas based on user query.
+Keep responses concise and informative. If asked to generate a rule, provide it in B/S notation (e.g., B3/S23) or as an elementary rule number.
+Format responses clearly, using markdown-like newlines if needed for lists or steps.`;
+
+                const response = await fetch('/api/ai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ aiguide, msgforai: query })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    addChatMessage(data.response, 'assistant');
+                    playSound('success');
+                } else {
+                    addChatMessage(`Error: ${data.error || 'Failed to get response.'}`, 'assistant');
+                    playSound('error');
+                }
+            } catch (error) {
+                addChatMessage(`Network error: ${error.message}`, 'assistant');
+                playSound('error');
+            } finally {
+                DOM_ELEMENTS.aiLoadingSpinner.classList.add('d-none');
+                DOM_ELEMENTS.sendAiQueryBtn.disabled = false;
+            }
+        }
+        
+        async function handleGenerateArt() {
+            DOM_ELEMENTS.artSpinner.classList.remove('d-none');
+            DOM_ELEMENTS.artErrorText.classList.add('d-none');
+            DOM_ELEMENTS.generateArtBtn.disabled = true;
+            DOM_ELEMENTS.generatedImageContainer.innerHTML = ''; 
+            playSound('ui');
+
+            let patternDescription = "a cellular automaton pattern";
+            const aliveCells = STATE.grid.flat().filter(cell => cell === 1 || cell === 2).length;
+            const totalCells = STATE.numRows * STATE.numCols;
+            const density = totalCells > 0 ? aliveCells / totalCells : 0;
+
+            if (density === 0) patternDescription = "an empty cellular automaton grid";
+            else if (density < 0.05) patternDescription = "a sparse cellular automaton pattern";
+            else if (density > 0.6) patternDescription = "a dense, chaotic cellular automaton pattern";
+            else if (density > 0.2 && density < 0.4) patternDescription = "a moderately dense cellular automaton pattern with distinct structures";
+
+            const ruleName = STATE.currentRuleKey === 'Custom' ? 
+                (STATE.customRule.type === 'BS' ? `Custom rule ${STATE.customRule.bs.ruleString}` : `Custom Rule ${STATE.customRule.elementary1D.ruleNumber}`) 
+                : STATE.currentRuleName;
+            
+            const prompt = `Digital art, abstract, inspired by ${patternDescription} from rule "${ruleName}". Emphasize geometric shapes and evolving structures. Colors: primary ${STATE.aliveColor}, secondary ${STATE.dyingColor}, background ${STATE.deadColor}. Style: vibrant, intricate, glowing, slightly technological.`;
+
+            try {
+                const response = await fetch('/api/generate-image-on-demand', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt, aspectRatio: "1:1", style: "hd" })
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    const img = new Image();
+                    img.onload = () => {
+                        DOM_ELEMENTS.artSpinner.classList.add('d-none');
+                        DOM_ELEMENTS.generateArtBtn.disabled = false;
+                        playSound('success');
+                    };
+                    img.onerror = () => {
+                         DOM_ELEMENTS.artErrorText.textContent = 'Error: Failed to load generated image.';
+                         DOM_ELEMENTS.artErrorText.classList.remove('d-none');
+                         DOM_ELEMENTS.generatedImageContainer.textContent = 'Art generation failed.';
+                         DOM_ELEMENTS.artSpinner.classList.add('d-none');
+                         DOM_ELEMENTS.generateArtBtn.disabled = false;
+                         playSound('error');
+                    };
+                    img.src = data.imageUrl;
+                    img.alt = "Generated CA Art";
+                    img.classList.add('img-fluid');
+                    DOM_ELEMENTS.generatedImageContainer.appendChild(img);
+                } else {
+                    DOM_ELEMENTS.artErrorText.textContent = `Error: ${data.error || 'Failed to generate image.'}`;
+                    DOM_ELEMENTS.artErrorText.classList.remove('d-none');
+                    DOM_ELEMENTS.generatedImageContainer.textContent = 'Art generation failed.';
+                    DOM_ELEMENTS.artSpinner.classList.add('d-none');
+                    DOM_ELEMENTS.generateArtBtn.disabled = false;
+                    playSound('error');
+                }
+            } catch (err) {
+                DOM_ELEMENTS.artErrorText.textContent = 'Network error. Could not generate image.';
+                DOM_ELEMENTS.artErrorText.classList.remove('d-none');
+                DOM_ELEMENTS.generatedImageContainer.textContent = 'Art generation failed.';
+                DOM_ELEMENTS.artSpinner.classList.add('d-none');
+                DOM_ELEMENTS.generateArtBtn.disabled = false;
+                playSound('error');
+            }
+        }
+
+        function exportPNG() {
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = STATE.logicalCanvasWidth;
+            tempCanvas.height = STATE.logicalCanvasHeight;
+            const tempCtx = tempCanvas.getContext('2d');
+            
+            tempCtx.fillStyle = STATE.deadColor;
+            tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+            for (let row = 0; row < STATE.numRows; row++) {
+                for (let col = 0; col < STATE.numCols; col++) {
+                    const cellState = STATE.grid[row][col];
+                    if (cellState === 1) tempCtx.fillStyle = STATE.aliveColor;
+                    else if (cellState === 2) tempCtx.fillStyle = STATE.dyingColor;
+                    else tempCtx.fillStyle = STATE.deadColor; 
+                    tempCtx.fillRect(col * STATE.cellSize, row * STATE.cellSize, STATE.cellSize, STATE.cellSize);
+                }
+            }
+            if (STATE.showGridLines) {
+                tempCtx.strokeStyle = STATE.gridLineColor;
+                tempCtx.lineWidth = 0.5;
+                for (let row = 0; row <= STATE.numRows; row++) {
+                    tempCtx.beginPath(); tempCtx.moveTo(0, row * STATE.cellSize); tempCtx.lineTo(STATE.numCols * STATE.cellSize, row * STATE.cellSize); tempCtx.stroke();
+                }
+                for (let col = 0; col <= STATE.numCols; col++) {
+                    tempCtx.beginPath(); tempCtx.moveTo(col * STATE.cellSize, 0); tempCtx.lineTo(col * STATE.cellSize, STATE.numRows * STATE.cellSize); tempCtx.stroke();
+                }
+            }
+            try {
+                const dataURL = tempCanvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.download = `ca_pattern_${STATE.currentRuleName.replace(/[\s:]/g, '_')}_gen${STATE.generationCount}.png`;
+                link.href = dataURL;
+                link.click();
+                playSound('success');
+            } catch (e) {
+                showToast("Error exporting PNG.", "danger");
+                console.error("PNG Export Error:", e);
+            }
+        }
+
+        function exportJSON() {
+            const activeCells = [];
+            for (let r = 0; r < STATE.numRows; r++) {
+                for (let c = 0; c < STATE.numCols; c++) {
+                    if (STATE.grid[r][c] !== 0) {
+                        activeCells.push([r, c, STATE.grid[r][c]]);
+                    }
+                }
+            }
+            const exportData = {
+                version: 1,
+                ruleKey: STATE.currentRuleKey,
+                customRule: STATE.currentRuleKey === 'Custom' ? STATE.customRule : null,
+                grid: { rows: STATE.numRows, cols: STATE.numCols, cellSize: STATE.cellSize },
+                colors: { alive: STATE.aliveColor, dead: STATE.deadColor, dying: STATE.dyingColor },
+                activeCells: activeCells,
+                generation: STATE.generationCount,
+                showGridLines: STATE.showGridLines
+            };
+            try {
+                const jsonString = JSON.stringify(exportData, null, 2);
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.download = `ca_config_${STATE.currentRuleName.replace(/[\s:]/g, '_')}.json`;
+                link.href = url;
+                link.click();
+                URL.revokeObjectURL(url);
+                playSound('success');
+            } catch (e) {
+                showToast("Error exporting JSON.", "danger");
+                console.error("JSON Export Error:", e);
+            }
+        }
+        
+        function generateShareURL() {
+            const activeCellsRLE = []; 
+            for (let r = 0; r < STATE.numRows; r++) {
+                let currentRun = null;
+                for (let c = 0; c < STATE.numCols; c++) {
+                    const cellState = STATE.grid[r][c];
+                    if (cellState !== 0) {
+                        if (currentRun && currentRun.state === cellState && currentRun.colStart + currentRun.count === c) {
+                            currentRun.count++;
+                        } else {
+                            if (currentRun) activeCellsRLE.push([currentRun.row, currentRun.colStart, currentRun.count, currentRun.state]);
+                            currentRun = { row: r, colStart: c, count: 1, state: cellState };
+                        }
+                    } else {
+                        if (currentRun) {
+                            activeCellsRLE.push([currentRun.row, currentRun.colStart, currentRun.count, currentRun.state]);
+                            currentRun = null;
+                        }
+                    }
+                }
+                if (currentRun) activeCellsRLE.push([currentRun.row, currentRun.colStart, currentRun.count, currentRun.state]);
+            }
+
+            const shareState = {
+                v: 1.1, 
+                rK: STATE.currentRuleKey,
+                cR: STATE.currentRuleKey === 'Custom' ? STATE.customRule : undefined,
+                gW: STATE.numCols,
+                gH: STATE.numRows,
+                cS: STATE.cellSize,
+                cA: STATE.aliveColor,
+                cD: STATE.deadColor,
+                cY: STATE.dyingColor,
+                acRLE: activeCellsRLE, 
+                gN: STATE.generationCount,
+                sGL: STATE.showGridLines ? 1:0
+            };
+            try {
+                const jsonString = JSON.stringify(shareState);
+                const encoded = btoa(jsonString); 
+                const url = `${window.location.origin}${window.location.pathname}#data=${encoded}`;
+                DOM_ELEMENTS.shareLinkInput.value = url;
+                showToast("Share link generated. Ready to copy.", "info");
+            } catch (e) {
+                DOM_ELEMENTS.shareLinkInput.value = "Error generating share link. Pattern might be too complex.";
+                showToast("Error generating share link.", "danger");
+                console.error("Share URL generation error:", e);
+            }
+        }
+
+        function loadFromURL() {
+            if (window.location.hash && window.location.hash.startsWith('#data=')) {
+                try {
+                    const encoded = window.location.hash.substring(6);
+                    const jsonString = atob(encoded);
+                    const loadedState = JSON.parse(jsonString);
+
+                    if (loadedState.v === 1 || loadedState.v === 1.1) {
+                        STATE.numCols = loadedState.gW || GAME_CONFIG.DEFAULT_COLS;
+                        STATE.numRows = loadedState.gH || GAME_CONFIG.DEFAULT_ROWS;
+                        STATE.cellSize = loadedState.cS || GAME_CONFIG.DEFAULT_CELL_SIZE;
+                        DOM_ELEMENTS.gridWidthInput.value = STATE.numCols;
+                        DOM_ELEMENTS.gridHeightInput.value = STATE.numRows;
+                        DOM_ELEMENTS.cellSizeInput.value = STATE.cellSize;
+                        
+                        STATE.aliveColor = loadedState.cA || GAME_CONFIG.DEFAULT_ALIVE_COLOR;
+                        STATE.deadColor = loadedState.cD || GAME_CONFIG.DEFAULT_DEAD_COLOR;
+                        STATE.dyingColor = loadedState.cY || GAME_CONFIG.DEFAULT_DYING_COLOR;
+                        DOM_ELEMENTS.aliveColorPicker.value = STATE.aliveColor;
+                        DOM_ELEMENTS.deadColorPicker.value = STATE.deadColor;
+                        DOM_ELEMENTS.dyingColorPicker.value = STATE.dyingColor;
+
+                        STATE.showGridLines = loadedState.sGL === 1;
+                        DOM_ELEMENTS.showGridLinesSwitch.checked = STATE.showGridLines;
+                        
+                        initGridStructure(); 
+
+                        if (loadedState.acRLE && loadedState.v === 1.1) { 
+                            for (const run of loadedState.acRLE) {
+                                const [r, colStart, count, cellStateVal] = run;
+                                for (let i=0; i < count; i++) {
+                                    const c = colStart + i;
+                                    if (r < STATE.numRows && c < STATE.numCols) {
+                                        STATE.grid[r][c] = cellStateVal;
+                                    }
+                                }
+                            }
+                        } else if (loadedState.ac) { 
+                            for (const cell of loadedState.ac) {
+                                if (cell[0] < STATE.numRows && cell[1] < STATE.numCols) {
+                                    STATE.grid[cell[0]][cell[1]] = cell[2];
+                                }
+                            }
+                        }
+                        
+                        if (loadedState.cR && loadedState.rK === 'Custom') {
+                            STATE.customRule = loadedState.cR;
+                        }
+                        _configureRuleLogic(loadedState.rK || 'GOL');
+                        
+                        STATE.generationCount = loadedState.gN || 0; 
+                        updateGenerationDisplay();
+                        resizeCanvasAndRender();
+                        
+                        window.location.hash = ''; 
+                        showToast("Configuration loaded from URL!", "success");
+                    }
+                } catch (e) {
+                    console.error("Failed to load state from URL:", e);
+                    showToast("Could not load configuration from URL. It might be invalid or corrupted.", "danger");
+                     window.location.hash = ''; 
+                }
+            }
+        }
+
+        function updatePatternList() {
+            const patterns = PATTERN_LIBRARY[STATE.currentRuleKey] || [];
+            DOM_ELEMENTS.patternList.innerHTML = '';
+            if (patterns.length === 0 && STATE.currentRuleType !== '1D') {
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.classList.add('dropdown-item', 'disabled');
+                a.href = "#";
+                a.textContent = "(No patterns for this rule)";
+                li.appendChild(a);
+                DOM_ELEMENTS.patternList.appendChild(li);
+            } else if (STATE.currentRuleType === '1D' && patterns.length > 0 && patterns[0].data.length === 0) { 
+                 const li = document.createElement('li');
+                 const a = document.createElement('a');
+                 a.classList.add('dropdown-item');
+                 a.href = "#";
+                 a.textContent = patterns[0].name;
+                 a.addEventListener('click', (e) => { 
+                    e.preventDefault(); 
+                    resetSimulation(); 
+                    playSound('ui'); 
+                    showToast(`Pattern '${patterns[0].name}' initialized for 1D rule.`, 'info', 2500);
+                });
+                 li.appendChild(a);
+                 DOM_ELEMENTS.patternList.appendChild(li);
+            }else {
+                patterns.forEach((pattern) => {
+                    const li = document.createElement('li');
+                    const a = document.createElement('a');
+                    a.classList.add('dropdown-item');
+                    a.href = "#";
+                    a.textContent = pattern.name;
+                    a.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        loadPattern(pattern);
+                        playSound('ui');
+                    });
+                    li.appendChild(a);
+                    DOM_ELEMENTS.patternList.appendChild(li);
+                });
+            }
+        }
+
+        function loadPattern(pattern) {
+            resetSimulation(); 
+            if (STATE.currentRuleType === '1D' || pattern.data.length === 0) { 
+                showToast(`Pattern '${pattern.name}' initialized for 1D rule.`, 'info', 2500);
+                return;
+            }
+
+            const minX = pattern.data.reduce((min, p) => Math.min(min, p[1]), Infinity);
+            const maxX = pattern.data.reduce((max, p) => Math.max(max, p[1]), -Infinity);
+            const minY = pattern.data.reduce((min, p) => Math.min(min, p[0]), Infinity);
+            const maxY = pattern.data.reduce((max, p) => Math.max(max, p[0]), -Infinity);
+            
+            const patternWidth = (minX === Infinity) ? 0 : maxX - minX + 1;
+            const patternHeight = (minY === Infinity) ? 0 : maxY - minY + 1;
+
+            const offsetX = Math.floor((STATE.numCols - patternWidth) / 2);
+            const offsetY = Math.floor((STATE.numRows - patternHeight) / 2);
+
+            pattern.data.forEach(p_coords => {
+                const r_pattern = p_coords[0];
+                const c_pattern = p_coords[1];
+                const r = offsetY + (r_pattern - minY);
+                const c = offsetX + (c_pattern - minX);
+
+                if (r >= 0 && r < STATE.numRows && c >= 0 && c < STATE.numCols) {
+                    if (STATE.currentRuleKey === 'BB' && pattern.type === 'firing') {
+                        STATE.grid[r][c] = 1; 
+                    } else {
+                         STATE.grid[r][c] = 1; 
+                    }
+                }
+            });
+            if (STATE.isPlaying) pauseSimulation();
+            showToast(`Pattern '${pattern.name}' loaded.`, 'info', 2500);
+        }
+
+        function loadTutorialStep(stepIndex) {
+            if (stepIndex < 0 || stepIndex >= TUTORIAL_STEPS.length) return;
+            STATE.currentTutorialStep = stepIndex;
+            const step = TUTORIAL_STEPS[stepIndex];
+            DOM_ELEMENTS.tutorialContent.innerHTML = `<h4>${stepIndex + 1}. ${step.title}</h4>${step.content}`;
+            DOM_ELEMENTS.prevTutorialStepBtn.disabled = stepIndex === 0;
+            DOM_ELEMENTS.nextTutorialStepBtn.disabled = stepIndex === TUTORIAL_STEPS.length - 1;
+            DOM_ELEMENTS.nextTutorialStepBtn.innerHTML = stepIndex === TUTORIAL_STEPS.length - 1 ? "Finish <i class='bi bi-check-circle-fill'></i>" : "Next <i class='bi bi-arrow-right-circle-fill'></i>";
+            DOM_ELEMENTS.tutorialStepIndicator.textContent = `Step ${stepIndex + 1}/${TUTORIAL_STEPS.length}`;
+            playSound('ui');
+        }
+        
+        function setupInputParameters() {
+            DOM_ELEMENTS.gridWidthInput.min = GAME_CONFIG.MIN_COLS;
+            DOM_ELEMENTS.gridWidthInput.max = GAME_CONFIG.MAX_COLS;
+            DOM_ELEMENTS.gridWidthInput.value = STATE.numCols;
+            DOM_ELEMENTS.gridHeightInput.min = GAME_CONFIG.MIN_ROWS;
+            DOM_ELEMENTS.gridHeightInput.max = GAME_CONFIG.MAX_ROWS;
+            DOM_ELEMENTS.gridHeightInput.value = STATE.numRows;
+            DOM_ELEMENTS.cellSizeInput.min = GAME_CONFIG.MIN_CELL_SIZE;
+            DOM_ELEMENTS.cellSizeInput.max = GAME_CONFIG.MAX_CELL_SIZE;
+            DOM_ELEMENTS.cellSizeInput.value = STATE.cellSize;
+            
+            DOM_ELEMENTS.speedRange.min = GAME_CONFIG.MIN_SPEED;
+            DOM_ELEMENTS.speedRange.max = GAME_CONFIG.MAX_SPEED;
+            DOM_ELEMENTS.speedRange.value = STATE.simulationSpeed;
+            DOM_ELEMENTS.speedValueDisplay.textContent = STATE.simulationSpeed;
+
+            DOM_ELEMENTS.aliveColorPicker.value = STATE.aliveColor;
+            DOM_ELEMENTS.deadColorPicker.value = STATE.deadColor;
+            DOM_ELEMENTS.dyingColorPicker.value = STATE.dyingColor;
+            DOM_ELEMENTS.showGridLinesSwitch.checked = STATE.showGridLines;
+
+            DOM_ELEMENTS.numStatesInput.value = GAME_CONFIG.CUSTOM_BS_NUM_STATES;
+            DOM_ELEMENTS.elementaryRuleNumberInput.min = GAME_CONFIG.ELEMENTARY_RULE_MIN;
+            DOM_ELEMENTS.elementaryRuleNumberInput.max = GAME_CONFIG.ELEMENTARY_RULE_MAX;
+            DOM_ELEMENTS.elementaryRuleNumberInput.value = GAME_CONFIG.DEFAULT_ELEMENTARY_RULE;
+            DOM_ELEMENTS.ruleStringInput.value = STATE.customRule.bs.ruleString;
+
+
+            DOM_ELEMENTS.generatedImageContainer.textContent = 'Art will appear here';
+        }
+
+        function attachEventListeners() {
+            DOM_ELEMENTS.playBtn.addEventListener('click', playSimulation);
+            DOM_ELEMENTS.pauseBtn.addEventListener('click', pauseSimulation);
+            DOM_ELEMENTS.stepBtn.addEventListener('click', stepSimulation);
+            DOM_ELEMENTS.resetBtn.addEventListener('click', resetSimulation);
+            DOM_ELEMENTS.speedRange.addEventListener('input', updateSpeed);
+            DOM_ELEMENTS.applyGridSettingsBtn.addEventListener('click', applyGridSettings);
+            DOM_ELEMENTS.aliveColorPicker.addEventListener('input', handleColorChange);
+            DOM_ELEMENTS.deadColorPicker.addEventListener('input', handleColorChange);
+            DOM_ELEMENTS.dyingColorPicker.addEventListener('input', handleColorChange);
+            DOM_ELEMENTS.showGridLinesSwitch.addEventListener('change', (e) => { STATE.showGridLines = e.target.checked; playSound('ui'); });
+            
+            DOM_ELEMENTS.rulesList.addEventListener('click', (e) => {
+                if (e.target.tagName === 'A' && e.target.dataset.rule) {
+                    selectRule(e.target.dataset.rule);
+                }
+            });
+
+            DOM_ELEMENTS.canvas.addEventListener('mousedown', handleCanvasMouseDown);
+            DOM_ELEMENTS.canvas.addEventListener('mousemove', handleCanvasMouseMove);
+            document.addEventListener('mouseup', handleCanvasMouseUp); 
+            DOM_ELEMENTS.canvas.addEventListener('touchstart', handleCanvasMouseDown, { passive: false });
+            DOM_ELEMENTS.canvas.addEventListener('touchmove', handleCanvasMouseMove, { passive: false });
+            document.addEventListener('touchend', handleCanvasMouseUp);
+            DOM_ELEMENTS.canvas.addEventListener('wheel', handleCanvasWheel, { passive: false });
+            DOM_ELEMENTS.canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+
+            DOM_ELEMENTS.zoomInBtn.addEventListener('click', () => zoom(1.25));
+            DOM_ELEMENTS.zoomOutBtn.addEventListener('click', () => zoom(0.8));
+            DOM_ELEMENTS.resetViewBtn.addEventListener('click', resetViewTransform);
+
+            DOM_ELEMENTS.ruleTypeSelect.addEventListener('change', updateCustomRuleModalView);
+            DOM_ELEMENTS.applyCustomRuleBtn.addEventListener('click', handleApplyCustomRule);
+
+            DOM_ELEMENTS.sendAiQueryBtn.addEventListener('click', handleSendAiQuery);
+            DOM_ELEMENTS.aiQueryInput.addEventListener('keypress', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendAiQuery(); } });
+            DOM_ELEMENTS.generateArtBtn.addEventListener('click', handleGenerateArt);
+
+            DOM_ELEMENTS.exportPngBtn.addEventListener('click', () => { exportPNG(); playSound('ui');});
+            DOM_ELEMENTS.exportJsonBtn.addEventListener('click', () => { exportJSON(); playSound('ui');});
+            
+            DOM_ELEMENTS.shareBtnTrigger.addEventListener('click', () => { generateShareURL(); playSound('ui');});
+            DOM_ELEMENTS.copyShareLinkBtn.addEventListener('click', () => {
+                const urlToCopy = DOM_ELEMENTS.shareLinkInput.value;
+                if (!urlToCopy || urlToCopy.startsWith("Error")) {
+                    showToast("No link to copy or link generation failed.", "warning");
+                    return;
+                }
+                navigator.clipboard.writeText(urlToCopy).then(() => {
+                    showToast('Copied to clipboard!', 'success');
+                }).catch(err => {
+                    showToast('Failed to copy! Please copy manually.', 'danger');
+                    console.error("Clipboard copy error:", err);
+                });
+            });
+
+            DOM_ELEMENTS.prevTutorialStepBtn.addEventListener('click', () => loadTutorialStep(STATE.currentTutorialStep - 1));
+            DOM_ELEMENTS.nextTutorialStepBtn.addEventListener('click', () => {
+                if (STATE.currentTutorialStep === TUTORIAL_STEPS.length - 1) {
+                    const modalInstance = bootstrap.Modal.getInstance(DOM_ELEMENTS.tutorialModalEl);
+                    if (modalInstance) modalInstance.hide();
+                    sessionStorage.setItem('tutorialDismissed', 'true'); 
+                    playSound('success');
+                } else {
+                    loadTutorialStep(STATE.currentTutorialStep + 1);
+                }
+            });
+            DOM_ELEMENTS.tutorialBtnTrigger.addEventListener('click', () => { 
+                loadTutorialStep(0); 
+                playSound('ui');
+            });
+             DOM_ELEMENTS.tutorialModalEl.addEventListener('hidden.bs.modal', () => {
+                if (STATE.currentTutorialStep === TUTORIAL_STEPS.length - 1) { 
+                    sessionStorage.setItem('tutorialDismissed', 'true');
+                }
+            });
+
+
+            window.addEventListener('resize', resizeCanvasAndRender);
+            document.addEventListener('keydown', (e) => {
+                if (DOM_ELEMENTS.aiQueryInput === document.activeElement || 
+                    DOM_ELEMENTS.ruleStringInput === document.activeElement || 
+                    DOM_ELEMENTS.elementaryRuleNumberInput === document.activeElement ||
+                    DOM_ELEMENTS.gridWidthInput === document.activeElement ||
+                    DOM_ELEMENTS.gridHeightInput === document.activeElement ||
+                    DOM_ELEMENTS.cellSizeInput === document.activeElement
+                    ) {
+                    return; 
+                }
+                switch(e.key) {
+                    case ' ': e.preventDefault(); STATE.isPlaying ? pauseSimulation() : playSimulation(); break;
+                    case 'ArrowRight': e.preventDefault(); stepSimulation(); break;
+                    case 'r': case 'R': e.preventDefault(); resetSimulation(); break;
+                    case '+': case '=': e.preventDefault(); zoom(1.25); break;
+                    case '-': case '_': e.preventDefault(); zoom(0.8); break;
+                    case '0': e.preventDefault(); resetViewTransform(); break;
+                }
+            });
+        }
+
+        function init() {
+            ctx.imageSmoothingEnabled = false;
+            setupInputParameters();
+            attachEventListeners();
+            initGridStructure(); 
+            _configureRuleLogic('GOL'); 
+            loadFromURL(); 
+            
+            requestAnimationFrame(gameLoop);
+
+            const currentHash = window.location.hash;
+            const tutorialDismissed = sessionStorage.getItem('tutorialDismissed');
+            if (!currentHash.startsWith('#data=') && !tutorialDismissed) {
+                loadTutorialStep(0); 
+                const tutorialModalInstance = new bootstrap.Modal(DOM_ELEMENTS.tutorialModalEl);
+                tutorialModalInstance.show();
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', init);
+    })();
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

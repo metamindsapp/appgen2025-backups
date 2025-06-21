@@ -1,0 +1,63 @@
+{
+  "projectId": "dc6848ed-5f45-4ee1-8b53-b8c8aec5a4de",
+  "revisionString": "1",
+  "projectNameDisplay": "egg",
+  "projectType": "website",
+  "ownerPublicKey": "FasjMytLz4YvCekTUiMXR8n5KoHbLvqCmvnX6D6GG5s8",
+  "userPromptForThisRevision": "super simple egg timer",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-06-18T16:45:07.807Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/imagen3_FasjMy_dc6848_9f788da8-0e8.png",
+      "url": "/generated_images/imagen3_FasjMy_dc6848_9f788da8-0e8.png",
+      "description": "A charming and friendly cartoon egg character, white or light cream, smiling broadly. Clean lines, flat design style with subtle gradients for a modern, inviting look. Transparent background. Optimistic and welcoming mood. Centered.",
+      "purpose": "Main hero illustration for the egg timer website (ID: mainEggImage). Path: [PREGEN_MAIN_EGG_IMAGE_PATH_WILL_BE_HERE]",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_FasjMy_dc6848_f48d212e-d44.png",
+      "url": "/generated_images/imagen3_FasjMy_dc6848_f48d212e-d44.png",
+      "description": "Tiny, simple, iconic egg shape. Solid light yellow or white. Suitable for a 16x16 or 32x32 favicon. Clear silhouette. Transparent background.",
+      "purpose": "Favicon for the website and small icon in header (ID: headerEggIcon). Path: [PREGEN_FAVICON_PATH_WILL_BE_HERE]",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_FasjMy_dc6848_1aefe537-d5d.png",
+      "url": "/generated_images/imagen3_FasjMy_dc6848_1aefe537-d5d.png",
+      "description": "Small flat design icon: soft-boiled egg, top slightly cracked, showing runny bright yellow yolk. White/cream shell. Transparent background.",
+      "purpose": "Icon for 'Soft-boiled' preset button. Path: [PREGEN_SOFT_EGG_ICON_PATH_WILL_BE_HERE]",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_FasjMy_dc6848_268414b8-887.png",
+      "url": "/generated_images/imagen3_FasjMy_dc6848_268414b8-887.png",
+      "description": "Small flat design icon: 'dippy egg' in a simple egg cup, or with toast soldier. Focus on very runny bright yellow yolk. White/cream shell. Transparent background.",
+      "purpose": "Icon for 'Dippy Egg' preset button. Path: [PREGEN_DIPPY_EGG_ICON_PATH_WILL_BE_HERE]",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_FasjMy_dc6848_9cfadf62-7a7.png",
+      "url": "/generated_images/imagen3_FasjMy_dc6848_9cfadf62-7a7.png",
+      "description": "Small flat design icon: medium-boiled egg, halved, showing a jammy, slightly firm orange-yellow yolk. White/cream shell. Transparent background.",
+      "purpose": "Icon for 'Medium-boiled' preset button. Path: [PREGEN_MEDIUM_EGG_ICON_PATH_WILL_BE_HERE]",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_FasjMy_dc6848_3eb84399-f8e.png",
+      "url": "/generated_images/imagen3_FasjMy_dc6848_3eb84399-f8e.png",
+      "description": "Small flat design icon: medium-hard boiled egg, halved, showing a firm light yellow yolk, not chalky. White/cream shell. Transparent background.",
+      "purpose": "Icon for 'Med-Hard boiled' preset button. Path: [PREGEN_MEDIUM_PLUS_EGG_ICON_PATH_WILL_BE_HERE]",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_FasjMy_dc6848_5f714901-87f.png",
+      "url": "/generated_images/imagen3_FasjMy_dc6848_5f714901-87f.png",
+      "description": "Small flat design icon: hard-boiled egg, peeled whole or halved, showing a fully cooked, pale yellow, firm yolk. White/cream shell. Transparent background.",
+      "purpose": "Icon for 'Hard-boiled' preset button. Path: [PREGEN_HARD_EGG_ICON_PATH_WILL_BE_HERE]",
+      "isNewlyGenerated": true
+    }
+  ],
+  "isPublished": false,
+  "isShowcased": false
+}

@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Muse: The Paradoxical Prompt Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #1a202c;
+            color: #e2e8f0;
+            font-family: sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .card {
+            background-color: #2d3748;
+            color: #e2e8f0;
+            border-color: #4a5568;
+            transition: transform 0.3s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .form-control, .form-select {
+            background-color: #4a5568;
+            color: #e2e8f0;
+            border-color: #6a7280;
+        }
+        .form-control::placeholder {
+            color: #a0aec0;
+        }
+        .btn-primary {
+            background-color: #667eea;
+            border-color: #667eea;
+            transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out;
+        }
+         .btn-primary:hover {
+            background-color: #5a67d8;
+            border-color: #5a67d8;
+        }
+         .btn-primary:disabled {
+            background-color: #434190;
+            border-color: #434190;
+            opacity: 0.6;
+        }
+        .btn-secondary {
+             background-color: #a0aec0;
+             border-color: #a0aec0;
+             transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out;
+        }
+         .btn-secondary:hover {
+            background-color: #718096;
+            border-color: #718096;
+         }
+        .btn-outline-danger {
+            color: #fc8181;
+            border-color: #fc8181;
+            transition: color 0.3s ease-in-out, background-color 0.3s ease-in-out, border-color 0.3s ease-in-out;
+        }
+        .btn-outline-danger:hover {
+             color: #1a202c;
+             background-color: #fc8181;
+             border-color: #fc8181;
+        }
+        .loading-spinner {
+            display: none;
+            width: 1.5rem;
+            height: 1.5rem;
+            margin-right: 0.5rem;
+        }
+         .loading-container {
+            min-height: 150px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+            color: #a0aec0;
+         }
+         .loading-container .spinner-border {
+             color: #667eea !important;
+         }
+        .prompt-image {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 10px;
+            border: 1px solid #4a5568;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            background-color: #4a5568; /* Placeholder color while loading */
+        }
+         .journal-entry {
+            border-bottom: 1px solid #4a5568;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+         .journal-entry:last-child {
+            border-bottom: none;
+        }
+        .modal-content {
+            background-color: #2d3748;
+            color: #e2e8f0;
+        }
+        .modal-header, .modal-footer {
+             border-color: #4a5568;
+        }
+        .btn-close {
+            filter: invert(1);
+        }
+         .error-message {
+            color: #fc8181;
+            font-size: 0.9em;
+            margin-top: 5px;
+         }
+         .card-footer {
+             background-color: #2d3748;
+             border-top: 1px solid #4a5568;
+         }
+         .card-title {
+             color: #90cdf4;
+         }
+         .text-muted {
+             color: #a0aec0 !important;
+         }
+         #journalEntries .prompt-image {
+             max-width: 150px; /* Smaller images in journal */
+             height: auto;
+         }
+    </style>
+</head>
+<body class="d-flex flex-column min-vh-100" data-bs-theme="dark">
+    <main class="flex-grow-1 container my-4">
+        <h1 class="text-center text-light mb-4">AI Muse: Paradoxical Prompt Generator</h1>
+
+        <section class="card mb-4 p-4">
+            <div class="card-body">
+                <div class="row g-3 align-items-center">
+                    <div class="col-md-6 col-lg-7">
+                        <label for="coreConceptInput" class="form-label">Enter a core concept or keyword:</label>
+                        <input type="text" class="form-control" id="coreConceptInput" placeholder="e.g., forest, city, dream">
+                    </div>
+                    <div class="col-md-3 col-lg-2">
+                         <label for="imageAspectRatio" class="form-label">Image Aspect Ratio:</label>
+                         <select class="form-select" id="imageAspectRatio">
+                             <option value="1:1">1:1 Square</option>
+                             <option value="16:9">16:9 Widescreen</option>
+                             <option value="9:16">9:16 Vertical</option>
+                         </select>
+                    </div>
+                    <div class="col-md-3 col-lg-3 d-flex align-items-end">
+                        <button class="btn btn-primary w-100" id="generatePromptsBtn">
+                             <span class="spinner-border spinner-border-sm loading-spinner" role="status" aria-hidden="true" id="generateSpinner"></span>
+                             Generate Prompts
+                        </button>
+                    </div>
+                </div>
+                 <div id="inputError" class="text-danger mt-2" style="display: none;">Please enter a concept.</div>
+            </div>
+        </section>
+
+        <section id="promptsGallery" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-4"></section>
+
+        <div class="modal fade" id="evolvePromptModal" tabindex="-1" aria-labelledby="evolvePromptModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="evolvePromptModalLabel">Evolve Prompt</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="originalPromptInfo" class="mb-3">
+                            <h6>Original Entry:</h6>
+                            <p id="evolveOriginalPromptText" class="small"></p>
+                            <img id="evolveOriginalImage" src="" alt="Original generated image" class="prompt-image w-50">
+                            <p id="evolveOriginalCaptionText" class="small text-muted"></p>
+                        </div>
+                        <div class="mb-3">
+                            <label for="evolutionDirectives" class="form-label">Additional Directives / Keywords:</label>
+                            <textarea class="form-control" id="evolutionDirectives" rows="3" placeholder="e.g., Make it cyberpunk, focus on texture, add a sense of urgency"></textarea>
+                        </div>
+                         <div id="evolutionError" class="text-danger mt-2" style="display: none;"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="triggerEvolutionBtn">
+                             <span class="spinner-border spinner-border-sm loading-spinner" role="status" aria-hidden="true" id="evolutionSpinner"></span>
+                             Evolve
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section class="card mb-4 p-4">
+            <div class="card-body">
+                <h2 class="card-title text-light">Muse Journal</h2>
+                 <button class="btn btn-sm btn-outline-danger float-end" id="clearJournalBtn">Clear Journal</button>
+                <div id="journalEntries" class="mt-3">
+                    <p id="noJournalEntries" class="text-muted">Your journal is empty.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="footer mt-auto py-3 bg-dark text-light text-center">
+        <div class="container">
+            <span>AI Muse: Paradoxical Prompt Generator</span>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const appState = {
+            journalEntries: [],
+            currentEvolutionEntry: null
+        };
+
+        const DOM = {};
+
+        function getDOMElements() {
+            DOM.coreConceptInput = document.getElementById('coreConceptInput');
+            DOM.imageAspectRatio = document.getElementById('imageAspectRatio');
+            DOM.generatePromptsBtn = document.getElementById('generatePromptsBtn');
+            DOM.generateSpinner = document.getElementById('generateSpinner');
+            DOM.inputError = document.getElementById('inputError');
+            DOM.promptsGallery = document.getElementById('promptsGallery');
+            DOM.evolvePromptModal = document.getElementById('evolvePromptModal');
+            DOM.evolveOriginalPromptText = document.getElementById('evolveOriginalPromptText');
+            DOM.evolveOriginalImage = document.getElementById('evolveOriginalImage');
+            DOM.evolveOriginalCaptionText = document.getElementById('evolveOriginalCaptionText');
+            DOM.evolutionDirectives = document.getElementById('evolutionDirectives');
+            DOM.triggerEvolutionBtn = document.getElementById('triggerEvolutionBtn');
+            DOM.evolutionSpinner = document.getElementById('evolutionSpinner');
+            DOM.evolutionError = document.getElementById('evolutionError');
+            DOM.journalEntriesDiv = document.getElementById('journalEntries');
+            DOM.clearJournalBtn = document.getElementById('clearJournalBtn');
+            DOM.noJournalEntriesMessage = document.getElementById('noJournalEntries');
+        }
+
+        function showLoading(buttonElement, spinnerElement) {
+            buttonElement.disabled = true;
+            spinnerElement.style.display = 'inline-block';
+        }
+
+        function hideLoading(buttonElement, spinnerElement) {
+            buttonElement.disabled = false;
+            spinnerElement.style.display = 'none';
+        }
+
+        async function callApi(endpoint, payload, method = 'POST') {
+            try {
+                const response = await fetch(endpoint, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                });
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    const errorMsg = data.error || `Unknown API error from ${endpoint}`;
+                    console.error(`API Error from ${endpoint}:`, errorMsg);
+                    throw new Error(errorMsg);
+                }
+                return data;
+            } catch (error) {
+                console.error(`Fetch Error for ${endpoint}:`, error);
+                throw error;
+            }
+        }
+
+        async function generateParadoxicalPrompts(concept) {
+            const promptText = `Generate 5 distinct paradoxical prompts based on the concept "${concept}". Each prompt should be a creative and evocative description suitable for generating an image. Format the response as a JSON array of strings. Example: ["Prompt 1", "Prompt 2", ...]`;
+            const payload = {
+                aiguide: "You are a creative AI assistant that generates paradoxical prompts. Respond only with the JSON array.",
+                msgforai: promptText,
+                llmSettings: { temperature: 0.8 }
+            };
+            const data = await callApi('/api/ai', payload);
+            try {
+                const prompts = JSON.parse(data.response.trim());
+                 if (Array.isArray(prompts) && prompts.every(p => typeof p === 'string')) {
+                    return prompts;
+                 } else {
+                     console.error("API returned invalid prompt format:", data.response);
+                     throw new Error("Failed to parse paradoxical prompts: Invalid format.");
+                 }
+            } catch (e) {
+                 console.error("Failed to parse API response as JSON array:", e);
+                 throw new Error("Failed to parse paradoxical prompts: JSON error.");
+            }
+        }
+
+        async function generateImageAndCaption(prompt, aspectRatio, cardElement) {
+            const imageLoadingContainer = cardElement.querySelector('.loading-container');
+            const imageElement = cardElement.querySelector('.prompt-image');
+            const captionElement = cardElement.querySelector('.card-text');
+            const evolveBtn = cardElement.querySelector('.evolve-btn');
+            const journalBtn = cardElement.querySelector('.journal-btn');
+            const errorElement = cardElement.querySelector('.error-message');
+
+            imageLoadingContainer.style.display = 'flex';
+            imageLoadingContainer.innerHTML = `<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-2">Generating image...</p>`;
+            imageElement.style.display = 'none';
+            captionElement.textContent = 'Generating caption...';
+            errorElement.style.display = 'none';
+            evolveBtn.disabled = true;
+            journalBtn.disabled = true;
+
+            let imageUrl = null;
+            let captionText = 'Caption generation failed.';
+
+            try {
+                const imageData = await callApi('/api/generate-image-on-demand', { prompt: prompt, aspectRatio: aspectRatio });
+                imageUrl = imageData.imageUrl;
+
+                const imgLoadPromise = new Promise((resolve, reject) => {
+                    imageElement.onload = () => {
+                        imageLoadingContainer.style.display = 'none';
+                        imageElement.style.display = 'block';
+                        resolve();
+                    };
+                    imageElement.onerror = () => {
+                        imageLoadingContainer.style.display = 'none';
+                        imageElement.style.display = 'none';
+                        errorElement.textContent = 'Failed to load image.';
+                        errorElement.style.display = 'block';
+                        reject(new Error('Image load error'));
+                    };
+                    imageElement.src = imageUrl;
+                    if (!imageUrl) reject(new Error('No image URL received'));
+                });
+
+                const captionPrompt = `Generate a concise, creative caption (max 2 sentences) for the following paradoxical prompt and image. Consider both the text prompt and what the image likely depicts based on the prompt. Prompt: "${prompt}"`;
+                 const captionData = await callApi('/api/ai', {
+                     aiguide: "You are a creative AI assistant that generates captions for paradoxical images. Respond only with the caption text.",
+                     msgforai: captionPrompt,
+                     llmSettings: { temperature: 0.7 }
+                 });
+                 captionText = captionData.response.trim();
+                 captionElement.textContent = captionText;
+
+
+                 await imgLoadPromise; // Wait for image to load before finishing
+
+            } catch (error) {
+                console.error("Generation process failed:", error);
+                imageLoadingContainer.style.display = 'none';
+                imageElement.style.display = 'none'; // Ensure image is hidden on error
+                errorElement.textContent = `Error: ${error.message}`;
+                errorElement.style.display = 'block';
+                captionElement.textContent = captionText; // Display failed caption message if set
+
+            } finally {
+                evolveBtn.disabled = false;
+                journalBtn.disabled = false;
+                 cardElement.dataset.prompt = prompt;
+                 cardElement.dataset.imageUrl = imageUrl || 'null'; // Store null if image failed
+                 cardElement.dataset.caption = captionText;
+            }
+        }
+
+        function createPromptCard(prompt) {
+            const colDiv = document.createElement('div');
+            colDiv.classList.add('col');
+
+            const cardDiv = document.createElement('div');
+            cardDiv.classList.add('card', 'h-100');
+
+            const cardBody = document.createElement('div');
+            cardBody.classList.add('card-body');
+
+            const promptText = document.createElement('h5');
+            promptText.classList.add('card-title');
+            promptText.textContent = prompt;
+
+            const loadingContainer = document.createElement('div');
+            loadingContainer.classList.add('loading-container');
+
+            const imageElement = document.createElement('img');
+            imageElement.classList.add('prompt-image', 'card-img-top');
+            imageElement.alt = 'Generated paradoxical image';
+            imageElement.style.display = 'none';
+
+            const captionText = document.createElement('p');
+            captionText.classList.add('card-text', 'small', 'text-muted');
+
+             const errorElement = document.createElement('p');
+             errorElement.classList.add('error-message');
+             errorElement.style.display = 'none';
+
+
+            cardBody.appendChild(promptText);
+            cardBody.appendChild(loadingContainer);
+            cardBody.appendChild(imageElement);
+            cardBody.appendChild(captionText);
+            cardBody.appendChild(errorElement);
+
+
+            const cardFooter = document.createElement('div');
+            cardFooter.classList.add('card-footer');
+
+            const evolveBtn = document.createElement('button');
+            evolveBtn.classList.add('btn', 'btn-sm', 'btn-secondary', 'me-2', 'evolve-btn');
+            evolveBtn.textContent = 'Evolve';
+            evolveBtn.setAttribute('data-bs-toggle', 'modal');
+            evolveBtn.setAttribute('data-bs-target', '#evolvePromptModal');
+
+            const journalBtn = document.createElement('button');
+            journalBtn.classList.add('btn', 'btn-sm', 'btn-outline-primary', 'journal-btn');
+            journalBtn.textContent = 'Add to Journal';
+
+            cardFooter.appendChild(evolveBtn);
+            cardFooter.appendChild(journalBtn);
+
+            cardDiv.appendChild(cardBody);
+            cardDiv.appendChild(cardFooter);
+            colDiv.appendChild(cardDiv);
+
+            return colDiv;
+        }
+
+        function loadJournal() {
+            const savedJournal = localStorage.getItem('museJournal');
+            if (savedJournal) {
+                try {
+                    appState.journalEntries = JSON.parse(savedJournal);
+                } catch (e) {
+                    console.error("Failed to parse journal from localStorage:", e);
+                    appState.journalEntries = [];
+                }
+            } else {
+                appState.journalEntries = [];
+            }
+            renderJournal();
+        }
+
+        function saveJournal() {
+            localStorage.setItem('museJournal', JSON.stringify(appState.journalEntries));
+        }
+
+        function renderJournal() {
+            DOM.journalEntriesDiv.innerHTML = '';
+            if (appState.journalEntries.length === 0) {
+                DOM.noJournalEntriesMessage.style.display = 'block';
+            } else {
+                 DOM.noJournalEntriesMessage.style.display = 'none';
+                appState.journalEntries.forEach(entry => {
+                    const entryDiv = document.createElement('div');
+                    entryDiv.classList.add('journal-entry');
+
+                    const promptP = document.createElement('p');
+                    promptP.innerHTML = `<strong>Prompt:</strong> ${entry.prompt}`;
+
+                    entryDiv.appendChild(promptP);
+
+                    if(entry.imageUrl && entry.imageUrl !== 'null') {
+                        const img = document.createElement('img');
+                        img.src = entry.imageUrl;
+                        img.alt = 'Journal entry image';
+                        img.classList.add('prompt-image');
+                         img.onerror = () => {
+                             img.style.display = 'none';
+                             const errorSpan = document.createElement('span');
+                             errorSpan.classList.add('error-message');
+                             errorSpan.textContent = 'Image failed to load.';
+                             entryDiv.insertBefore(errorSpan, captionP);
+                         };
+                         entryDiv.appendChild(img);
+                    }
+
+
+                    const captionP = document.createElement('p');
+                    captionP.classList.add('small', 'text-muted');
+                    captionP.innerHTML = `<strong>Caption:</strong> ${entry.caption}`;
+                    entryDiv.appendChild(captionP);
+
+
+                    DOM.journalEntriesDiv.appendChild(entryDiv);
+                });
+            }
+        }
+
+        function addEntryToJournal(entryData) {
+             if (!entryData || !entryData.prompt || !entryData.caption) {
+                 console.error("Invalid entry data for journal:", entryData);
+                 return;
+             }
+            appState.journalEntries.push(entryData);
+            saveJournal();
+            renderJournal();
+        }
+
+        function setupEvolutionModal(entryData) {
+             if (!entryData || !entryData.prompt || !entryData.caption) {
+                 console.error("Invalid entry data for evolution:", entryData);
+                 DOM.evolutionError.textContent = 'Failed to load original entry data.';
+                 DOM.evolutionError.style.display = 'block';
+                 DOM.triggerEvolutionBtn.disabled = true;
+                 return;
+             }
+             appState.currentEvolutionEntry = entryData;
+             DOM.evolveOriginalPromptText.textContent = entryData.prompt;
+
+             if (entryData.imageUrl && entryData.imageUrl !== 'null') {
+                 DOM.evolveOriginalImage.src = entryData.imageUrl;
+                 DOM.evolveOriginalImage.style.display = 'block';
+                 DOM.evolveOriginalImage.onerror = () => {
+                     DOM.evolveOriginalImage.style.display = 'none';
+                     console.error("Failed to load original image for evolution modal.");
+                 };
+             } else {
+                 DOM.evolveOriginalImage.style.display = 'none';
+             }
+
+             DOM.evolveOriginalCaptionText.textContent = entryData.caption;
+             DOM.evolutionDirectives.value = '';
+             DOM.evolutionError.style.display = 'none';
+             DOM.triggerEvolutionBtn.disabled = false;
+        }
+
+        async function triggerEvolution() {
+            const originalEntry = appState.currentEvolutionEntry;
+            const directives = DOM.evolutionDirectives.value.trim();
+            const aspectRatio = DOM.imageAspectRatio.value;
+
+            if (!originalEntry) {
+                DOM.evolutionError.textContent = 'No original prompt selected for evolution.';
+                DOM.evolutionError.style.display = 'block';
+                return;
+            }
+             if (!directives) {
+                 DOM.evolutionError.textContent = 'Please add some directives for evolution.';
+                 DOM.evolutionError.style.display = 'block';
+                 return;
+             }
+
+            showLoading(DOM.triggerEvolutionBtn, DOM.evolutionSpinner);
+            DOM.evolutionError.style.display = 'none';
+
+            const evolutionPromptText = `Evolve the following paradoxical prompt and its caption based on these new directives. Generate a *new* single paradoxical prompt. Original Prompt: "${originalEntry.prompt}" Original Caption: "${originalEntry.caption}" Directives: "${directives}". Provide ONLY the new prompt text.`;
+
+            try {
+                const data = await callApi('/api/ai', {
+                    aiguide: "You are a creative AI assistant that evolves paradoxical prompts. Respond only with the new prompt text.",
+                    msgforai: evolutionPromptText,
+                    llmSettings: { temperature: 0.9 }
+                });
+                const newPrompt = data.response.trim();
+
+                if (newPrompt) {
+                    const modal = bootstrap.Modal.getInstance(DOM.evolvePromptModal);
+                    modal.hide();
+
+                    const newCard = createPromptCard(newPrompt);
+                    DOM.promptsGallery.prepend(newCard);
+                    generateImageAndCaption(newPrompt, aspectRatio, newCard);
+
+                } else {
+                     DOM.evolutionError.textContent = 'AI failed to generate a new prompt.';
+                     DOM.evolutionError.style.display = 'block';
+                }
+
+            } catch (error) {
+                DOM.evolutionError.textContent = `Evolution failed: ${error.message}`;
+                DOM.evolutionError.style.display = 'block';
+            } finally {
+                hideLoading(DOM.triggerEvolutionBtn, DOM.evolutionSpinner);
+            }
+        }
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            getDOMElements();
+            loadJournal();
+
+            DOM.generatePromptsBtn.addEventListener('click', async () => {
+                const concept = DOM.coreConceptInput.value.trim();
+                const aspectRatio = DOM.imageAspectRatio.value;
+
+                if (!concept) {
+                    DOM.inputError.style.display = 'block';
+                    return;
+                }
+                DOM.inputError.style.display = 'none';
+
+                showLoading(DOM.generatePromptsBtn, DOM.generateSpinner);
+                DOM.promptsGallery.innerHTML = '';
+                 const loadingMessageCol = document.createElement('div');
+                 loadingMessageCol.classList.add('col-12', 'text-center', 'text-muted');
+                 loadingMessageCol.innerHTML = `<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-2">Generating paradoxical prompts...</p>`;
+                 DOM.promptsGallery.appendChild(loadingMessageCol);
+
+
+                try {
+                    const prompts = await generateParadoxicalPrompts(concept);
+                    DOM.promptsGallery.innerHTML = ''; // Clear loading message
+
+                    if (prompts && prompts.length > 0) {
+                        prompts.forEach(prompt => {
+                            const cardElement = createPromptCard(prompt);
+                            DOM.promptsGallery.appendChild(cardElement);
+                            generateImageAndCaption(prompt, aspectRatio, cardElement);
+                        });
+                    } else {
+                        DOM.promptsGallery.innerHTML = '<p class="col-12 text-center text-muted">No paradoxical prompts were generated. Try a different concept.</p>';
+                    }
+
+                } catch (error) {
+                    DOM.promptsGallery.innerHTML = `<p class="col-12 text-center text-danger">Error generating prompts: ${error.message}</p>`;
+                    console.error("Generate Prompts Button Error:", error);
+                } finally {
+                    hideLoading(DOM.generatePromptsBtn, DOM.generateSpinner);
+                }
+            });
+
+            DOM.promptsGallery.addEventListener('click', (event) => {
+                const target = event.target;
+                const card = target.closest('.card');
+                if (!card) return;
+
+                // Extract data from card's dataset
+                const entryData = {
+                    prompt: card.dataset.prompt,
+                    imageUrl: card.dataset.imageUrl,
+                    caption: card.dataset.caption
+                };
+
+                if (target.classList.contains('evolve-btn')) {
+                    setupEvolutionModal(entryData);
+                } else if (target.classList.contains('journal-btn')) {
+                     addEntryToJournal(entryData);
+                }
+            });
+
+             DOM.triggerEvolutionBtn.addEventListener('click', triggerEvolution);
+
+             DOM.clearJournalBtn.addEventListener('click', () => {
+                 if (confirm('Are you sure you want to clear your Muse Journal? This cannot be undone.')) {
+                     appState.journalEntries = [];
+                     saveJournal();
+                     renderJournal();
+                 }
+             });
+        });
+
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

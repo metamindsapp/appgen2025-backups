@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Douglas Crossing Band - South Surrey's Very Own!</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Nunito:wght@400;600;700;800&display=swap');
+        @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css");
+
+        :root {
+            --pixar-blue: #049DD9;
+            --pixar-orange: #F27F0C;
+            --pixar-green: #78B82A;
+            --pixar-yellow: #F2B705;
+            --pixar-purple: #582C8F;
+            --pixar-red: #D92B04;
+
+            --pixar-orange-rgb: 242, 127, 12;
+            --pixar-blue-rgb: 4, 157, 217;
+
+            --bs-body-bg: #1A202C; 
+            --bs-body-color: #E2E8F0;
+            --bs-dark-rgb: 45, 55, 72;
+            --bs-secondary-bg: #2D3748;
+            --bs-border-color: #4A5568;
+        }
+
+        html {
+            scroll-padding-top: 76px; 
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            padding-top: 76px; 
+            background-color: var(--bs-body-bg);
+            color: var(--bs-body-color);
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            padding-top: 0.8rem;
+            padding-bottom: 0.8rem;
+            font-size: 1.1rem;
+            background-color: rgba(26, 32, 44, 0.85) !important;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        .navbar-brand span {
+            font-family: 'Luckiest Guy', cursive;
+            font-size: 1.8rem;
+            color: var(--pixar-yellow);
+        }
+        .nav-link {
+            color: var(--bs-body-color);
+            transition: color 0.2s ease-in-out, transform 0.2s ease-in-out;
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: var(--pixar-orange) !important;
+            transform: translateY(-2px);
+        }
+
+        #hero {
+            min-height: calc(100vh - 76px);
+            background-size: cover;
+            background-position: center center;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        #hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0,0,0,0.6);
+            z-index: 0;
+        }
+        #hero > div.hero-content-wrapper {
+            position: relative;
+            z-index: 1;
+            background-color: rgba(var(--bs-dark-rgb), 0.75);
+            border-radius: 0.75rem;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+        #heroBandName { 
+            color: var(--pixar-yellow); 
+            text-shadow: 3px 3px 0px var(--pixar-orange), 5px 5px 8px rgba(0,0,0,0.7);
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+        }
+        #hero .lead {
+            color: var(--pixar-blue);
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        #hero .fst-italic {
+             color: #cbd5e0;
+        }
+
+        .pixar-heading-font { font-family: 'Luckiest Guy', cursive; letter-spacing: 1px; }
+        .pixar-heading { 
+            color: var(--pixar-blue); 
+            text-shadow: 2px 2px 0px var(--pixar-yellow), 3px 3px 5px rgba(0,0,0,0.3);
+        }
+        .pixar-subheading { color: var(--pixar-green); font-weight: 700; }
+
+        .pixar-btn {
+            font-weight: 700;
+            border-radius: 50px;
+            padding: 0.8rem 1.8rem;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .pixar-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+        }
+
+        .pixar-btn-primary {
+            background-color: var(--pixar-orange);
+            border-color: var(--pixar-orange);
+            color: white;
+        }
+        .pixar-btn-primary:hover {
+            background-color: var(--pixar-orange);
+            border-color: var(--pixar-orange);
+            filter: brightness(1.15);
+            color: white;
+        }
+        .pixar-btn-secondary {
+            background-color: var(--pixar-green);
+            border-color: var(--pixar-green);
+            color: white;
+        }
+        .pixar-btn-secondary:hover {
+            background-color: var(--pixar-green);
+            border-color: var(--pixar-green);
+            filter: brightness(1.15);
+            color: white;
+        }
+        .pixar-btn-light {
+            background-color: var(--pixar-yellow);
+            border-color: var(--pixar-yellow);
+            color: #333;
+        }
+        .pixar-btn-light:hover {
+            background-color: var(--pixar-yellow);
+            border-color: var(--pixar-yellow);
+            filter: brightness(1.1);
+            color: #333;
+        }
+
+        section {
+            padding-top: 5rem;
+            padding-bottom: 5rem;
+        }
+        
+        #live {
+            background-color: var(--bs-secondary-bg);
+        }
+
+        .pixar-card {
+            background-color: #2D3748;
+            border: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-radius: 0.75rem;
+        }
+        .pixar-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.5) !important;
+        }
+        .pixar-card-header {
+            background-color: var(--pixar-purple);
+            color: white;
+            border-bottom: 3px solid var(--pixar-yellow);
+            border-top-left-radius: 0.75rem;
+            border-top-right-radius: 0.75rem;
+        }
+        .modal-content {
+            background-color: #1A202C !important;
+            border: 3px solid var(--pixar-blue);
+            border-radius: 0.75rem;
+            box-shadow: 0 5px 20px rgba(var(--pixar-blue-rgb),0.3);
+        }
+        .pixar-modal-header {
+            background-color: var(--pixar-blue);
+            color: white;
+            border-bottom: 3px solid var(--pixar-yellow);
+            border-top-left-radius: calc(0.75rem - 3px);
+            border-top-right-radius: calc(0.75rem - 3px);
+        }
+        #songListContainer .list-group-item {
+            background-color: transparent;
+            border-color: rgba(255,255,255,0.1);
+            color: var(--bs-body-color);
+            font-size: 1.1rem;
+            padding: 0.75rem 1.25rem;
+        }
+        #songListContainer .list-group-item:nth-child(odd) {
+            background-color: rgba(255,255,255,0.03);
+        }
+        
+        .form-control, .form-select {
+            background-color: #222b3c;
+            color: var(--bs-body-color);
+            border: 1px solid var(--bs-border-color);
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: #2d3748;
+            color: var(--bs-body-color);
+            border-color: var(--pixar-orange);
+            box-shadow: 0 0 0 0.25rem rgba(var(--pixar-orange-rgb), 0.35);
+        }
+        .form-floating > label { color: #a0aec0; }
+
+
+        .animated-item {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .animated-item.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        footer {
+            background-color: #121220 !important;
+            border-top: 3px solid var(--pixar-purple) !important;
+        }
+        footer a i.bi {
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+        footer a:hover i.bi {
+            color: var(--pixar-yellow) !important;
+            transform: scale(1.25) rotate(5deg);
+        }
+        .img-fluid.rounded-3.shadow-lg {
+            border: 4px solid var(--pixar-blue);
+            box-shadow: 0 0 25px rgba(var(--pixar-blue-rgb), 0.4), 0 5px 15px rgba(0,0,0,0.3) !important;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+         .img-fluid.rounded-3.shadow-lg:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 35px rgba(var(--pixar-blue-rgb), 0.6), 0 8px 20px rgba(0,0,0,0.4) !important;
+        }
+
+        #live .img-fluid.rounded-3.shadow-lg {
+             border: 4px solid var(--pixar-orange);
+             box-shadow: 0 0 25px rgba(var(--pixar-orange-rgb), 0.4), 0 5px 15px rgba(0,0,0,0.3) !important;
+        }
+        #live .img-fluid.rounded-3.shadow-lg:hover {
+            box-shadow: 0 0 35px rgba(var(--pixar-orange-rgb), 0.6), 0 8px 20px rgba(0,0,0,0.4) !important;
+        }
+    </style>
+</head>
+<body data-bs-theme="dark">
+
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top shadow-lg">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="#hero">
+                <img id="bandLogoNav" src="/generated_images/dalle_c92aa601-36f.png" alt="Douglas Crossing Band Logo" height="50" class="me-3">
+                <span class="fw-bold">Douglas Crossing Band</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto fw-bold">
+                    <li class="nav-item"><a class="nav-link" href="#hero">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#the-band">The Band</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#live">See Us Live</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#events">Events</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <header id="hero" style="background-image: url('/generated_images/dalle_dd420715-c9e.png');">
+        <div class="hero-content-wrapper text-center p-4 p-md-5 animated-item">
+            <h1 id="heroBandName" class="display-1 fw-bolder mb-3 pixar-heading-font">Douglas Crossing Band</h1>
+            <p class="lead fs-2 mb-3">SOUTH SURREY'S VERY OWN</p>
+            <p class="mb-4 fs-5 fst-italic">"Protect your domain from theft and accidental changes. Come experience the spectacle!"</p>
+            <a href="#live" class="btn btn-lg pixar-btn pixar-btn-primary mt-3 fs-4 px-5 py-3">Get Started & See Us Live! <i class="bi bi-rocket-takeoff-fill ms-2"></i></a>
+        </div>
+    </header>
+
+    <main class="container mt-0"> 
+        <section id="the-band" class="animated-item">
+            <h2 class="display-3 fw-bold text-center mb-5 pixar-heading pixar-heading-font">THE BAND</h2>
+            <div class="row align-items-center g-5">
+                <div class="col-lg-6 text-center">
+                    <img id="instrumentsImage" src="/generated_images/dalle_4b8505c9-0bf.png" class="img-fluid rounded-3 shadow-lg" alt="Pixar style musical instruments">
+                </div>
+                <div class="col-lg-6">
+                    <h3 class="pixar-subheading fw-semibold fs-2 mb-3">What We Play</h3>
+                    <p class="lead">60s through today including Mellencamp, The Doors, Poison, T-Rex, Guns&Roses, Smash Mouth, Trooper, AC/DC and so much more.</p>
+                    <button type="button" class="btn pixar-btn pixar-btn-secondary mt-4 fs-5" data-bs-toggle="modal" data-bs-target="#songListModal">
+                        OUR SONG LIST & SAMPLES <i class="bi bi-music-note-list ms-2"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="live" class="my-5 text-white rounded-3 shadow-lg p-md-5 p-4 animated-item">
+            <h2 class="display-3 fw-bold text-center mb-5 pixar-heading pixar-heading-font" style="color: var(--pixar-orange);">See Us Live</h2>
+            <div class="row align-items-center g-5">
+                <div class="col-lg-7">
+                    <p class="lead fs-3">We keep the dance floor moving by playing great dance tunes. Find out when we're playing next.</p>
+                    <a href="#events" class="btn pixar-btn pixar-btn-light mt-4 fs-5">VIEW OUR CALENDAR <i class="bi bi-calendar-event ms-2"></i></a>
+                </div>
+                <div class="col-lg-5 text-center">
+                     <img id="crowdImage" src="/generated_images/dalle_1a110072-c95.png" class="img-fluid rounded-3 shadow-lg" alt="Pixar style crowd enjoying music">
+                </div>
+            </div>
+        </section>
+
+        <section id="events" class="animated-item">
+            <h2 class="display-3 fw-bold text-center mb-5 pixar-heading pixar-heading-font">UPCOMING EVENTS</h2>
+            <div class="card text-white mb-4 shadow-lg pixar-card mx-auto" style="max-width: 700px;">
+                <div class="card-header pixar-card-header fs-5 fw-bold">
+                    Saturday Feb 24, 2024 <span class="badge bg-warning text-dark float-end">Past Event</span>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title fs-4 pixar-subheading">Live at Crescent Beach Legion, South Surrey</h5>
+                    <p class="card-text">Hear us live at The Crescent Beach Legion for an evening of dancing & good times. $10 cover charge.</p>
+                    <p class="card-text"><small class="text-white-50"><i class="bi bi-clock-fill me-1"></i> 7:30 pm - 11:00 pm | <i class="bi bi-geo-alt-fill ms-2 me-1"></i> Crescent Beach Legion South Surrey, BC</small></p>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="my-5 bg-dark rounded-3 shadow-lg p-md-5 p-4 animated-item">
+             <h2 class="display-3 fw-bold text-center mb-5 pixar-heading pixar-heading-font" style="color: var(--pixar-green);">CONTACT US</h2>
+            <div class="row">
+                <div class="col-md-8 mx-auto text-center">
+                    <p class="lead fs-4">Want the Douglas Crossing Band at your event?</p>
+                    <p>Get in touch to find out about featuring us at your event or venue. We'd love to hear from you!</p>
+                    <form id="contactForm" class="mt-4">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="contactName" placeholder="Your Name" required>
+                            <label for="contactName">Your Name</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="email" class="form-control" id="contactEmail" placeholder="Your Email" required>
+                            <label for="contactEmail">Your Email</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <textarea class="form-control" id="contactMessage" placeholder="Your Message" style="height: 120px" required></textarea>
+                            <label for="contactMessage">Your Message</label>
+                        </div>
+                        <button type="submit" class="btn btn-lg pixar-btn pixar-btn-primary mt-3 fs-5 px-4 py-2" id="sendMessageBtn">Send Message <i class="bi bi-send-fill ms-2"></i></button>
+                    </form>
+                    <div id="formFeedback" class="mt-4"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="modal fade" id="songListModal" tabindex="-1" aria-labelledby="songListModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content text-light">
+                <div class="modal-header pixar-modal-header">
+                    <h5 class="modal-title fs-3 pixar-heading-font" id="songListModalLabel">Our Extensive Song List</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="background-color: #212529;">
+                    <ul class="list-group list-group-flush" id="songListContainer">
+                    </ul>
+                </div>
+                <div class="modal-footer" style="background-color: #1A202C;">
+                    <button type="button" class="btn pixar-btn pixar-btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center text-white py-4 mt-auto">
+        <div class="container">
+            <p class="mb-2 fs-5 fw-bold" style="color: var(--pixar-yellow);">Douglas Crossing Band - Rockin' South Surrey!</p>
+            <p class="mb-3">
+                Follow us: 
+                <a href="#" class="text-white mx-2"><i class="bi bi-facebook fs-3"></i></a> 
+                <a href="#" class="text-white mx-2"><i class="bi bi-instagram fs-3"></i></a>
+                <a href="#" class="text-white mx-2"><i class="bi bi-youtube fs-3"></i></a>
+            </p>
+            <p class="mt-3"><small>&copy; <span id="currentYear"></span> Douglas Crossing Band. All Rights Reserved. Designed with <span style="color: var(--pixar-red); font-size: 1.2em;">&hearts;</span> by AppGen2025.</small></p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <script>
+    (function() {
+        'use strict';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initSmoothScroll();
+            populateSongList();
+            initContactForm();
+            updateCopyrightYear();
+            initScrollAnimations();
+            initActiveNavHighlighting();
+        });
+
+        function initSmoothScroll() {
+            const navLinks = document.querySelectorAll('.navbar-nav a[href^="#"], a.btn[href^="#"]');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        const navbar = document.querySelector('.navbar.sticky-top');
+                        const navbarHeight = navbar ? navbar.offsetHeight : 76;
+                        const elementPosition = targetElement.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - navbarHeight;
+                        
+                        window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+
+                        const navbarCollapseElement = document.getElementById('navbarNav');
+                        if (navbarCollapseElement.classList.contains('show')) {
+                            const navbarCollapse = new bootstrap.Collapse(navbarCollapseElement);
+                            navbarCollapse.hide();
+                        }
+                    }
+                });
+            });
+        }
+
+        function populateSongList() {
+            const songs = [
+                "Ain't my Fault", "Bang a Gong", "Blue Suede Shoes", "Breakup Song", "Cherry Bomb", "Cinnamon Girl", 
+                "Come & Get Your Love", "Comfortably Numb", "Could Have Been a Lady", "Crazy Little Thing Called Love", 
+                "Day After Day", "Dead Flowers", "Dear Mr. Fantasy", "Every Rose Has Its Thorns", "Friday I'm in Love", 
+                "Have You Ever Seen the Rain", "Here for a Good Time", "Hungry Heart", "Hurts so Good", "I won't Back Down", 
+                "I Would Walk 500 Miles", "It's Only Rock & Roll", "Johnny B Good", "Keep Your Hands to Yourself", 
+                "Knockin' on Heaven's Door", "Little Bones", "Little Sister", "Little Wing", "Losing My Religion", 
+                "Maggie May", "Margaritaville", "Mary Jane's Last Dance", "Midnight Special", "Mustang Sally", 
+                "New Orleans is Sinking", "No Matter What", "Pink Houses", "Pretty Woman", "Pride & Joy", "Proud Mary", 
+                "Raise a Little Hell", "Roadhouse Blues", "R.O.C.K in the USA", "Run to You", "Running Down a Dream", 
+                "Satisfaction", "Shook me all Night Long", "Some Kind of Wonderful", "Stray Cat Strut", 
+                "Stuck in the Middle with You", "Tennessee Whisky", "The Way", "This One Goes Out to the One I Love", 
+                "Tonight is a Wonderful Night to Fall in Love", "Under My Thumb", "Under the Boardwalk", "Wagon Wheel", 
+                "What I Like About You", "What's Up", "White Wedding", "Who'll Stop the Rain", "You May be Right", "You Wreck Me"
+            ];
+            const ulElement = document.getElementById('songListContainer');
+            if (ulElement) {
+                songs.forEach(song => {
+                    const li = document.createElement('li');
+                    li.classList.add('list-group-item');
+                    li.textContent = song;
+                    ulElement.appendChild(li);
+                });
+            }
+        }
+
+        function initContactForm() {
+            const contactForm = document.getElementById('contactForm');
+            const formFeedback = document.getElementById('formFeedback');
+            if (contactForm) {
+                contactForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    let isValid = true;
+                    this.querySelectorAll('[required]').forEach(input => {
+                        input.classList.remove('is-invalid', 'is-valid');
+                        if (!input.value.trim()) {
+                            isValid = false;
+                            input.classList.add('is-invalid');
+                        } else {
+                            input.classList.add('is-valid');
+                        }
+                    });
+
+                    if (isValid) {
+                        formFeedback.innerHTML = `<div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <strong>Awesome!</strong> Your message has been "sent" (this is a demo). Thanks for reaching out!
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>`;
+                        this.reset();
+                        this.querySelectorAll('.is-valid').forEach(el => el.classList.remove('is-valid'));
+                        if (typeof confetti === 'function') {
+                            const rect = e.submitter.getBoundingClientRect();
+                            const x = (rect.left + rect.right) / 2 / window.innerWidth;
+                            const y = (rect.top + rect.bottom) / 2 / window.innerHeight;
+
+                            confetti({ 
+                                particleCount: 250, 
+                                spread: 100, 
+                                origin: { x: x, y: y }, 
+                                colors: ['#049DD9', '#F27F0C', '#78B82A', '#F2B705', '#582C8F', '#D92B04'],
+                                scalar: 1.2
+                            });
+                        }
+                    } else {
+                        formFeedback.innerHTML = `<div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Oops!</strong> Please fill in all required fields.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>`;
+                    }
+                });
+            }
+        }
+
+        function updateCopyrightYear() {
+            const yearSpan = document.getElementById('currentYear');
+            if (yearSpan) yearSpan.textContent = new Date().getFullYear();
+        }
+
+        function initScrollAnimations() {
+            const animatedItems = document.querySelectorAll('.animated-item');
+            if (!animatedItems.length) return;
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                    } else {
+                        if (entry.target.closest('#hero')) {
+                           
+                        } else {
+                           
+                        }
+                    }
+                });
+            }, { threshold: 0.15 });
+
+            animatedItems.forEach(item => observer.observe(item));
+            
+            const heroContent = document.querySelector('#hero .animated-item');
+            if(heroContent) {
+                setTimeout(() => heroContent.classList.add('is-visible'), 100);
+            }
+        }
+
+        function initActiveNavHighlighting() {
+            const sections = document.querySelectorAll('section[id], header[id]');
+            const navLinks = document.querySelectorAll('.navbar-nav .nav-link[href^="#"]');
+            const navbar = document.querySelector('.navbar.sticky-top');
+            const navbarHeight = navbar ? navbar.offsetHeight : 76;
+            const buffer = 50; 
+
+            window.addEventListener('scroll', () => {
+                let currentSectionId = 'hero'; 
+                const scrollY = window.pageYOffset;
+
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop - navbarHeight - buffer;
+                    if (scrollY >= sectionTop) {
+                        currentSectionId = section.getAttribute('id');
+                    }
+                });
+                
+                const firstContentSection = document.getElementById('the-band'); 
+                if (firstContentSection && scrollY < firstContentSection.offsetTop - navbarHeight - buffer) {
+                     currentSectionId = 'hero';
+                }
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${currentSectionId}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+            window.dispatchEvent(new Event('scroll'));
+        }
+
+    })();
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

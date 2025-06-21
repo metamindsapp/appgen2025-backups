@@ -1,0 +1,31 @@
+{
+  "projectId": "56f0a6c3-a82a-4759-adee-b6ed60956357",
+  "revisionString": "1",
+  "projectNameDisplay": "Micro Haiku",
+  "userPromptForThisRevision": "make a beautiful minimalist haiku generator that is just the ai checking in on itself, no input from humans. hafve background image. ",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-05-22T18:51:36.782Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/dalle_c48258ce-ae4.png",
+      "url": "/generated_images/dalle_c48258ce-ae4.png",
+      "description": "Minimalist, atmospheric abstract background representing a 'Calm' mood. Dark, soft colors (deep blues, muted greens, subtle purples). Suggest tranquility, stillness, gentle light. Style should be serene and non-distracting, perhaps soft gradients or blurry textures.",
+      "purpose": "Background image for the 'Calm' AI mood.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_217efe10-a99.png",
+      "url": "/generated_images/dalle_217efe10-a99.png",
+      "description": "Minimalist, atmospheric abstract background representing a 'Reflective' mood. Darker, slightly more complex colors (deep grays, dark teals, hints of brown or gold). Suggest depth, introspection, quiet thought. Style could involve subtle patterns or textures that evoke contemplation.",
+      "purpose": "Background image for the 'Reflective' AI mood.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_bfc27d71-753.png",
+      "url": "/generated_images/dalle_bfc27d71-753.png",
+      "description": "Minimalist, atmospheric abstract background representing a 'Curious' mood. Dark colors with subtle pops of brighter, inquiring colors (deep indigos, dark purples with hints of brighter blues, oranges, or greens). Suggest exploration, wonder, gentle energy. Style could involve subtle, intriguing shapes or light sources.",
+      "purpose": "Background image for the 'Curious' AI mood.",
+      "isNewlyGenerated": true
+    }
+  ]
+}

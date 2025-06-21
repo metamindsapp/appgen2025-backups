@@ -1,0 +1,102 @@
+{
+  "projectId": "66cb0bbc-12cb-4cc5-99ce-33c29ed3bd1e",
+  "revisionString": "2",
+  "projectNameDisplay": "gregs fences website",
+  "projectType": "website",
+  "userPromptForThisRevision": "make sure the images are all in place too. and add a couple fun features",
+  "basedOnRevisionString": "1",
+  "savedAt": "2025-05-29T15:56:31.801Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/imagen3_a1bdc3d9-ff4.png",
+      "url": "/generated_images/imagen3_a1bdc3d9-ff4.png",
+      "description": "Photorealistic image of Greg (a friendly, middle-aged man with a work ethic appearance) and his team (2-3 diverse individuals) actively working on installing a high-quality wooden privacy fence in a sunny, suburban backyard in Sooke, BC. The team is focused and professional, wearing work attire. Show tools and materials. The background features typical Sooke natural elements like trees and a glimpse of a nearby house. Bright, natural lighting.",
+      "purpose": "Main image for the 'About Us' section of Greg's Fences website.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_f1cf8143-658.png",
+      "url": "/generated_images/imagen3_f1cf8143-658.png",
+      "description": "Photorealistic image of a beautiful, tall wooden privacy fence in a modern suburban backyard, sunny day, Sooke BC style, professional photography, high detail. The fence is newly installed and blends well with the green landscape.",
+      "purpose": "Thumbnail image for the 'Wood Privacy Fence' in the gallery section.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_dae28dfc-12b.png",
+      "url": "/generated_images/imagen3_dae28dfc-12b.png",
+      "description": "Photorealistic image of an elegant white vinyl fence around a family backyard, low maintenance, clean lines, sunny day, Sooke BC scenery, professional photography. The fence is pristine and adds to the home's curb appeal.",
+      "purpose": "Thumbnail image for the 'White Vinyl Fence' in the gallery section.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_f608cbce-b99.png",
+      "url": "/generated_images/imagen3_f608cbce-b99.png",
+      "description": "Photorealistic image of a durable chain link fence for property security, green landscape, practical solution, Sooke BC, professional photography. The fence is well-maintained and serves its purpose effectively.",
+      "purpose": "Thumbnail image for the 'Chain Link Fence' in the gallery section.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_a9c760de-f69.png",
+      "url": "/generated_images/imagen3_a9c760de-f69.png",
+      "description": "Photorealistic image of a decorative black ornamental iron fence with an elegant gate, adding curb appeal, Sooke BC home exterior, professional photography. The fence design is intricate and sophisticated.",
+      "purpose": "Thumbnail image for the 'Ornamental Fence' in the gallery section.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_963ccba4-f35.png",
+      "url": "/generated_images/imagen3_963ccba4-f35.png",
+      "description": "Photorealistic image of a unique custom-built artistic fence combining natural wood and metal elements, modern design, personalized property boundary, Sooke BC, professional photography. The fence showcases creativity and bespoke craftsmanship.",
+      "purpose": "Thumbnail image for the 'Custom Fence' in the gallery section.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_ed6816c7-9fb.png",
+      "url": "/generated_images/imagen3_ed6816c7-9fb.png",
+      "description": "Photorealistic image of a charming white picket fence installation around a front yard, classic American style, sunny day, Sooke BC, professional photography. The fence evokes a sense of home and welcome.",
+      "purpose": "Thumbnail image for the 'Picket Fence' in the gallery section.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_3213be8d-9d5.png",
+      "url": "/generated_images/imagen3_3213be8d-9d5.png",
+      "description": "Photorealistic image of a rustic farm style fence for acreage, featuring robust wooden posts and wire, set in a rural Sooke BC landscape, professional photography. The fence looks sturdy and blends with the natural environment.",
+      "purpose": "Thumbnail image for the 'Farm Fence' in the gallery section.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_584e769c-864.png",
+      "url": "/generated_images/imagen3_584e769c-864.png",
+      "description": "Photorealistic image of a modern composite fence matching a contemporary deck, low maintenance, sleek design, Sooke BC, professional photography. The fence complements the modern architecture.",
+      "purpose": "Thumbnail image for the 'Composite Fence' in the gallery section.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_d16bb9ed-fdd.png",
+      "url": "/generated_images/imagen3_d16bb9ed-fdd.png",
+      "description": "BEFORE image: A rundown, old, weathered wooden fence in a typical Sooke, BC backyard. The fence is leaning, discolored, and has some broken pickets. Overgrown weeds nearby. Overcast lighting, dull colors. Focus on the dilapidated fence.",
+      "purpose": "Before image for the 'Before & After' slider feature, showing a dilapidated fence.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_3575a7a9-1b7.png",
+      "url": "/generated_images/imagen3_3575a7a9-1b7.png",
+      "description": "AFTER image: The exact same Sooke, BC backyard as the 'before' image, now featuring a newly installed, pristine, modern wooden privacy fence. The fence is straight, clean, and a rich, natural wood color. The backyard is tidied up. Sunny day, vibrant colors. Focus on the new, high-quality fence.",
+      "purpose": "After image for the 'Before & After' slider feature, showing a new, high-quality fence.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_ec1c6be1-dec.png",
+      "url": "/generated_images/imagen3_ec1c6be1-dec.png",
+      "description": "BEFORE image: A residential property in Sooke, BC with an old, rusty, and slightly bent chain link fence. The fence appears neglected and blends poorly with the landscape. Dull, uninviting appearance. Focus on the old fence.",
+      "purpose": "Before image for the 'Before & After' slider feature, showing an old chain link fence.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_986326de-bee.png",
+      "url": "/generated_images/imagen3_986326de-bee.png",
+      "description": "AFTER image: The exact same residential property in Sooke, BC as the 'before' image, now featuring a sleek, new black vinyl fence. The fence is perfectly straight, clean, and significantly enhances the property's aesthetics. Bright, inviting appearance. Focus on the new vinyl fence.",
+      "purpose": "After image for the 'Before & After' slider feature, showing a new vinyl fence.",
+      "isNewlyGenerated": true
+    }
+  ]
+}

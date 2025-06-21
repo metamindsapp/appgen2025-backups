@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>trenndy - Explore Evolving Trends</title>
+    <meta name="description" content="trenndy: Your dashboard for discovering and visualizing real and simulated trends over time. Explore insights from technology, fashion, social media, and more.">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f8f9fa; 
+    color: #212529;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex-grow: 1;
+}
+
+.navbar-brand img { transition: transform 0.3s ease; }
+.navbar-brand:hover img { transform: rotate(-5deg) scale(1.1); }
+.nav-link { transition: color 0.2s ease-in-out; }
+.nav-link:hover, .nav-link.active { color: #0d6efd !important; }
+
+#heroImageBanner {
+    border: 5px solid white; 
+    max-height: 350px; 
+    object-fit: cover;
+    width: 100%;
+}
+
+#filters {
+    top: 60px; 
+    background-color: rgba(255, 255, 255, 0.95) !important; 
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border-bottom: 1px solid #dee2e6;
+    z-index: 1020; 
+}
+.navbar {
+    z-index: 1030;
+}
+
+.trend-card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+    display: flex;
+    flex-direction: column;
+}
+.trend-card:not(.placeholder-glow):hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+.trend-card .card-header {
+    background-color: transparent;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 0.75rem 1rem;
+}
+.trend-card .card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+.category-icon {
+    width: 28px;
+    height: 28px;
+    opacity: 0.8;
+}
+.trend-card .card-body {
+    padding: 1rem;
+    flex-grow: 1; 
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.trend-description {
+    font-size: 0.85rem;
+    color: #555;
+    margin-bottom: 0.75rem;
+    min-height: 50px; 
+    flex-grow: 1;
+}
+.mini-chart-container {
+    width: 100%;
+    height: 80px; 
+    margin-bottom: 0.75rem;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    overflow: hidden; 
+}
+.mini-chart-container.placeholder {
+    background-color: #e9ecef;
+}
+.mini-chart-container svg {
+    display: block; 
+}
+.trend-stats {
+    font-size: 0.9rem;
+}
+.current-value { color: #0d6efd; }
+.change-value.positive { color: #198754; } 
+.change-value.negative { color: #dc3545; } 
+.change-value.neutral { color: #6c757d; } 
+
+.trend-card .card-footer {
+    background-color: transparent;
+    border-top: 1px solid #f0f0f0;
+    padding: 0.75rem 1rem;
+}
+.trend-card .btn {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+}
+.dataSource {
+    font-size: 0.7rem;
+    color: #6c757d;
+}
+
+.chart-line {
+    fill: none;
+    stroke-width: 2px;
+}
+.chart-area {
+    stroke: none;
+    opacity: 0.2;
+}
+.chart-dot {
+    stroke-width: 1px;
+    stroke: white; 
+}
+.axis-line {
+    stroke: #ccc;
+    stroke-width: 1px;
+}
+.axis-text {
+    font-size: 10px;
+    fill: #777;
+}
+
+#spotlightContent .display-6 { font-weight: 300; }
+#spotlightChartContainer {
+    height: 350px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+}
+#spotlightImageContainer img, #modalImageContainer img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    margin-top: 1rem;
+}
+.ai-content-area {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    border: 1px solid #e9ecef;
+}
+.ai-content-area h6 {
+    font-weight: 600;
+    color: #343a40;
+}
+
+.modal-xl { max-width: 900px; }
+.modal-header { border-bottom: 1px solid #dee2e6; }
+.modal-footer { border-top: 1px solid #dee2e6; }
+
+.spinner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100px; 
+}
+.spinner-container.inline {
+    min-height: auto;
+    display: inline-flex;
+    vertical-align: middle;
+    margin-left: 8px;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+#track-custom-trend .form-control-lg {
+    font-size: 1rem; 
+}
+#customTrendOutput {
+    min-height: 200px;
+}
+#customTrendChartContainer {
+    height: 300px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+    margin-top: 1rem;
+}
+
+
+@media (max-width: 991px) { 
+    #filters {
+         top: 56px; 
+    }
+}
+
+@media (max-width: 768px) {
+    #filters {
+        position: static; 
+    }
+    .display-5 { font-size: 2.5rem; }
+    #spotlightChartContainer { height: 250px; }
+    #heroImageBanner { max-height: 250px; }
+    #customTrendChartContainer { height: 250px; }
+}
+    </style>
+</head>
+<body class="bg-light">
+
+    <header class="bg-white shadow-sm sticky-top">
+        <nav class="navbar navbar-expand-lg navbar-light container">
+            <a class="navbar-brand fw-bold" href="#home">
+                <img src="" alt="trenndy logo" id="logoImage" style="height: 30px; margin-right: 10px; vertical-align: middle;">
+                trenndy
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link active" aria-current="page" href="#home">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#track-custom-trend">Track Trend</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#dashboard">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#spotlight">Spotlight</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="home" class="py-5 text-center bg-white">
+            <div class="container">
+                <div class="row py-lg-4">
+                    <div class="col-lg-8 col-md-10 mx-auto">
+                        <img src="" alt="Abstract representation of data trends" id="heroImageBanner" class="img-fluid mb-4 rounded shadow-sm">
+                        <h1 class="fw-light display-5">Welcome to trenndy</h1>
+                        <p class="lead text-muted">Discover and explore emerging trends across various domains. See how patterns evolve over time with our curated visualizations from real-world data and insightful models.</p>
+                        <p id="featuredTrendWelcome" class="fst-italic text-primary my-3"></p>
+                        <p>
+                            <a href="#dashboard" class="btn btn-primary my-2 rounded-pill px-4">Explore Dashboard</a>
+                            <a href="#spotlight" class="btn btn-outline-secondary my-2 rounded-pill px-4">View Trend Spotlight</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="track-custom-trend" class="py-5 bg-white border-bottom">
+            <div class="container">
+                <h2 class="pb-3 mb-4 h3 fw-light text-center">Track a Wikipedia Trend</h2>
+                <div class="row justify-content-center">
+                    <div class="col-md-8 col-lg-6">
+                        <div class="input-group mb-3">
+                            <input type="text" id="wikiArticleInput" class="form-control form-control-lg" placeholder="Enter Wikipedia Article Title (e.g., Quantum Computing)">
+                            <button id="trackWikiTrendBtn" class="btn btn-success btn-lg" type="button">
+                                <i class="bi bi-graph-up-arrow me-2"></i>Track Trend
+                            </button>
+                        </div>
+                        <div id="customTrendStatus" class="text-center small"></div>
+                    </div>
+                </div>
+                <div id="customTrendOutput" class="mt-4">
+                </div>
+            </div>
+        </section>
+
+        <section id="filters" class="py-3 sticky-top">
+             <div class="container">
+                <div class="row g-3 align-items-center justify-content-center">
+                    <div class="col-md-4">
+                        <label for="categoryFilter" class="form-label visually-hidden">Filter by Category:</label>
+                        <select id="categoryFilter" class="form-select form-select-lg">
+                            <option value="all" selected>All Categories</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="timeRangeFilter" class="form-label visually-hidden">Filter by Time Range:</label>
+                        <select id="timeRangeFilter" class="form-select form-select-lg">
+                            <option value="12" selected>Last 12 Months</option>
+                            <option value="3">Last 3 Months</option>
+                            <option value="6">Last 6 Months</option>
+                            <option value="24">Last 24 Months</option>
+                            <option value="36">Last 36 Months</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="dashboard" class="py-5">
+            <div class="container">
+                <h2 class="pb-3 mb-4 h3 fw-light text-center border-bottom">Trend Dashboard</h2>
+                <div id="trendGrid" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                </div>
+                <div id="noResultsMessage" class="alert alert-info mt-4 d-none text-center" role="alert">
+                    No trends match your current filter criteria. Try adjusting your filters!
+                </div>
+            </div>
+        </section>
+
+        <section id="spotlight" class="py-5 bg-white">
+            <div class="container">
+                <h2 class="pb-3 mb-4 h3 fw-light text-center border-bottom">Trend Spotlight</h2>
+                <div id="spotlightContent" class="row align-items-center">
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="py-4 mt-auto bg-dark text-white text-center">
+        <div class="container">
+            <p class="mb-1">&copy; <span id="currentYear"></span> trenndy. All Rights Reserved. (Data sourced from Wikipedia and simulated models.)</p>
+            <ul class="list-inline mb-0 small">
+                <li class="list-inline-item"><a href="#" class="text-white-50 text-decoration-none">Privacy Policy</a></li>
+                <li class="list-inline-item">|</li>
+                <li class="list-inline-item"><a href="#" class="text-white-50 text-decoration-none">Terms of Service</a></li>
+            </ul>
+        </div>
+    </footer>
+
+    <div class="modal fade" id="trendModal" tabindex="-1" aria-labelledby="trendModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="trendModalLabel">Trend Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="trendModalBody">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+(function() {
+    const AppConfig = {
+        wikiApiBaseUrl: 'https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia.org/all-access/user/',
+        defaultTimeRangeMonths: 12,
+        maxSimulatedDataMonths: 36,
+        cacheDurationMs: 3600000, 
+        aiImageAspectRatio: '16:9',
+        categories: [
+            { 
+                id: 'tech', name: 'Technology', color: '#17a2b8',
+                trends: [
+                    { trendId: 'tech_ai', name: 'AI Development', dataSourceType: 'wikipedia', defaultArticle: 'Artificial_intelligence', description: 'Tracks interest in Artificial Intelligence based on Wikipedia pageviews.' },
+                    { trendId: 'tech_quantum', name: 'Quantum Computing Buzz', dataSourceType: 'wikipedia', defaultArticle: 'Quantum_computing', description: 'Monitors discussion around Quantum Computing via Wikipedia pageviews.'}
+                ]
+            },
+            { 
+                id: 'social', name: 'Social Media', color: '#0d6efd',
+                trends: [
+                    { trendId: 'social_tiktok', name: 'TikTok Usage', dataSourceType: 'wikipedia', defaultArticle: 'TikTok', description: 'Pageviews for TikTok on Wikipedia, indicating public interest.' },
+                    { trendId: 'social_metaverse', name: 'Metaverse Concepts', dataSourceType: 'simulated', simulationProfile: { type: 'volatile', base: 40, peak: 100, volatility: 0.6 }, description: 'Simulated trend for fluctuating interest in Metaverse concepts.'}
+                ]
+            },
+            { 
+                id: 'fashion', name: 'Fashion', color: '#e83e8c',
+                trends: [
+                     { trendId: 'fashion_sustainable', name: 'Sustainable Fashion', dataSourceType: 'simulated', simulationProfile: { type: 'cyclicalGrowth', base: 30, peak: 80, period: 12, growthFactor: 0.05 }, description: 'Simulated trend for growing interest in Sustainable Fashion, with seasonal peaks.'}
+                ]
+            },
+            { 
+                id: 'finance', name: 'Finance', color: '#198754',
+                trends: [
+                    { trendId: 'finance_crypto', name: 'Cryptocurrency Interest', dataSourceType: 'wikipedia', defaultArticle: 'Cryptocurrency', description: 'Wikipedia pageviews reflecting general interest in Cryptocurrencies.'},
+                    { trendId: 'finance_esg', name: 'ESG Investing', dataSourceType: 'simulated', simulationProfile: { type: 'steadyGrowth', base: 50, peak: 150, growthFactor: 0.1 }, description: 'Simulated steady growth in ESG (Environmental, Social, Governance) investing.'}
+                ]
+            },
+            { 
+                id: 'environment', name: 'Environment', color: '#fd7e14',
+                trends: [
+                    { trendId: 'env_climate_change', name: 'Climate Change Awareness', dataSourceType: 'wikipedia', defaultArticle: 'Climate_change', description: 'Wikipedia pageviews for "Climate Change", indicating public awareness levels.'},
+                ]
+            },
+            { 
+                id: 'popculture', name: 'Pop Culture', color: '#6f42c1',
+                trends: [
+                    { trendId: 'pop_streaming', name: 'Streaming Services Evolution', dataSourceType: 'simulated', simulationProfile: { type: 'plateau', base: 60, peak: 120, growthDuration: 24 }, description: 'Simulated trend of streaming service adoption, reaching a plateau.'}
+                ]
+            }
+        ],
+        imageAssetPaths: {}
+    };
+
+    const appState = {
+        allTrendsData: [],
+        currentFilterCategory: 'all',
+        currentFilterTimeRange: AppConfig.defaultTimeRangeMonths,
+        spotlightTrendId: null,
+        isLoading: {
+            dashboard: true,
+            customTrend: false,
+            spotlightAI: false,
+            modalAI: false
+        }
+    };
+
+    const domElements = {};
+
+    const apiService = {
+        async fetchWikipediaTrend(articleName, months) {
+            const articleKey = articleName.replace(/ /g, '_');
+            const cacheKey = `trenndy_wiki_${articleKey}_${months}`;
+            
+            try {
+                const cachedItem = localStorage.getItem(cacheKey);
+                if (cachedItem) {
+                    const cached = JSON.parse(cachedItem);
+                    if (cached && (Date.now() - cached.timestamp < AppConfig.cacheDurationMs)) {
+                        return cached.data;
+                    }
+                }
+            } catch (error) {
+                console.error('Error reading from localStorage:', error);
+            }
+
+            const endDate = new Date();
+            endDate.setDate(endDate.getDate() - 1); 
+            const startDate = new Date();
+            startDate.setMonth(startDate.getMonth() - months);
+
+            const formatDateForApi = (date) => {
+                const y = date.getFullYear();
+                const m = (date.getMonth() + 1).toString().padStart(2, '0');
+                const d = date.getDate().toString().padStart(2, '0');
+                return `${y}${m}${d}`;
+            };
+
+            const url = `${AppConfig.wikiApiBaseUrl}${articleKey}/daily/${formatDateForApi(startDate)}/${formatDateForApi(endDate)}`;
+            
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => null);
+                    throw new Error(`Wikimedia API error ${response.status}: ${errorData?.title || response.statusText}`);
+                }
+                const rawData = await response.json();
+                
+                const monthlyData = {};
+                if (rawData.items) {
+                    rawData.items.forEach(item => {
+                        const year = item.timestamp.substring(0, 4);
+                        const month = item.timestamp.substring(4, 6);
+                        const day = item.timestamp.substring(6, 8);
+                        const itemDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+                        
+                        const monthKey = `${year}-${month}`;
+                        if (!monthlyData[monthKey]) {
+                            monthlyData[monthKey] = {
+                                sum: 0,
+                                count: 0,
+                                lastDayOfMonth: new Date(itemDate.getFullYear(), itemDate.getMonth() + 1, 0).getDate().toString().padStart(2, '0')
+                            };
+                        }
+                        monthlyData[monthKey].sum += item.views;
+                        monthlyData[monthKey].count++;
+                    });
+                }
+
+                const formattedData = Object.entries(monthlyData).map(([key, value]) => ({
+                    date: `${key}-${value.lastDayOfMonth}`, 
+                    value: Math.round(value.sum) 
+                })).sort((a, b) => new Date(a.date) - new Date(b.date));
+                
+                try {
+                    localStorage.setItem(cacheKey, JSON.stringify({ data: formattedData, timestamp: Date.now() }));
+                } catch (error) {
+                    console.error('Error writing to localStorage:', error);
+                }
+                return formattedData;
+
+            } catch (error) {
+                console.error(`Error fetching Wikipedia trend for ${articleName}:`, error);
+                throw error;
+            }
+        },
+
+        generateRealisticSimulatedData(totalMonths, profile) {
+            const data = [];
+            const endDate = new Date();
+            endDate.setDate(0); 
+
+            let currentValue = profile.base;
+            for (let i = totalMonths - 1; i >= 0; i--) {
+                const date = new Date(endDate);
+                date.setMonth(endDate.getMonth() - i);
+                date.setDate(0); 
+
+                const monthStr = (date.getMonth() + 1).toString().padStart(2, '0');
+                const yearStr = date.getFullYear();
+                const dayStr = date.getDate().toString().padStart(2, '0');
+                
+                let pointValue = currentValue;
+                
+                switch (profile.type) {
+                    case 'steadyGrowth':
+                        pointValue += (profile.peak - profile.base) * ((totalMonths - i) / totalMonths) * (1 + (Math.random() - 0.5) * 0.2);
+                        break;
+                    case 'cyclicalGrowth':
+                        const cycleProgress = ((totalMonths - 1 - i) % profile.period) / profile.period;
+                        const seasonalityFactor = 1 + Math.sin(cycleProgress * 2 * Math.PI) * 0.3; 
+                        pointValue = profile.base * Math.pow(1 + profile.growthFactor, (totalMonths - i)/12) * seasonalityFactor * (1 + (Math.random() - 0.1) * 0.1);
+                        break;
+                    case 'volatile':
+                        pointValue = profile.base + (Math.random() * (profile.peak - profile.base)) * (1 + (Math.random() - 0.7) * profile.volatility);
+                        break;
+                    case 'plateau':
+                        const growthPhase = (totalMonths - i) / profile.growthDuration;
+                        if (growthPhase < 1) {
+                            pointValue = profile.base + (profile.peak - profile.base) * growthPhase;
+                        } else {
+                            pointValue = profile.peak;
+                        }
+                        pointValue *= (1 + (Math.random() - 0.5) * 0.1);
+                        break;
+                    default:
+                        pointValue = profile.base + Math.random() * (profile.peak - profile.base);
+                }
+                data.push({ date: `${yearStr}-${monthStr}-${dayStr}`, value: Math.max(0, Math.round(pointValue)) });
+            }
+            return data;
+        },
+
+        async handleAIGeneration(trend, type, uiElements) {
+            if (!trend) return;
+            const { loader, container, button } = uiElements;
+            
+            loader.classList.remove('d-none');
+            if(button) button.disabled = true;
+            container.innerHTML = ''; 
+
+            try {
+                if (type === 'image') {
+                    const category = uiUpdater.getCategoryById(trend.categoryId);
+                    const prompt = `Create an abstract, artistic, and visually compelling conceptual image representing the core idea of the trend: "${trend.name}". Description: "${trend.description}". Source: ${trend.dataSource}. The image should be suitable for a light-themed, modern data analytics website. Emphasize dynamism and insight. Aspect ratio ${AppConfig.aiImageAspectRatio}. Use colors that evoke innovation and clarity, perhaps with hints of ${category?.color || '#0d6efd'}.`;
+                    const response = await fetch('/api/generate-image-on-demand', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prompt: prompt, aspectRatio: AppConfig.aiImageAspectRatio })
+                    });
+                    if (!response.ok) throw new Error(`API request failed with status ${response.status}`);
+                    const result = await response.json();
+                    if (result.success && result.imageUrl) {
+                        container.innerHTML = `<img src="${result.imageUrl}" alt="AI generated visual for ${trend.name}" class="img-fluid rounded shadow-sm">`;
+                    } else {
+                        throw new Error(result.error || 'Failed to generate image.');
+                    }
+                } else if (type === 'summary') {
+                    const aiguidePrompt = `You are an insightful trend analyst. Provide a concise (1-2 sentences) summary or potential implication for the given trend. Be engaging and focus on key takeaways. Mention the data source (${trend.dataSource}) if relevant.`;
+                    const userQuery = `Trend Name: "${trend.name}". Description: "${trend.description}". Data Source: ${trend.dataSource}. Provide your summary.`;
+                    const response = await fetch('/api/ai', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ aiguide: aiguidePrompt, msgforai: userQuery })
+                    });
+                    if (!response.ok) throw new Error(`API request failed with status ${response.status}`);
+                    const result = await response.json();
+                    if (result.success && result.response) {
+                        container.innerHTML = `<p class="mb-0">${result.response}</p>`;
+                    } else {
+                        throw new Error(result.error || 'Failed to generate summary.');
+                    }
+                }
+            } catch (error) {
+                console.error(`Error generating AI ${type}:`, error);
+                container.innerHTML = `<small class="text-danger d-block text-center p-2">Oops! Error generating ${type}. ${error.message}</small>`;
+            } finally {
+                loader.classList.add('d-none');
+                if(button) button.disabled = false;
+            }
+        }
+    };
+    
+    const uiUpdater = {
+        getCategoryById(categoryId) {
+            return AppConfig.categories.find(cat => cat.id === categoryId);
+        },
+        getTrendById(trendId) {
+            return appState.allTrendsData.find(t => t.id === trendId);
+        },
+        formatDate(dateString) {
+            if(!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        },
+        updateStatusMessage(elementId, message, type = 'info') {
+            const el = domElements[elementId] || document.getElementById(elementId);
+            if (el) {
+                el.innerHTML = `<div class="alert alert-${type} py-1 px-2 mb-0">${message}</div>`;
+            }
+        },
+        clearStatusMessage(elementId) {
+            const el = domElements[elementId] || document.getElementById(elementId);
+            if (el) el.innerHTML = '';
+        },
+        showLoadingSkeletonCard(container) {
+            const cardCol = document.createElement('div');
+            cardCol.className = 'col';
+            cardCol.innerHTML = `
+                <div class="card h-100 trend-card shadow-sm placeholder-glow">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="card-title mb-0 h6"><span class="placeholder col-6"></span></h3>
+                        <span class="placeholder rounded" style="width:28px; height:28px;"></span>
+                    </div>
+                    <div class="card-body">
+                        <p class="trend-description placeholder-glow"><span class="placeholder col-12"></span><span class="placeholder col-10"></span><span class="placeholder col-11"></span></p>
+                        <div class="mini-chart-container placeholder mb-3"><span class="placeholder col-12 h-100"></span></div>
+                        <div class="trend-stats placeholder-glow">
+                            <p class="mb-1"><span class="placeholder col-5"></span></p>
+                            <p class="mb-0"><span class="placeholder col-6"></span></p>
+                        </div>
+                    </div>
+                    <small class="text-muted px-3 pt-1 dataSource placeholder-glow"><span class="placeholder col-4"></span></small>
+                    <div class="card-footer text-center d-flex justify-content-around">
+                        <button class="btn btn-sm btn-outline-primary flex-fill me-1 disabled placeholder col-3"></button>
+                        <button class="btn btn-sm btn-outline-info flex-fill me-1 disabled placeholder col-3"></button>
+                        <button class="btn btn-sm btn-outline-success flex-fill disabled placeholder col-3"></button>
+                    </div>
+                </div>`;
+            container.appendChild(cardCol);
+        },
+        renderTrendCard(trend) {
+            const category = uiUpdater.getCategoryById(trend.categoryId);
+            const trendValueCurrent = trend.data.length > 0 ? trend.data[trend.data.length - 1].value : 0;
+            const trendValuePrevious = trend.data.length > 1 ? trend.data[trend.data.length - 2].value : trendValueCurrent;
+            const change = trendValueCurrent - trendValuePrevious;
+            const percentChange = trendValuePrevious !== 0 ? (change / trendValuePrevious) * 100 : (trendValueCurrent > 0 ? 100 : 0);
+
+            let changeClass = 'neutral';
+            let changeIcon = '<i class="bi bi-dash"></i>';
+            if (percentChange > 0.5) { changeClass = 'positive'; changeIcon = '<i class="bi bi-arrow-up-right"></i>'; }
+            else if (percentChange < -0.5) { changeClass = 'negative'; changeIcon = '<i class="bi bi-arrow-down-left"></i>'; }
+            
+            const cardCol = document.createElement('div');
+            cardCol.className = 'col';
+            const categoryIconSrc = category.icon || appState.imageAssetPaths.defaultCategoryIcon;
+            cardCol.innerHTML = `
+                <div class="card h-100 trend-card shadow-sm" data-trend-id="${trend.id}">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="card-title mb-0 h6">${trend.name}</h3>
+                        <img src="${categoryIconSrc}" alt="${category.name} category icon" class="category-icon">
+                    </div>
+                    <div class="card-body">
+                        <p class="trend-description">${trend.description.substring(0, 120)}${trend.description.length > 120 ? '...' : ''}</p>
+                        <div class="mini-chart-container mb-3"></div>
+                        <div class="trend-stats">
+                            <p class="mb-1">Current Index: <span class="fw-bold current-value">${Math.round(trendValueCurrent)}</span></p>
+                            <p class="mb-0">Change: <span class="change-value ${changeClass} fw-bold">${percentChange.toFixed(1)}% ${changeIcon}</span></p>
+                        </div>
+                    </div>
+                    <small class="text-muted px-3 pt-1 dataSource">Source: ${trend.dataSource}</small>
+                    <div class="card-footer text-center d-flex justify-content-around">
+                        <button class="btn btn-sm btn-outline-primary view-details-btn flex-fill me-1">Details</button>
+                        <button class="btn btn-sm btn-outline-info generate-image-btn flex-fill me-1">AI Visual</button>
+                        <button class="btn btn-sm btn-outline-success generate-summary-btn flex-fill">AI Summary</button>
+                    </div>
+                </div>
+            `;
+            domElements.trendGrid.appendChild(cardCol);
+            const chartContainer = cardCol.querySelector('.mini-chart-container');
+            setTimeout(() => chartDrawer.drawSVGChart(chartContainer, trend.data, category.color, true), 0); 
+        },
+        renderDashboard() {
+            domElements.trendGrid.innerHTML = ''; 
+            const trendsToDisplay = eventHandlers.getFilteredTrends();
+
+            if (appState.isLoading.dashboard && trendsToDisplay.length === 0) {
+                for(let i=0; i < 6; i++) uiUpdater.showLoadingSkeletonCard(domElements.trendGrid);
+                domElements.noResultsMessage.classList.add('d-none');
+            } else if (trendsToDisplay.length === 0) {
+                domElements.noResultsMessage.classList.remove('d-none');
+            } else {
+                domElements.noResultsMessage.classList.add('d-none');
+                trendsToDisplay.forEach(trend => {
+                    if (trend.isLoading) uiUpdater.showLoadingSkeletonCard(domElements.trendGrid);
+                    else uiUpdater.renderTrendCard(trend);
+                });
+            }
+        },
+        populateCategoryFilter() {
+            AppConfig.categories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat.id;
+                option.textContent = cat.name;
+                domElements.categoryFilter.appendChild(option);
+            });
+        },
+        populateSpotlight(trendId = null) {
+            const trendToSpotlight = trendId ? uiUpdater.getTrendById(trendId) : appState.allTrendsData.find(t => !t.isLoading && t.data && t.data.length > 0);
+            
+            if (!trendToSpotlight || trendToSpotlight.isLoading) {
+                domElements.spotlightContent.innerHTML = `
+                <div class="col-12 placeholder-glow text-center">
+                    <h3 class="display-6 fw-bold lh-1 mb-3"><span class="placeholder col-5"></span></h3>
+                    <p class="lead"><span class="placeholder col-7"></span> <span class="placeholder col-6"></span></p>
+                    <div id="spotlightChartContainer" class="shadow-sm placeholder my-3" style="height:350px; background-color: #e9ecef;"></div>
+                    <p class="text-muted">Loading spotlight trend or select one from the dashboard...</p>
+                </div>`;
+                if (trendToSpotlight && trendToSpotlight.isLoading) appState.spotlightTrendId = trendToSpotlight.id;
+                return;
+            }
+            appState.spotlightTrendId = trendToSpotlight.id;
+            const category = uiUpdater.getCategoryById(trendToSpotlight.categoryId);
+
+            domElements.spotlightContent.innerHTML = `
+                <div class="col-lg-6">
+                    <h3 class="display-6 fw-bold lh-1 mb-3">${trendToSpotlight.name}</h3>
+                    <p class="lead"><span class="badge me-2" style="background-color:${category.color}; color:white;">${category.name}</span> ${trendToSpotlight.description}</p>
+                    <small class="text-muted dataSource">Source: ${trendToSpotlight.dataSource}</small>
+                    <div class="ai-content-area mt-3">
+                        <h6>AI Generated Insights:</h6>
+                        <div id="spotlightAISummaryText" class="fst-italic small" style="min-height: 40px;">Click "Get AI Insights" to generate notes...</div>
+                        <div id="spotlightAISummaryLoader" class="spinner-container d-none my-2"><div class="spinner-border spinner-border-sm text-info" role="status"><span class="visually-hidden">Loading...</span></div></div>
+                        <button id="getSpotlightAISummaryBtn" class="btn btn-sm btn-info mt-2 w-100">Get AI Insights</button>
+                    </div>
+                </div>
+                <div class="col-lg-6 mt-4 mt-lg-0">
+                    <div id="spotlightChartContainer" class="shadow-sm"></div>
+                    <div id="spotlightImageContainer" class="mt-3 text-center" style="min-height: 150px;">
+                         <small class="text-muted">Click "Generate AI Visual" for an artistic representation.</small>
+                    </div>
+                    <div id="spotlightImageLoader" class="spinner-container d-none my-2"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>
+                    <div class="text-center mt-3">
+                       <button id="spotlightGenerateImageBtn" class="btn btn-primary w-100">Generate AI Visual</button>
+                    </div>
+                </div>
+            `;
+            const chartContainer = domElements.spotlightContent.querySelector('#spotlightChartContainer');
+            setTimeout(() => chartDrawer.drawSVGChart(chartContainer, trendToSpotlight.data, category.color, false), 0);
+        },
+        showTrendModal(trendId, options = {}) {
+            const trend = uiUpdater.getTrendById(trendId); 
+            if (!trend || trend.isLoading) return;
+
+            const category = uiUpdater.getCategoryById(trend.categoryId);
+            domElements.trendModalLabel.textContent = trend.name;
+
+            domElements.trendModalBody.innerHTML = `
+                <div class="row">
+                    <div class="col-md-7">
+                        <h4><span class="badge me-2" style="background-color:${category.color}; color:white;">${category.name}</span> ${trend.name}</h4>
+                        <p class="text-muted">${trend.description}</p>
+                        <small class="text-muted dataSource d-block mb-2">Source: ${trend.dataSource}</small>
+                        <div id="modalChartContainer" style="height: 300px; width:100%; background-color: #f8f9fa; border-radius: 6px;"></div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="ai-content-area mb-3">
+                            <h6>AI Generated Visual</h6>
+                            <div id="modalImageContainer" class="text-center my-2" style="min-height:150px;">
+                                <small class="text-muted">Click "Generate Visual" to create an AI image.</small>
+                            </div>
+                            <div id="modalImageLoader" class="spinner-container d-none"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>
+                            <button class="btn btn-sm btn-primary w-100 generate-image-btn-modal" data-trend-id="${trend.id}">Generate Visual</button>
+                        </div>
+                        <div class="ai-content-area">
+                            <h6>AI Generated Summary</h6>
+                            <div id="modalSummaryText" class="fst-italic small my-2" style="min-height: 50px;">Click "Generate Summary" for AI insights.</div>
+                            <div id="modalSummaryLoader" class="spinner-container d-none"><div class="spinner-border spinner-border-sm text-info" role="status"><span class="visually-hidden">Loading...</span></div></div>
+                            <button class="btn btn-sm btn-info w-100 generate-summary-btn-modal" data-trend-id="${trend.id}">Generate Summary</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const modalInstance = bootstrap.Modal.getInstance(domElements.trendModal) || new bootstrap.Modal(domElements.trendModal);
+            const chartContainer = domElements.trendModalBody.querySelector('#modalChartContainer');
+
+            const onModalShown = () => {
+                chartDrawer.drawSVGChart(chartContainer, trend.data, category.color, false);
+                if (options.autoAction) {
+                    const actionType = options.autoAction;
+                    const buttonClass = actionType === 'image' ? '.generate-image-btn-modal' : '.generate-summary-btn-modal';
+                    const modalButton = domElements.trendModalBody.querySelector(buttonClass);
+                    if (modalButton) modalButton.click();
+                }
+                domElements.trendModal.removeEventListener('shown.bs.modal', onModalShown);
+            };
+            
+            domElements.trendModal.addEventListener('shown.bs.modal', onModalShown, { once: true });
+            modalInstance.show();
+        },
+        renderCustomTrackedTrend(articleName, data, error) {
+            domElements.customTrendOutput.innerHTML = '';
+            if (error) {
+                domElements.customTrendOutput.innerHTML = `<div class="alert alert-danger">${error.message || 'Failed to fetch trend data.'}</div>`;
+                return;
+            }
+            if (!data || data.length === 0) {
+                domElements.customTrendOutput.innerHTML = `<div class="alert alert-warning">No data found for "${articleName}". It might be a new or less popular article.</div>`;
+                return;
+            }
+            const trendValueCurrent = data.length > 0 ? data[data.length - 1].value : 0;
+
+            domElements.customTrendOutput.innerHTML = `
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h4 class="h5 mb-0">Trend for: ${articleName.replace(/_/g, ' ')}</h4>
+                        <small class="text-muted dataSource">Source: Wikipedia Pageviews</small>
+                    </div>
+                    <div class="card-body">
+                         <p>Current Monthly Views (approx): <span class="fw-bold current-value">${Math.round(trendValueCurrent)}</span></p>
+                        <div id="customTrendChartContainer"></div>
+                    </div>
+                </div>`;
+            const chartContainer = domElements.customTrendOutput.querySelector('#customTrendChartContainer');
+            setTimeout(() => chartDrawer.drawSVGChart(chartContainer, data, '#0d6efd', false), 0);
+        },
+        displayFeaturedTrendWelcome() {
+            const availableTrends = appState.allTrendsData.filter(t => !t.isLoading && t.data && t.data.length > 0);
+            if (availableTrends.length > 0) {
+                const randomIndex = Math.floor(Math.random() * availableTrends.length);
+                const featuredTrend = availableTrends[randomIndex];
+                if (domElements.featuredTrendWelcome) {
+                     domElements.featuredTrendWelcome.innerHTML = `✨ Today's Highlight: <a href="#spotlight" class="fw-bold text-decoration-none spotlight-link" data-trend-id-spotlight="${featuredTrend.id}">${featuredTrend.name}</a> - see it in the Spotlight!`;
+                }
+            } else {
+                if (domElements.featuredTrendWelcome) domElements.featuredTrendWelcome.innerHTML = 'Loading featured trends...';
+            }
+        }
+    };
+
+    const chartDrawer = {
+        drawSVGChart(container, dataPoints, categoryColor, isMini = true) {
+            container.innerHTML = ''; 
+            if (!dataPoints || dataPoints.length < 2) {
+                container.innerHTML = `<p class="text-center small text-muted p-2 d-flex align-items-center justify-content-center h-100">${isMini ? 'Not enough data' : 'Not enough data for chart.'}</p>`;
+                return;
+            }
+
+            const svgNS = "http://www.w3.org/2000/svg";
+            const svg = document.createElementNS(svgNS, "svg");
+            const padding = isMini ? { top: 5, right: 5, bottom: 5, left: 5 } : { top: 20, right: 20, bottom: 30, left: 40 };
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            if (width === 0 || height === 0) return; 
+
+            svg.setAttribute("width", "100%");
+            svg.setAttribute("height", "100%");
+            svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+            svg.style.overflow = "visible";
+            svg.setAttribute("aria-labelledby", "chartTitle");
+            svg.setAttribute("aria-describedby", "chartDesc");
+            svg.setAttribute("role", "img");
+
+            const titleEl = document.createElementNS(svgNS, "title");
+            titleEl.id = "chartTitle";
+            titleEl.textContent = isMini ? "Mini trend chart" : "Trend chart";
+            svg.appendChild(titleEl);
+
+            const descEl = document.createElementNS(svgNS, "desc");
+            descEl.id = "chartDesc";
+            descEl.textContent = `Line chart showing trend data over time. First data point ${uiUpdater.formatDate(dataPoints[0].date)}, last data point ${uiUpdater.formatDate(dataPoints[dataPoints.length-1].date)}.`;
+            svg.appendChild(descEl);
+
+
+            const values = dataPoints.map(dp => dp.value);
+            const minVal = Math.min(...values);
+            const maxVal = Math.max(...values);
+            const valueRange = maxVal - minVal === 0 ? 1 : maxVal - minVal; 
+
+            const xStep = (dataPoints.length > 1) ? (width - padding.left - padding.right) / (dataPoints.length - 1) : (width - padding.left - padding.right);
+            
+            const normalizeY = val => height - padding.bottom - ((val - minVal) / valueRange) * (height - padding.top - padding.bottom);
+
+            let pathD = `M ${padding.left} ${normalizeY(values[0])}`;
+            for (let i = 1; i < values.length; i++) {
+                pathD += ` L ${padding.left + i * xStep} ${normalizeY(values[i])}`;
+            }
+
+            const line = document.createElementNS(svgNS, "path");
+            line.setAttribute("d", pathD);
+            line.setAttribute("class", "chart-line");
+            line.setAttribute("stroke", categoryColor || "#0d6efd");
+            svg.appendChild(line);
+
+            if (!isMini) {
+                const areaPathD = pathD + ` L ${padding.left + (values.length - 1) * xStep} ${height - padding.bottom} L ${padding.left} ${height - padding.bottom} Z`;
+                const area = document.createElementNS(svgNS, "path");
+                area.setAttribute("d", areaPathD);
+                area.setAttribute("class", "chart-area");
+                area.setAttribute("fill", categoryColor || "#0d6efd");
+                svg.appendChild(area);
+
+                dataPoints.forEach((dp, i) => {
+                    const circle = document.createElementNS(svgNS, "circle");
+                    circle.setAttribute("cx", padding.left + i * xStep);
+                    circle.setAttribute("cy", normalizeY(dp.value));
+                    circle.setAttribute("r", "3");
+                    circle.setAttribute("fill", categoryColor || "#0d6efd");
+                    circle.setAttribute("class", "chart-dot");
+                    svg.appendChild(circle);
+                });
+
+                const xAxisLine = document.createElementNS(svgNS, "line");
+                xAxisLine.setAttribute("x1", padding.left);
+                xAxisLine.setAttribute("y1", height - padding.bottom);
+                xAxisLine.setAttribute("x2", width - padding.right);
+                xAxisLine.setAttribute("y2", height - padding.bottom);
+                xAxisLine.setAttribute("class", "axis-line");
+                svg.appendChild(xAxisLine);
+
+                const yAxisLine = document.createElementNS(svgNS, "line");
+                yAxisLine.setAttribute("x1", padding.left);
+                yAxisLine.setAttribute("y1", padding.top);
+                yAxisLine.setAttribute("x2", padding.left);
+                yAxisLine.setAttribute("y2", height - padding.bottom);
+                yAxisLine.setAttribute("class", "axis-line");
+                svg.appendChild(yAxisLine);
+
+                const minLabel = document.createElementNS(svgNS, "text");
+                minLabel.setAttribute("x", padding.left - 8);
+                minLabel.setAttribute("y", height - padding.bottom + 4);
+                minLabel.setAttribute("text-anchor", "end");
+                minLabel.setAttribute("class", "axis-text");
+                minLabel.textContent = Math.round(minVal);
+                svg.appendChild(minLabel);
+
+                const maxLabel = document.createElementNS(svgNS, "text");
+                maxLabel.setAttribute("x", padding.left - 8);
+                maxLabel.setAttribute("y", padding.top + 4); 
+                maxLabel.setAttribute("text-anchor", "end");
+                maxLabel.setAttribute("class", "axis-text");
+                maxLabel.textContent = Math.round(maxVal);
+                svg.appendChild(maxLabel);
+
+                const startDateLabel = document.createElementNS(svgNS, "text");
+                startDateLabel.setAttribute("x", padding.left);
+                startDateLabel.setAttribute("y", height - padding.bottom + 15);
+                startDateLabel.setAttribute("text-anchor", "start");
+                startDateLabel.setAttribute("class", "axis-text");
+                startDateLabel.textContent = uiUpdater.formatDate(dataPoints[0].date);
+                svg.appendChild(startDateLabel);
+
+                const endDateLabel = document.createElementNS(svgNS, "text");
+                endDateLabel.setAttribute("x", width - padding.right);
+                endDateLabel.setAttribute("y", height - padding.bottom + 15);
+                endDateLabel.setAttribute("text-anchor", "end");
+                endDateLabel.setAttribute("class", "axis-text");
+                endDateLabel.textContent = uiUpdater.formatDate(dataPoints[dataPoints.length - 1].date);
+                svg.appendChild(endDateLabel);
+            }
+            container.appendChild(svg);
+        }
+    };
+
+    const eventHandlers = {
+        getFilteredTrends() {
+            let trends = JSON.parse(JSON.stringify(appState.allTrendsData)); 
+            if (appState.currentFilterCategory !== 'all') {
+                trends = trends.filter(trend => trend.categoryId === appState.currentFilterCategory);
+            }
+            
+            const monthsToInclude = parseInt(appState.currentFilterTimeRange);
+            trends = trends.map(trend => {
+                if(trend.isLoading || !trend.data) return trend; 
+                const filteredData = trend.data.slice(-monthsToInclude);
+                return { ...trend, data: filteredData };
+            }).filter(trend => trend.isLoading || (trend.data && trend.data.length > 0));
+            return trends;
+        },
+        async handleFilterChange() {
+            const newCategory = domElements.categoryFilter.value;
+            const newTimeRange = parseInt(domElements.timeRangeFilter.value);
+
+            let needsRefresh = false;
+            if (appState.currentFilterCategory !== newCategory) {
+                appState.currentFilterCategory = newCategory;
+                needsRefresh = true; 
+            }
+            if (appState.currentFilterTimeRange !== newTimeRange) {
+                appState.currentFilterTimeRange = newTimeRange;
+                needsRefresh = true;
+            }
+
+            if (needsRefresh) {
+                 appState.isLoading.dashboard = true;
+                 uiUpdater.renderDashboard(); 
+                 await mainInit.loadInitialTrends(true); 
+            } else {
+                uiUpdater.renderDashboard();
+            }
+        },
+        handleGridActions(event) {
+            const target = event.target;
+            const cardButton = target.closest('.btn');
+            if (!cardButton) return;
+
+            const card = target.closest('.trend-card');
+            if (!card) return;
+            const trendId = card.dataset.trendId;
+            if (!trendId) return;
+
+            if (cardButton.classList.contains('view-details-btn')) {
+                uiUpdater.showTrendModal(trendId);
+            } else if (cardButton.classList.contains('generate-image-btn')) {
+                uiUpdater.showTrendModal(trendId, { autoAction: 'image' });
+            } else if (cardButton.classList.contains('generate-summary-btn')) {
+                uiUpdater.showTrendModal(trendId, { autoAction: 'summary' });
+            }
+        },
+        handleModalActions(event) {
+            const target = event.target;
+            const trendId = target.dataset.trendId;
+            if (!trendId) return;
+            
+            const trend = uiUpdater.getTrendById(trendId);
+            if(!trend) return;
+
+            if (target.classList.contains('generate-image-btn-modal')) {
+                apiService.handleAIGeneration(trend, 'image', {
+                    loader: domElements.trendModalBody.querySelector('#modalImageLoader'),
+                    container: domElements.trendModalBody.querySelector('#modalImageContainer'),
+                    button: target
+                });
+            } else if (target.classList.contains('generate-summary-btn-modal')) {
+                apiService.handleAIGeneration(trend, 'summary', {
+                    loader: domElements.trendModalBody.querySelector('#modalSummaryLoader'),
+                    container: domElements.trendModalBody.querySelector('#modalSummaryText'),
+                    button: target
+                });
+            }
+        },
+        handleSpotlightOrWelcomeLink(event) {
+            const target = event.target;
+            let trendIdForSpotlight = null;
+            const trend = uiUpdater.getTrendById(appState.spotlightTrendId);
+
+            if (target.id === 'getSpotlightAISummaryBtn' || target.id === 'spotlightGenerateImageBtn') {
+                trendIdForSpotlight = appState.spotlightTrendId;
+            } else if (target.classList.contains('spotlight-link') && target.dataset.trendIdSpotlight) {
+                event.preventDefault();
+                trendIdForSpotlight = target.dataset.trendIdSpotlight;
+                uiUpdater.populateSpotlight(trendIdForSpotlight);
+                const spotlightSection = document.getElementById('spotlight');
+                if (spotlightSection) {
+                    spotlightSection.scrollIntoView({ behavior: 'smooth' });
+                }
+                return; 
+            }
+
+            if (!trendIdForSpotlight || !trend) return;
+
+            if (target.id === 'getSpotlightAISummaryBtn') {
+                apiService.handleAIGeneration(trend, 'summary', {
+                    loader: domElements.spotlightContent.querySelector('#spotlightAISummaryLoader'),
+                    container: domElements.spotlightContent.querySelector('#spotlightAISummaryText'),
+                    button: target
+                });
+            } else if (target.id === 'spotlightGenerateImageBtn') {
+                 apiService.handleAIGeneration(trend, 'image', {
+                    loader: domElements.spotlightContent.querySelector('#spotlightImageLoader'),
+                    container: domElements.spotlightContent.querySelector('#spotlightImageContainer'),
+                    button: target
+                });
+            }
+        },
+        async handleTrackWikiTrend() {
+            const articleName = domElements.wikiArticleInput.value.trim();
+            if (!articleName) {
+                uiUpdater.updateStatusMessage('customTrendStatus', 'Please enter a Wikipedia article title.', 'warning');
+                return;
+            }
+            uiUpdater.clearStatusMessage('customTrendStatus');
+            domElements.customTrendOutput.innerHTML = '<div class="d-flex justify-content-center mt-3"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+            domElements.trackWikiTrendBtn.disabled = true;
+            appState.isLoading.customTrend = true;
+
+            try {
+                const timeRangeMonths = parseInt(domElements.timeRangeFilter.value) || AppConfig.defaultTimeRangeMonths;
+                const data = await apiService.fetchWikipediaTrend(articleName, timeRangeMonths);
+                uiUpdater.renderCustomTrackedTrend(articleName, data, null);
+            } catch (error) {
+                console.error('Error tracking custom trend:', error);
+                uiUpdater.renderCustomTrackedTrend(articleName, null, error);
+            } finally {
+                appState.isLoading.customTrend = false;
+                domElements.trackWikiTrendBtn.disabled = false;
+            }
+        }
+    };
+    
+    const mainInit = {
+        setAssetPaths(availableAssets) {
+            appState.imageAssetPaths = { ...availableAssets };
+            if (domElements.logoImage) domElements.logoImage.src = appState.imageAssetPaths.logo || '';
+            if (domElements.heroImageBanner) domElements.heroImageBanner.src = appState.imageAssetPaths.heroBanner || '';
+
+            AppConfig.categories.forEach(cat => {
+                cat.icon = appState.imageAssetPaths[`icon_${cat.id}`] || appState.imageAssetPaths.defaultCategoryIcon || '';
+            });
+        },
+        async loadInitialTrends(isFilterChange = false) {
+            const trendPromises = [];
+            const initialTrendObjects = [];
+
+            if (!isFilterChange) {
+                appState.isLoading.dashboard = true;
+                uiUpdater.renderDashboard(); 
+            }
+            
+            AppConfig.categories.forEach(category => {
+                category.trends.forEach(trendConfig => {
+                    const trendId = trendConfig.trendId;
+                    initialTrendObjects.push({
+                        id: trendId,
+                        name: trendConfig.name,
+                        categoryId: category.id,
+                        description: trendConfig.description,
+                        dataSource: trendConfig.dataSourceType === 'wikipedia' ? 'Wikipedia Pageviews' : 'Simulated Model',
+                        data: [],
+                        isLoading: true,
+                        defaultArticle: trendConfig.defaultArticle,
+                        simulationProfile: trendConfig.simulationProfile,
+                        dataSourceType: trendConfig.dataSourceType
+                    });
+                });
+            });
+            
+            appState.allTrendsData = initialTrendObjects;
+
+            appState.allTrendsData.forEach(trend => {
+                if (trend.dataSourceType === 'wikipedia') {
+                    trendPromises.push(
+                        apiService.fetchWikipediaTrend(trend.defaultArticle, appState.currentFilterTimeRange)
+                            .then(data => ({ id: trend.id, data }))
+                            .catch(error => ({ id: trend.id, error, data: [] }))
+                    );
+                } else if (trend.dataSourceType === 'simulated') {
+                     trendPromises.push(
+                        Promise.resolve().then(() => {
+                            const fullSimData = apiService.generateRealisticSimulatedData(AppConfig.maxSimulatedDataMonths, trend.simulationProfile);
+                            return { id: trend.id, data: fullSimData }; 
+                        })
+                    );
+                }
+            });
+
+            const results = await Promise.allSettled(trendPromises);
+            
+            results.forEach(result => {
+                if (result.status === 'fulfilled' && result.value) {
+                    const trendIdx = appState.allTrendsData.findIndex(t => t.id === result.value.id);
+                    if (trendIdx !== -1) {
+                        appState.allTrendsData[trendIdx].data = result.value.data;
+                        appState.allTrendsData[trendIdx].isLoading = false;
+                        if(result.value.error) appState.allTrendsData[trendIdx].error = result.value.error.message;
+                    }
+                } else if (result.status === 'rejected') {
+                    console.error("Failed to load a trend:", result.reason);
+                    const failedTrend = appState.allTrendsData.find(t => 
+                        trendPromises.find(p => p === result.reason?.promise)?.id === t.id
+                    );
+                    if(failedTrend) {
+                        failedTrend.isLoading = false;
+                        failedTrend.error = result.reason?.message || "Unknown error loading trend.";
+                    }
+                }
+            });
+            
+            appState.isLoading.dashboard = false;
+            uiUpdater.renderDashboard();
+            if (!isFilterChange || !appState.spotlightTrendId || !uiUpdater.getTrendById(appState.spotlightTrendId)) {
+                 uiUpdater.populateSpotlight();
+            } else {
+                 uiUpdater.populateSpotlight(appState.spotlightTrendId);
+            }
+            uiUpdater.displayFeaturedTrendWelcome();
+        },
+
+        init() {
+            domElements.logoImage = document.getElementById('logoImage');
+            domElements.heroImageBanner = document.getElementById('heroImageBanner');
+            domElements.categoryFilter = document.getElementById('categoryFilter');
+            domElements.timeRangeFilter = document.getElementById('timeRangeFilter');
+            domElements.trendGrid = document.getElementById('trendGrid');
+            domElements.noResultsMessage = document.getElementById('noResultsMessage');
+            domElements.spotlightContent = document.getElementById('spotlightContent');
+            domElements.trendModal = document.getElementById('trendModal');
+            domElements.trendModalLabel = document.getElementById('trendModalLabel');
+            domElements.trendModalBody = document.getElementById('trendModalBody');
+            domElements.currentYear = document.getElementById('currentYear');
+            domElements.featuredTrendWelcome = document.getElementById('featuredTrendWelcome');
+            domElements.wikiArticleInput = document.getElementById('wikiArticleInput');
+            domElements.trackWikiTrendBtn = document.getElementById('trackWikiTrendBtn');
+            domElements.customTrendOutput = document.getElementById('customTrendOutput');
+            domElements.customTrendStatus = document.getElementById('customTrendStatus');
+
+
+            const actualAssets = {
+                 logo: "/generated_images/dalle3_6e6da9d7-ef5.png",
+                 heroBanner: "/generated_images/dalle3_fa02ebd7-d57.png",
+                 defaultCategoryIcon: "/generated_images/dalle3_8eef466f-650.png",
+                 icon_tech: "/generated_images/dalle3_05bb9330-8e8.png", 
+                 icon_social: "/generated_images/dalle3_713dddaf-396.png",
+                 icon_fashion: "/generated_images/dalle3_2e110fbd-2dd.png",
+                 icon_finance: "/generated_images/dalle3_01d68a2b-3a7.png",
+                 icon_environment: "/generated_images/dalle3_b14f9451-06e.png",
+                 icon_popculture: "/generated_images/dalle3_b30d69b5-980.png"
+            };
+            mainInit.setAssetPaths(actualAssets);
+            
+            if(domElements.currentYear) domElements.currentYear.textContent = new Date().getFullYear();
+            uiUpdater.populateCategoryFilter();
+            
+            appState.currentFilterTimeRange = parseInt(domElements.timeRangeFilter.value);
+            mainInit.loadInitialTrends();
+
+            domElements.categoryFilter.addEventListener('change', eventHandlers.handleFilterChange);
+            domElements.timeRangeFilter.addEventListener('change', eventHandlers.handleFilterChange);
+            domElements.trendGrid.addEventListener('click', eventHandlers.handleGridActions);
+            if(domElements.trendModalBody) domElements.trendModalBody.addEventListener('click', eventHandlers.handleModalActions); 
+            document.body.addEventListener('click', eventHandlers.handleSpotlightOrWelcomeLink);
+            domElements.trackWikiTrendBtn.addEventListener('click', eventHandlers.handleTrackWikiTrend);
+
+            const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    navLinks.forEach(nav => nav.classList.remove('active'));
+                    link.classList.add('active');
+                });
+            });
+        }
+    };
+    
+    document.addEventListener('DOMContentLoaded', mainInit.init);
+
+})();
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

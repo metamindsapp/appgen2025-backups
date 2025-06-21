@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gene's Beans - Best Chili in Lower Mainland BC!</title>
+    <meta name="description" content="Gene's Beans is a mobile chili truck serving delicious, homemade chili across the Lower Mainland, BC. Find our daily location and view our menu!">
+    <meta name="keywords" content="chili, food truck, Vancouver, Burnaby, Richmond, Lower Mainland, BC, Gene's Beans, mobile food, spicy, comfort food, catering">
+    <meta name="author" content="Gene's Beans">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --bs-primary: #D32F2F;
+            --bs-primary-rgb: 211, 47, 47;
+            --bs-secondary: #FF8F00;
+            --bs-success: #4CAF50;
+            --bs-info: #2196F3;
+        }
+        .bg-primary { background-color: var(--bs-primary) !important; }
+        .text-primary { color: var(--bs-primary) !important; }
+        .btn-primary {
+            --bs-btn-color: #fff;
+            --bs-btn-bg: var(--bs-primary);
+            --bs-btn-border-color: var(--bs-primary);
+            --bs-btn-hover-color: #fff;
+            --bs-btn-hover-bg: #C62828;
+            --bs-btn-active-bg: #B71C1C;
+            --bs-btn-disabled-bg: var(--bs-primary);
+        }
+        .btn-outline-light {
+            --bs-btn-color: var(--bs-light);
+            --bs-btn-border-color: var(--bs-light);
+            --bs-btn-hover-color: var(--bs-primary);
+            --bs-btn-hover-bg: var(--bs-light);
+            --bs-btn-active-bg: var(--bs-light);
+        }
+        .hero-bg {
+            background-image: url('/generated_images/dalle3_23c088cf-ab2.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .bg-cover-overlay {
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+        .gallery-item-link {
+            display: block;
+            overflow: hidden;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15);
+            cursor: pointer;
+        }
+        .gallery-item-link img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            border-radius: 0.5rem;
+        }
+        .gallery-item-link:hover img {
+            transform: scale(1.05);
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,.25) !important;
+        }
+        #testimonials .rounded-circle {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border: 3px solid var(--bs-primary);
+        }
+        #map {
+            border-radius: 0.5rem;
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15);
+            z-index: 1;
+        }
+        body {
+            padding-top: 56px;
+        }
+        section {
+            padding-top: 56px;
+            margin-top: -56px;
+        }
+        a.text-primary:hover {
+            color: var(--bs-secondary) !important;
+        }
+        .card-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+        .badge-dietary {
+            font-size: 0.85em;
+            padding: 0.3em 0.6em;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top shadow-sm" aria-label="Main navigation">
+            <div class="container">
+                <a class="navbar-brand fw-bold text-primary" href="#home">Gene's Beans</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item"><a class="nav-link active" href="#home">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#menu">Menu</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#locations">Locations</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#about">About Us</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#gallery">Gallery</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main data-bs-spy="scroll" data-bs-target="#navbarNav" data-bs-root-margin="0px 0px -40%" data-bs-smooth-scroll="true" tabindex="0">
+        <section id="home" class="d-flex align-items-center text-center text-light bg-primary min-vh-100 position-relative hero-bg">
+            <div class="container z-1">
+                <h1 class="display-3 fw-bold mb-4">Gene's Beans</h1>
+                <p class="lead mb-5">Serving the best homemade chili in the Lower Mainland, BC!</p>
+                <a href="#locations" class="btn btn-primary btn-lg me-3">Find Our Truck!</a>
+                <a href="#menu" class="btn btn-outline-light btn-lg">View Our Menu</a>
+            </div>
+            <div class="position-absolute top-0 start-0 w-100 h-100 bg-cover-overlay"></div>
+        </section>
+
+        <section id="featured-chili" class="py-5 bg-light">
+            <div class="container">
+                <h2 class="text-center mb-5 display-5 fw-bold text-dark">Today's Special: Smokin' Hot Mess!</h2>
+                <div class="row align-items-center justify-content-center">
+                    <div class="col-md-6 col-lg-5 mb-4 mb-md-0">
+                        <img src="/generated_images/dalle3_f01a2842-87f.png" class="img-fluid rounded shadow-lg" alt="A steaming bowl of Smokin' Hot Mess chili with brisket, chipotle, and cilantro, served with cornbread." width="700" height="467">
+                    </div>
+                    <div class="col-md-6 col-lg-5">
+                        <h3 class="h2 text-primary mb-3">The Smokin' Hot Mess Chili</h3>
+                        <p class="lead">Prepare yourself for a flavor explosion! Our "Smokin' Hot Mess" chili features tender, slow-smoked beef brisket, fiery chipotle peppers, and a secret blend of spices that will leave your taste buds begging for more. Served with a side of our signature golden cornbread.</p>
+                        <ul class="list-unstyled mb-4">
+                            <li><i class="bi bi-fire text-primary me-2"></i><strong>Heat Level:</strong> Medium-Hot</li>
+                            <li><i class="bi bi-star-fill text-warning me-2"></i><strong>Chef's Recommendation:</strong> Top with pickled jalapeños and a dollop of sour cream!</li>
+                        </ul>
+                        <a href="#menu" class="btn btn-primary btn-lg">Explore Full Menu</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="menu" class="py-5">
+            <div class="container">
+                <h2 class="text-center mb-5 display-5 fw-bold text-dark">Our Delicious Chili Menu</h2>
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    <div class="col">
+                        <div class="card h-100 shadow-sm">
+                            <img src="/generated_images/dalle3_ac6dca2d-ddc.png" class="card-img-top" alt="A hearty bowl of Classic Beef Chili topped with melted cheddar cheese and sour cream." width="400" height="200">
+                            <div class="card-body">
+                                <h3 class="card-title h5 text-primary">Classic Beef Chili</h3>
+                                <p class="card-text">Our timeless recipe: rich ground beef, kidney beans, and a robust blend of spices. A true comfort classic.</p>
+                                <p class="fw-bold mb-1">$12.99</p>
+                                <span class="badge bg-success badge-dietary">Gluten-Friendly</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card h-100 shadow-sm">
+                            <img src="/generated_images/dalle3_0d06b003-039.png" class="card-img-top" alt="A vibrant bowl of Spicy Veggie Chili with black beans, corn, and colorful bell peppers." width="400" height="200">
+                            <div class="card-body">
+                                <h3 class="card-title h5 text-primary">Spicy Veggie Chili</h3>
+                                <p class="card-text">A vibrant, flavorful chili packed with black beans, corn, bell peppers, and a kick of chipotle. Healthy and satisfying.</p>
+                                <p class="fw-bold mb-1">$11.99</p>
+                                <span class="badge bg-info badge-dietary me-1">Vegetarian</span>
+                                <span class="badge bg-success badge-dietary">Gluten-Friendly</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card h-100 shadow-sm">
+                            <img src="/generated_images/dalle3_4736e893-eeb.png" class="card-img-top" alt="A rich, dark bowl of chili topped with tender, fall-apart shredded smoked pork carnitas." width="400" height="200">
+                            <div class="card-body">
+                                <h3 class="card-title h5 text-primary">Smoked Pork Carnitas Chili</h3>
+                                <p class="card-text">Slow-smoked pork carnitas infused into a savory chili base with pinto beans. Smoky, tender, and incredibly rich.</p>
+                                <p class="fw-bold mb-1">$13.99</p>
+                                <span class="badge bg-success badge-dietary">Gluten-Friendly</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card h-100 shadow-sm">
+                            <img src="/generated_images/dalle3_3c70190f-0bf.png" class="card-img-top" alt="Gene's Beans logo, a clean and professional design suitable for branding seasonal chili." width="400" height="200">
+                            <div class="card-body">
+                                <h3 class="card-title h5 text-primary">Seasonal Special Chili</h3>
+                                <p class="card-text">Ask us about our rotating seasonal chili! We craft unique flavors based on fresh, local ingredients.</p>
+                                <p class="fw-bold mb-1">Market Price</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card h-100 shadow-sm">
+                            <img src="/generated_images/dalle3_17e1ea97-718.png" class="card-img-top" alt="A beautifully presented bowl of chili with various classic toppings like cheese, sour cream, and green onions." width="400" height="200">
+                            <div class="card-body">
+                                <h3 class="card-title h5 text-primary">Toppings & Sides</h3>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">Shredded Cheddar <span class="fw-bold">$1.00</span></li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">Sour Cream <span class="fw-bold">$0.75</span></li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">Fresh Jalapeños <span class="fw-bold">$0.50</span></li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">Crispy Onions <span class="fw-bold">$0.75</span></li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">Cornbread <span class="fw-bold">$2.50</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card h-100 shadow-sm">
+                            <img src="/generated_images/dalle3_3c70190f-0bf.png" class="card-img-top" alt="Gene's Beans logo, a clean and professional design suitable for beverages." width="400" height="200">
+                            <div class="card-body">
+                                <h3 class="card-title h5 text-primary">Beverages</h3>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">Bottled Water <span class="fw-bold">$2.00</span></li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">Assorted Sodas <span class="fw-bold">$3.00</span></li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">Freshly Brewed Iced Tea <span class="fw-bold">$3.50</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="locations" class="py-5 bg-light">
+            <div class="container">
+                <h2 class="text-center mb-5 display-5 fw-bold text-dark">Find Our Truck!</h2>
+                <div class="row justify-content-center mb-5">
+                    <div class="col-12 col-lg-10">
+                        <p class="lead text-center mb-4">We're a mobile chili truck, always on the move! Check our map for today's approximate location and our schedule for where we'll be next. For real-time updates, follow us on social media!</p>
+                        <div id="map" style="height: 450px;" class="mb-5"></div>
+                    </div>
+                </div>
+                <div class="row justify-content-center">
+                    <div class="col-12 col-lg-8">
+                        <h3 class="h3 text-center text-primary mb-4">Upcoming Schedule</h3>
+                        <ul class="list-group shadow-sm">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Monday, May 27:</span> Downtown Vancouver (Burrard & Georgia)
+                                <span class="badge bg-primary rounded-pill">11 AM - 2 PM</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Tuesday, May 28:</span> Metrotown, Burnaby (near Central Park)
+                                <span class="badge bg-primary rounded-pill">12 PM - 3 PM</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Wednesday, May 29:</span> Richmond Night Market (Special Event)
+                                <span class="badge bg-primary rounded-pill">5 PM - 10 PM</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Thursday, May 30:</span> Gastown, Vancouver (Waterfront)
+                                <span class="badge bg-primary rounded-pill">11:30 AM - 2:30 PM</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Friday, May 31:</span> Port Moody Brewer's Row
+                                <span class="badge bg-primary rounded-pill">4 PM - 8 PM</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Saturday, June 1:</span> Trout Lake Farmers Market, Vancouver
+                                <span class="badge bg-primary rounded-pill">9 AM - 2 PM</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Sunday, June 2:</span> Private Catering Event (Closed to Public)
+                                <span class="badge bg-secondary rounded-pill">Closed</span>
+                            </li>
+                        </ul>
+                        <p class="text-center mt-4">Follow us on <a href="#" class="text-primary fw-bold">Instagram</a> and <a href="#" class="text-primary fw-bold">Facebook</a> for live location updates and daily specials!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="py-5">
+            <div class="container">
+                <h2 class="text-center mb-5 display-5 fw-bold text-dark">Our Story</h2>
+                <div class="row align-items-center justify-content-center">
+                    <div class="col-md-6 col-lg-5 order-md-2 mb-4 mb-md-0">
+                        <img src="/generated_images/dalle3_f3951ea8-dcc.png" class="img-fluid rounded shadow-lg" alt="The Gene's Beans food truck, clean and modern, parked in a pleasant outdoor setting." width="700" height="467">
+                    </div>
+                    <div class="col-md-6 col-lg-7 order-md-1">
+                        <h3 class="h2 text-primary mb-3">From Our Family Kitchen to Your Plate</h3>
+                        <p class="lead">Gene's Beans started with a simple passion: crafting the perfect bowl of chili. Our founder, Gene, spent years perfecting his recipes, drawing inspiration from family traditions and global flavors. What began as a weekend hobby for friends and family soon blossomed into a dream to share this delicious comfort food with the entire Lower Mainland.</p>
+                        <p>We believe in using only the freshest, high-quality ingredients, locally sourced whenever possible. Every batch of chili is made with love, slow-simmered to perfection, ensuring a rich, hearty, and unforgettable experience. From classic beef to adventurous veggie options, there's a bowl for everyone at Gene's Beans.</p>
+                        <p>Our chili truck isn't just about serving food; it's about bringing people together, one warm, satisfying bowl at a time. We're proud to be a part of the vibrant BC food scene and look forward to seeing you at our next stop!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="testimonials" class="py-5 bg-light">
+            <div class="container">
+                <h2 class="text-center mb-5 display-5 fw-bold text-dark">What Our Customers Say</h2>
+                <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        <div class="carousel-item active">
+                            <div class="d-flex flex-column align-items-center text-center p-4">
+                                <img src="/generated_images/dalle3_837334d1-780.png" class="rounded-circle mb-3 shadow-sm" alt="Happy customer, young woman, smiling." width="100" height="100">
+                                <p class="lead mb-3">"Absolutely the best chili I've ever had! The Smokin' Hot Mess is a game-changer. So much flavor and perfectly spiced. I track their truck every week!"</p>
+                                <footer class="blockquote-footer text-dark">Sarah L. from Vancouver</footer>
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <div class="d-flex flex-column align-items-center text-center p-4">
+                                <img src="/generated_images/dalle3_86396e83-824.png" class="rounded-circle mb-3 shadow-sm" alt="Happy customer, middle-aged man, smiling." width="100" height="100">
+                                <p class="lead mb-3">"Gene's Beans has become my go-to for lunch. The Classic Beef Chili is hearty and comforting, just like homemade. Highly recommend!"</p>
+                                <footer class="blockquote-footer text-dark">Mark T. from Burnaby</footer>
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <div class="d-flex flex-column align-items-center text-center p-4">
+                                <img src="/generated_images/dalle3_7001d9d0-347.png" class="rounded-circle mb-3 shadow-sm" alt="Happy customer, older woman, smiling." width="100" height="100">
+                                <p class="lead mb-3">"I love their Spicy Veggie Chili! It's so fresh and full of vibrant flavors. It's hard to find good vegetarian options at food trucks, but Gene's Beans delivers!"</p>
+                                <footer class="blockquote-footer text-dark">Emily R. from Richmond</footer>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="gallery" class="py-5">
+            <div class="container">
+                <h2 class="text-center mb-5 display-5 fw-bold text-dark">Our Gallery</h2>
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    <div class="col">
+                        <a href="#" class="gallery-item-link" data-bs-toggle="modal" data-bs-target="#imageModal" data-img-src="/generated_images/dalle3_89c3c16b-4fc.png" data-img-alt="Extreme close-up of a steaming bowl of chili, emphasizing texture and deliciousness.">
+                            <img src="/generated_images/dalle3_89c3c16b-4fc.png" alt="Extreme close-up of a steaming bowl of chili" width="400" height="250">
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a href="#" class="gallery-item-link" data-bs-toggle="modal" data-bs-target="#imageModal" data-img-src="/generated_images/dalle3_41f3d2d1-693.png" data-img-alt="Gene's Beans food truck serving a happy customer at the window.">
+                            <img src="/generated_images/dalle3_41f3d2d1-693.png" alt="Food truck serving customer" width="400" height="250">
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a href="#" class="gallery-item-link" data-bs-toggle="modal" data-bs-target="#imageModal" data-img-src="/generated_images/dalle3_3baedc11-1ef.png" data-img-alt="Artfully arranged fresh chili ingredients: peppers, tomatoes, beans, and spices.">
+                            <img src="/generated_images/dalle3_3baedc11-1ef.png" alt="Fresh chili ingredients" width="400" height="250">
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a href="#" class="gallery-item-link" data-bs-toggle="modal" data-bs-target="#imageModal" data-img-src="/generated_images/dalle3_6b091ab4-e8b.png" data-img-alt="A happy customer enjoying a spoonful of chili with a satisfied expression.">
+                            <img src="/generated_images/dalle3_6b091ab4-e8b.png" alt="Customer enjoying chili" width="400" height="250">
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a href="#" class="gallery-item-link" data-bs-toggle="modal" data-bs-target="#imageModal" data-img-src="/generated_images/dalle3_17e1ea97-718.png" data-img-alt="A beautifully presented bowl of chili with various classic toppings.">
+                            <img src="/generated_images/dalle3_17e1ea97-718.png" alt="Chili with various toppings" width="400" height="250">
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a href="#" class="gallery-item-link" data-bs-toggle="modal" data-bs-target="#imageModal" data-img-src="/generated_images/dalle3_3c70190f-0bf.png" data-img-alt="Close-up of the Gene's Beans logo, clean and professional.">
+                            <img src="/generated_images/dalle3_3c70190f-0bf.png" alt="Gene's Beans logo" width="400" height="250">
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="imageModalLabel">Image Title</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <img src="" id="modalImage" class="img-fluid rounded" alt="Enlarged image from gallery" width="800" height="600">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section id="contact" class="py-5 bg-primary text-light">
+            <div class="container">
+                <h2 class="text-center mb-5 display-5 fw-bold">Contact Us</h2>
+                <div class="row justify-content-center">
+                    <div class="col-md-8 col-lg-6">
+                        <p class="lead text-center mb-4">Have a question or want to book us for an event? Reach out to us!</p>
+                        <div class="d-flex justify-content-center mb-4">
+                            <a href="mailto:info@genesbeans.com" class="btn btn-outline-light btn-lg me-3"><i class="bi bi-envelope me-2"></i>Email Us</a>
+                            <a href="tel:+16045551234" class="btn btn-outline-light btn-lg"><i class="bi bi-phone me-2"></i>Call Us</a>
+                        </div>
+                        <h3 class="h3 text-center mb-4">Send Us a Message</h3>
+                        <form id="contactForm" class="p-4 rounded shadow-lg bg-white text-dark">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Name</label>
+                                <input type="text" class="form-control form-control-lg" id="name" required aria-required="true">
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email address</label>
+                                <input type="email" class="form-control form-control-lg" id="email" required aria-required="true">
+                            </div>
+                            <div class="mb-3">
+                                <label for="message" class="form-label">Message</label>
+                                <textarea class="form-control form-control-lg" id="message" rows="5" required aria-required="true"></textarea>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">Send Message</button>
+                            </div>
+                            <div id="formMessage" class="mt-3 text-center" style="display: none;"></div>
+                            <p class="text-muted small mt-3 text-center">Note: This form simulates submission for demonstration purposes. It does not send actual emails.</p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-dark text-light py-4">
+        <div class="container text-center">
+            <p class="mb-2">&copy; 2025 Gene's Beans. All rights reserved.</p>
+            <div class="social-icons mb-2">
+                <a href="#" class="text-light me-3" aria-label="Instagram"><i class="bi bi-instagram fs-4"></i></a>
+                <a href="#" class="text-light me-3" aria-label="Facebook"><i class="bi bi-facebook fs-4"></i></a>
+                <a href="#" class="text-light" aria-label="Twitter X"><i class="bi bi-twitter-x fs-4"></i></a>
+            </div>
+            <p class="small text-muted mb-0">Made with <i class="bi bi-heart-fill text-danger"></i> for chili lovers in the Lower Mainland, BC.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mapElement = document.getElementById('map');
+            if (mapElement) {
+                const geneBeansLocation = [49.2840, -123.1235];
+                const map = L.map('map').setView(geneBeansLocation, 15);
+
+                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+
+                L.marker(geneBeansLocation).addTo(map)
+                    .bindPopup('<b>Gene\'s Beans Truck</b><br>Today: Burrard & Georgia, Vancouver')
+                    .openPopup();
+            }
+
+            const imageModal = document.getElementById('imageModal');
+            if (imageModal) {
+                imageModal.addEventListener('show.bs.modal', function (event) {
+                    const triggerLink = event.relatedTarget;
+                    const imgSrc = triggerLink.getAttribute('data-img-src');
+                    const imgAlt = triggerLink.getAttribute('data-img-alt');
+
+                    const modalImage = imageModal.querySelector('#modalImage');
+                    const modalTitle = imageModal.querySelector('.modal-title');
+
+                    modalImage.src = imgSrc;
+                    modalImage.alt = imgAlt;
+                    modalTitle.textContent = imgAlt;
+                });
+            }
+
+            const contactForm = document.getElementById('contactForm');
+            const formMessage = document.getElementById('formMessage');
+
+            if (contactForm) {
+                contactForm.addEventListener('submit', function(event) {
+                    event.preventDefault();
+
+                    const name = document.getElementById('name').value.trim();
+                    const email = document.getElementById('email').value.trim();
+                    const message = document.getElementById('message').value.trim();
+
+                    if (!name || !email || !message) {
+                        formMessage.textContent = 'Please fill in all required fields.';
+                        formMessage.classList.remove('text-success');
+                        formMessage.classList.add('text-danger');
+                        formMessage.style.display = 'block';
+                        return;
+                    }
+
+                    formMessage.textContent = 'Thank you for your message! We will get back to you soon.';
+                    formMessage.classList.remove('text-danger');
+                    formMessage.classList.add('text-success');
+                    formMessage.style.display = 'block';
+
+                    contactForm.reset();
+
+                    setTimeout(() => {
+                        formMessage.style.display = 'none';
+                    }, 5000);
+                });
+            }
+
+            document.querySelectorAll('a.nav-link[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        const navbarHeight = document.querySelector('.navbar').offsetHeight;
+                        const offsetPosition = targetElement.offsetTop - navbarHeight;
+
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: "smooth"
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "projectId": "88e3d2de-aee9-4a22-b94e-010a2e969256",
+  "revisionString": "1",
+  "projectNameDisplay": "imageGen",
+  "projectType": "webapp",
+  "ownerPublicKey": "EZxuU9mZRqgsYxoFgDEnwNvWu4DYVjWiCFnSB3jSj7Hq",
+  "userPromptForThisRevision": "make a basic image generator please",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-06-04T14:53:16.479Z",
+  "imageAssets": [],
+  "isPublished": false,
+  "isShowcased": false
+}

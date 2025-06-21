@@ -1,0 +1,74 @@
+{
+  "projectId": "9a6d5ac7-2dab-4483-b83f-15fd4db1a37f",
+  "revisionString": "1",
+  "projectNameDisplay": "breakout2",
+  "projectType": "game",
+  "userPromptForThisRevision": "Fun breakout game",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-05-29T15:09:02.558Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/imagen3_23288ac7-9be.png",
+      "url": "/generated_images/imagen3_23288ac7-9be.png",
+      "description": "Subtle, abstract game background for a Breakout-style game. Light theme focus. Soft, light blue and light grey geometric patterns or a gentle gradient. Non-distracting, clean, and modern. Should evoke a sense of digital space. Avoid strong, dark colors.",
+      "purpose": "Game area background image, to be used as CSS background for #game-container or drawn on canvas.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_b5fd2ded-3b4.png",
+      "url": "/generated_images/imagen3_b5fd2ded-3b4.png",
+      "description": "Player paddle sprite for Breakout. Sleek, slightly rounded rectangular bar. Primary color: Bootstrap blue (#0d6efd) with a subtle lighter blue highlight on top edge for a slight 3D effect. Clean, flat design. Dimensions for sprite: approx 100px width, 20px height.",
+      "purpose": "Player paddle sprite.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_38f50f30-a77.png",
+      "url": "/generated_images/imagen3_38f50f30-a77.png",
+      "description": "Game ball sprite for Breakout. Perfect circle. Bright, energetic orange color (#fd7e14) with a small white specular highlight to suggest roundness. Stands out well against light backgrounds. Diameter for sprite: approx 20px.",
+      "purpose": "Game ball sprite.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_c43dd159-b85.png",
+      "url": "/generated_images/imagen3_c43dd159-b85.png",
+      "description": "Standard brick sprite for Breakout. Rectangle. Color: light grey (#ced4da from Bootstrap) with a very subtle inset shadow or top/left edge highlight to give a hint of depth. Clean. Dimensions for sprite: approx 60px width, 20px height.",
+      "purpose": "Standard brick sprite (1 hit).",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_9413540c-146.png",
+      "url": "/generated_images/imagen3_9413540c-146.png",
+      "description": "Strong brick sprite (2-hit variant) for Breakout. Same dimensions as standard brick (approx 60x20px). Color: a slightly more robust light blue (#cfe2ff from Bootstrap). Subtle visual difference like a hairline crack pattern or slightly thicker border to indicate it's tougher than standard brick. Maintain light theme.",
+      "purpose": "Strong brick sprite (for 2-hit bricks, initial state).",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_75d57de1-b3f.png",
+      "url": "/generated_images/imagen3_75d57de1-b3f.png",
+      "description": "Power-up brick sprite for Breakout. Same dimensions as standard brick (approx 60x20px). Color: a light, friendly green (#d1e7dd from Bootstrap) with a simple white star icon or 'P' symbol in the center. Clearly indicates it will drop a power-up.",
+      "purpose": "Brick that drops a power-up.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_50ab2fb6-57f.png",
+      "url": "/generated_images/imagen3_50ab2fb6-57f.png",
+      "description": "Icon for 'Large Paddle' power-up. A stylized wider version of the player paddle sprite (Bootstrap blue #0d6efd). Simple, clear, and recognizable at small size (e.g., 24x24px or 32x32px).",
+      "purpose": "Power-up icon for 'Large Paddle', used in UI and as falling item.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_58b45865-812.png",
+      "url": "/generated_images/imagen3_58b45865-812.png",
+      "description": "Icon for 'Multi-ball' power-up. Three small orange (#fd7e14) circles, similar to the game ball, clustered together. Simple, clear, and recognizable at small size (e.g., 24x24px or 32x32px).",
+      "purpose": "Power-up icon for 'Multi-ball', used in UI and as falling item.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_0b48ec0f-832.png",
+      "url": "/generated_images/imagen3_0b48ec0f-832.png",
+      "description": "Icon for 'Sticky Paddle' power-up. A stylized player paddle (Bootstrap blue #0d6efd) with a small ball (orange #fd7e14) appearing to be 'stuck' on its top surface, perhaps with a subtle 'magnetic field' or 'goo' effect. Simple, clear, and recognizable at small size (e.g., 24x24px or 32x32px).",
+      "purpose": "Power-up icon for 'Sticky Paddle', used in UI and as falling item.",
+      "isNewlyGenerated": true
+    }
+  ]
+}

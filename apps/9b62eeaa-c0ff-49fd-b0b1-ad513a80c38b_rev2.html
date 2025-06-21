@@ -1,0 +1,1853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beekeeping Simulator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; 
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        #app-container {
+            background-color: #eef2f7; 
+        }
+
+        #game-header {
+            background-color: #ffffff;
+            flex-shrink: 0; 
+            transition: border-bottom-color 0.5s ease-in-out;
+        }
+        
+        #game-title {
+            color: #0d6efd; 
+        }
+
+        #main-interface-area {
+            flex-grow: 1; 
+            overflow: hidden; 
+        }
+
+        #sidebar-nav {
+            overflow-y: auto; 
+            height: 100%; 
+        }
+
+        #content-pane {
+            overflow-y: auto; 
+            scroll-behavior: smooth;
+            height: 100%; 
+        }
+        
+        #game-footer {
+            flex-shrink: 0; 
+        }
+
+        #sidebar-nav .nav-link {
+            color: #343a40; 
+            padding: 0.6rem 1rem;
+            font-weight: 500;
+            border-radius: 0.3rem;
+        }
+
+        #sidebar-nav .nav-link.active {
+            background-color: var(--bs-primary);
+            color: white;
+        }
+
+        #sidebar-nav .nav-link:hover {
+            background-color: #e9ecef;
+            color: #0d6efd;
+        }
+
+        #sidebar-nav .nav-link img,
+        #sidebar-nav .nav-link .bi { 
+            opacity: 0.6;
+            transition: opacity 0.2s ease-in-out;
+            margin-right: 0.5em;
+        }
+
+        #sidebar-nav .nav-link.active img,
+        #sidebar-nav .nav-link:hover img,
+        #sidebar-nav .nav-link.active .bi,
+        #sidebar-nav .nav-link:hover .bi {
+            opacity: 1;
+        }
+        
+        #dynamic-hive-nav-list .nav-link {
+            font-size: 0.9em;
+            padding: 0.4rem 1rem;
+        }
+        
+        .card-header {
+            background-color: #f8f9fa;
+        }
+
+        .progress {
+            height: 1rem;
+            font-size: 0.75rem;
+        }
+        
+        .stat-value {
+            font-weight: bold;
+            color: var(--bs-primary);
+        }
+
+        .hive-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .hive-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.10)!important;
+        }
+        .icon-sm { 
+            width: 1.1em; 
+            height: 1.1em; 
+            vertical-align: text-bottom;
+        }
+        .action-btn-sm {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+        }
+        .guide-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.25rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .almanac-cover {
+            max-height: 250px;
+            object-fit: cover;
+            width: 100%;
+            border-radius: .25rem;
+            margin-bottom: 1.5rem;
+        }
+        .toast-container {
+            z-index: 1100; 
+        }
+        .bi { 
+            vertical-align: -0.125em; 
+        }
+        .btn .bi {
+             vertical-align: text-bottom;
+        }
+        #pause-button .bi-play-fill, #pause-button .bi-pause-fill {
+            font-size: 1.1em; 
+        }
+        .journal-list {
+            max-height: 60vh; 
+            overflow-y: auto;
+        }
+        #game-header.header-spring { border-bottom: 3px solid #28a745 !important; }
+        #game-header.header-summer { border-bottom: 3px solid #ffc107 !important; }
+        #game-header.header-autumn { border-bottom: 3px solid #fd7e14 !important; }
+        #game-header.header-winter { border-bottom: 3px solid #0dcaf0 !important; }
+    </style>
+</head>
+<body>
+    <div id="app-container" class="container-fluid d-flex flex-column min-vh-100 p-0">
+
+        <header id="game-header" class="py-3 px-4 bg-white border-bottom shadow-sm">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 id="game-title" class="h2 mb-0">Beekeeping Simulator</h1>
+                <div id="game-status-bar" class="text-center mx-3">
+                    <div><span id="beekeeper-name-display" class="fw-bold">My Apiary</span></div>
+                    <div>Date: <span id="game-date" class="fw-bold">Spring, Year 1, Day 1</span></div>
+                    <div>Money: <span id="player-money" class="fw-bold text-success">$500</span></div>
+                    <div>Apiary Health: <span id="apiary-health-status" class="fw-bold">Good</span></div>
+                </div>
+                <div class="text-end">
+                    <button id="next-day-button" class="btn btn-primary btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Advance to the next day"><i class="bi bi-caret-right-fill"></i> Advance Day</button>
+                    <button id="pause-button" class="btn btn-secondary btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Pause Game"><i class="bi bi-pause-fill"></i> Pause</button>
+                    <button id="settings-button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#settingsModal" data-bs-tooltip="tooltip" data-bs-placement="bottom" title="Game Settings">
+                        <img src="/generated_images/dalle_3fcb1131-10c.png" alt="Settings" style="width: 1.2em; height: 1.2em; vertical-align: middle;">
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div id="main-interface-area" class="flex-grow-1 d-flex p-3">
+            <nav id="sidebar-nav" class="col-lg-2 col-md-3 bg-white p-3 border rounded shadow-sm me-3">
+                <ul class="nav nav-pills flex-column">
+                    <li class="nav-item mb-2"><a class="nav-link active" id="nav-apiary-overview" href="#"><img src="/generated_images/dalle_1b6fffb3-faa.png" class="icon-sm" alt="Apiary Icon">Apiary Overview</a></li>
+                    <li class="nav-item mb-2"><a class="nav-link" id="nav-market" href="#"><img src="/generated_images/dalle_4fbd6488-32b.png" class="icon-sm" alt="Market Icon">Market</a></li>
+                    <li class="nav-item mb-2"><a class="nav-link" id="nav-research" href="#"><img src="/generated_images/dalle_24279f93-1c0.png" class="icon-sm" alt="Research Icon">Knowledge</a></li>
+                    <li class="nav-item mb-2"><a class="nav-link" id="nav-guide" href="#"><img src="/generated_images/dalle_034e8bdf-261.png" class="icon-sm" alt="Guide Icon">Beekeeper's Almanac</a></li>
+                    <li class="nav-item mb-2"><a class="nav-link" id="nav-journal" href="#"><i class="bi bi-book"></i>Beekeeper's Journal</a></li>
+                </ul>
+                <hr>
+                <div id="hive-list-nav" class="mt-3">
+                    <h6 class="text-muted">My Hives:</h6>
+                    <ul class="nav nav-pills flex-column" id="dynamic-hive-nav-list">
+                    </ul>
+                </div>
+            </nav>
+
+            <main id="content-pane" class="col-lg-10 col-md-9 bg-white p-4 border rounded shadow-sm">
+            </main>
+        </div>
+
+        <footer id="game-footer" class="py-2 px-4 bg-white border-top text-center">
+            <small class="text-muted">Beekeeping Simulator v<span id="game-version-display">0.1.2</span> | Current Season: <span id="footer-season">Spring</span> | Weather: <span id="footer-weather">Sunny</span></small>
+        </footer>
+    </div>
+
+    <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true"><div class="modal-dialog modal-lg"><div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title" id="settingsModalLabel">Settings</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+        <div class="modal-body">
+            <div class="mb-3">
+                <label for="beekeeperNameInputModal" class="form-label">Beekeeper/Apiary Name:</label>
+                <input type="text" class="form-control" id="beekeeperNameInputModal" value="My Apiary" maxlength="25">
+            </div>
+            <button type="button" class="btn btn-warning" id="resetGameButtonModal"><i class="bi bi-exclamation-triangle"></i> Reset Game Data</button>
+            <small class="d-block mt-1 text-muted">This will erase all progress and start a new game.</small>
+        </div>
+        <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button><button type="button" class="btn btn-primary" id="saveSettingsButtonModal"><i class="bi bi-save"></i> Save Settings</button></div>
+    </div></div></div>
+
+    <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title" id="eventModalLabel">Event!</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+        <div class="modal-body" id="eventModalBody"></div>
+        <div class="modal-footer" id="eventModalFooter"></div>
+    </div></div></div>
+
+    <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title" id="confirmationModalLabel">Confirm Action</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+        <div class="modal-body" id="confirmationModalBody"></div>
+        <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="confirmationCancelBtn">Cancel</button><button type="button" class="btn btn-primary" id="confirmationConfirmBtn">Confirm</button></div>
+    </div></div></div>
+
+    <div class="modal fade" id="guideDetailModal" tabindex="-1" aria-labelledby="guideDetailModalLabel" aria-hidden="true"><div class="modal-dialog modal-xl modal-dialog-scrollable"><div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title" id="guideDetailModalLabel">Guide Entry</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+        <div class="modal-body" id="guideDetailModalBody"></div>
+        <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button></div>
+    </div></div></div>
+    
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+      <div id="gameToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+          <strong class="me-auto" id="toastTitle">Notification</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="toastBody">
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    (function() {
+        'use strict';
+
+        const GAME_VERSION = "0.1.2";
+        const SEASONS = { SPRING: "Spring", SUMMER: "Summer", AUTUMN: "Autumn", WINTER: "Winter" };
+        const WEATHER_TYPES = ["Sunny", "Cloudy", "Rainy", "Windy", "Cold Snap", "Heatwave"];
+        const INITIAL_MONEY = 500;
+        const INITIAL_HIVES = 1;
+        const MAX_HIVE_NAME_LENGTH = 25;
+        const VARROA_GROWTH_RATE = 0.05; 
+        const VARROA_TREATMENT_EFFECTIVENESS = 0.8; 
+
+        let gameState; 
+        
+        let settingsModalInstance, eventModalInstance, confirmationModalInstance, guideDetailModalInstance, gameToastInstance;
+
+        const DOM = {
+            contentPane: document.getElementById('content-pane'),
+            beekeeperNameDisplay: document.getElementById('beekeeper-name-display'),
+            gameDateDisplay: document.getElementById('game-date'),
+            playerMoneyDisplay: document.getElementById('player-money'),
+            apiaryHealthDisplay: document.getElementById('apiary-health-status'),
+            footerSeasonDisplay: document.getElementById('footer-season'),
+            footerWeatherDisplay: document.getElementById('footer-weather'),
+            dynamicHiveNavList: document.getElementById('dynamic-hive-nav-list'),
+            pauseButton: document.getElementById('pause-button'),
+            pauseButtonIcon: document.querySelector('#pause-button .bi'),
+            nextDayButton: document.getElementById('next-day-button'),
+            settingsModal: {
+                beekeeperNameInput: document.getElementById('beekeeperNameInputModal'),
+                saveButton: document.getElementById('saveSettingsButtonModal'),
+                resetButton: document.getElementById('resetGameButtonModal')
+            },
+            eventModal: {
+                title: document.getElementById('eventModalLabel'),
+                body: document.getElementById('eventModalBody'),
+                footer: document.getElementById('eventModalFooter')
+            },
+            confirmationModal: {
+                title: document.getElementById('confirmationModalLabel'),
+                body: document.getElementById('confirmationModalBody'),
+                confirmButton: document.getElementById('confirmationConfirmBtn')
+            },
+            guideDetailModal: {
+                title: document.getElementById('guideDetailModalLabel'),
+                body: document.getElementById('guideDetailModalBody')
+            },
+            toast: {
+                title: document.getElementById('toastTitle'),
+                body: document.getElementById('toastBody'),
+            },
+            gameVersionDisplay: document.getElementById('game-version-display')
+        };
+        
+        const GameData = {
+            guideContent: [
+                { id: "welcome", title: "Welcome to Beekeeping!", shortDesc: "An introduction to your apiary.", 
+                  fullContentHTML: `
+                    <img src="/generated_images/dalle_9e83b2a9-3d9.png" alt="Apiary" class="img-fluid rounded mb-3 almanac-cover">
+                    <h4>Welcome, Beekeeper!</h4>
+                    <p>This almanac is your guide to the fascinating world of bees and the art of beekeeping. Here, you'll find information on bee biology, hive management, common challenges, and how the simulation mirrors real-life beekeeping practices.</p>
+                    <p>Your journey begins with a small apiary. Your goal is to nurture your colonies, help them thrive through the seasons, harvest valuable products, and expand your operation. Pay close attention to your bees' needs, the changing weather, and potential threats like pests and diseases.</p>
+                    <p>Use the navigation on the left to explore different aspects of the game. Good luck!</p>` 
+                },
+                { id: "bee_types", title: "Bee Types & Roles", shortDesc: "Queen, Worker, Drone.", 
+                  fullContentHTML: `<h4>Bee Types & Roles</h4>
+                    <p>A honey bee colony is a complex society with specialized roles for each type of bee.</p>
+                    <h5>Queen Bee</h5>
+                    <img src="/generated_images/dalle_4d02bfd9-1a0.png" alt="Queen Bee" class="guide-image" style="max-width:300px;">
+                    <p>The queen is the heart of the colony. Her primary role is to lay eggs, ensuring the continuation of the hive. A healthy queen can lay thousands of eggs per day during peak season. She also produces pheromones that regulate colony cohesion and behavior. In this simulation, queen health and age affect her laying rate.</p>
+                    <h5>Worker Bee</h5>
+                    <img src="/generated_images/dalle_0ae3380b-d92.png" alt="Worker Bee" class="guide-image" style="max-width:300px;">
+                    <p>Worker bees are sterile females and make up the vast majority of the colony. They perform all the tasks necessary for hive survival, including: cleaning cells, feeding larvae (nurse bees), building wax comb, guarding the hive entrance, and foraging for nectar, pollen, water, and propolis. Their roles change as they age. Foragers are crucial for resource gathering in the game.</p>
+                    <h5>Drone Bee</h5>
+                    <img src="/generated_images/dalle_1d178691-0dc.png" alt="Drone Bee" class="guide-image" style="max-width:300px;">
+                    <p>Drones are male bees. Their sole purpose is to mate with a virgin queen. They do not forage, build comb, or defend the hive. Drones are produced in spring and summer and are often expelled from the hive in autumn to conserve resources. In the game, drone population has a minor impact on queen mating success (an abstracted concept for now).</p>` 
+                },
+                { id: "hive_inspections", title: "Hive Inspections", shortDesc: "What to look for.", 
+                  fullContentHTML: `<h4>Hive Inspections</h4>
+                    <p>Regular hive inspections are crucial for monitoring colony health, population, resources, and identifying problems early.</p>
+                    <h5>What to Look For:</h5>
+                    <ul>
+                        <li><strong>Queen Presence:</strong> Spotting the queen, or evidence of her (freshly laid eggs), confirms she is alive and laying.</li>
+                        <li><strong>Brood Pattern:</strong> A healthy queen lays eggs in a compact, solid pattern. Scattered brood can indicate problems.
+                           <img src="/generated_images/dalle_2a85bba6-439.png" alt="Healthy Brood" class="guide-image" style="max-width:400px;"></li>
+                        <li><strong>Population Size:</strong> Estimate the number of bees covering the frames.</li>
+                        <li><strong>Food Stores:</strong> Check levels of honey and pollen. Bees need adequate food, especially heading into winter or during nectar dearths.</li>
+                        <li><strong>Pests & Diseases:</strong> Look for signs of Varroa mites, Small Hive Beetles, Wax Moths, or symptoms of diseases like American Foulbrood or Chalkbrood.</li>
+                        <li><strong>Swarm Cells:</strong> Presence of queen cells (swarm cells or supersedure cells) indicates the colony might be preparing to swarm or replace their queen.</li>
+                    </ul>
+                    <p>In the simulation, performing an inspection reveals detailed information about the hive but can slightly stress the colony.</p>`
+                },
+                { id: "pests_diseases", title: "Common Pests & Diseases", shortDesc: "Identifying and managing threats.", 
+                  fullContentHTML: `<h4>Common Pests & Diseases</h4>
+                    <p>Honey bee colonies are susceptible to various pests and diseases that can weaken or destroy them if not managed.</p>
+                    <h5>Varroa Mites (<em>Varroa destructor</em>)</h5>
+                    <img src="/generated_images/dalle_83639747-1d2.png" alt="Varroa Mite" class="guide-image" style="max-width:300px;">
+                    <p>Varroa mites are external parasites that feed on adult bees and developing brood. They transmit viruses and weaken the colony. High mite levels are a primary cause of colony losses. Regular monitoring and treatment are essential. In the game, Varroa levels increase over time and impact hive health.</p>
+                    <h5>American Foulbrood (AFB)</h5>
+                    <img src="/generated_images/dalle_04593238-fd5.png" alt="American Foulbrood" class="guide-image" style="max-width:400px;">
+                    <p>AFB is a highly contagious and destructive bacterial disease affecting bee larvae. Symptoms include sunken, perforated cappings and a "ropy" larval remnant. There is no cure; infected colonies and equipment usually must be destroyed by burning to prevent spread. This is a serious threat in the simulation.</p>
+                    <h5>Chalkbrood</h5>
+                    <img src="/generated_images/dalle_eea9b54c-2a0.png" alt="Chalkbrood" class="guide-image" style="max-width:400px;">
+                    <p>Chalkbrood is a fungal disease that affects larvae, causing them to become hard, chalk-like mummies. It's often stress-related and typically less devastating than AFB but can weaken colonies. Good ventilation and strong colonies help prevent it.</p>
+                    <h5>Small Hive Beetle (SHB)</h5>
+                    <img src="/generated_images/dalle_82085711-4ff.png" alt="Small Hive Beetle" class="guide-image" style="max-width:300px;">
+                    <p>SHB are pests that can damage comb, honey, and pollen. Larvae burrow through comb, and adults can cause honey to ferment. Strong colonies can usually manage small beetle populations, but weak hives are vulnerable. Traps can help control them.</p>
+                    <h5>Wax Moths</h5>
+                    <img src="/generated_images/dalle_6fdb66d6-83d.png" alt="Wax Moth Damage" class="guide-image" style="max-width:400px;">
+                    <p>Wax moths infest hives, particularly weak ones or stored comb. Larvae tunnel through comb, consuming wax, pollen, and honey, leaving behind webbing and debris. Strong colonies and proper storage of equipment are key preventatives.</p>`
+                },
+                 { id: "sim_vs_reality", title: "Simulation vs. Reality", shortDesc: "How the game models beekeeping.", 
+                  fullContentHTML: `<h4>Simulation vs. Reality</h4>
+                    <p>This Beekeeping Simulator aims to capture many core aspects of real-world beekeeping, but it is, by necessity, a simplification. Here's how some game mechanics relate to reality:</p>
+                    <ul>
+                        <li><strong>Time & Seasons:</strong> The game progresses day by day, with distinct seasons. Real beekeeping is heavily influenced by seasonal changes in weather, forage availability, and bee behavior. The simulation models this by adjusting parameters like nectar flow, queen laying rates, and pest activity based on the season.</li>
+                        <li><strong>Hive Population Dynamics:</strong> Worker bee populations rise and fall based on the queen's egg-laying, brood development time, and bee lifespan. This mirrors the natural colony cycle. Forager numbers directly impact resource collection.</li>
+                        <li><strong>Resource Management:</strong> Bees collect nectar (converted to honey) and pollen. The game requires you to monitor these stores, especially for winter survival, similar to a real beekeeper. Feeding might be necessary.</li>
+                        <li><strong>Pest & Disease Management:</strong> Varroa mites, AFB, etc., are simulated threats. The game allows for treatments, which have effectiveness rates and costs, reflecting real-world decisions beekeepers make. Early detection and intervention are key in both the game and reality.</li>
+                        <li><strong>Inspections:</strong> Performing inspections in the game gives you vital information, similar to opening a real hive. However, the stress impact in the game is a simplified representation of the disturbance caused by inspections.</li>
+                        <li><strong>Market & Economics:</strong> Buying equipment and selling honey/products reflects the economic side of beekeeping. Prices may fluctuate based on simulated supply/demand or quality.</li>
+                        <li><strong>Abstractions:</strong> Many complex biological processes (e.g., bee communication, detailed genetics, precise nutritional values of pollen) are abstracted for gameplay. For example, "forage quality" might be a single variable instead of modeling hundreds of plant types.</li>
+                    </ul>
+                    <p>The goal is to provide an engaging and educational experience that highlights the challenges and rewards of beekeeping. While not every detail can be perfectly replicated, the core principles of colony health, resource management, and seasonal awareness are central to the simulation.</p>`
+                },
+            ],
+            marketItems: [
+                { id: "sugar", name: "Sugar (1kg)", type: "supply", buyPrice: 2, sellPrice: null, description: "For making sugar syrup to feed bees." },
+                { id: "pollen_patty", name: "Pollen Patty", type: "supply", buyPrice: 5, sellPrice: null, description: "Provides protein supplement for brood rearing." },
+                { id: "varroa_treatment_basic", name: "Basic Varroa Treatment", type: "treatment", buyPrice: 15, sellPrice: null, description: "A standard treatment for Varroa mites." },
+                { id: "hive_body", name: "New Hive Body", type: "equipment", buyPrice: 50, sellPrice: 10, description: "A complete new hive setup (box, frames, foundation)." },
+                { id: "raw_honey", name: "Raw Honey (1kg)", type: "product", buyPrice: null, sellPriceBase: 8, description: "Unprocessed honey from your hives." },
+                { id: "beeswax", name: "Beeswax (100g)", type: "product", buyPrice: null, sellPriceBase: 3, description: "Rendered beeswax." }
+            ],
+            researchNodes: [
+                { id: "basic_beekeeping", name: "Basic Beekeeping", cost: 0, description: "Fundamental knowledge of bee care.", unlocked: true, effects: {} },
+                { id: "varroa_monitoring", name: "Varroa Monitoring", cost: 50, prereq: "basic_beekeeping", description: "Learn to identify and count Varroa mites.", unlocked: false, effects: { varroaDetectionChance: 0.1 } },
+                { id: "advanced_feeding", name: "Advanced Feeding Strategies", cost: 75, prereq: "basic_beekeeping", description: "Understand optimal feeding times and ratios.", unlocked: false, effects: { feedingEffectiveness: 0.15 } },
+                { id: "integrated_pest_management", name: "Integrated Pest Management", cost: 150, prereq: "varroa_monitoring", description: "Holistic approaches to pest control.", unlocked: false, effects: { treatmentCostReduction: 0.1 } }
+            ],
+            eventDefinitions: [
+                { 
+                    id: "good_forage", 
+                    title: "Excellent Foraging Conditions!", 
+                    text: "The weather has been perfect and local flora is booming. Your bees are bringing in extra nectar!",
+                    type: "positive",
+                    condition: (gs) => gs.currentSeason !== SEASONS.WINTER && Math.random() < 0.05,
+                    effect: (gs) => {
+                        gs.hives.forEach(hive => {
+                            if (hive.population.foragers > 0) hive.resources.nectar += Math.floor(Math.random() * 5 + 2); 
+                        });
+                        UIManager.showToast("Bumper Harvest!", "Your bees found abundant nectar today.");
+                        JournalManager.addEntry(`Excellent foraging conditions boosted nectar collection.`);
+                    },
+                    choices: [{ text: "Wonderful!", action: null }]
+                },
+                {
+                    id: "mild_varroa_increase",
+                    title: "Varroa Mite Activity",
+                    text: "Routine checks suggest a slight increase in Varroa mite populations in some hives. Consider monitoring closely or treating if levels get high.",
+                    type: "neutral",
+                    condition: (gs) => gs.hives.some(h => h.health.varroaMites > 100 && h.health.varroaMites < 500) && Math.random() < 0.1,
+                    effect: null,
+                    choices: [{ text: "Noted.", action: null }]
+                },
+                {
+                    id: "pesticide_incident_nearby",
+                    title: "Pesticide Concern",
+                    text: "Reports indicate pesticide spraying occurred in a nearby agricultural area. This might affect your foragers.",
+                    type: "negative",
+                    condition: (gs) => (gs.currentSeason === SEASONS.SPRING || gs.currentSeason === SEASONS.SUMMER) && Math.random() < 0.03,
+                    effect: (gs) => {
+                        let affectedHivesCount = 0;
+                        gs.hives.forEach(hive => {
+                            if (Math.random() < 0.3) { 
+                                const loss = Math.floor(hive.population.foragers * (Math.random() * 0.1 + 0.05)); 
+                                hive.population.foragers = Math.max(0, hive.population.foragers - loss);
+                                hive.population.total = hive.population.workers + hive.population.drones; 
+                                affectedHivesCount++;
+                                JournalManager.addEntry(`Hive ${hive.name} lost ${loss} foragers due to pesticide exposure.`);
+                            }
+                        });
+                        if (affectedHivesCount > 0) {
+                           UIManager.showToast("Forager Losses!", `${affectedHivesCount} hive(s) experienced forager losses due to pesticides.`, "warning");
+                        }
+                    },
+                    choices: [{ text: "Oh no!", action: null}]
+                }
+            ]
+        };
+        
+        function initializeNewGameState() {
+            gameState = {
+                beekeeperName: "My Apiary",
+                money: INITIAL_MONEY,
+                year: 1,
+                currentSeason: SEASONS.SPRING,
+                dayInSeason: 1,
+                dayTotal: 1,
+                currentWeather: WEATHER_TYPES[0],
+                hives: [],
+                inventory: { rawHoney: 0, beeswax: 0, sugar: 0, pollenpatty: 0 },
+                researchPoints: 0,
+                unlockedResearch: ["basic_beekeeping"],
+                researchEffects: {},
+                journal: [],
+                isGameOver: false
+            };
+            for (let i = 0; i < INITIAL_HIVES; i++) {
+                const newHiveId = gameState.hives.length > 0 ? Math.max(...gameState.hives.map(h => h.id)) + 1 : 1;
+                gameState.hives.push(new Hive(newHiveId, `Hive ${newHiveId}`));
+            }
+            JournalManager.addEntry("Welcome to your new apiary! Your beekeeping journey begins.");
+        }
+
+        const PersistenceManager = {
+            SAVE_KEY: `beekeepingSimulatorSaveData_v_${GAME_VERSION.replace(/\./g, '_')}`,
+            GAME_MODEL_VERSION: GAME_VERSION,
+
+            saveGame() {
+                if (gameState.isGameOver && !confirm("Game is over. Save final state? This might prevent starting a new game automatically if you reload.")) {
+                    return; 
+                }
+                try {
+                    const dataToSave = {
+                        version: this.GAME_MODEL_VERSION,
+                        timestamp: new Date().toISOString(),
+                        gameState: gameState
+                    };
+                    localStorage.setItem(this.SAVE_KEY, JSON.stringify(dataToSave));
+                } catch (error) {
+                    console.error("Error saving game:", error);
+                    UIManager.showToast("Save Failed", "Could not save game data. Your browser might be blocking local storage or it's full.", "danger");
+                }
+            },
+
+            loadGame() {
+                try {
+                    const savedString = localStorage.getItem(this.SAVE_KEY);
+                    if (!savedString) return false;
+
+                    const savedData = JSON.parse(savedString);
+                    if (!savedData || typeof savedData !== 'object') {
+                        console.error("Invalid saved data format.");
+                        return false;
+                    }
+
+                    if (savedData.version !== this.GAME_MODEL_VERSION) {
+                        UIManager.showToast("Load Failed", `Save data is from an incompatible version (${savedData.version}). Starting a new game. Current version is ${this.GAME_MODEL_VERSION}.`, "warning");
+                        localStorage.removeItem(this.SAVE_KEY); 
+                        return false;
+                    }
+
+                    if (!savedData.gameState) {
+                        console.error("Saved data is missing gameState.");
+                        return false;
+                    }
+                    
+                    gameState = savedData.gameState;
+
+                    gameState.inventory = gameState.inventory || { rawHoney: 0, beeswax: 0, sugar: 0, pollenpatty: 0 };
+                    gameState.journal = gameState.journal || [];
+                    gameState.unlockedResearch = gameState.unlockedResearch || ["basic_beekeeping"];
+                    gameState.researchEffects = gameState.researchEffects || {};
+                    gameState.isGameOver = gameState.isGameOver || false;
+                    gameState.beekeeperName = gameState.beekeeperName || "My Apiary";
+                    gameState.hives = gameState.hives || [];
+
+
+                    if (gameState.hives && Array.isArray(gameState.hives)) {
+                        gameState.hives = gameState.hives.map(plainHive => {
+                            if (!plainHive || typeof plainHive !== 'object') return null;
+                            const hiveInstance = new Hive(plainHive.id, plainHive.name);
+                            Object.assign(hiveInstance, plainHive);
+                            if (plainHive.queen && typeof plainHive.queen === 'object') {
+                                const queenInstance = new Queen();
+                                Object.assign(queenInstance, plainHive.queen);
+                                hiveInstance.queen = queenInstance;
+                            } else {
+                                hiveInstance.queen = new Queen(); 
+                            }
+                            return hiveInstance;
+                        }).filter(h => h !== null);
+                    } else {
+                        gameState.hives = [];
+                    }
+                    
+                    UIManager.showToast("Game Loaded", `Welcome back, ${gameState.beekeeperName}!`, "success");
+                    return true;
+                } catch (error) {
+                    console.error("Error loading game:", error);
+                    UIManager.showToast("Load Error", "Failed to load saved game. Starting a new game.", "danger");
+                    localStorage.removeItem(this.SAVE_KEY); 
+                    return false;
+                }
+            },
+            
+            resetGameConfirm(confirmUser = true) {
+                if (confirmUser) {
+                    UIManager.showConfirmation("Are you sure you want to reset all game data and start over?", () => {
+                        this.performReset();
+                    });
+                } else {
+                    this.performReset();
+                }
+            },
+
+            performReset() {
+                try {
+                    localStorage.removeItem(this.SAVE_KEY);
+                } catch (error) {
+                    console.error("Error clearing saved game data:", error);
+                    UIManager.showToast("Reset Error", "Could not clear old save data from local storage.", "warning");
+                }
+                initializeNewGameState();
+                GameLoopManager.isPaused = false; 
+                DOM.pauseButtonIcon.className = 'bi bi-pause-fill';
+                DOM.pauseButton.setAttribute('data-bs-original-title', 'Pause Game');
+                DOM.nextDayButton.disabled = false;
+                DOM.pauseButton.disabled = false;
+
+                UIManager.currentView = 'apiary-overview';
+                UIManager.activeHiveId = null;
+                UIManager.render();
+                UIManager.showToast("Game Reset", "A new beekeeping season begins!", "info");
+                if (settingsModalInstance) settingsModalInstance.hide();
+                if (eventModalInstance) eventModalInstance.hide();
+                if (confirmationModalInstance) confirmationModalInstance.hide();
+
+            }
+        };
+
+        class Queen {
+            constructor(age = 0, health = 100, baseLayingRate = 1000) {
+                this.age = age; 
+                this.health = health; 
+                this.baseLayingRate = baseLayingRate; 
+                this.maxLifespan = 3 * 365; 
+            }
+
+            dailyUpdate(hiveResources) {
+                this.age++;
+                if (this.age > this.maxLifespan * 0.75 && Math.random() < 0.005) this.health -= 5; 
+                this.health = Math.max(0, Math.min(100, this.health));
+            }
+
+            layEggs(season) {
+                if (this.health < 20 || season === SEASONS.WINTER) return 0;
+                
+                let currentEffectiveLayingRate = this.baseLayingRate * (this.health / 100.0);
+
+                let potentialEggs = currentEffectiveLayingRate;
+                if (season === SEASONS.SPRING) potentialEggs *= 1.0;
+                else if (season === SEASONS.SUMMER) potentialEggs *= 1.2;
+                else if (season === SEASONS.AUTUMN) potentialEggs *= 0.5;
+                
+                return Math.floor(Math.random() * potentialEggs);
+            }
+        }
+
+        class Hive {
+            constructor(id, name) {
+                this.id = id;
+                this.name = name || `Hive ${id}`;
+                this.queen = new Queen();
+                this.population = { workers: 10000, drones: 500, foragers: 4000, total: 10500 };
+                this.brood = { eggs: 0, larvae: 0, pupae: 0 };
+                this.resources = { honey: 5, pollen: 2, nectar: 2, water: 1, wax: 1 }; 
+                this.comb = { drawnFrames: 5, totalFrames: 10 }; 
+                this.health = { overall: 90, varroaMites: 50, diseases: {} };
+                this.temperament = "Calm"; 
+                this.swarmingUrge = 0; 
+                this.lastInspectionDay = -1;
+            }
+
+            dailyUpdate(season, weather) {
+                this.queen.dailyUpdate(this.resources);
+
+                let eggsLaid = this.queen.layEggs(season);
+                if (this.resources.pollen < eggsLaid * 0.001 || this.population.workers < eggsLaid * 0.002) { 
+                    eggsLaid = Math.min(eggsLaid, Math.floor(this.resources.pollen / 0.001), Math.floor(this.population.workers / 0.002));
+                }
+                this.brood.eggs += eggsLaid;
+
+                let dailyForagingGain = this.calculateForaging(season, weather);
+                this.resources.nectar += dailyForagingGain.nectar;
+                this.resources.pollen += dailyForagingGain.pollen;
+
+                this.convertNectarToHoney();
+                this.consumeResources();
+                this.developBrood();
+                this.updatePopulation(); 
+                this.updateHealth(season);
+                this.updateSwarmingUrge(season);
+                
+                this.resources.nectar = Math.max(0, parseFloat(this.resources.nectar.toFixed(2)));
+                this.resources.pollen = Math.max(0, parseFloat(this.resources.pollen.toFixed(2)));
+                this.resources.honey = Math.max(0, parseFloat(this.resources.honey.toFixed(2)));
+            }
+
+            calculateForaging(season, weather) {
+                let nectarGain = 0;
+                let pollenGain = 0;
+                if (this.population.foragers <= 0 || season === SEASONS.WINTER) return { nectar: 0, pollen: 0 };
+
+                let baseForage = this.population.foragers * 0.001; 
+                
+                if (season === SEASONS.SPRING) baseForage *= 1.2;
+                if (season === SEASONS.SUMMER) baseForage *= 1.5;
+                if (season === SEASONS.AUTUMN) baseForage *= 0.8;
+
+                if (weather === "Sunny") baseForage *= 1.2;
+                if (weather === "Cloudy") baseForage *= 0.9;
+                if (weather === "Rainy") baseForage *= 0.2;
+                if (weather === "Windy") baseForage *= 0.6;
+                if (weather === "Cold Snap") baseForage *= 0.3;
+                if (weather === "Heatwave") baseForage *= 0.7;
+
+                nectarGain = baseForage * (Math.random() * 0.5 + 0.75); 
+                pollenGain = nectarGain * (Math.random() * 0.3 + 0.1); 
+
+                return { nectar: parseFloat(nectarGain.toFixed(2)), pollen: parseFloat(pollenGain.toFixed(2)) };
+            }
+
+            convertNectarToHoney() {
+                const conversionRate = 0.5; 
+                const maxConversion = this.population.workers * 0.0005; 
+                let nectarToConvert = Math.min(this.resources.nectar, maxConversion);
+                this.resources.honey += nectarToConvert * conversionRate;
+                this.resources.nectar -= nectarToConvert;
+            }
+
+            consumeResources() {
+                let honeyConsumption = this.population.total * 0.0001; 
+                let pollenConsumption = (this.brood.larvae * 0.0005) + (this.population.workers * 0.00005);
+
+                if (this.resources.honey >= honeyConsumption) {
+                    this.resources.honey -= honeyConsumption;
+                } else {
+                    this.health.overall -= 5; 
+                    this.population.workers = Math.floor(this.population.workers * 0.95); 
+                    this.population.drones = Math.floor(this.population.drones * 0.95);
+                    this.population.total = this.population.workers + this.population.drones;
+                }
+                if (this.resources.pollen >= pollenConsumption) {
+                    this.resources.pollen -= pollenConsumption;
+                } else {
+                     this.brood.larvae = Math.floor(this.brood.larvae * 0.8); 
+                }
+            }
+            
+            developBrood() {
+                const eggToLarvaTime = 3;
+                const larvaToPupaTime = 6;
+                const pupaToAdultTime = 12;
+
+                let emergingAdults = Math.floor(this.brood.pupae / pupaToAdultTime);
+                this.brood.pupae = Math.max(0, this.brood.pupae - emergingAdults);
+                
+                let pupatingLarvae = Math.floor(this.brood.larvae / larvaToPupaTime);
+                this.brood.larvae = Math.max(0, this.brood.larvae - pupatingLarvae);
+                this.brood.pupae += pupatingLarvae;
+
+                let hatchingEggs = Math.floor(this.brood.eggs / eggToLarvaTime);
+                this.brood.eggs = Math.max(0, this.brood.eggs - hatchingEggs);
+                this.brood.larvae += hatchingEggs;
+                
+                if (emergingAdults > 0) {
+                    const newWorkers = Math.floor(emergingAdults * 0.95);
+                    const newDrones = emergingAdults - newWorkers;
+                    this.population.workers = Math.max(0, this.population.workers + newWorkers);
+                    this.population.drones = Math.max(0, this.population.drones + newDrones);
+                    
+                    this.population.foragers = Math.max(0, this.population.foragers + Math.floor(newWorkers * 0.1)); 
+                    this.population.foragers = Math.min(this.population.foragers, Math.floor(this.population.workers * 0.5));
+                    this.population.total = this.population.workers + this.population.drones;
+                }
+            }
+
+            updatePopulation() {
+                const workerLifespan = 45; 
+                const droneLifespan = 60;
+                
+                let dailyWorkerLoss = Math.floor(this.population.workers / workerLifespan);
+                let dailyDroneLoss = Math.floor(this.population.drones / droneLifespan);
+
+                this.population.workers = Math.max(0, this.population.workers - dailyWorkerLoss);
+                this.population.drones = Math.max(0, this.population.drones - dailyDroneLoss);
+                
+                let foragerLossRate = this.population.workers > 0 ? (this.population.foragers / this.population.workers) : 0;
+                let lostForagers = Math.floor(dailyWorkerLoss * foragerLossRate);
+                this.population.foragers = Math.max(0, this.population.foragers - lostForagers);
+                this.population.foragers = Math.min(this.population.foragers, Math.floor(this.population.workers * 0.5));
+
+                this.population.total = this.population.workers + this.population.drones;
+
+                if (this.population.total <= 0 && !gameState.isGameOver) {
+                    GameLoopManager.handleHiveCollapse(this.id);
+                }
+            }
+
+            updateHealth(season) {
+                this.health.varroaMites *= (1 + VARROA_GROWTH_RATE * (season === SEASONS.WINTER ? 0.1 : 1)); 
+                this.health.varroaMites = Math.floor(this.health.varroaMites);
+
+                let healthImpact = 0;
+                if (this.health.varroaMites > 1000) healthImpact += (this.health.varroaMites - 1000) / 100; 
+                if (this.health.diseases && this.health.diseases.AFB) healthImpact += 20;
+                if (this.health.diseases && this.health.diseases.chalkbroodLevel > 0) healthImpact += this.health.diseases.chalkbroodLevel * 2;
+
+                this.health.overall = Math.max(0, 100 - healthImpact);
+                if (this.health.overall < 30 && Math.random() < 0.1) { 
+                    this.queen.health = Math.max(0, this.queen.health - 20);
+                     UIManager.showToast("Queen Health Declining!", `The queen in ${this.name} is suffering due to poor hive health.`, "warning");
+                }
+            }
+            
+            updateSwarmingUrge(season) {
+                if (season === SEASONS.SPRING || season === SEASONS.SUMMER) {
+                    if (this.population.total > 25000) this.swarmingUrge += 5; 
+                    if (this.queen.age > 365 * 2) this.swarmingUrge += 3; 
+                    if (this.comb.drawnFrames / this.comb.totalFrames > 0.9) this.swarmingUrge += 5; 
+                } else {
+                    this.swarmingUrge -= 10; 
+                }
+                this.swarmingUrge = Math.max(0, Math.min(100, this.swarmingUrge));
+
+                if (this.swarmingUrge > 80 && Math.random() < 0.1) {
+                    this.triggerSwarm();
+                }
+            }
+
+            triggerSwarm() {
+                const swarmSize = Math.floor(this.population.total * (Math.random() * 0.3 + 0.4)); 
+                const oldQueenLeaves = Math.random() < 0.7; 
+
+                this.population.workers -= Math.floor(swarmSize * (this.population.workers / this.population.total));
+                this.population.drones -= Math.floor(swarmSize * (this.population.drones / this.population.total));
+                this.population.foragers = Math.floor(this.population.workers * 0.4);
+                this.population.total = this.population.workers + this.population.drones;
+
+                if (oldQueenLeaves || this.queen.health < 30) {
+                    this.queen = new Queen(0, 80, 800); 
+                }
+                this.swarmingUrge = 0;
+                JournalManager.addEntry(`Hive ${this.name} swarmed! Lost approx ${swarmSize} bees.`);
+                UIManager.showToast("Swarm!", `Hive ${this.name} has swarmed! You lost a significant portion of its population.`, "warning");
+                EventManager.triggerSpecificEvent({
+                    title: "Hive Swarmed!",
+                    text: `${this.name} has swarmed. A portion of the bees ${oldQueenLeaves ? 'and the old queen' : ''} have left. The hive will need time to recover${oldQueenLeaves ? ' and raise a new queen' : ''}.`,
+                    choices: [{text: "Acknowledge", action: null}]
+                });
+            }
+
+            applyTreatment(treatmentId) {
+                if (treatmentId === "varroa_treatment_basic") {
+                    this.health.varroaMites = Math.floor(this.health.varroaMites * (1 - VARROA_TREATMENT_EFFECTIVENESS));
+                    JournalManager.addEntry(`Applied Varroa treatment to ${this.name}.`);
+                    UIManager.showToast("Treatment Applied", `Varroa treatment applied to ${this.name}.`, "success");
+                    return true;
+                }
+                return false;
+            }
+
+            feed(foodType, amount) {
+                amount = parseInt(amount);
+                if (isNaN(amount) || amount <=0) {
+                    UIManager.showToast("Invalid Amount", "Please enter a positive number for feeding.", "warning");
+                    return false;
+                }
+
+                if (foodType === "sugar_syrup") {
+                    this.resources.nectar += amount; 
+                    JournalManager.addEntry(`Fed ${this.name} ${amount}kg sugar syrup.`);
+                    UIManager.showToast("Feeding Success", `${this.name} fed ${amount}kg sugar syrup.`, "success");
+                    return true;
+                } else if (foodType === "pollen_patty") {
+                    this.resources.pollen += amount;
+                    JournalManager.addEntry(`Fed ${this.name} ${amount} pollen patties.`);
+                    UIManager.showToast("Feeding Success", `${this.name} fed ${amount} pollen patties.`, "success");
+                    return true;
+                }
+                return false;
+            }
+            
+            harvest(product, amount) {
+                amount = parseInt(amount);
+                 if (isNaN(amount) || amount <=0) {
+                    UIManager.showToast("Invalid Amount", "Please enter a positive number for harvesting.", "warning");
+                    return false;
+                 }
+
+                if (product === "honey") {
+                    if (this.resources.honey >= amount) {
+                        this.resources.honey -= amount;
+                        gameState.inventory.rawHoney = (gameState.inventory.rawHoney || 0) + amount;
+                        JournalManager.addEntry(`Harvested ${amount}kg honey from ${this.name}.`);
+                        UIManager.showToast("Honey Harvested!", `${amount}kg honey harvested from ${this.name}.`, "success");
+                        return true;
+                    } else {
+                        UIManager.showToast("Not Enough Honey", `Not enough honey in ${this.name} to harvest ${amount}kg.`, "warning");
+                        return false;
+                    }
+                }
+                 return false;
+            }
+        }
+
+        const UIManager = {
+            currentView: 'apiary-overview',
+            activeHiveId: null,
+
+            init() {
+                settingsModalInstance = new bootstrap.Modal(document.getElementById('settingsModal'));
+                eventModalInstance = new bootstrap.Modal(document.getElementById('eventModal'));
+                confirmationModalInstance = new bootstrap.Modal(document.getElementById('confirmationModal'));
+                guideDetailModalInstance = new bootstrap.Modal(document.getElementById('guideDetailModal'));
+                gameToastInstance = new bootstrap.Toast(document.getElementById('gameToast'));
+                
+                DOM.gameVersionDisplay.textContent = GAME_VERSION;
+                this._initializeTooltips(document.body);
+
+                this.updateHeader();
+                this.render();
+            },
+            
+            _initializeTooltips(parentElement = document) {
+                try {
+                    const tooltipTriggerList = [].slice.call(parentElement.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                    tooltipTriggerList.map(function (tooltipTriggerEl) {
+                        const existingTooltip = bootstrap.Tooltip.getInstance(tooltipTriggerEl);
+                        if (existingTooltip) {
+                            existingTooltip.dispose();
+                        }
+                        return new bootstrap.Tooltip(tooltipTriggerEl);
+                    });
+                } catch (error) {
+                    console.error("Error initializing tooltips:", error);
+                }
+            },
+
+            setActiveNav(targetId) {
+                document.querySelectorAll('#sidebar-nav .nav-link').forEach(link => link.classList.remove('active'));
+                const activeLink = document.getElementById(targetId);
+                if (activeLink) activeLink.classList.add('active');
+                
+                document.querySelectorAll('#dynamic-hive-nav-list .nav-link').forEach(link => link.classList.remove('active'));
+                if (targetId.startsWith('nav-hive-') || (this.currentView === 'hive-detail' && this.activeHiveId)) {
+                    const activeHiveLink = document.querySelector(`#dynamic-hive-nav-list .nav-link[data-hiveid="${this.activeHiveId}"]`);
+                    if (activeHiveLink) activeHiveLink.classList.add('active');
+                }
+            },
+
+            updateHeader() {
+                try {
+                    DOM.beekeeperNameDisplay.textContent = gameState.beekeeperName;
+                    DOM.gameDateDisplay.textContent = `${gameState.currentSeason}, Year ${gameState.year}, Day ${gameState.dayInSeason}`;
+                    DOM.playerMoneyDisplay.textContent = `$${gameState.money.toFixed(2)}`;
+                    DOM.playerMoneyDisplay.classList.toggle('text-danger', gameState.money < 0);
+                    DOM.playerMoneyDisplay.classList.toggle('text-success', gameState.money >= 0);
+
+                    DOM.footerSeasonDisplay.textContent = gameState.currentSeason;
+                    DOM.footerWeatherDisplay.textContent = gameState.currentWeather;
+                    
+                    let totalHealth = 0;
+                    if (gameState.hives && gameState.hives.length > 0) {
+                        gameState.hives.forEach(h => totalHealth += h.health.overall);
+                        const avgHealth = Math.round(totalHealth / gameState.hives.length);
+                        DOM.apiaryHealthDisplay.textContent = `${avgHealth}% (${this.getHealthStatusText(avgHealth)})`;
+                        DOM.apiaryHealthDisplay.className = "fw-bold"; 
+                        if (avgHealth > 80) DOM.apiaryHealthDisplay.classList.add("text-success");
+                        else if (avgHealth > 50) DOM.apiaryHealthDisplay.classList.add("text-warning");
+                        else DOM.apiaryHealthDisplay.classList.add("text-danger");
+                    } else {
+                         DOM.apiaryHealthDisplay.textContent = "N/A";
+                         DOM.apiaryHealthDisplay.className = "fw-bold text-muted";
+                    }
+
+                    const gameHeaderEl = document.getElementById('game-header');
+                    if (gameHeaderEl) {
+                        ['header-spring', 'header-summer', 'header-autumn', 'header-winter'].forEach(c => gameHeaderEl.classList.remove(c));
+                        gameHeaderEl.classList.add(`header-${gameState.currentSeason.toLowerCase()}`);
+                    }
+
+
+                } catch (error) {
+                    console.error("Error updating header:", error);
+                }
+            },
+            
+            getHealthStatusText(healthValue) {
+                if (healthValue > 90) return "Excellent";
+                if (healthValue > 75) return "Good";
+                if (healthValue > 50) return "Fair";
+                if (healthValue > 25) return "Poor";
+                return "Critical";
+            },
+
+            updateHiveNavList() {
+                try {
+                    DOM.dynamicHiveNavList.innerHTML = '';
+                    if (!gameState.hives) return;
+                    gameState.hives.forEach(hive => {
+                        if (!hive) return; 
+                        const li = document.createElement('li');
+                        li.className = 'nav-item mb-1';
+                        const a = document.createElement('a');
+                        a.className = `nav-link nav-link-hive text-truncate`;
+                        if (this.currentView === 'hive-detail' && this.activeHiveId === hive.id) {
+                            a.classList.add('active');
+                        }
+                        a.href = '#';
+                        a.dataset.hiveid = hive.id;
+                        a.textContent = `${hive.name} (H:${hive.health.overall}%)`;
+                        a.setAttribute('title', `${hive.name} (Health: ${hive.health.overall}%)`);
+                        a.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            this.activeHiveId = hive.id;
+                            this.currentView = 'hive-detail';
+                            this.render();
+                        });
+                        li.appendChild(a);
+                        DOM.dynamicHiveNavList.appendChild(li);
+                    });
+                    this._initializeTooltips(DOM.dynamicHiveNavList);
+                } catch (error) {
+                    console.error("Error updating hive nav list:", error);
+                }
+            },
+
+            render() {
+                try {
+                    this.updateHeader();
+                    this.updateHiveNavList();
+                    
+                    let targetNavId = `nav-${this.currentView.replace('-','_')}`;
+                    if (this.currentView === 'hive-detail' && this.activeHiveId) {
+                         targetNavId = `nav-hive-${this.activeHiveId}`; 
+                    }
+                    this.setActiveNav(targetNavId);
+
+                    switch (this.currentView) {
+                        case 'apiary-overview': this.renderApiaryOverview(); break;
+                        case 'hive-detail': this.renderHiveDetailView(this.activeHiveId); break;
+                        case 'market': this.renderMarket(); break;
+                        case 'research': this.renderResearch(); break;
+                        case 'guide': this.renderGuide(); break;
+                        case 'journal': this.renderJournal(); break;
+                        default: DOM.contentPane.innerHTML = '<p>Select an option from the menu.</p>';
+                    }
+                    this._initializeTooltips(DOM.contentPane);
+                } catch (error) {
+                    console.error("Error during main render:", error);
+                    DOM.contentPane.innerHTML = '<p class="text-danger">A critical error occurred while rendering this view. Please try navigating or resetting the game.</p>';
+                    this.showToast("Render Error", "An error occurred displaying content.", "danger");
+                }
+            },
+
+            renderApiaryOverview() {
+                try {
+                    const hiveBodyCostItem = GameData.marketItems.find(i=>i.id==='hive_body');
+                    const hiveBodyCost = hiveBodyCostItem ? hiveBodyCostItem.buyPrice : 'N/A';
+                    let html = `<div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h2>Apiary Overview</h2>
+                                    <button class="btn btn-success btn-sm" id="addHiveButton" data-bs-toggle="tooltip" title="Cost: $${hiveBodyCost}"><i class="bi bi-plus-circle me-1"></i> Add New Hive</button>
+                                </div>`;
+                    html += '<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">';
+                    if (!gameState.hives || gameState.hives.length === 0) {
+                        html += '<div class="col-12"><p>You have no hives. Purchase one by clicking "Add New Hive".</p></div>';
+                    } else {
+                        gameState.hives.forEach(hive => {
+                            if (!hive) return; 
+                            html += `
+                                <div class="col">
+                                    <div class="card h-100 hive-card">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0 text-truncate" title="${hive.name}">${hive.name}</h5>
+                                            <span class="badge bg-${hive.health.overall > 70 ? 'success' : hive.health.overall > 40 ? 'warning' : 'danger'}">${this.getHealthStatusText(hive.health.overall)}</span>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="card-text mb-1">Population: <span class="stat-value">${hive.population.total.toLocaleString()}</span> bees</p>
+                                            <p class="card-text mb-1">Honey Stores: <span class="stat-value">${hive.resources.honey.toFixed(1)} kg</span></p>
+                                            <p class="card-text mb-1">Pollen Stores: <span class="stat-value">${hive.resources.pollen.toFixed(1)} kg</span></p>
+                                            <p class="card-text mb-1">Varroa Mites: <span class="stat-value ${hive.health.varroaMites > 500 ? 'text-danger' : hive.health.varroaMites > 200 ? 'text-warning' : ''}">${hive.health.varroaMites}</span></p>
+                                            <p class="card-text mb-1">Swarm Urge: <span class="stat-value ${hive.swarmingUrge > 70 ? 'text-danger' : hive.swarmingUrge > 40 ? 'text-warning' : ''}">${hive.swarmingUrge}%</span></p>
+                                        </div>
+                                        <div class="card-footer bg-transparent border-top-0 text-end">
+                                            <button class="btn btn-primary btn-sm view-hive-details" data-hiveid="${hive.id}"><i class="bi bi-eye"></i> View Details</button>
+                                        </div>
+                                    </div>
+                                </div>`;
+                        });
+                    }
+                    html += '</div>';
+                    DOM.contentPane.innerHTML = html;
+
+                    document.querySelectorAll('.view-hive-details').forEach(button => {
+                        button.addEventListener('click', (e) => {
+                            this.activeHiveId = parseInt(e.currentTarget.dataset.hiveid);
+                            this.currentView = 'hive-detail';
+                            this.render();
+                        });
+                    });
+                    
+                    const addHiveButton = document.getElementById('addHiveButton');
+                    if (addHiveButton) {
+                        addHiveButton.addEventListener('click', () => MarketManager.buyItem('hive_body', 1));
+                    }
+                } catch (error) {
+                    console.error("Error rendering apiary overview:", error);
+                    DOM.contentPane.innerHTML = '<p class="text-danger">Error displaying apiary overview.</p>';
+                }
+            },
+
+            renderHiveDetailView(hiveId) {
+                try {
+                    const hive = gameState.hives.find(h => h.id === hiveId);
+                    if (!hive) {
+                        DOM.contentPane.innerHTML = '<p class="text-danger">Hive not found. It may have been removed or collapsed.</p>';
+                        this.currentView = 'apiary-overview'; 
+                        this.activeHiveId = null;
+                        this.render();
+                        return;
+                    }
+                    const varroaTreatmentItem = GameData.marketItems.find(i=>i.id==='varroa_treatment_basic');
+                    const varroaTreatmentCost = varroaTreatmentItem ? varroaTreatmentItem.buyPrice : 'N/A';
+                    const sugarItem = GameData.marketItems.find(i=>i.id==='sugar');
+                    const sugarCost = sugarItem ? sugarItem.buyPrice : 'N/A';
+                    const pollenPattyItem = GameData.marketItems.find(i=>i.id==='pollen_patty');
+                    const pollenPattyCost = pollenPattyItem ? pollenPattyItem.buyPrice : 'N/A';
+
+                    let html = `
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h2 class="text-truncate" title="${hive.name}">Hive: ${hive.name} <button class="btn btn-sm btn-outline-secondary ms-2" id="renameHiveBtn" data-bs-toggle="tooltip" title="Rename Hive"><i class="bi bi-pencil"></i></button></h2>
+                            <button class="btn btn-sm btn-outline-danger" id="removeHiveBtn" data-hiveid="${hive.id}" data-bs-toggle="tooltip" title="Remove this hive permanently"><i class="bi bi-trash"></i> Remove Hive</button>
+                        </div>
+                        <ul class="nav nav-tabs mb-3" id="hiveDetailTabs" role="tablist">
+                            <li class="nav-item" role="presentation"><button class="nav-link active" id="summary-tab-${hive.id}" data-bs-toggle="tab" data-bs-target="#summary-${hive.id}" type="button" role="tab">Summary</button></li>
+                            <li class="nav-item" role="presentation"><button class="nav-link" id="brood-tab-${hive.id}" data-bs-toggle="tab" data-bs-target="#brood-${hive.id}" type="button" role="tab">Brood Chamber</button></li>
+                            <li class="nav-item" role="presentation"><button class="nav-link" id="health-tab-${hive.id}" data-bs-toggle="tab" data-bs-target="#health-${hive.id}" type="button" role="tab">Health & Pests</button></li>
+                            <li class="nav-item" role="presentation"><button class="nav-link" id="actions-tab-${hive.id}" data-bs-toggle="tab" data-bs-target="#actions-${hive.id}" type="button" role="tab">Actions</button></li>
+                        </ul>
+                        <div class="tab-content" id="hiveDetailTabsContent">
+                            <div class="tab-pane fade show active" id="summary-${hive.id}" role="tabpanel" aria-labelledby="summary-tab-${hive.id}">
+                                <h4>Summary</h4>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>Queen Age:</strong> ${Math.floor(hive.queen.age / 30)} months (${hive.queen.age} days)</p>
+                                        <p><strong>Queen Health:</strong> ${hive.queen.health}%</p>
+                                        <p><strong>Queen Base Laying Rate:</strong> ${hive.queen.baseLayingRate.toLocaleString()} eggs/day</p>
+                                        <p><strong>Temperament:</strong> ${hive.temperament}</p>
+                                        <p><strong>Swarm Urge:</strong> ${hive.swarmingUrge}%</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>Total Population:</strong> ${hive.population.total.toLocaleString()}</p>
+                                        <p><strong>Workers:</strong> ${hive.population.workers.toLocaleString()}</p>
+                                        <p><strong>Drones:</strong> ${hive.population.drones.toLocaleString()}</p>
+                                        <p><strong>Foragers:</strong> ${hive.population.foragers.toLocaleString()}</p>
+                                    </div>
+                                </div>
+                                <h5>Resources</h5>
+                                <div class="row">
+                                    <div class="col-md-3"><strong>Honey:</strong> ${hive.resources.honey.toFixed(1)} kg</div>
+                                    <div class="col-md-3"><strong>Pollen:</strong> ${hive.resources.pollen.toFixed(1)} kg</div>
+                                    <div class="col-md-3"><strong>Nectar:</strong> ${hive.resources.nectar.toFixed(1)} kg</div>
+                                    <div class="col-md-3"><strong>Wax:</strong> ${hive.resources.wax.toFixed(1)} kg</div>
+                                </div>
+                                 <p class="mt-2"><small>Last Inspected: Day ${hive.lastInspectionDay > 0 ? hive.lastInspectionDay : 'N/A'}</small></p>
+                            </div>
+                            <div class="tab-pane fade" id="brood-${hive.id}" role="tabpanel" aria-labelledby="brood-tab-${hive.id}">
+                                <h4>Brood Chamber</h4>
+                                <p><strong>Eggs:</strong> ${hive.brood.eggs.toLocaleString()}</p>
+                                <p><strong>Larvae:</strong> ${hive.brood.larvae.toLocaleString()}</p>
+                                <p><strong>Pupae:</strong> ${hive.brood.pupae.toLocaleString()}</p>
+                                <p><strong>Drawn Comb:</strong> ${hive.comb.drawnFrames} / ${hive.comb.totalFrames} frames</p>
+                                <img src="/generated_images/dalle_2a85bba6-439.png" alt="Healthy Brood Example" class="guide-image" style="max-width: 300px; margin-top: 10px;">
+                            </div>
+                            <div class="tab-pane fade" id="health-${hive.id}" role="tabpanel" aria-labelledby="health-tab-${hive.id}">
+                                <h4>Health & Pests</h4>
+                                <p><strong>Overall Hive Health:</strong> ${hive.health.overall}%</p>
+                                <div class="progress mb-2" role="progressbar" aria-label="Hive health" aria-valuenow="${hive.health.overall}" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar bg-${hive.health.overall > 70 ? 'success' : hive.health.overall > 40 ? 'warning' : 'danger'}" style="width: ${hive.health.overall}%">${hive.health.overall}%</div></div>
+                                <p><strong>Varroa Mites:</strong> ${hive.health.varroaMites.toLocaleString()} (approx.)</p>
+                                ${Object.keys(hive.health.diseases).length > 0 ? 
+                                    `<p><strong>Active Diseases:</strong> ${Object.entries(hive.health.diseases).map(([k,v]) => `${k}${typeof v === 'boolean' && v ? '' : `: Level ${v}`}`).join(', ')}</p>` 
+                                    : '<p>No major diseases detected.</p>'}
+                                <button class="btn btn-sm btn-warning mt-2" id="treatVarroaBtn" data-hiveid="${hive.id}" data-bs-toggle="tooltip" title="Cost: $${varroaTreatmentCost}"><i class="bi bi-shield-plus"></i> Treat Varroa Mites</button>
+                            </div>
+                            <div class="tab-pane fade" id="actions-${hive.id}" role="tabpanel" aria-labelledby="actions-tab-${hive.id}">
+                                <h4>Hive Actions</h4>
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <h5>Feeding</h5>
+                                        <button class="btn btn-sm btn-outline-primary d-block mb-2 w-100 action-btn-feed" data-food="sugar_syrup" data-hiveid="${hive.id}" data-bs-toggle="tooltip" title="Cost: $${sugarCost}"><i class="bi bi-droplet"></i> Feed Sugar Syrup (1kg)</button>
+                                        <button class="btn btn-sm btn-outline-primary d-block w-100 action-btn-feed" data-food="pollen_patty" data-hiveid="${hive.id}" data-bs-toggle="tooltip" title="Cost: $${pollenPattyCost}"><i class="bi bi-flower1"></i> Feed Pollen Patty (1)</button>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <h5>Harvesting</h5>
+                                        <div class="input-group input-group-sm mb-2">
+                                            <input type="number" class="form-control form-control-sm" id="harvestHoneyAmount-${hive.id}" value="1" min="1" max="${Math.floor(hive.resources.honey)}">
+                                            <button class="btn btn-sm btn-outline-success action-btn-harvest" data-product="honey" data-hiveid="${hive.id}" data-bs-toggle="tooltip" title="Harvest available honey"><i class="bi bi-bucket"></i> Harvest Honey (kg)</button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <h5>Management</h5>
+                                        <button class="btn btn-sm btn-outline-info d-block mb-2 w-100" id="inspectHiveBtn" data-hiveid="${hive.id}" data-bs-toggle="tooltip" title="Inspect hive (minor stress)"><i class="bi bi-search"></i> Full Inspection</button>
+                                        <button class="btn btn-sm btn-outline-secondary d-block mb-2 w-100" disabled>Add Super (Future)</button>
+                                        <button class="btn btn-sm btn-outline-secondary d-block w-100" disabled>Split Hive (Future)</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                    DOM.contentPane.innerHTML = html;
+                    
+                    const firstTabEl = document.querySelector(`#hiveDetailTabs button[data-bs-target="#summary-${hive.id}"]`);
+                    if (firstTabEl) new bootstrap.Tab(firstTabEl).show();
+
+                    document.getElementById(`renameHiveBtn`)?.addEventListener('click', () => {
+                        const currentHive = gameState.hives.find(h => h.id === hiveId);
+                        if (!currentHive) return;
+                        const newName = prompt(`Enter new name for ${currentHive.name} (max ${MAX_HIVE_NAME_LENGTH} chars):`, currentHive.name);
+                        if (newName && newName.trim() !== "" && newName.length <= MAX_HIVE_NAME_LENGTH) {
+                            currentHive.name = newName.trim();
+                            JournalManager.addEntry(`Hive ${currentHive.id} renamed to ${currentHive.name}.`);
+                            this.render(); 
+                        } else if (newName !== null) { 
+                            UIManager.showToast("Invalid Name", `Name must be 1-${MAX_HIVE_NAME_LENGTH} characters.`, "warning");
+                        }
+                    });
+
+                    document.getElementById(`removeHiveBtn`)?.addEventListener('click', (e) => {
+                        const hiveIdToRemove = parseInt(e.currentTarget.dataset.hiveid);
+                        const hiveToRemove = gameState.hives.find(h => h.id === hiveIdToRemove);
+                        if (!hiveToRemove) return;
+                        this.showConfirmation(`Are you sure you want to remove ${hiveToRemove.name}? This cannot be undone.`, () => {
+                            GameLoopManager.removeHive(hiveIdToRemove);
+                        });
+                    });
+
+                    document.getElementById(`treatVarroaBtn`)?.addEventListener('click', (e) => {
+                        const hiveToTreat = gameState.hives.find(h => h.id === parseInt(e.currentTarget.dataset.hiveid));
+                        if (!hiveToTreat) return;
+                        const treatmentCost = varroaTreatmentItem ? varroaTreatmentItem.buyPrice : 0;
+                        if (gameState.money >= treatmentCost) {
+                            this.showConfirmation(`Treat ${hiveToTreat.name} for Varroa mites for $${treatmentCost}?`, () => {
+                                gameState.money -= treatmentCost;
+                                hiveToTreat.applyTreatment('varroa_treatment_basic');
+                                this.render();
+                            });
+                        } else {
+                            this.showToast("Insufficient Funds", `You need $${treatmentCost} to apply Varroa treatment.`, "danger");
+                        }
+                    });
+
+                    document.querySelectorAll('.action-btn-feed').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            const foodType = e.currentTarget.dataset.food;
+                            const hiveToFeed = gameState.hives.find(h => h.id === parseInt(e.currentTarget.dataset.hiveid));
+                            if (!hiveToFeed) return;
+                            let cost = 0;
+                            let itemName = "";
+                            if (foodType === "sugar_syrup") { 
+                                cost = sugarItem ? sugarItem.buyPrice : 0; itemName = "1kg Sugar"; 
+                            } else if (foodType === "pollen_patty") { 
+                                cost = pollenPattyItem ? pollenPattyItem.buyPrice : 0; itemName = "1 Pollen Patty";
+                            }
+                            
+                            if (gameState.money >= cost) {
+                                this.showConfirmation(`Feed ${hiveToFeed.name} ${itemName} for $${cost}?`, () => {
+                                    gameState.money -= cost;
+                                    hiveToFeed.feed(foodType, 1); 
+                                    this.render();
+                                });
+                            } else {
+                                this.showToast("Insufficient Funds", `You need $${cost} to buy ${itemName}.`, "danger");
+                            }
+                        });
+                    });
+                    
+                    document.querySelectorAll('.action-btn-harvest').forEach(btn => {
+                         btn.addEventListener('click', (e) => {
+                            const product = e.currentTarget.dataset.product;
+                            const hiveToHarvest = gameState.hives.find(h => h.id === parseInt(e.currentTarget.dataset.hiveid));
+                            if (!hiveToHarvest) return;
+                            const amountInput = document.getElementById(`harvestHoneyAmount-${hiveToHarvest.id}`);
+                            const amount = parseInt(amountInput.value);
+
+                            if (isNaN(amount) || amount <= 0) {
+                                UIManager.showToast("Invalid Amount", "Please enter a positive number to harvest.", "warning");
+                                return;
+                            }
+                            if (amount > hiveToHarvest.resources.honey && product === "honey") {
+                                UIManager.showToast("Not Enough Honey", `Not enough honey in ${hiveToHarvest.name} to harvest ${amount}kg.`, "warning");
+                                return;
+                            }
+
+                            if (hiveToHarvest.harvest(product, amount)) {
+                                this.render(); 
+                            }
+                        });
+                    });
+                    
+                    document.getElementById('inspectHiveBtn')?.addEventListener('click', e => {
+                        const hiveToInspect = gameState.hives.find(h => h.id === parseInt(e.currentTarget.dataset.hiveid));
+                        if (!hiveToInspect) return;
+                        hiveToInspect.lastInspectionDay = gameState.dayTotal;
+                        hiveToInspect.health.overall = Math.max(0, hiveToInspect.health.overall - 1); 
+                        JournalManager.addEntry(`Inspected ${hiveToInspect.name}.`);
+                        this.showToast("Inspection Complete", `${hiveToInspect.name} inspected. Minor stress caused.`, "info");
+                        this.render(); 
+                    });
+                } catch (error) {
+                    console.error("Error rendering hive detail view:", error);
+                    DOM.contentPane.innerHTML = '<p class="text-danger">Error displaying hive details.</p>';
+                }
+
+            },
+
+            renderMarket() {
+                try {
+                    let html = `<h2>Marketplace</h2>
+                                <p>Buy supplies and equipment, or sell your hive products.</p>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h4>Buy Items</h4>
+                                        <table class="table table-sm table-hover">
+                                            <thead><tr><th>Item</th><th>Description</th><th>Price</th><th>Action</th></tr></thead>
+                                            <tbody>`;
+                    GameData.marketItems.filter(item => item.buyPrice !== null).forEach(item => {
+                        html += `<tr>
+                                    <td>${item.name}</td>
+                                    <td><small>${item.description}</small></td>
+                                    <td>$${item.buyPrice}</td>
+                                    <td><button class="btn btn-success btn-sm market-buy-btn" data-itemid="${item.id}" data-bs-toggle="tooltip" title="Buy 1 ${item.name}"><i class="bi bi-cart-plus"></i> Buy</button></td>
+                                 </tr>`;
+                    });
+                    html += `</tbody></table></div>`;
+
+                    html += `<div class="col-md-6">
+                                <h4>Sell Products</h4>
+                                <table class="table table-sm table-hover">
+                                    <thead><tr><th>Product</th><th>In Stock</th><th>Price/Unit</th><th>Action</th></tr></thead>
+                                    <tbody>`;
+                    GameData.marketItems.filter(item => item.sellPriceBase !== null).forEach(item => {
+                        const stockKey = item.id === 'raw_honey' ? 'rawHoney' : item.id === 'beeswax' ? 'beeswax' : item.id;
+                        const stock = gameState.inventory[stockKey] || 0;
+                        const currentPrice = MarketManager.getCurrentSellPrice(item.id);
+                        html += `<tr>
+                                    <td>${item.name}</td>
+                                    <td>${stock} ${item.id.includes('honey') ? 'kg' : item.id.includes('wax') ? 'g' : 'units'}</td>
+                                    <td>$${currentPrice.toFixed(2)}</td>
+                                    <td>
+                                        <div class="input-group input-group-sm">
+                                            <input type="number" class="form-control form-control-sm market-sell-amount" value="1" min="1" max="${stock}" style="width: 60px;" ${stock <= 0 ? 'disabled' : ''}>
+                                            <button class="btn btn-warning btn-sm market-sell-btn" data-itemid="${item.id}" ${stock <= 0 ? 'disabled' : ''} data-bs-toggle="tooltip" title="Sell selected amount"><i class="bi bi-cash-coin"></i> Sell</button>
+                                        </div>
+                                    </td>
+                                 </tr>`;
+                    });
+                    html += `</tbody></table></div></div>`;
+                    DOM.contentPane.innerHTML = html;
+
+                    document.querySelectorAll('.market-buy-btn').forEach(button => {
+                        button.addEventListener('click', (e) => MarketManager.buyItem(e.currentTarget.dataset.itemid, 1));
+                    });
+                    document.querySelectorAll('.market-sell-btn').forEach(button => {
+                        button.addEventListener('click', (e) => {
+                            const itemId = e.currentTarget.dataset.itemid;
+                            const amountInput = e.currentTarget.closest('.input-group').querySelector('.market-sell-amount');
+                            const amount = parseInt(amountInput.value);
+                            if (isNaN(amount) || amount <= 0) {
+                                UIManager.showToast("Invalid Amount", "Please enter a positive number to sell.", "warning");
+                                return;
+                            }
+                            MarketManager.sellItem(itemId, amount);
+                        });
+                    });
+                } catch (error) {
+                    console.error("Error rendering market:", error);
+                    DOM.contentPane.innerHTML = '<p class="text-danger">Error displaying market.</p>';
+                }
+            },
+
+            renderResearch() {
+                try {
+                    let html = `<h2>Knowledge & Upgrades</h2>
+                                <p>Invest in research to improve your beekeeping skills and unlock new technologies. Current Research Points: <span class="stat-value">${(gameState.researchPoints || 0).toFixed(1)}</span></p>
+                                <div class="list-group">`;
+                    GameData.researchNodes.forEach(node => {
+                        const canAfford = (gameState.researchPoints || 0) >= node.cost;
+                        const prereqMet = node.prereq ? gameState.unlockedResearch.includes(node.prereq) : true;
+                        const isUnlocked = gameState.unlockedResearch.includes(node.id);
+
+                        html += `<div class="list-group-item ${isUnlocked ? 'list-group-item-success' : ''}">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h5 class="mb-1">${node.name} ${isUnlocked ? '<span class="badge bg-success">Unlocked</span>' : ''}</h5>
+                                        <small>Cost: ${node.cost} RP</small>
+                                    </div>
+                                    <p class="mb-1"><small>${node.description}</small></p>
+                                    ${!isUnlocked && prereqMet ? `<button class="btn btn-sm btn-info research-unlock-btn" data-nodeid="${node.id}" ${!canAfford ? 'disabled' : ''}><i class="bi bi-unlock"></i> Unlock</button>` : ''}
+                                    ${!prereqMet ? `<small class="text-muted">Requires: ${GameData.researchNodes.find(n=>n.id === node.prereq)?.name || 'Unknown'}</small>`: ''}
+                                 </div>`;
+                    });
+                    html += `</div>`;
+                    DOM.contentPane.innerHTML = html;
+                    
+                    document.querySelectorAll('.research-unlock-btn').forEach(button => {
+                        button.addEventListener('click', (e) => ResearchManager.unlockNode(e.currentTarget.dataset.nodeid));
+                    });
+                } catch (error) {
+                    console.error("Error rendering research:", error);
+                    DOM.contentPane.innerHTML = '<p class="text-danger">Error displaying research.</p>';
+                }
+            },
+
+            renderGuide() {
+                try {
+                    let html = `<h2>Beekeeper's Almanac</h2>
+                                <img src="/generated_images/dalle_9e83b2a9-3d9.png" alt="Apiary Almanac Cover" class="img-fluid rounded mb-3 almanac-cover">
+                                <p>Welcome to the Beekeeper's Almanac. Select a topic below to learn more.</p>
+                                <div class="list-group">`;
+                    GameData.guideContent.forEach(entry => {
+                        html += `<a href="#" class="list-group-item list-group-item-action guide-entry-link" data-entryid="${entry.id}">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h5 class="mb-1">${entry.title}</h5>
+                                    </div>
+                                    <p class="mb-1"><small>${entry.shortDesc}</small></p>
+                                 </a>`;
+                    });
+                    html += `</div>`;
+                    DOM.contentPane.innerHTML = html;
+
+                    document.querySelectorAll('.guide-entry-link').forEach(link => {
+                        link.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            GuideManager.showGuideEntry(e.currentTarget.dataset.entryid);
+                        });
+                    });
+                } catch (error) {
+                    console.error("Error rendering guide:", error);
+                    DOM.contentPane.innerHTML = '<p class="text-danger">Error displaying guide.</p>';
+                }
+            },
+            
+            renderJournal() {
+                try {
+                    let html = `<h2>Beekeeper's Journal</h2>
+                                <p>A log of significant events and actions in your apiary.</p>
+                                <ul class="list-group journal-list">`;
+                    if (!gameState.journal || gameState.journal.length === 0) {
+                        html += '<li class="list-group-item">Your journal is empty. Start playing to fill it!</li>';
+                    } else {
+                        [...gameState.journal].reverse().forEach(entry => { 
+                            html += `<li class="list-group-item"><small>${entry}</small></li>`;
+                        });
+                    }
+                    html += `</ul>`;
+                    DOM.contentPane.innerHTML = html;
+                    const journalListEl = DOM.contentPane.querySelector('.journal-list');
+                    if (journalListEl) {
+                        journalListEl.scrollTop = journalListEl.scrollHeight;
+                    }
+                } catch (error) {
+                    console.error("Error rendering journal:", error);
+                    DOM.contentPane.innerHTML = '<p class="text-danger">Error displaying journal.</p>';
+                }
+            },
+
+            showEventModal(eventData) {
+                DOM.eventModal.title.textContent = eventData.title;
+                DOM.eventModal.body.innerHTML = `<p>${eventData.text}</p>`;
+                DOM.eventModal.footer.innerHTML = '';
+                eventData.choices.forEach(choice => {
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = 'btn btn-primary';
+                    button.textContent = choice.text;
+                    button.addEventListener('click', () => {
+                        if (choice.action) choice.action(gameState);
+                        eventModalInstance.hide();
+                        if (!gameState.isGameOver) this.render(); 
+                    });
+                    DOM.eventModal.footer.appendChild(button);
+                });
+                eventModalInstance.show();
+            },
+
+            showConfirmation(message, onConfirmCallback) {
+                DOM.confirmationModal.body.textContent = message;
+                const confirmBtnClone = DOM.confirmationModal.confirmButton.cloneNode(true);
+                DOM.confirmationModal.confirmButton.parentNode.replaceChild(confirmBtnClone, DOM.confirmationModal.confirmButton);
+                DOM.confirmationModal.confirmButton = confirmBtnClone; 
+
+                DOM.confirmationModal.confirmButton.onclick = () => {
+                    onConfirmCallback();
+                    confirmationModalInstance.hide();
+                    if (!gameState.isGameOver) this.render();
+                };
+                confirmationModalInstance.show();
+            },
+
+            showToast(title, message, type = "info") { 
+                DOM.toast.title.textContent = title;
+                DOM.toast.body.textContent = message;
+                
+                const toastEl = document.getElementById('gameToast');
+                toastEl.className = 'toast align-items-center border-0'; 
+                toastEl.classList.add(`text-bg-${type}`); 
+                
+                gameToastInstance.show();
+            }
+        };
+
+        const MarketManager = {
+            buyItem(itemId, quantity) {
+                const item = GameData.marketItems.find(i => i.id === itemId);
+                if (!item || item.buyPrice === null) {
+                    UIManager.showToast("Error", "Item not available for purchase.", "danger");
+                    return;
+                }
+                const totalCost = item.buyPrice * quantity;
+                if (gameState.money >= totalCost) {
+                    UIManager.showConfirmation(`Buy ${quantity}x ${item.name} for $${totalCost}?`, () => {
+                        gameState.money -= totalCost;
+                        if (item.type === "equipment" && item.id === "hive_body") {
+                            GameLoopManager.addNewHive();
+                        } else {
+                            const inventoryKey = item.id.replace('_',''); 
+                            gameState.inventory[inventoryKey] = (gameState.inventory[inventoryKey] || 0) + quantity;
+                        }
+                        JournalManager.addEntry(`Bought ${quantity}x ${item.name} for $${totalCost}.`);
+                        UIManager.showToast("Purchase Successful", `Bought ${item.name}.`, "success");
+                        UIManager.render();
+                    });
+                } else {
+                    UIManager.showToast("Insufficient Funds", `You need $${totalCost.toFixed(2)} to buy ${item.name}.`, "danger");
+                }
+            },
+            sellItem(itemId, quantity) {
+                const item = GameData.marketItems.find(i => i.id === itemId);
+                if (!item || item.sellPriceBase === null) {
+                    UIManager.showToast("Error", "Item cannot be sold.", "danger");
+                    return;
+                }
+                const stockKey = item.id === 'raw_honey' ? 'rawHoney' : item.id === 'beeswax' ? 'beeswax' : item.id;
+                
+                if (!gameState.inventory[stockKey] || gameState.inventory[stockKey] < quantity || quantity <= 0) {
+                    UIManager.showToast("Error", "Cannot sell item, insufficient stock, or invalid amount.", "danger");
+                    return;
+                }
+                
+                const currentPrice = this.getCurrentSellPrice(itemId);
+                const totalGain = currentPrice * quantity;
+
+                UIManager.showConfirmation(`Sell ${quantity}x ${item.name} for $${totalGain.toFixed(2)}?`, () => {
+                    gameState.money += totalGain;
+                    gameState.inventory[stockKey] -= quantity;
+                    JournalManager.addEntry(`Sold ${quantity}x ${item.name} for $${totalGain.toFixed(2)}.`);
+                    UIManager.showToast("Sale Successful", `Sold ${item.name}.`, "success");
+                    UIManager.render();
+                });
+            },
+            getCurrentSellPrice(itemId) {
+                const item = GameData.marketItems.find(i => i.id === itemId);
+                if (!item || item.sellPriceBase === null) return 0;
+                return parseFloat((item.sellPriceBase * (Math.random() * 0.2 + 0.9)).toFixed(2)); 
+            }
+        };
+        
+        const ResearchManager = {
+            unlockNode(nodeId) {
+                const node = GameData.researchNodes.find(n => n.id === nodeId);
+                if (!node || gameState.unlockedResearch.includes(nodeId)) return;
+
+                const prereqMet = node.prereq ? gameState.unlockedResearch.includes(node.prereq) : true;
+                if (!prereqMet) {
+                    UIManager.showToast("Prerequisite Missing", "You need to unlock previous research first.", "warning");
+                    return;
+                }
+                if ((gameState.researchPoints || 0) >= node.cost) {
+                     UIManager.showConfirmation(`Unlock ${node.name} for ${node.cost} Research Points?`, () => {
+                        gameState.researchPoints -= node.cost;
+                        gameState.unlockedResearch.push(nodeId);
+                        JournalManager.addEntry(`Unlocked research: ${node.name}.`);
+                        UIManager.showToast("Research Unlocked!", `${node.name} is now available.`, "success");
+                        if(node.effects) {
+                            Object.entries(node.effects).forEach(([key, value]) => {
+                                gameState.researchEffects[key] = (gameState.researchEffects[key] || 0) + value;
+                            });
+                        }
+                        UIManager.render();
+                    });
+                } else {
+                    UIManager.showToast("Insufficient RP", "Not enough Research Points to unlock.", "warning");
+                }
+            }
+        };
+
+        const GuideManager = {
+            showGuideEntry(entryId) {
+                const entry = GameData.guideContent.find(e => e.id === entryId);
+                if (entry) {
+                    DOM.guideDetailModal.title.textContent = entry.title;
+                    DOM.guideDetailModal.body.innerHTML = entry.fullContentHTML;
+                    guideDetailModalInstance.show();
+                }
+            }
+        };
+        
+        const JournalManager = {
+            addEntry(text) {
+                if (!gameState || !gameState.journal) return;
+                const timestamp = `D${gameState.dayTotal}, ${gameState.currentSeason.substring(0,3)}. Y${gameState.year}: `;
+                gameState.journal.push(timestamp + text);
+                if (gameState.journal.length > 100) { 
+                    gameState.journal.shift();
+                }
+                if (UIManager.currentView === 'journal') UIManager.renderJournal(); 
+            }
+        };
+        
+        const EventManager = {
+            checkAndTriggerEvents() {
+                if (!gameState || gameState.isGameOver) return;
+                GameData.eventDefinitions.forEach(eventDef => {
+                    try {
+                        if (eventDef.condition(gameState)) {
+                            if (eventDef.effect) eventDef.effect(gameState); 
+                            if (eventDef.choices && eventDef.choices.length > 0) { 
+                               this.triggerSpecificEvent(eventDef);
+                            }
+                        }
+                    } catch (error) {
+                        console.error(`Error processing event ${eventDef.id}:`, error);
+                    }
+                });
+            },
+            triggerSpecificEvent(eventData) { 
+                UIManager.showEventModal(eventData);
+            }
+        };
+
+        const GameLoopManager = {
+            isPaused: false,
+            
+            togglePause() {
+                if (gameState.isGameOver) return;
+                this.isPaused = !this.isPaused;
+                DOM.pauseButtonIcon.className = this.isPaused ? 'bi bi-play-fill' : 'bi bi-pause-fill';
+                DOM.pauseButton.setAttribute('data-bs-original-title', this.isPaused ? 'Resume Game' : 'Pause Game');
+                UIManager._initializeTooltips(DOM.pauseButton.parentElement); 
+                
+                DOM.nextDayButton.disabled = this.isPaused;
+
+                if (this.isPaused) {
+                    UIManager.showToast("Game Paused", "Game is paused. Click Play to resume.", "info");
+                } else {
+                    UIManager.showToast("Game Resumed", "The simulation continues.", "info");
+                }
+            },
+
+            advanceDay() {
+                if (gameState.isGameOver) {
+                    UIManager.showToast("Game Over", "The game has ended. Please start a new game.", "warning");
+                    return;
+                }
+                if (this.isPaused) {
+                    UIManager.showToast("Game Paused", "Resume game to advance time.", "info");
+                    return;
+                }
+                
+                try {
+                    gameState.dayInSeason++;
+                    gameState.dayTotal++;
+                    
+                    const seasonLength = (gameState.currentSeason === SEASONS.WINTER) ? 60 : 90; 
+                    if (gameState.dayInSeason > seasonLength) {
+                        gameState.dayInSeason = 1;
+                        if (gameState.currentSeason === SEASONS.SPRING) gameState.currentSeason = SEASONS.SUMMER;
+                        else if (gameState.currentSeason === SEASONS.SUMMER) gameState.currentSeason = SEASONS.AUTUMN;
+                        else if (gameState.currentSeason === SEASONS.AUTUMN) gameState.currentSeason = SEASONS.WINTER;
+                        else if (gameState.currentSeason === SEASONS.WINTER) {
+                            gameState.currentSeason = SEASONS.SPRING;
+                            gameState.year++;
+                             JournalManager.addEntry(`A new year begins! It is now Year ${gameState.year}.`);
+                        }
+                        JournalManager.addEntry(`The season changed to ${gameState.currentSeason}.`);
+                    }
+
+                    gameState.currentWeather = WEATHER_TYPES[Math.floor(Math.random() * WEATHER_TYPES.length)];
+
+                    if (gameState.hives && gameState.hives.length > 0) {
+                        gameState.hives.forEach(hive => { 
+                            if (hive && typeof hive.dailyUpdate === 'function') {
+                                hive.dailyUpdate(gameState.currentSeason, gameState.currentWeather);
+                            }
+                        });
+                    }
+                    
+                    gameState.researchPoints = parseFloat(((gameState.researchPoints || 0) + ((gameState.hives || []).length * 0.1)).toFixed(1)); 
+
+                    EventManager.checkAndTriggerEvents();
+                    
+                    if (gameState.money < -200 && (!gameState.hives || gameState.hives.length === 0)) { 
+                        this.triggerGameOver("Bankruptcy & Apiary Collapse", "You've run out of money and all your hives are gone!");
+                        return;
+                    }
+                    if (gameState.money < -500) {
+                        this.triggerGameOver("Deep Debt!", "Your apiary has fallen too deep into debt.");
+                        return;
+                    }
+
+                    PersistenceManager.saveGame();
+                    UIManager.render();
+                } catch (error) {
+                    console.error("Critical error in advanceDay:", error);
+                    UIManager.showToast("Critical Error", "An unexpected error occurred. The game might be unstable. Consider saving and reloading, or resetting.", "danger");
+                    this.isPaused = true; 
+                    DOM.pauseButtonIcon.className = 'bi bi-play-fill';
+                    DOM.pauseButton.setAttribute('data-bs-original-title', 'Resume Game (Error)');
+                    DOM.nextDayButton.disabled = true;
+                }
+            },
+            
+            addNewHive() {
+                if (gameState.isGameOver) return;
+                const newHiveId = gameState.hives.length > 0 ? Math.max(0, ...gameState.hives.map(h => h.id)) + 1 : 1;
+                const newHive = new Hive(newHiveId, `Hive ${newHiveId}`);
+                gameState.hives.push(newHive);
+                JournalManager.addEntry(`Added new hive: ${newHive.name}.`);
+                UIManager.showToast("New Hive Added!", `${newHive.name} is ready.`, "success");
+                if (UIManager.currentView === 'apiary-overview') UIManager.render();
+                else UIManager.updateHiveNavList();
+            },
+
+            removeHive(hiveId) {
+                if (gameState.isGameOver) return;
+                const hiveIndex = gameState.hives.findIndex(h => h.id === hiveId);
+                if (hiveIndex > -1) {
+                    const removedHiveName = gameState.hives[hiveIndex].name;
+                    gameState.hives.splice(hiveIndex, 1);
+                    JournalManager.addEntry(`Removed hive: ${removedHiveName}.`);
+                    UIManager.showToast("Hive Removed", `${removedHiveName} has been removed.`, "info");
+                    if (UIManager.activeHiveId === hiveId) {
+                        UIManager.currentView = 'apiary-overview';
+                        UIManager.activeHiveId = null;
+                    }
+                    if (gameState.hives.length === 0) {
+                         this.triggerGameOver("Apiary Lost", "All your hives are gone!");
+                    }
+                    UIManager.render();
+                }
+            },
+
+            handleHiveCollapse(hiveId) {
+                if (gameState.isGameOver) return;
+                const hiveIndex = gameState.hives.findIndex(h => h.id === hiveId);
+                if (hiveIndex > -1) {
+                    const collapsedHiveName = gameState.hives[hiveIndex].name;
+                    gameState.hives.splice(hiveIndex, 1);
+                    JournalManager.addEntry(`Hive ${collapsedHiveName} collapsed!`);
+                    UIManager.showToast("Hive Collapsed!", `Hive ${collapsedHiveName} has collapsed and been removed.`, "danger");
+
+                    if (UIManager.activeHiveId === hiveId) {
+                        UIManager.currentView = 'apiary-overview';
+                        UIManager.activeHiveId = null;
+                    }
+
+                    if (gameState.hives.length === 0) {
+                        this.triggerGameOver("Apiary Lost", "All your hives have collapsed!");
+                    }
+                    UIManager.render();
+                }
+            },
+
+            triggerGameOver(title, message) {
+                if (gameState.isGameOver) return; 
+                gameState.isGameOver = true;
+                this.isPaused = true;
+
+                DOM.nextDayButton.disabled = true;
+                DOM.pauseButton.disabled = true;
+                DOM.pauseButtonIcon.className = 'bi bi-play-fill';
+                DOM.pauseButton.setAttribute('data-bs-original-title', 'Game Over');
+                
+                const gameOverEventData = {
+                    title: title,
+                    text: message + " The game has ended.",
+                    choices: [{
+                        text: "Start New Game",
+                        action: () => {
+                            PersistenceManager.resetGameConfirm(false);
+                        }
+                    }]
+                };
+                UIManager.showEventModal(gameOverEventData);
+                JournalManager.addEntry(`GAME OVER: ${title} - ${message}`);
+                PersistenceManager.saveGame(); 
+            }
+        };
+        
+        function setupEventListeners() {
+            document.querySelectorAll('#sidebar-nav .nav-link:not(.nav-link-hive)').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (gameState.isGameOver && e.currentTarget.id !== 'nav-guide') {
+                        UIManager.showToast("Game Over", "Please start a new game to continue.", "warning");
+                        return;
+                    }
+                    UIManager.activeHiveId = null; 
+                    UIManager.currentView = e.currentTarget.id.substring(4).replace('_', '-');
+                    UIManager.render();
+                });
+            });
+
+            DOM.nextDayButton.addEventListener('click', () => GameLoopManager.advanceDay());
+            DOM.pauseButton.addEventListener('click', () => GameLoopManager.togglePause());
+            
+            DOM.settingsModal.saveButton.addEventListener('click', () => {
+                const newName = DOM.settingsModal.beekeeperNameInput.value.trim();
+                if (newName && newName.length > 0 && newName.length <= MAX_HIVE_NAME_LENGTH) {
+                    gameState.beekeeperName = newName;
+                    UIManager.updateHeader();
+                    PersistenceManager.saveGame();
+                    UIManager.showToast("Settings Saved", "Beekeeper name updated.", "success");
+                    settingsModalInstance.hide();
+                } else {
+                    UIManager.showToast("Invalid Name", `Name must be 1-${MAX_HIVE_NAME_LENGTH} characters.`, "warning");
+                }
+            });
+            DOM.settingsModal.resetButton.addEventListener('click', () => PersistenceManager.resetGameConfirm(true));
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!PersistenceManager.loadGame()) {
+                initializeNewGameState();
+            }
+            UIManager.init();
+            setupEventListeners();
+            UIManager.render(); 
+            if (gameState.isGameOver) { // Handle case where loaded game was already over
+                GameLoopManager.triggerGameOver("Game Over", "This game session had previously ended.");
+            }
+        });
+
+    })();
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

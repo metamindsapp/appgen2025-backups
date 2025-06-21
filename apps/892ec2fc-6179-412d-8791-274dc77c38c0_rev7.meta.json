@@ -1,0 +1,9 @@
+{
+  "projectId": "892ec2fc-6179-412d-8791-274dc77c38c0",
+  "revisionString": "7",
+  "projectNameDisplay": "MetaMind Insights: Your AI-Powered Research Assistant",
+  "userPromptForThisRevision": "[2025-05-28T12:55:49.708Z] [ERROR] Fetch error details: TypeError: Failed to fetch\r\n    at HTMLFormElement.handleSearchSubmit (https://beepboopbeepgen.replit.app/apps/892ec2fc-6179-412d-8791-274dc77c38c0_rev6.html:284:44)\r\n\r\ndid u try to impliment a curl post? ie this worked\r\n\r\ncorey@AX18:~/projects/MetaMindsSearch$ curl -X POST \\\r\n  -H \"Content-Type: application/json\" \\\r\n  -d '{\"query\": \"latest advancements in artificial intelligence\"}' \\\r\n  http://MetaMindsSearch-dev.eba-q5t7qk5a.us-east-2.elasticbeanstalk.com/api/bing-search\r\n{\"searchQuery\":\"latest advancements in artificial intelligence\",\"summary\":\"### Summary of Recent Advancements in Artificial Intelligence\\n\\n#### Key Developments in AI (2025)\\n\\n1. **Light-Driven Cockroach Cyborgs**: Researchers have developed a new type of insect cyborg that navigates auto",
+  "basedOnRevisionString": "6",
+  "savedAt": "2025-05-28T13:02:15.226Z",
+  "imageAssets": []
+}

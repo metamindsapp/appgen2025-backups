@@ -1,0 +1,119 @@
+{
+  "projectId": "49e6413d-f6b8-4214-99a7-6cd329026b06",
+  "revisionString": "1",
+  "projectNameDisplay": "Lake Tyee Lot Owners band",
+  "projectType": "website",
+  "ownerPublicKey": "FasjMytLz4YvCekTUiMXR8n5KoHbLvqCmvnX6D6GG5s8",
+  "userPromptForThisRevision": "5 piece classic rock band. needs a logo too",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-06-20T23:45:21.549Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/imagen3_FasjMy_49e641_f5db8298-0e6.png",
+      "url": "/generated_images/imagen3_FasjMy_49e641_f5db8298-0e6.png",
+      "description": "Logo for a 5-piece classic rock band 'Lake Tyee Lot Owners Band'. Design should be clean, legible, with a slightly vintage or rustic rock aesthetic. Consider incorporating a subtle graphic element related to 'Lake Tyee' (e.g., simplified outline of a lake, mountain, or pine tree) if it doesn't clutter the design. Dominant colors: deep blues, earthy browns, or classic rock muted tones, with a possible small accent of orange or yellow. Text: 'Lake Tyee Lot Owners Band'. Ensure it's versatile for web use.",
+      "purpose": "Main band logo for website navbar (to be referenced as /generated_images/band_logo.png).",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_FasjMy_49e641_be8abf08-857.png",
+      "url": "/generated_images/imagen3_FasjMy_49e641_be8abf08-857.png",
+      "description": "Favicon derived from the 'Lake Tyee Lot Owners Band' logo. Could be a simplified version of the graphic element or stylized initials 'LTOB'. Must be clear and recognizable at small sizes (16x16, 32x32).",
+      "purpose": "Favicon for the website (to be referenced as /generated_images/logo_favicon.png).",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_FasjMy_49e641_2254a3cc-703.png",
+      "url": "/generated_images/imagen3_FasjMy_49e641_2254a3cc-703.png",
+      "description": "Expansive and engaging hero banner image for a classic rock band website. A dynamic, wide-angle shot of a 5-piece band performing with energy on an outdoor stage or a well-lit rustic indoor venue, possibly with subtle hints of a lake or forested background if it fits naturally. The scene should feel authentic and inviting. Overall light and bright, suitable for a light theme. Photorealistic style.",
+      "purpose": "Hero banner for the homepage (to be referenced as /generated_images/hero_image.png).",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_FasjMy_49e641_5188dfef-4a2.png",
+      "url": "/generated_images/imagen3_FasjMy_49e641_5188dfef-4a2.png",
+      "description": "Group photo of a 5-piece classic rock band for an 'About Us' section. The band members (mixed gender, diverse appearances) should look approachable and authentic, dressed in casual classic rock attire. Pose them naturally, perhaps with some instruments, in a relaxed outdoor setting that could evoke 'Lake Tyee' (e.g., near a lake, in a forest clearing, or on a wooden porch). Good lighting, clear faces. Photorealistic style.",
+      "purpose": "Main band photo for the 'About Us' section (to be referenced as /generated_images/band_photo_about.png).",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_FasjMy_49e641_e7a3e650-fe8.png",
+      "url": "/generated_images/imagen3_FasjMy_49e641_e7a3e650-fe8.png",
+      "description": "Stylized digital art portrait avatar for a male lead vocalist/rhythm guitarist of a classic rock band. Charismatic expression, perhaps mid-song. Light, neutral background. Square aspect ratio. Consistent artistic style with other member avatars.",
+      "purpose": "Avatar for band member 'Rocky Roads' (to be referenced as /generated_images/member_rocky.png).",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_FasjMy_49e641_995bd8f5-a54.png",
+      "url": "/generated_images/imagen3_FasjMy_49e641_995bd8f5-a54.png",
+      "description": "Stylized digital art portrait avatar for a male lead guitarist of a classic rock band. Intense or focused expression, maybe a hint of a guitar. Light, neutral background. Square. Consistent artistic style.",
+      "purpose": "Avatar for band member 'Shreddy Mercury' (to be referenced as /generated_images/member_shreddy.png).",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_FasjMy_49e641_d777093c-55c.png",
+      "url": "/generated_images/imagen3_FasjMy_49e641_d777093c-55c.png",
+      "description": "Stylized digital art portrait avatar for a male bass guitarist of a classic rock band. Cool, grounded expression. Light, neutral background. Square. Consistent artistic style.",
+      "purpose": "Avatar for band member 'Thunder Thumbs' (to be referenced as /generated_images/member_thunder.png).",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_FasjMy_49e641_67eb7b2a-8db.png",
+      "url": "/generated_images/imagen3_FasjMy_49e641_67eb7b2a-8db.png",
+      "description": "Stylized digital art portrait avatar for a female drummer of a classic rock band. Energetic or joyful expression. Light, neutral background. Square. Consistent artistic style.",
+      "purpose": "Avatar for band member 'Beatrix Potter' (to be referenced as /generated_images/member_beatrix.png).",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_FasjMy_49e641_c994a81c-b83.png",
+      "url": "/generated_images/imagen3_FasjMy_49e641_c994a81c-b83.png",
+      "description": "Stylized digital art portrait avatar for a female keyboardist of a classic rock band. Thoughtful or soulful expression. Light, neutral background. Square. Consistent artistic style.",
+      "purpose": "Avatar for band member 'Keyshia Coletrane' (to be referenced as /generated_images/member_keyshia.png).",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_FasjMy_49e641_4dc9f0b7-967.png",
+      "url": "/generated_images/imagen3_FasjMy_49e641_4dc9f0b7-967.png",
+      "description": "Gallery Image: Photorealistic shot of a classic rock band performing live on a small, warmly lit stage, capturing the energy and interaction between members. Audience subtly visible. Square or 3:2 aspect ratio.",
+      "purpose": "Gallery image for website (to be referenced as /generated_images/gallery_live_1.png).",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_FasjMy_49e641_e32a40a9-e53.png",
+      "url": "/generated_images/imagen3_FasjMy_49e641_e32a40a9-e53.png",
+      "description": "Gallery Image: Photorealistic close-up action shot of a guitarist's hands during an expressive guitar solo. Dynamic lighting. Square or 3:2 aspect ratio.",
+      "purpose": "Gallery image for website (to be referenced as /generated_images/gallery_guitar_solo.png).",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_FasjMy_49e641_f6c21695-e9b.png",
+      "url": "/generated_images/imagen3_FasjMy_49e641_f6c21695-e9b.png",
+      "description": "Gallery Image: Photorealistic shot from the band's perspective showing an appreciative, small crowd at an outdoor community gig or local venue. Focus on happy faces. Square or 3:2 aspect ratio.",
+      "purpose": "Gallery image for website (to be referenced as /generated_images/gallery_crowd.png).",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_FasjMy_49e641_cc2ee0e8-a27.png",
+      "url": "/generated_images/imagen3_FasjMy_49e641_cc2ee0e8-a27.png",
+      "description": "Gallery Image: Photorealistic image of the band in a more relaxed, possibly acoustic setting. Could be a rehearsal or a laid-back performance. Square or 3:2 aspect ratio.",
+      "purpose": "Gallery image for website (to be referenced as /generated_images/gallery_acoustic_set.png).",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_FasjMy_49e641_9f2715b8-4aa.png",
+      "url": "/generated_images/imagen3_FasjMy_49e641_9f2715b8-4aa.png",
+      "description": "Gallery Image: Beautiful, atmospheric landscape photograph of a serene lake surrounded by pine trees and mountains, subtly evoking the 'Lake Tyee' theme. Could be at sunrise or sunset for dramatic lighting. Square or 3:2 aspect ratio.",
+      "purpose": "Gallery image for website, thematic (to be referenced as /generated_images/gallery_lake_view.png).",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_FasjMy_49e641_e8a24af4-4c8.png",
+      "url": "/generated_images/imagen3_FasjMy_49e641_e8a24af4-4c8.png",
+      "description": "Gallery Image: Artistic still life of classic rock band equipment, like vintage amplifiers, a collection of guitar pedals, or an old microphone. Moody, textured. Photorealistic. Square or 3:2 aspect ratio.",
+      "purpose": "Gallery image for website, thematic (to be referenced as /generated_images/gallery_vintage_gear.png).",
+      "isNewlyGenerated": true
+    }
+  ],
+  "isPublished": false,
+  "isShowcased": false
+}

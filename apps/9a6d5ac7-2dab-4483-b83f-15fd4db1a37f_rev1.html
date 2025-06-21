@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Breakout Blast</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+    body {
+        overflow: hidden; 
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #e9ecef;
+    }
+
+    #game-container {
+        background-image: url('/generated_images/imagen3_23288ac7-9be.png');
+        background-size: cover;
+        background-position: center;
+    }
+
+    #main-content {
+        max-width: 1000px; 
+        width: 100%;
+    }
+
+    #gameCanvas {
+        display: block;
+        background-color: #FFFFFF;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        border-radius: 0.375rem;
+        image-rendering: -moz-crisp-edges;
+        image-rendering: -webkit-crisp-edges;
+        image-rendering: pixelated;
+    }
+
+    #game-hud {
+        border-radius: 0 0 0.375rem 0.375rem;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        z-index: 1000;
+    }
+    #game-hud .badge {
+        font-size: 0.9em;
+    }
+
+    .modal-content {
+        border-radius: 0.5rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .modal-header {
+        border-bottom: none;
+        padding: 1rem 1.5rem;
+    }
+    .modal-header .modal-title {
+        font-weight: 600;
+    }
+    .modal-footer {
+        border-top: none;
+        padding: 1rem 1.5rem;
+    }
+    .modal-body .btn {
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+    }
+
+    .btn:focus {
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.5);
+    }
+
+    .list-group-item img[data-powerup-icon] {
+        vertical-align: -0.25em;
+    }
+
+    #loadingIndicatorContainer {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(233, 236, 239, 0.8); 
+        z-index: 2000;
+    }
+    </style>
+</head>
+<body class="bg-light">
+    <div id="game-container" class="container-fluid d-flex flex-column align-items-center justify-content-center min-vh-100 p-0 m-0">
+        <div id="loadingIndicatorContainer">
+            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+        <header class="text-center my-3 visually-hidden-focusable"> 
+            <h1 id="game-title" class="display-4" style="color: #0d6efd;">Breakout Blast</h1>
+        </header>
+
+        <main id="main-content" class="text-center d-flex justify-content-center align-items-center flex-grow-1 w-100">
+            <canvas id="gameCanvas">Your browser does not support the HTML5 canvas tag.</canvas>
+        </main>
+
+        <div id="game-hud" class="container fixed-top p-2 d-none" style="background-color: rgba(248, 249, 250, 0.9); backdrop-filter: blur(4px); border-bottom: 1px solid #dee2e6;">
+            <div class="row align-items-center">
+                <div class="col">
+                    <span class="fw-bold">Score: <span id="scoreDisplay" class="badge bg-primary rounded-pill">0</span></span>
+                </div>
+                <div class="col text-center">
+                    <span class="fw-bold">Level: <span id="levelDisplay" class="badge bg-info rounded-pill">1</span></span>
+                </div>
+                <div class="col text-center">
+                     <button id="pauseGameBtn" class="btn btn-sm btn-warning">Pause</button>
+                </div>
+                <div class="col text-end">
+                    <span class="fw-bold">Lives: <span id="livesDisplay" class="badge bg-danger rounded-pill">3</span></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="mainMenuModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="mainMenuModalLabel">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-primary border-2">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="mainMenuModalLabel">Breakout Blast!</h5>
+                    </div>
+                    <div class="modal-body text-center p-4">
+                        <button id="startGameBtn" class="btn btn-primary btn-lg mb-3 w-100 fs-5 shadow-sm" disabled>Start Game</button>
+                        <button id="instructionsBtn" class="btn btn-info btn-lg mb-3 w-100 fs-5 shadow-sm">How to Play</button>
+                        <button id="toggleSoundBtn" class="btn btn-secondary btn-sm mt-3 w-75">Mute Sound</button>
+                    </div>
+                    <div class="modal-footer justify-content-center bg-light">
+                        <p class="text-muted small mb-0">High Score: <span id="highScoreDisplayMenu" class="fw-bold text-success">0</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="instructionsModal" tabindex="-1" aria-labelledby="instructionsModalLabel">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-info text-dark">
+                        <h5 class="modal-title" id="instructionsModalLabel">How to Play</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <p>Use your <strong>Mouse</strong> to move the paddle left and right.</p>
+                        <p>Alternatively, use <strong>A/D keys</strong> or <strong>Left/Right Arrow keys</strong>.</p>
+                        <p>Your goal is to destroy all bricks by hitting them with the ball.</p>
+                        <p>If the ball falls below your paddle, you lose a life. Lose all lives, and it's Game Over!</p>
+                        <p>Launch the ball by <strong>clicking the mouse</strong> or pressing the <strong>Spacebar</strong> when it's on the paddle.</p>
+                        <h6 class="mt-4">Power-ups:</h6>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item"><img src="" data-powerup-icon="LargePaddle" alt="Large Paddle Icon" class="me-2" style="width:24px; height:24px; vertical-align:middle;"> <strong>Large Paddle:</strong> Makes your paddle wider for a short time.</li>
+                            <li class="list-group-item"><img src="" data-powerup-icon="MultiBall" alt="Multi-ball Icon" class="me-2" style="width:24px; height:24px; vertical-align:middle;"> <strong>Multi-ball:</strong> Releases extra balls into play!</li>
+                            <li class="list-group-item"><img src="" data-powerup-icon="StickyPaddle" alt="Sticky Paddle Icon" class="me-2" style="width:24px; height:24px; vertical-align:middle;"> <strong>Sticky Paddle:</strong> The ball sticks to your paddle. Click or press Spacebar to launch it.</li>
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got It!</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="pauseModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="pauseModalLabel">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning text-dark">
+                        <h5 class="modal-title" id="pauseModalLabel">Game Paused</h5>
+                    </div>
+                    <div class="modal-body text-center p-4">
+                        <button id="resumeGameBtn" class="btn btn-success btn-lg mb-3 w-100 fs-5 shadow-sm">Resume Game</button>
+                        <button id="restartLevelBtnPause" class="btn btn-info btn-lg mb-3 w-100 fs-5 shadow-sm">Restart Level</button>
+                        <button id="mainMenuBtnPause" class="btn btn-secondary btn-lg w-100 fs-5 shadow-sm">Main Menu</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="gameOverModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="gameOverModalLabel">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-danger border-2">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title" id="gameOverModalLabel">Game Over!</h5>
+                    </div>
+                    <div class="modal-body text-center p-4">
+                        <h4>Your Score: <span id="finalScoreGameOver" class="text-primary">0</span></h4>
+                        <p class="mt-3">High Score: <span id="highScoreDisplayGameOver" class="fw-bold text-success">0</span></p>
+                        <button id="restartGameBtnGameOver" class="btn btn-primary btn-lg mt-3 mb-2 w-100 fs-5 shadow-sm">Play Again</button>
+                        <button id="mainMenuBtnGameOver" class="btn btn-secondary btn-lg w-100 fs-5 shadow-sm">Main Menu</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="levelCompleteModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="levelCompleteModalLabel">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-success border-2">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title" id="levelCompleteModalLabel">Level Complete!</h5>
+                    </div>
+                    <div class="modal-body text-center p-4">
+                        <h4>Score: <span id="scoreLevelComplete" class="text-primary">0</span></h4>
+                        <p class="mt-3">Level <span id="levelNumComplete" class="fw-bold">1</span> Cleared!</p>
+                        <button id="nextLevelBtn" class="btn btn-primary btn-lg mt-3 mb-2 w-100 fs-5 shadow-sm">Next Level</button>
+                        <button id="mainMenuBtnLevelComplete" class="btn btn-secondary btn-lg w-100 fs-5 shadow-sm">Main Menu</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer class="text-center mt-auto py-2 visually-hidden-focusable">
+            <p class="text-muted small">Breakout Blast - An AI Generated Game</p>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
+    <script>
+    (function() {
+        'use strict';
+
+        const VIRTUAL_WIDTH = 800;
+        const VIRTUAL_HEIGHT = 450;
+
+        const IMAGE_PATHS = {
+            paddle: "/generated_images/imagen3_b5fd2ded-3b4.png",
+            ball: "/generated_images/imagen3_38f50f30-a77.png",
+            brick_standard: "/generated_images/imagen3_c43dd159-b85.png",
+            brick_strong_1: "/generated_images/imagen3_9413540c-146.png", 
+            brick_strong_0: "/generated_images/imagen3_c43dd159-b85.png", 
+            brick_powerup: "/generated_images/imagen3_75d57de1-b3f.png",
+            powerup_largepaddle: "/generated_images/imagen3_50ab2fb6-57f.png",
+            powerup_multiball: "/generated_images/imagen3_58b45865-812.png",
+            powerup_stickypaddle: "/generated_images/imagen3_0b48ec0f-832.png"
+        };
+
+        const SOUND_PATHS = {
+            bounce: 'https://cdn.jsdelivr.net/gh/PetterKraabol/soundeffects@main/static/8bit/fx/platformer/jump_1.wav', 
+            brick_hit: 'https://cdn.jsdelivr.net/gh/PetterKraabol/soundeffects@main/static/8bit/fx/other/hit_1.wav',
+            brick_destroy: 'https://cdn.jsdelivr.net/gh/PetterKraabol/soundeffects@main/static/8bit/fx/explosion/explosion_1.wav',
+            powerup_spawn: 'https://cdn.jsdelivr.net/gh/PetterKraabol/soundeffects@main/static/8bit/fx/other/coin_1.wav',
+            powerup_collect: 'https://cdn.jsdelivr.net/gh/PetterKraabol/soundeffects@main/static/8bit/fx/other/powerup_1.wav',
+            life_lost: 'https://cdn.jsdelivr.net/gh/PetterKraabol/soundeffects@main/static/8bit/fx/other/death_1.wav',
+            level_start: 'https://cdn.jsdelivr.net/gh/PetterKraabol/soundeffects@main/static/8bit/fx/other/level_start_1.wav',
+            game_over: 'https://cdn.jsdelivr.net/gh/PetterKraabol/soundeffects@main/static/8bit/fx/music/game_over_1.wav',
+            level_complete: 'https://cdn.jsdelivr.net/gh/PetterKraabol/soundeffects@main/static/8bit/fx/music/level_complete_1.wav',
+            click: 'https://cdn.jsdelivr.net/gh/PetterKraabol/soundeffects@main/static/8bit/fx/ui/click_1.wav'
+        };
+        
+        const GameState = {
+            LOADING: 'LOADING',
+            MAIN_MENU: 'MAIN_MENU',
+            PLAYING: 'PLAYING',
+            PAUSED: 'PAUSED',
+            LEVEL_START_DELAY: 'LEVEL_START_DELAY',
+            LIFE_LOST_DELAY: 'LIFE_LOST_DELAY',
+            LEVEL_COMPLETE: 'LEVEL_COMPLETE',
+            GAME_OVER: 'GAME_OVER'
+        };
+
+        const POWERUP_TYPES = {
+            LARGE_PADDLE: 'LargePaddle',
+            MULTI_BALL: 'MultiBall',
+            STICKY_PADDLE: 'StickyPaddle'
+        };
+
+        const BRICK_SPACING = 2;
+        const BRICK_AREA_TOP_MARGIN = 60;
+        const BRICK_AREA_WIDTH_FACTOR = 0.95;
+
+
+        const LEVELS = [
+            [
+                "S S S S S S S S S S",
+                " S P S S S S S P S ",
+                "  S S T S S T S S  ",
+                "   S S S S S S S   "
+            ],
+            [
+                "T T T T T T T T T T",
+                "P S S S S S S S S P",
+                " S T S P S P S T S ",
+                "  S S S S S S S S  ",
+                "   T T T T T T T   "
+            ],
+            [
+                "P T S T S T S T S P",
+                " T S T S T S T S T ",
+                "S T S T S T S T S T",
+                " T S T S T S T S T ",
+                "P T S T S T S T S P"
+            ],
+            [
+                "S S S S S S S S S S S S",
+                " T T T T T T T T T T T ",
+                "  P P P P P P P P P  ",
+                "   S S S S S S S S   ",
+                "    T T T T T T T    "
+            ],
+            [
+                "T P T P T P T P T P T",
+                " S S S S S S S S S S ",
+                "T P T S S S S T P T",
+                " S S S S S S S S S S ",
+                "T P T P T P T P T P T",
+            ]
+        ];
+
+        class AssetLoader {
+            constructor() {
+                this.images = {};
+                this.totalAssets = 0;
+                this.loadedAssets = 0;
+                this.errorAssets = 0;
+            }
+
+            loadImage(key, src) {
+                this.totalAssets++;
+                const img = new Image();
+                img.src = src;
+                img.onload = () => this._assetLoaded();
+                img.onerror = () => {
+                    console.error(`Failed to load image: ${key} at ${src}`);
+                    this.errorAssets++;
+                    this._assetLoaded(); 
+                };
+                this.images[key] = img;
+            }
+
+            loadSound(key, src, soundManager) {
+                this.totalAssets++;
+                soundManager.loadSound(key, src, () => this._assetLoaded(), () => {
+                    console.error(`Failed to load sound: ${key} at ${src}`);
+                    this.errorAssets++;
+                    this._assetLoaded();
+                });
+            }
+            
+            _assetLoaded() {
+                this.loadedAssets++;
+            }
+
+            isDone() {
+                return this.loadedAssets === this.totalAssets;
+            }
+
+            get(key) {
+                return this.images[key];
+            }
+        }
+        
+        class InputManager {
+            constructor(canvas) {
+                this.keys = {};
+                this.mousePos = { x: canvas.width / 2, y: canvas.height - 50 };
+                this.mouseClicked = false;
+
+                document.addEventListener('keydown', e => this.keys[e.key.toLowerCase()] = true);
+                document.addEventListener('keyup', e => this.keys[e.key.toLowerCase()] = false);
+                
+                canvas.addEventListener('mousemove', e => {
+                    const rect = canvas.getBoundingClientRect();
+                    const scaleX = canvas.width / rect.width;
+                    this.mousePos.x = (e.clientX - rect.left) * scaleX;
+                });
+                canvas.addEventListener('mousedown', e => {
+                    if (e.button === 0) this.mouseClicked = true;
+                });
+                 canvas.addEventListener('mouseup', e => {
+                    if (e.button === 0) this.mouseClicked = false;
+                });
+            }
+
+            isKeyDown(key) {
+                return !!this.keys[key];
+            }
+
+            consumeClick() {
+                const clicked = this.mouseClicked;
+                this.mouseClicked = false;
+                return clicked;
+            }
+        }
+
+        class SoundManager {
+            constructor() {
+                this.sounds = {};
+                this.isMuted = false;
+                this.globalVolume = 0.3; 
+            }
+
+            loadSound(key, src, successCallback, errorCallback) {
+                const sound = new Howl({
+                    src: [src],
+                    volume: this.globalVolume,
+                    onload: successCallback,
+                    onloaderror: (id, err) => {
+                        errorCallback(); 
+                    }
+                });
+                this.sounds[key] = sound;
+            }
+
+            play(key) {
+                if (this.sounds[key] && !this.isMuted && this.sounds[key].state() === 'loaded') {
+                    this.sounds[key].play();
+                } else if (this.sounds[key] && this.sounds[key].state() !== 'loaded') {
+                     console.warn(`Sound ${key} not loaded yet.`);
+                }
+            }
+
+            toggleMute(muteState) {
+                this.isMuted = muteState;
+                Howler.mute(this.isMuted);
+            }
+        }
+
+        class UIManager {
+            constructor(game) {
+                this.game = game;
+                this.scoreDisplay = document.getElementById('scoreDisplay');
+                this.livesDisplay = document.getElementById('livesDisplay');
+                this.levelDisplay = document.getElementById('levelDisplay');
+                this.gameHud = document.getElementById('game-hud');
+                this.loadingIndicatorContainer = document.getElementById('loadingIndicatorContainer');
+                this.startGameBtn = document.getElementById('startGameBtn');
+
+                this.mainMenuModalEl = document.getElementById('mainMenuModal');
+                this.instructionsModalEl = document.getElementById('instructionsModal');
+                this.pauseModalEl = document.getElementById('pauseModal');
+                this.gameOverModalEl = document.getElementById('gameOverModal');
+                this.levelCompleteModalEl = document.getElementById('levelCompleteModal');
+
+                this.mainMenuModal = new bootstrap.Modal(this.mainMenuModalEl);
+                this.instructionsModal = new bootstrap.Modal(this.instructionsModalEl);
+                this.pauseModal = new bootstrap.Modal(this.pauseModalEl);
+                this.gameOverModal = new bootstrap.Modal(this.gameOverModalEl);
+                this.levelCompleteModal = new bootstrap.Modal(this.levelCompleteModalEl);
+                
+                this.highScoreDisplayMenu = document.getElementById('highScoreDisplayMenu');
+                this.finalScoreGameOver = document.getElementById('finalScoreGameOver');
+                this.highScoreDisplayGameOver = document.getElementById('highScoreDisplayGameOver');
+                this.scoreLevelComplete = document.getElementById('scoreLevelComplete');
+                this.levelNumComplete = document.getElementById('levelNumComplete');
+                this.toggleSoundBtn = document.getElementById('toggleSoundBtn');
+
+                this.setupModalIconPaths();
+            }
+
+            setupModalIconPaths() {
+                document.querySelector('[data-powerup-icon="LargePaddle"]').src = IMAGE_PATHS.powerup_largepaddle;
+                document.querySelector('[data-powerup-icon="MultiBall"]').src = IMAGE_PATHS.powerup_multiball;
+                document.querySelector('[data-powerup-icon="StickyPaddle"]').src = IMAGE_PATHS.powerup_stickypaddle;
+            }
+
+            updateHUD() {
+                this.scoreDisplay.textContent = this.game.score;
+                this.livesDisplay.textContent = this.game.lives;
+                this.levelDisplay.textContent = this.game.currentLevelIndex + 1;
+            }
+
+            showHUD() { this.gameHud.classList.remove('d-none'); }
+            hideHUD() { this.gameHud.classList.add('d-none'); }
+            
+            showLoading() { this.loadingIndicatorContainer.style.display = 'flex'; this.startGameBtn.disabled = true; }
+            hideLoading() { this.loadingIndicatorContainer.style.display = 'none'; this.startGameBtn.disabled = false; }
+
+            showModal(modalInstance) { modalInstance.show(); }
+            hideAllModals() {
+                if (this.mainMenuModalEl.classList.contains('show')) this.mainMenuModal.hide();
+                if (this.instructionsModalEl.classList.contains('show')) this.instructionsModal.hide();
+                if (this.pauseModalEl.classList.contains('show')) this.pauseModal.hide();
+                if (this.gameOverModalEl.classList.contains('show')) this.gameOverModal.hide();
+                if (this.levelCompleteModalEl.classList.contains('show')) this.levelCompleteModal.hide();
+            }
+            
+            updateSoundButtonText(isMuted) {
+                this.toggleSoundBtn.textContent = isMuted ? 'Unmute Sound' : 'Mute Sound';
+            }
+
+            updateHighScores(highScore) {
+                this.highScoreDisplayMenu.textContent = highScore;
+                this.highScoreDisplayGameOver.textContent = highScore;
+            }
+
+            showGameOverScreen() {
+                this.finalScoreGameOver.textContent = this.game.score;
+                this.showModal(this.gameOverModal);
+            }
+
+            showLevelCompleteScreen() {
+                this.scoreLevelComplete.textContent = this.game.score;
+                this.levelNumComplete.textContent = this.game.currentLevelIndex + 1;
+                const nextLevelBtn = document.getElementById('nextLevelBtn');
+                if (this.game.currentLevelIndex >= LEVELS.length - 1) {
+                    nextLevelBtn.textContent = 'You Beat All Levels!';
+                    nextLevelBtn.disabled = true;
+                } else {
+                    nextLevelBtn.textContent = 'Next Level';
+                    nextLevelBtn.disabled = false;
+                }
+                this.showModal(this.levelCompleteModal);
+            }
+        }
+        
+        class Particle {
+            constructor(x, y, color, size, speed, angle, lifespan) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.size = size;
+                this.vx = speed * Math.cos(angle);
+                this.vy = speed * Math.sin(angle);
+                this.lifespan = lifespan;
+                this.life = 0;
+                this.alpha = 1;
+            }
+
+            update(dt) {
+                this.x += this.vx * dt;
+                this.y += this.vy * dt;
+                this.vy += 50 * dt; // Gravity
+                this.life += dt;
+                this.alpha = 1 - (this.life / this.lifespan);
+                if (this.alpha < 0) this.alpha = 0;
+            }
+
+            draw(ctx) {
+                if (this.alpha <= 0) return;
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x - this.size / 2, this.y - this.size / 2, this.size, this.size);
+                ctx.restore();
+            }
+
+            isAlive() {
+                return this.alpha > 0;
+            }
+        }
+
+        class ParticleSystem {
+            constructor() {
+                this.particles = [];
+            }
+
+            createExplosion(x, y, color, count = 15, size = 3, speed = 120, lifespan = 0.6) {
+                for (let i = 0; i < count; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const particleSpeed = speed * (0.5 + Math.random() * 0.7);
+                    const particleSize = size * (0.7 + Math.random() * 0.6);
+                    this.particles.push(new Particle(x, y, color, particleSize, particleSpeed, angle, lifespan));
+                }
+            }
+
+            update(dt) {
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    this.particles[i].update(dt);
+                    if (!this.particles[i].isAlive()) {
+                        this.particles.splice(i, 1);
+                    }
+                }
+            }
+
+            draw(ctx) {
+                this.particles.forEach(p => p.draw(ctx));
+            }
+        }
+
+        class Paddle {
+            constructor(game) {
+                this.game = game;
+                this.image = game.assetLoader.get('paddle');
+                this.baseWidth = 100;
+                this.height = 20;
+                this.width = this.baseWidth;
+                this.x = (game.canvas.width - this.width) / 2;
+                this.y = game.canvas.height - this.height - 15;
+                this.speed = 700; 
+                this.isSticky = false;
+                this.powerUpTimer = 0;
+                this.powerUpDuration = 10; 
+                this.mouseLerpFactor = 0.25;
+            }
+
+            update(dt) {
+                const targetX = this.game.inputManager.mousePos.x - this.width / 2;
+                this.x += (targetX - this.x) * this.mouseLerpFactor; 
+
+                if (this.game.inputManager.isKeyDown('a') || this.game.inputManager.isKeyDown('arrowleft')) {
+                    this.x -= this.speed * dt;
+                }
+                if (this.game.inputManager.isKeyDown('d') || this.game.inputManager.isKeyDown('arrowright')) {
+                    this.x += this.speed * dt;
+                }
+
+                if (this.x < 0) this.x = 0;
+                if (this.x + this.width > this.game.canvas.width) {
+                    this.x = this.game.canvas.width - this.width;
+                }
+
+                if (this.powerUpTimer > 0) {
+                    this.powerUpTimer -= dt;
+                    if (this.powerUpTimer <= 0) {
+                        this.resetEffects();
+                    }
+                }
+            }
+
+            draw(ctx) {
+                if (this.image && this.image.complete && this.image.naturalHeight > 0) {
+                     ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+                } else {
+                    ctx.fillStyle = '#0d6efd';
+                    ctx.fillRect(this.x, this.y, this.width, this.height);
+                }
+            }
+
+            activatePowerUp(type) {
+                this.resetEffects();
+                this.powerUpTimer = this.powerUpDuration;
+                if (type === POWERUP_TYPES.LARGE_PADDLE) {
+                    this.width = this.baseWidth * 1.5;
+                    this.x -= (this.width - this.baseWidth) / 2; // Keep centered
+                } else if (type === POWERUP_TYPES.STICKY_PADDLE) {
+                    this.isSticky = true;
+                }
+            }
+            
+            resetEffects() {
+                this.x += (this.width - this.baseWidth) / 2; // Re-center if width changed
+                this.width = this.baseWidth;
+                this.isSticky = false;
+                this.powerUpTimer = 0;
+            }
+        }
+
+        class Ball {
+            constructor(game, x, y, dx, dy) {
+                this.game = game;
+                this.image = game.assetLoader.get('ball');
+                this.radius = 10;
+                this.baseSpeed = 350;
+                this.speed = this.baseSpeed;
+                this.x = x;
+                this.y = y;
+                this.dx = dx;
+                this.dy = dy;
+                this.isStuckToPaddle = false;
+                this.trailParticles = [];
+                this.trailInterval = 0.02; 
+                this.trailTimer = 0;
+                this.minDYRatio = 0.2; // Minimum vertical speed component to prevent flat bounces
+            }
+
+            update(dt) {
+                if (this.isStuckToPaddle) {
+                    this.x = this.game.paddle.x + this.game.paddle.width / 2;
+                    this.y = this.game.paddle.y - this.radius;
+                    if (this.game.inputManager.consumeClick() || this.game.inputManager.isKeyDown(' ')) {
+                        this.isStuckToPaddle = false;
+                        this.game.paddle.isSticky = false; 
+                        this.dy = -this.speed;
+                        this.dx = (Math.random() - 0.5) * this.speed * 0.3; 
+                        this.normalizeSpeed();
+                        this.game.soundManager.play('bounce');
+                    }
+                    return;
+                }
+
+                this.x += this.dx * dt;
+                this.y += this.dy * dt;
+                
+                this.trailTimer += dt;
+                if (this.trailTimer >= this.trailInterval) {
+                    this.trailTimer = 0;
+                    this.trailParticles.push({ x: this.x, y: this.y, alpha: 1, radius: this.radius * 0.6 });
+                }
+                this.updateTrail(dt);
+
+
+                if (this.x - this.radius < 0 || this.x + this.radius > this.game.canvas.width) {
+                    this.dx *= -1;
+                    this.x = (this.x - this.radius < 0) ? this.radius : this.game.canvas.width - this.radius;
+                    this.game.soundManager.play('bounce');
+                }
+                if (this.y - this.radius < 0) {
+                    this.dy *= -1;
+                    this.y = this.radius;
+                    this.game.soundManager.play('bounce');
+                }
+
+                if (this.y + this.radius > this.game.canvas.height) {
+                    this.game.loseLife(this);
+                }
+            }
+            
+            updateTrail(dt) {
+                for (let i = this.trailParticles.length - 1; i >= 0; i--) {
+                    const p = this.trailParticles[i];
+                    p.alpha -= 4 * dt; 
+                    if (p.alpha <= 0) {
+                        this.trailParticles.splice(i, 1);
+                    }
+                }
+            }
+
+            draw(ctx) {
+                this.trailParticles.forEach(p => {
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(253, 126, 20, ${p.alpha * 0.4})`;
+                    ctx.fill();
+                });
+
+                if (this.image && this.image.complete && this.image.naturalHeight > 0) {
+                    ctx.drawImage(this.image, this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = '#fd7e14';
+                    ctx.fill();
+                }
+            }
+            
+            normalizeSpeed() {
+                const currentSpeed = Math.sqrt(this.dx * this.dx + this.dy * this.dy);
+                if (currentSpeed === 0) { 
+                    this.dx = 0;
+                    this.dy = -this.speed;
+                    return;
+                }
+                this.dx = (this.dx / currentSpeed) * this.speed;
+                this.dy = (this.dy / currentSpeed) * this.speed;
+
+                if (Math.abs(this.dy / this.speed) < this.minDYRatio) {
+                    this.dy = (this.dy > 0 ? 1 : -1) * this.speed * this.minDYRatio;
+                    const newDXSq = this.speed * this.speed - this.dy * this.dy;
+                    this.dx = (this.dx > 0 ? 1 : -1) * Math.sqrt(Math.max(0, newDXSq));
+                }
+            }
+
+            reset(x, y, stuck = true) {
+                this.x = x;
+                this.y = y;
+                this.isStuckToPaddle = stuck;
+                if (stuck) {
+                    this.dx = 0;
+                    this.dy = 0;
+                } else {
+                    this.dy = -this.speed;
+                    this.dx = (Math.random() - 0.5) * this.speed * 0.3;
+                    this.normalizeSpeed();
+                }
+                this.trailParticles = [];
+            }
+        }
+
+        class Brick {
+            constructor(game, x, y, width, height, type) {
+                this.game = game;
+                this.x = x;
+                this.y = y;
+                this.width = width;
+                this.height = height;
+                this.type = type; 
+                this.isVisible = true;
+
+                switch(type) {
+                    case 'S': 
+                        this.health = 1;
+                        this.image = game.assetLoader.get('brick_standard');
+                        this.color = '#ced4da';
+                        this.points = 10;
+                        this.powerUpType = null;
+                        break;
+                    case 'T': 
+                        this.health = 2;
+                        this.image = game.assetLoader.get('brick_strong_1');
+                        this.color = '#cfe2ff';
+                        this.points = 25;
+                        this.powerUpType = null;
+                        break;
+                    case 'P': 
+                        this.health = 1;
+                        this.image = game.assetLoader.get('brick_powerup');
+                        this.color = '#d1e7dd';
+                        this.points = 50;
+                        const powerUpKeys = Object.values(POWERUP_TYPES);
+                        this.powerUpType = powerUpKeys[Math.floor(Math.random() * powerUpKeys.length)];
+                        break;
+                    default:
+                        this.isVisible = false; 
+                }
+            }
+
+            draw(ctx) {
+                if (!this.isVisible) return;
+                if (this.image && this.image.complete && this.image.naturalHeight > 0) {
+                     ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+                } else {
+                    ctx.fillStyle = this.color;
+                    ctx.fillRect(this.x, this.y, this.width, this.height);
+                    ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+                    ctx.strokeRect(this.x, this.y, this.width, this.height);
+                }
+            }
+
+            takeHit() {
+                if (!this.isVisible) return false;
+                this.health--;
+                this.game.soundManager.play('brick_hit');
+                if (this.health <= 0) {
+                    this.isVisible = false;
+                    this.game.score += this.points;
+                    this.game.particleSystem.createExplosion(this.x + this.width / 2, this.y + this.height / 2, this.color);
+                    this.game.soundManager.play('brick_destroy');
+                    if (this.powerUpType) {
+                        this.game.spawnPowerUp(this.x + this.width / 2, this.y + this.height / 2, this.powerUpType);
+                    }
+                    return true; 
+                } else if (this.type === 'T') {
+                    this.image = this.game.assetLoader.get('brick_strong_0'); 
+                    this.color = '#ced4da'; 
+                }
+                return false; 
+            }
+        }
+        
+        class PowerUp {
+            constructor(game, x, y, type) {
+                this.game = game;
+                this.type = type;
+                this.image = game.assetLoader.get(`powerup_${type.toLowerCase()}`);
+                this.width = 30;
+                this.height = 30;
+                this.x = x - this.width / 2;
+                this.y = y;
+                this.speed = 150;
+                this.isVisible = true;
+            }
+
+            update(dt) {
+                if (!this.isVisible) return;
+                this.y += this.speed * dt;
+                if (this.y > this.game.canvas.height) {
+                    this.isVisible = false;
+                }
+            }
+
+            draw(ctx) {
+                if (!this.isVisible) return;
+                if (this.image && this.image.complete && this.image.naturalHeight > 0) {
+                    ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+                } else {
+                    let color = '#FFD700'; 
+                    if (this.type === POWERUP_TYPES.LARGE_PADDLE) color = '#0dcaf0';
+                    if (this.type === POWERUP_TYPES.MULTI_BALL) color = '#fd7e14';
+                    if (this.type === POWERUP_TYPES.STICKY_PADDLE) color = '#6f42c1';
+                    ctx.fillStyle = color;
+                    ctx.fillRect(this.x, this.y, this.width, this.height);
+                }
+            }
+
+            activate() {
+                this.game.soundManager.play('powerup_collect');
+                this.game.paddle.activatePowerUp(this.type);
+                if (this.type === POWERUP_TYPES.MULTI_BALL) {
+                    this.game.activateMultiBall();
+                }
+                this.isVisible = false;
+            }
+        }
+
+        class Game {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.canvas.width = VIRTUAL_WIDTH;
+                this.canvas.height = VIRTUAL_HEIGHT;
+
+                this.assetLoader = new AssetLoader();
+                this.soundManager = new SoundManager();
+                this.inputManager = new InputManager(this.canvas);
+                this.uiManager = new UIManager(this);
+                this.particleSystem = new ParticleSystem();
+                
+                this.paddle = null;
+                this.balls = [];
+                this.bricks = [];
+                this.powerUps = [];
+
+                this.score = 0;
+                this.lives = 3;
+                this.currentLevelIndex = 0;
+                this.gameState = GameState.LOADING;
+                this.highScore = 0;
+                this.isMuted = false;
+
+                this.lastTime = 0;
+                this.deltaTime = 0;
+                this.stateTimer = 0;
+
+                this.isShaking = false;
+                this.shakeDuration = 0;
+                this.shakeMagnitude = 0;
+                this.shakeTimer = 0;
+            }
+
+            init() {
+                this.uiManager.showLoading();
+                this.loadAssets();
+                this.loadSettings();
+                this.uiManager.updateSoundButtonText(this.isMuted);
+                this.uiManager.updateHighScores(this.highScore);
+                this.setupEventListeners();
+                this.resizeCanvas();
+                window.addEventListener('resize', () => this.resizeCanvas());
+                requestAnimationFrame(this.gameLoop.bind(this));
+            }
+
+            loadAssets() {
+                Object.keys(IMAGE_PATHS).forEach(key => {
+                    this.assetLoader.loadImage(key, IMAGE_PATHS[key]);
+                });
+                Object.keys(SOUND_PATHS).forEach(key => {
+                    this.assetLoader.loadSound(key, SOUND_PATHS[key], this.soundManager);
+                });
+            }
+            
+            loadSettings() {
+                try {
+                    this.highScore = parseInt(localStorage.getItem('breakoutHighScore_v1')) || 0;
+                    this.isMuted = localStorage.getItem('breakoutMuted_v1') === 'true';
+                    this.soundManager.toggleMute(this.isMuted);
+                } catch (e) {
+                    console.error("Error loading from localStorage:", e);
+                    this.highScore = 0;
+                    this.isMuted = false;
+                }
+            }
+
+            saveSettings() {
+                try {
+                    localStorage.setItem('breakoutHighScore_v1', this.highScore.toString());
+                    localStorage.setItem('breakoutMuted_v1', this.isMuted.toString());
+                } catch (e) {
+                    console.error("Error saving to localStorage:", e);
+                }
+            }
+
+            setupEventListeners() {
+                document.getElementById('startGameBtn').addEventListener('click', () => { this.soundManager.play('click'); this.startGame(); });
+                document.getElementById('instructionsBtn').addEventListener('click', () => { this.soundManager.play('click'); this.uiManager.showModal(this.uiManager.instructionsModal); });
+                document.getElementById('toggleSoundBtn').addEventListener('click', () => { this.toggleSound(); this.soundManager.play('click'); });
+                document.getElementById('pauseGameBtn').addEventListener('click', () => { this.soundManager.play('click'); this.pauseGame(); });
+                document.getElementById('resumeGameBtn').addEventListener('click', () => { this.soundManager.play('click'); this.resumeGame(); });
+                
+                const restartHandler = () => { this.soundManager.play('click'); this.restartLevel(); };
+                document.getElementById('restartLevelBtnPause').addEventListener('click', restartHandler);
+                
+                const mainMenuHandler = () => { this.soundManager.play('click'); this.goToMainMenu(); };
+                document.getElementById('mainMenuBtnPause').addEventListener('click', mainMenuHandler);
+                document.getElementById('mainMenuBtnGameOver').addEventListener('click', mainMenuHandler);
+                document.getElementById('mainMenuBtnLevelComplete').addEventListener('click', mainMenuHandler);
+
+                document.getElementById('restartGameBtnGameOver').addEventListener('click', () => { this.soundManager.play('click'); this.startGame(true); });
+                document.getElementById('nextLevelBtn').addEventListener('click', () => { this.soundManager.play('click'); this.nextLevel(); });
+            }
+
+            resizeCanvas() {
+                const mainContent = document.getElementById('main-content');
+                const aspectRatio = this.canvas.width / this.canvas.height; 
+                
+                let availableWidth = mainContent.clientWidth;
+                let availableHeight = mainContent.clientHeight;
+
+                let newCanvasWidth, newCanvasHeight;
+
+                if (availableWidth / availableHeight > aspectRatio) {
+                    newCanvasHeight = availableHeight;
+                    newCanvasWidth = newCanvasHeight * aspectRatio;
+                } else {
+                    newCanvasWidth = availableWidth;
+                    newCanvasHeight = newCanvasWidth / aspectRatio;
+                }
+                
+                this.canvas.style.width = `${newCanvasWidth}px`;
+                this.canvas.style.height = `${newCanvasHeight}px`;
+            }
+            
+            setState(newState) {
+                this.gameState = newState;
+                this.stateTimer = 0;
+                this.uiManager.hideAllModals();
+                this.uiManager.hideHUD();
+
+                switch(newState) {
+                    case GameState.LOADING:
+                        this.uiManager.showLoading();
+                        break;
+                    case GameState.MAIN_MENU:
+                        this.uiManager.hideLoading();
+                        this.uiManager.showModal(this.uiManager.mainMenuModal);
+                        this.paddle = null; 
+                        this.balls = [];
+                        this.bricks = [];
+                        this.powerUps = [];
+                        break;
+                    case GameState.PLAYING:
+                        this.uiManager.showHUD();
+                        break;
+                    case GameState.PAUSED:
+                        this.uiManager.showHUD(); 
+                        this.uiManager.showModal(this.uiManager.pauseModal);
+                        break;
+                    case GameState.LEVEL_START_DELAY:
+                    case GameState.LIFE_LOST_DELAY:
+                        this.uiManager.showHUD();
+                        this.stateTimer = 1.5; 
+                        break;
+                    case GameState.GAME_OVER:
+                        this.uiManager.showGameOverScreen();
+                        this.soundManager.play('game_over');
+                        break;
+                    case GameState.LEVEL_COMPLETE:
+                        this.uiManager.showLevelCompleteScreen();
+                        this.soundManager.play('level_complete');
+                        break;
+                }
+            }
+
+            gameLoop(timestamp) {
+                if (!this.lastTime) this.lastTime = timestamp;
+                this.deltaTime = (timestamp - this.lastTime) / 1000;
+                this.lastTime = timestamp;
+                if (this.deltaTime > 0.1) this.deltaTime = 0.1; 
+
+                this.update(this.deltaTime);
+                this.render();
+                requestAnimationFrame(this.gameLoop.bind(this));
+            }
+
+            update(dt) {
+                if (this.gameState === GameState.LOADING) {
+                    if (this.assetLoader.isDone()) {
+                        this.setState(GameState.MAIN_MENU);
+                    }
+                    return;
+                }
+                
+                this.particleSystem.update(dt);
+
+                if (this.isShaking) {
+                    this.shakeTimer += dt;
+                    if (this.shakeTimer >= this.shakeDuration) {
+                        this.isShaking = false;
+                        this.shakeTimer = 0;
+                    }
+                }
+
+                if (this.gameState === GameState.PLAYING) {
+                    if (this.paddle) this.paddle.update(dt);
+                    this.balls.forEach(ball => ball.update(dt));
+                    this.powerUps = this.powerUps.filter(pu => pu.isVisible);
+                    this.powerUps.forEach(pu => pu.update(dt));
+                    this.handleCollisions();
+                    this.checkWinCondition();
+                } else if (this.gameState === GameState.LEVEL_START_DELAY || this.gameState === GameState.LIFE_LOST_DELAY) {
+                    this.stateTimer -= dt;
+                    if (this.stateTimer <= 0) {
+                        this.setState(GameState.PLAYING);
+                    }
+                }
+            }
+
+            render() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                if (this.isShaking) {
+                    this.ctx.save();
+                    const dx = (Math.random() - 0.5) * this.shakeMagnitude * 2;
+                    const dy = (Math.random() - 0.5) * this.shakeMagnitude * 2;
+                    this.ctx.translate(dx, dy);
+                }
+
+                if (this.paddle) this.paddle.draw(this.ctx);
+                this.bricks.forEach(brick => brick.draw(this.ctx));
+                this.balls.forEach(ball => ball.draw(this.ctx));
+                this.powerUps.forEach(pu => pu.draw(this.ctx));
+                this.particleSystem.draw(this.ctx);
+
+                if (this.gameState === GameState.LEVEL_START_DELAY || this.gameState === GameState.LIFE_LOST_DELAY) {
+                    this.ctx.fillStyle = "rgba(0,0,0,0.6)";
+                    this.ctx.fillRect(0,0, this.canvas.width, this.canvas.height);
+                    this.ctx.fillStyle = "white";
+                    this.ctx.font = "bold 60px 'Segoe UI', sans-serif";
+                    this.ctx.textAlign = "center";
+                    this.ctx.textBaseline = "middle";
+                    this.ctx.fillText(Math.ceil(this.stateTimer).toString(), this.canvas.width / 2, this.canvas.height / 2);
+                }
+                
+                if (this.isShaking) {
+                    this.ctx.restore();
+                }
+            }
+
+            handleCollisions() {
+                this.balls.forEach(ball => {
+                    if (ball.isStuckToPaddle) return;
+
+                    if (ball.x + ball.radius > this.paddle.x &&
+                        ball.x - ball.radius < this.paddle.x + this.paddle.width &&
+                        ball.y + ball.radius > this.paddle.y &&
+                        ball.y - ball.radius < this.paddle.y + this.paddle.height && ball.dy > 0) { // Check ball.dy > 0 to prevent sticking from side/top
+                        
+                        if (this.paddle.isSticky) {
+                            ball.isStuckToPaddle = true;
+                            ball.dx = 0; ball.dy = 0;
+                        } else {
+                            ball.y = this.paddle.y - ball.radius; 
+                            ball.dy *= -1;
+
+                            let hitPos = (ball.x - (this.paddle.x + this.paddle.width / 2)) / (this.paddle.width / 2);
+                            hitPos = Math.max(-0.95, Math.min(0.95, hitPos)); 
+                            ball.dx = hitPos * ball.speed * 0.8; 
+                            ball.normalizeSpeed();
+                            this.soundManager.play('bounce');
+                        }
+                    }
+
+                    for (let i = this.bricks.length - 1; i >= 0; i--) {
+                        const brick = this.bricks[i];
+                        if (!brick.isVisible) continue;
+
+                        const ballLeft = ball.x - ball.radius;
+                        const ballRight = ball.x + ball.radius;
+                        const ballTop = ball.y - ball.radius;
+                        const ballBottom = ball.y + ball.radius;
+
+                        const brickLeft = brick.x;
+                        const brickRight = brick.x + brick.width;
+                        const brickTop = brick.y;
+                        const brickBottom = brick.y + brick.height;
+
+                        if (ballRight > brickLeft && ballLeft < brickRight && ballBottom > brickTop && ballTop < brickBottom) {
+                            const overlapX = Math.min(ballRight, brickRight) - Math.max(ballLeft, brickLeft);
+                            const overlapY = Math.min(ballBottom, brickBottom) - Math.max(ballTop, brickTop);
+                            
+                            const prevBallX = ball.x - ball.dx * this.deltaTime;
+                            const prevBallY = ball.y - ball.dy * this.deltaTime;
+
+                            if (overlapX < overlapY) { // Horizontal collision
+                                ball.dx *= -1;
+                                ball.x = (ball.x > brick.x + brick.width / 2) ? brick.x + brick.width + ball.radius : brick.x - ball.radius;
+                            } else { // Vertical collision
+                                ball.dy *= -1;
+                                ball.y = (ball.y > brick.y + brick.height / 2) ? brick.y + brick.height + ball.radius : brick.y - ball.radius;
+                            }
+                            
+                            if (brick.takeHit()) {
+                                this.bricks.splice(i, 1);
+                            }
+                            ball.normalizeSpeed(); // Ensure speed is maintained after potential position correction
+                            break; 
+                        }
+                    }
+                });
+
+                for (let i = this.powerUps.length - 1; i >= 0; i--) {
+                    const pu = this.powerUps[i];
+                    if (!pu.isVisible) continue;
+
+                    if (pu.x < this.paddle.x + this.paddle.width &&
+                        pu.x + pu.width > this.paddle.x &&
+                        pu.y < this.paddle.y + this.paddle.height &&
+                        pu.y + pu.height > this.paddle.y) {
+                        pu.activate();
+                    }
+                }
+            }
+            
+            triggerScreenShake(duration = 0.2, magnitude = 3) {
+                this.isShaking = true;
+                this.shakeDuration = duration;
+                this.shakeMagnitude = magnitude;
+                this.shakeTimer = 0;
+            }
+
+            startGame(isRestart = false) {
+                this.score = 0;
+                this.lives = 3;
+                if (isRestart) this.currentLevelIndex = 0;
+                this.paddle = new Paddle(this);
+                this.loadLevel(this.currentLevelIndex);
+                this.uiManager.updateHUD();
+                this.setState(GameState.LEVEL_START_DELAY);
+                this.soundManager.play('level_start');
+            }
+
+            loadLevel(levelIndex) {
+                this.currentLevelIndex = levelIndex;
+                if (this.paddle) this.paddle.resetEffects();
+                
+                this.balls = [new Ball(this, this.paddle.x + this.paddle.width / 2, this.paddle.y - 10, 0, 0)];
+                this.balls[0].isStuckToPaddle = true;
+                this.powerUps = [];
+                this.bricks = [];
+
+                const layout = LEVELS[levelIndex];
+                if (!layout) {
+                    console.error("Level not found:", levelIndex);
+                    this.goToMainMenu(); 
+                    return;
+                }
+                
+                const numRows = layout.length;
+                const numCols = layout[0].split(" ").filter(c => c !== "").length; // Count non-empty elements for more robust col count
+                
+                const effectiveCanvasWidth = this.canvas.width * BRICK_AREA_WIDTH_FACTOR;
+                const brickWidth = (effectiveCanvasWidth - (numCols - 1) * BRICK_SPACING) / numCols;
+                const brickHeight = 20;
+                
+                const totalBricksWidth = numCols * brickWidth + (numCols - 1) * BRICK_SPACING;
+                const offsetX = (this.canvas.width - totalBricksWidth) / 2;
+                const offsetY = BRICK_AREA_TOP_MARGIN;
+
+                layout.forEach((rowStr, r) => {
+                    const rowChars = rowStr.trim().split(" ");
+                    let currentCol = 0;
+                    rowChars.forEach((char) => {
+                        if (char !== '') { // Skip multiple spaces
+                            const x = offsetX + currentCol * (brickWidth + BRICK_SPACING);
+                            const y = offsetY + r * (brickHeight + BRICK_SPACING);
+                            this.bricks.push(new Brick(this, x, y, brickWidth, brickHeight, char));
+                            currentCol++;
+                        }
+                    });
+                });
+                this.uiManager.updateHUD();
+            }
+            
+            spawnPowerUp(x, y, type) {
+                this.powerUps.push(new PowerUp(this, x, y, type));
+                this.soundManager.play('powerup_spawn');
+            }
+
+            activateMultiBall() {
+                const sourceBall = this.balls.find(b => !b.isStuckToPaddle) || this.balls[0];
+                
+                for (let i = 0; i < 2; i++) {
+                    if (this.balls.length >= 5) break; 
+                    const newBall = new Ball(this, sourceBall.x, sourceBall.y, (Math.random() - 0.5) * sourceBall.speed * 0.6, -sourceBall.speed * 0.8);
+                    newBall.normalizeSpeed();
+                    this.balls.push(newBall);
+                }
+            }
+
+            loseLife(lostBall) {
+                this.balls = this.balls.filter(b => b !== lostBall);
+                
+                if (this.balls.length === 0) {
+                    this.lives--;
+                    if (this.paddle) this.paddle.resetEffects();
+                    this.triggerScreenShake(0.3, 5);
+                    this.soundManager.play('life_lost');
+                    this.uiManager.updateHUD();
+                    if (this.lives <= 0) {
+                        this.gameOver();
+                    } else {
+                        this.balls.push(new Ball(this, this.paddle.x + this.paddle.width / 2, this.paddle.y - 10, 0, 0));
+                        this.balls[0].isStuckToPaddle = true;
+                        this.setState(GameState.LIFE_LOST_DELAY);
+                    }
+                }
+            }
+
+            gameOver() {
+                if (this.score > this.highScore) {
+                    this.highScore = this.score;
+                    this.uiManager.updateHighScores(this.highScore);
+                    this.saveSettings();
+                }
+                this.setState(GameState.GAME_OVER);
+            }
+            
+            checkWinCondition() {
+                if (this.bricks.every(brick => !brick.isVisible)) {
+                    this.levelComplete();
+                }
+            }
+
+            levelComplete() {
+                this.score += 1000; 
+                this.uiManager.updateHUD();
+                this.setState(GameState.LEVEL_COMPLETE);
+            }
+            
+            nextLevel() {
+                if (this.currentLevelIndex < LEVELS.length - 1) {
+                    this.currentLevelIndex++;
+                    this.loadLevel(this.currentLevelIndex);
+                    this.setState(GameState.LEVEL_START_DELAY);
+                    this.soundManager.play('level_start');
+                } else {
+                     this.uiManager.showModal(this.uiManager.mainMenuModal);
+                }
+            }
+            
+            restartLevel() {
+                this.loadLevel(this.currentLevelIndex);
+                this.score = Math.max(0, this.score - 250); 
+                this.uiManager.updateHUD();
+                this.setState(GameState.LEVEL_START_DELAY);
+            }
+
+            pauseGame() {
+                if (this.gameState === GameState.PLAYING) {
+                    this.setState(GameState.PAUSED);
+                }
+            }
+
+            resumeGame() {
+                if (this.gameState === GameState.PAUSED) {
+                    this.setState(GameState.PLAYING);
+                    this.lastTime = performance.now(); 
+                }
+            }
+            
+            goToMainMenu() {
+                this.setState(GameState.MAIN_MENU);
+            }
+
+            toggleSound() {
+                this.isMuted = !this.isMuted;
+                this.soundManager.toggleMute(this.isMuted);
+                this.uiManager.updateSoundButtonText(this.isMuted);
+                this.saveSettings();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const game = new Game();
+            game.init();
+        });
+
+    })();
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>

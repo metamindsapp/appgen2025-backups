@@ -1,0 +1,32 @@
+{
+  "projectId": "97c91c89-4228-47d9-b352-4639b23e5841",
+  "revisionString": "8",
+  "projectNameDisplay": "IDEA",
+  "projectType": "webapp",
+  "userPromptForThisRevision": "everywhere it says Dalle 3, change it to Imagen 3\r\n\r\nchange nothing else. ",
+  "basedOnRevisionString": "7",
+  "savedAt": "2025-05-29T10:42:30.925Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/dalle_5333239a-08a.png",
+      "url": "/generated_images/dalle_5333239a-08a.png",
+      "description": "A sophisticated and abstract background image suitable for a dark-themed web application. The design should evoke concepts of digital creativity, flowing ideas, neural networks, or subtle geometric patterns. Use a palette of deep blues (e.g., #0A192F), purples (e.g., #4A0D67), and teals (e.g., #085E6D), with subtle glowing accents or light trails in lighter blues or whites. Avoid any discernible objects or text. The overall mood should be futuristic, inspiring, and professional, yet calm enough not to overpower foreground content. Ensure high contrast for accessibility if possible.",
+      "purpose": "Main background for the 'AppGen Prompt Idea Generator'. It will be displayed full-screen behind a semi-transparent dark overlay (rgba(0,0,0,0.7)).",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_de328a3e-c5d.png",
+      "url": "/generated_images/dalle_de328a3e-c5d.png",
+      "description": "A modern, minimalist logo icon representing 'AppGen' or 'idea generation'. Options: 1) A stylized, abstract representation of a lightbulb combined with a subtle 'A' or 'G'. 2) Intertwined lines forming a unique, elegant shape symbolizing connection and creation. 3) A clean, abstract geometric form suggesting innovation. The icon should be sharp, clear, and primarily use a bright, contrasting color like a vibrant blue (e.g., #4299E1 from the app's buttons) or a luminous white/light grey, designed for a transparent background to sit well on a dark header. Suitable for display at approximately 40px height.",
+      "purpose": "Logo icon for the 'AppGen Prompt Idea Generator' header. To be placed next to the application title.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_0e28dee3-98e.png",
+      "url": "/generated_images/dalle_0e28dee3-98e.png",
+      "description": "A clean, modern gear icon for a settings button. The gear should be easily recognizable, with a flat design style. Use a light grey (e.g., #A0AEC0 or #CBD5E0) or a muted light blue that provides good contrast against the dark theme button (#718096 or #2D3748). The icon should be clear at a small size (around 32x32 pixels) and designed for a transparent background. Ensure it looks distinct and not too dark on the button.",
+      "purpose": "Settings button icon for the 'AppGen Prompt Idea Generator'. Standard gear symbol for UI.",
+      "isNewlyGenerated": true
+    }
+  ]
+}

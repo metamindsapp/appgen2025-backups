@@ -1,0 +1,31 @@
+{
+  "projectId": "78bcb84e-5c06-4e38-9b0d-70dd70b11144",
+  "revisionString": "1",
+  "projectNameDisplay": "crash game",
+  "userPromptForThisRevision": "Prompt for AI Web-App Builder: Provably-Fair Crash Game (\"Bustabit\"-style)\r\n\r\n1. High-Level Goal\r\nGenerate a full-stack, production-ready web application that runs a provably-fair “Crash” gambling game similar to Bustabit. The app must handle real-time multiplayer bets, continuously rising multipliers, an unpredictable crash point, instant bet settlement, a player lobby/chat, account & wallet management, and an admin panel.\r\n\r\n2. Tech-Stack Constraints\r\nFront end: React 18 + TypeScript + Vite\r\nState mgmt: Zustand\r\nStyling: Tailwind CSS 3 (dark & light themes)\r\nReal-time: WebSockets via Socket.IO v5\r\nBack end: Node.js 20 + Express 5\r\nDatabase: PostgreSQL 16 (via Prisma ORM)\r\nAuth: JSON Web Tokens (access+refresh) + BCrypt\r\nFairness: HMAC-SHA256 seed model (client-seed/server-seed—nonce) with public reveal & verification endpoint\r\nPayments: Lightning Network (LND) + optional play-money faucet\r\nContainerization: Docker + docker-compose\r\nCloud: Deploy-ready for Render or Fly.io\r\nCI/CD: GitHub Actions (test → build → deploy)\r\nTesting: Vitest (unit) + Playwright (e2e)\r\n\r\n3. Core Gameplay Requirements\r\n• Lobby – live list of active players, avatars, last 20 bets, and chat  \r\n• Bet Phase – 4-second countdown, wager entry, auto cash-out, manual cash-out  \r\n• Run Phase – multiplier starts at 1.00×, updates every 100 ms using m(t)=e^(0.00006·t) until secret crash C  \r\n• Crash Phase – show “BUSTED @ C×”, settle bets, record seeds  \r\n• Provably-Fair – publish SHA-256 hash of serverSeed before round; after round reveal serverSeed so anyone can verify C = (HMAC-SHA256(serverSeed, clientSeed-nonce) mod 10 000 + 100) ÷ 100; include a verify page\r\n\r\n4. UI / UX Highlights\r\nResponsive 16:9 canvas with animated multiplier curve  \r\nBet controls (amount, slider, auto cash-out, Place/Cash-Out button)  \r\nSidebar with recent rounds, winners, bankroll graph  \r\nModals for deposit/withdraw (Lightning invoices), settings, hotkeys  \r\nAccessibility: ARIA, keyboard shortcuts, color-blind palette\r\n\r\n5. Security & Compliance\r\nRate-limit auth, secure cookies, CSRF token, Zod validation, GDPR compliance (consent banner, data export/erase routes). Note: real-money gambling may require licensing; implement age/KYC & jurisdiction checks.\r\n\r\n6. Data Models (Prisma – abbreviated)\r\nmodel User      { id Int @id @default(autoincrement()) email String @unique … balance Decimal @db.Numeric(18,8) … }\r\nmodel Round     { id BigInt @id … crashMultiplier Decimal … serverSeed String clientSeed String nonce Int … }\r\nmodel Bet       { id BigInt @id … userId Int roundId BigInt wager Decimal cashOut Decimal? paidOut Boolean … }\r\nmodel Txn       { id BigInt @id … userId Int amount Decimal type TxnType enum: [DEPOSIT, WITHDRAW, FAUCET, BET, PAYOUT] }\r\n\r\n7. Admin Panel\r\nToggle maintenance, max wager, house edge; view live bankroll & liability; manual txns and KYC; seed scheduler; log viewer.\r\n\r\n8. Optional Extras\r\nAuto-bet scripting, social feed, bonuses (rain/rakeback), i18n, PWA install.\r\n\r\n9. Delivery Checklist\r\n• Single monorepo (/apps/web, /apps/api)  \r\n• Commented code & OpenAPI 3 spec  \r\n• .env.example with variables  \r\n• 90 %+ unit & e2e tests  \r\n• Docker Compose that starts app + db + redis + lnd mock  \r\n• Deployment guide for Render & Fly.io\r\n\r\n10. TASKS\r\n1. Scaffold the project with the specified stack  \r\n2. Implement the database schema  \r\n3. Build the API routes  \r\n4. Implement WebSocket channels  \r\n5. Build the React front-end views & animations  \r\n6. Add fairness verification utilities  \r\n7. Integrate Lightning payment mocks  \r\n8. Write tests & CI-CD pipeline  \r\n9. Containerize the app  \r\n10. Produce deployment-ready artifacts\r\n",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-05-22T19:14:01.574Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/dalle_8e2b207c-4dc.png",
+      "url": "/generated_images/dalle_8e2b207c-4dc.png",
+      "description": "A dynamic, abstract background for a financial tech/gambling game graph. Dark theme, featuring subtle glowing grid lines, faint data streams, or network-like patterns in shades of dark blue, teal, and purple. Should evoke a sense of technology and movement without being distracting. Overall mood is sleek and modern.",
+      "purpose": "Main game background for the canvas area where the multiplier graph is displayed. To be used as a static background image drawn on the canvas first.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_ce73e1ad-040.png",
+      "url": "/generated_images/dalle_ce73e1ad-040.png",
+      "description": "A stylized icon representing a rocket or upward arrow, symbolizing growth and increasing value. Sleek, modern design, suitable for a dark theme. Could have a subtle neon glow effect (e.g., electric blue or green). For use on a button or as a small visual element.",
+      "purpose": "Icon for the 'Place Bet' button or to visually represent the rising multiplier phase. Could also be used in the navbar brand.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_b7ae5893-176.png",
+      "url": "/generated_images/dalle_b7ae5893-176.png",
+      "description": "A stylized icon representing an explosion or a 'crash' symbol. Modern, sharp design, suitable for a dark theme. Could use colors like red or orange with a subtle impact effect. For use on a button or as a visual indicator of the game crashing.",
+      "purpose": "Icon to visually represent the 'BUSTED' state or for a 'Cash Out' button if it implies danger/risk. Also, for the crash message.",
+      "isNewlyGenerated": true
+    }
+  ]
+}

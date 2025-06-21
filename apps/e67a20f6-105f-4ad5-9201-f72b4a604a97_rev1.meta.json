@@ -1,0 +1,52 @@
+{
+  "projectId": "e67a20f6-105f-4ad5-9201-f72b4a604a97",
+  "revisionString": "1",
+  "projectNameDisplay": "Dxb pixar",
+  "userPromptForThisRevision": "logo\r\nProtect your domain from theft and accidental changes.\r\nGet Started\r\nimpression\r\nDouglas Crossing Band\r\n\r\nSOUTH SURREY'S VERY OWN\r\nCome experience the spectacle!\r\nCONTACT US\r\nTHE BAND\r\n\r\nWhat We Play\r\n\r\n60s through today including Mellencamp, The Doors, Poison, T-Rex, Guns&Roses, Smash Mouth, Trooper, AC/DC and so much more.\r\nOUR SONG LIST & SAMPLES\r\nSee Us Live\r\n\r\nWe keep the dance floor moving by playing great dance tunes. Find out when we're playing next.\r\nCALENDAR\r\nHave Us Play Your Event\r\n\r\nGet in touch to find out about featuring Douglas Crossing Band at your event or venue.\r\nCONTACT US\r\nEVENTS\r\nSaturday Feb 24, 2024\r\nLive at Crescent Beach Legion, South Surry\r\nHear us live at The Crescent Beach Legion for an evening of dancing & good times.  $10 cover charge.\r\n7:30 pm- 11:00 pm\r\nCrescent Beach Legion South Surrey, BC\r\nOUR SONG LIST\r\n\r\nAin't my Fault\r\nBang a Gong\r\nBlue Suede Shoes\r\nBreakup Song\r\nCherry Bomb\r\nCinnamon Girl\r\nCome & Get Your Love\r\nComfortably Numb\r\nCould Have Been a Lady\r\nCrazy Little Thing Called Love\r\nDay After Day\r\nDead Flowers\r\nDear Mr. Fantasy\r\nEvery Rose Has Its Thorns\r\nFriday I'm in Love\r\nHave You Ever Seen the Rain\r\nHere for a Good Time\r\nHungry Heart\r\nHurts so Good\r\nI won't Back Down\r\nI Would Walk 500 Miles\r\nIt's Only Rock & Roll\r\nJohnny B Good\r\nKeep Your Hands to Yourself\r\nKnockin' on Heaven's Door\r\nLittle Bones\r\nLittle Sister\r\nLittle Wing\r\nLosing My Religion\r\nMaggie May\r\nMargaritaville\r\nMary Jane's Last Dance\r\nMidnight Special\r\nMustang Sally\r\nNew Orleans is Sinking\r\nNo Matter What\r\nPink Houses \r\nPretty Woman \r\nPride & Joy\r\nProud Mary\r\nRaise a Little Hell\r\nRoadhouse Blues\r\nR.O.C.K in the USA\r\nRun to You\r\nRunning Down a Dream\r\nSatisfaction\r\nShook me all Night Long\r\nSome Kind of Wonderful\r\nStray Cat Strut\r\nStuck in the Middle with You\r\nTennessee Whisky\r\nThe Way\r\nThis One Goes Out to the One I Love\r\nTonight is a Wonderful Night to Fall in Love\r\nUnder My Thumb\r\nUnder the Boardwalk\r\nWagon Wheel\r\nWhat I Like About You\r\nWhat's Up\r\nWhite Wedding\r\nWho'll Stop the Rain\r\nYou May be Right\r\nYou Wreck Me\r\nSOCIAL\r\nCONTACT US\r\n\r\nSend Message\r\nPixar style website, vibrant, ",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-05-23T15:01:10.613Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/dalle_d82f6a54-699.png",
+      "url": "/generated_images/dalle_d82f6a54-699.png",
+      "description": "Game Logo: Text 'Douglas Crossing Band: Road to Rockstar'. Pixar animation movie title style, vibrant, playful, friendly, slightly 3D lettering. Colors: bright blues, oranges, yellows. Clean background for easy compositing.",
+      "purpose": "Game title logo for main menu and splash screen. Placeholder: [GAME_LOGO_URL]",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_b067ae37-400.png",
+      "url": "/generated_images/dalle_b067ae37-400.png",
+      "description": "Band Characters Group Shot: Four diverse and appealing band members (lead singer with mic, guitarist with electric guitar, bassist with bass guitar, drummer behind a small drum kit). Full body, dynamic and friendly poses, as if posing for an album cover. Pixar animation character style, vibrant colors, expressive faces, detailed but cartoony. Clear separation between characters.",
+      "purpose": "Visual for main menu, band info screens, and story elements. Placeholder: [BAND_CHARACTERS_GROUP_SHOT_URL]",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_74f8fbc5-ea4.png",
+      "url": "/generated_images/dalle_74f8fbc5-ea4.png",
+      "description": "Rhythm Game Background - Crescent Beach Legion Stage: Interior view of a cozy, lively community hall stage. Wooden stage floor, simple curtains, a few stage lights. Silhouettes of a small, enthusiastic audience in the darker background. Warm, inviting lighting. Pixar animation environment style, detailed but not visually distracting for gameplay.",
+      "purpose": "Background for the rhythm game when playing at the Crescent Beach Legion venue. Placeholder: [CRESCENT_LEGION_BG_URL]",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_2830f0a6-9cf.png",
+      "url": "/generated_images/dalle_2830f0a6-9cf.png",
+      "description": "Rhythm Game Note Sprite Sheet: A small sprite sheet (e.g., 256x64 pixels). Contains 4 distinct 'note gems' or 'orbs' (approx 32x32px each) in different vibrant colors (e.g., green, red, yellow, blue). Also includes a 'hit sparkle' or 'impact flash' effect sprite (approx 32x32px). Style: clean, slightly 3D/beveled, bright, easily distinguishable. To be used for notes scrolling in the rhythm game.",
+      "purpose": "Sprites for rhythm game notes and hit effects. Placeholder: [NOTE_SPRITES_SHEET_URL]",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_4e5715a7-edb.png",
+      "url": "/generated_images/dalle_4e5715a7-edb.png",
+      "description": "Groove Meter Bar Asset: A horizontal bar graphic set for a game's 'Groove Meter'. Two states: 1) Empty/Low state (e.g., dull colors, slightly cracked texture). 2) Full/High state (e.g., vibrant glowing colors, musical notes or stars integrated). Pixar-esque UI style, fun and appealing. Dimensions flexible, perhaps 300x50px for each state, can be on one image.",
+      "purpose": "Visual for the Groove Meter in the rhythm game HUD. Placeholder: [GROOVE_METER_ASSET_URL]",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/dalle_04111a59-cd8.png",
+      "url": "/generated_images/dalle_04111a59-cd8.png",
+      "description": "World Map Icon - Band Van: A cute, quirky, colorful band van. Pixar animation style. Viewed from a slightly top-down isometric angle. Should look friendly and adventurous. Suitable as an icon on a map screen. Small details like musical instruments tied to the roof rack.",
+      "purpose": "Icon representing the band on the adventure map screen. Placeholder: [BAND_VAN_MAP_ICON_URL]",
+      "isNewlyGenerated": true
+    }
+  ]
+}

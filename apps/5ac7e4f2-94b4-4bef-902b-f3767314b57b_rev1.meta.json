@@ -1,0 +1,17 @@
+{
+  "projectId": "5ac7e4f2-94b4-4bef-902b-f3767314b57b",
+  "revisionString": "1",
+  "projectNameDisplay": "cage",
+  "userPromptForThisRevision": "octagonal cage rotating with a bunch of different colored balls in it that properly collide with the cage and bounce a little, with proper gravity and physics. wow me",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-05-26T20:24:24.513Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/dalle_d0bd7f4f-f45.png",
+      "url": "/generated_images/dalle_d0bd7f4f-f45.png",
+      "description": "A very subtle, abstract background texture for a physics game. Light theme. Should evoke a sense of clean, modern, slightly technological space. Perhaps a soft, blurred geometric pattern or a gentle light gradient with minimal noise. Colors should be very light grays, off-whites, and possibly a hint of pale cool blue (e.g., hex #f0f4f8, #e8edf2). It must not be distracting, primarily serving as a non-plain backdrop for the canvas. High resolution to look good scaled.",
+      "purpose": "Subtle background for the game canvas to enhance visual appeal. It will be drawn onto the canvas as the first layer.",
+      "isNewlyGenerated": true
+    }
+  ]
+}

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mountain Pic Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #1a202c; /* Dark background */
+            color: #e2e8f0; /* Light text */
+        }
+        .container {
+            max-width: 900px; /* Slightly wider container */
+        }
+        .image-container {
+            width: 100%;
+            position: relative;
+            margin-bottom: 1.5rem; /* More space below image */
+            aspect-ratio: 16 / 9;
+            background-color: #2d3748; /* Slightly lighter dark background for container */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            border-radius: 8px; /* Rounded corners */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Subtle shadow */
+        }
+        .image-container img {
+            display: none;
+            max-width: 100%;
+            max-height: 100%;
+            height: auto;
+            object-fit: contain;
+        }
+        .loading-message, .error-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            padding: 1rem;
+            border-radius: 5px;
+        }
+        .loading-message {
+            color: #cbd5e0; /* Light gray */
+        }
+        .error-message {
+            color: #f8d7da; /* Bootstrap danger light */
+            background-color: #721c24; /* Bootstrap danger dark background */
+            border: 1px solid #f5c6cb;
+        }
+        .hidden {
+            display: none;
+        }
+        .btn-light {
+            /* Ensure good contrast in dark mode */
+            color: #1a202c; /* Dark text for light button */
+            background-color: #e2e8f0; /* Light background */
+            border-color: #e2e8f0;
+        }
+        .btn-light:hover {
+             color: #1a202c;
+             background-color: #cbd5e0;
+             border-color: #cbd5e0;
+        }
+    </style>
+</head>
+<body class="bg-dark text-white" data-bs-theme="dark">
+
+    <div class="container text-center d-flex flex-column align-items-center py-5">
+        <h1 class="mb-4">Mountain Pic Generator</h1>
+
+        <div id="imageContainer" class="image-container">
+            <img id="mountainImage" src="" alt="Generated mountain landscape">
+            <div id="loadingMessage" class="loading-message">
+                <div class="spinner-border text-light" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Generating image...</p>
+            </div>
+            <div id="errorMessage" class="error-message hidden">
+                <p>Error generating image.</p>
+                <p id="errorText"></p>
+            </div>
+        </div>
+
+        <button id="generateButton" class="btn btn-light btn-lg">Generate New Mountain</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function() {
+            const mountainImg = document.getElementById('mountainImage');
+            const generateBtn = document.getElementById('generateButton');
+            const loadingDiv = document.getElementById('loadingMessage');
+            const errorDiv = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+
+            function showLoading() {
+                mountainImg.style.display = 'none';
+                errorDiv.classList.add('hidden');
+                loadingDiv.classList.remove('hidden');
+                generateBtn.disabled = true;
+            }
+
+            function hideLoading() {
+                loadingDiv.classList.add('hidden');
+                generateBtn.disabled = false;
+            }
+
+            function showError(message) {
+                mountainImg.style.display = 'none';
+                loadingDiv.classList.add('hidden');
+                errorText.textContent = message;
+                errorDiv.classList.remove('hidden');
+                generateBtn.disabled = false;
+            }
+
+            async function generateMountainImage() {
+                showLoading();
+                const prompt = "a majestic, detailed mountain landscape, digital art";
+                const aspectRatio = "16:9";
+                const style = "hd";
+
+                try {
+                    const response = await fetch('/api/generate-image-on-demand', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prompt, aspectRatio, style })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok && data.success) {
+                        mountainImg.onload = () => {
+                            hideLoading();
+                            errorDiv.classList.add('hidden');
+                            mountainImg.style.display = 'block';
+                        };
+                        mountainImg.onerror = () => {
+                            showError('Failed to load generated image.');
+                            console.error('Image loading error for URL:', data.imageUrl);
+                        };
+                        mountainImg.src = data.imageUrl;
+                    } else {
+                        showError(data.error || 'Failed to generate image.');
+                        console.error('API Error:', data.error);
+                    }
+                } catch (err) {
+                    showError('An unexpected error occurred.');
+                    console.error('Fetch Error:', err);
+                }
+            }
+
+            generateBtn.addEventListener('click', generateMountainImage);
+
+            document.addEventListener('DOMContentLoaded', () => {
+                generateMountainImage(); // Generate initial image on load
+            });
+
+        })();
+    </script>
+
+<!-- Injectable Console Log Copier Snippet -->
+<div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab">
+    <button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button>
+</div>
+<script>
+    (function() {
+        const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil');
+        if (utilContainer) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            const originalConsoleWarn = console.warn;
+            const originalConsoleInfo = console.info;
+            const originalConsoleDebug = console.debug;
+            const logs = [];
+            function formatLog(type, args) {
+                const timestamp = new Date().toISOString();
+                const message = Array.from(args).map(arg => {
+                    try {
+                        if (arg instanceof Error) return arg.stack || arg.toString();
+                        if (typeof arg === 'object' && arg !== null) {
+                            const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; };
+                            return JSON.stringify(arg, getCircularReplacer(), 2);
+                        }
+                        return String(arg);
+                    } catch (e) { return '[Unserializable Object]'; }
+                }).join(' ');
+                return `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            }
+            console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); };
+            console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); };
+            console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); };
+            console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); };
+            console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); };
+            window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; };
+            window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); };
+            const copyButton = utilContainer.querySelector('button');
+            if (copyButton) {
+                copyButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; }
+                    const logText = logs.join('\n');
+                    navigator.clipboard.writeText(logText).then(function() {
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000);
+                        originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.');
+                    }).catch(function(err) {
+                        originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message);
+                        alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.');
+                        const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545';
+                        setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000);
+                    });
+                });
+            }
+        } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found. Ensure it is correctly injected or present in the HTML.'); }
+    })();
+</script>
+<!-- End of Injectable Snippet -->
+
+</body>
+</html>
