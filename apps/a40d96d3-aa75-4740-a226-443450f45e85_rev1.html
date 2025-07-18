@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PuppyGen - AI Image Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        #app-wrapper {
+            background-image: linear-gradient(rgba(18, 18, 18, 0.88), rgba(18, 18, 18, 0.97)), url("/generated_images/imagen3_3VyXPH_a40d96_e93cd06b-729.png");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        .card {
+            background-color: rgba(33, 37, 41, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #prompt-input {
+            resize: none;
+        }
+
+        @keyframes pulse {
+            0% { background-color: rgba(255, 255, 255, 0.05); }
+            50% { background-color: rgba(255, 255, 255, 0.1); }
+            100% { background-color: rgba(255, 255, 255, 0.05); }
+        }
+
+        #image-placeholder {
+            animation: pulse 2s infinite ease-in-out;
+            transition: background-color 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out forwards;
+        }
+
+        .gallery-img {
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out;
+            border: 2px solid transparent;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            width: 100%;
+        }
+
+        .gallery-img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0, 123, 255, 0.6);
+            border-color: #0d6efd;
+        }
+
+        #main-image {
+            max-height: 512px;
+            width: auto;
+            max-width: 100%;
+            object-fit: contain;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+</head>
+<body data-bs-theme="dark">
+
+    <div id="app-wrapper" class="min-vh-100 d-flex flex-column">
+
+        <header class="p-3 text-center">
+            <h1 class="display-4 fw-bold">🐾 PuppyGen</h1>
+            <p class="lead text-body-secondary">Turn any idea into a masterpiece... with a puppy!</p>
+        </header>
+
+        <main class="container my-auto py-4">
+            <div id="error-display" class="alert alert-danger d-none" role="alert"></div>
+            <div class="row g-4 justify-content-center">
+
+                <div class="col-lg-5 d-flex">
+                    <div class="card h-100 w-100">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title mb-1">1. Start with your prompt</h5>
+                            <p class="card-text text-body-secondary mb-3">Describe any scene or concept. We'll add the puppy magic.</p>
+                            <form id="prompt-form" class="d-flex flex-column flex-grow-1">
+                                <textarea id="prompt-input" class="form-control form-control-lg flex-grow-1" rows="6" placeholder="e.g., A futuristic city skyline at sunset" required></textarea>
+                                <button id="generate-btn" type="submit" class="btn btn-primary btn-lg mt-3 fw-bold">
+                                    <span id="generate-btn-text">Generate Image</span>
+                                    <span id="generate-spinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-7 d-flex">
+                    <div class="card h-100 w-100">
+                        <div class="card-body p-lg-4">
+                            
+                            <div id="welcome-view" class="text-center h-100 d-flex flex-column justify-content-center">
+                                <h5 class="card-title">Your creation will appear here!</h5>
+                                <p class="text-body-secondary">Here's an example to get you started:</p>
+                                <img src="/generated_images/imagen3_3VyXPH_a40d96_8a1a82fc-309.png" alt="A cute black lab puppy in a magical forest" class="img-fluid rounded shadow mt-2">
+                                <div class="mt-3 text-start">
+                                    <p class="text-body-secondary mb-1"><strong>Enhanced Prompt:</strong></p>
+                                    <p class="fst-italic bg-body-tertiary p-2 rounded small">A beautiful, cinematic, photorealistic image of a cute, blocky-headed black Labrador puppy sitting in a magical, glowing fantasy forest at night. The forest is filled with bioluminescent mushrooms and floating motes of light. The puppy looks curious and happy. The lighting is soft and magical, with deep blues and purples dominating the scene.</p>
+                                </div>
+                            </div>
+
+                            <div id="loading-view" class="text-center h-100 d-flex flex-column justify-content-center d-none">
+                                <div id="image-placeholder" class="w-100 bg-body-tertiary rounded d-flex align-items-center justify-content-center mb-3" style="aspect-ratio: 1/1;">
+                                    <div class="text-center">
+                                        <div class="spinner-grow text-primary" style="width: 3rem; height: 3rem;" role="status"></div>
+                                        <p class="mt-3 fs-5" id="loading-text">Enhancing prompt...</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="result-view" class="d-none h-100 d-flex flex-column">
+                                <div class="text-center mb-3">
+                                    <img id="main-image" src="" alt="" class="img-fluid rounded shadow">
+                                </div>
+                                <div class="mt-auto">
+                                    <p class="text-body-secondary mb-1"><strong>Enhanced Prompt:</strong></p>
+                                    <p id="enhanced-prompt-text" class="fst-italic bg-body-tertiary p-2 rounded small"></p>
+                                    <div class="d-flex gap-2 mt-2">
+                                        <button id="copy-btn" class="btn btn-secondary btn-sm flex-grow-1">
+                                            <i class="bi bi-clipboard"></i>
+                                            <span class="copy-text-default"> Copy Prompt</span>
+                                            <i class="bi bi-clipboard-check-fill d-none"></i>
+                                            <span class="copy-text-copied d-none"> Copied!</span>
+                                        </button>
+                                        <a id="download-btn" href="#" download="pupppygen-image.png" class="btn btn-success btn-sm flex-grow-1">
+                                            <i class="bi bi-download"></i> Download Image
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <section id="gallery-section" class="mt-5 d-none">
+                <h2 class="text-center mb-4">Recent Generations</h2>
+                <div id="gallery-container" class="row g-2 row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6">
+                </div>
+            </section>
+        </main>
+
+        <footer class="p-3 mt-4 text-center text-body-secondary">
+            <p class="mb-0">PuppyGen &copy; 2025. Powered by AppGen2025.</p>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const PuppyGenApp = {
+            elements: {},
+            state: {
+                isLoading: false,
+                loadingStep: '',
+                error: null,
+                history: [],
+                currentView: 'welcome',
+            },
+
+            init() {
+                this.cacheDOMElements();
+                this.loadHistory();
+                this.setupEventListeners();
+                this.render();
+            },
+
+            cacheDOMElements() {
+                this.elements.form = document.getElementById('prompt-form');
+                this.elements.promptInput = document.getElementById('prompt-input');
+                this.elements.generateBtn = document.getElementById('generate-btn');
+                this.elements.generateBtnText = document.getElementById('generate-btn-text');
+                this.elements.generateSpinner = document.getElementById('generate-spinner');
+                
+                this.elements.errorDisplay = document.getElementById('error-display');
+                
+                this.elements.welcomeView = document.getElementById('welcome-view');
+                this.elements.loadingView = document.getElementById('loading-view');
+                this.elements.loadingText = document.getElementById('loading-text');
+                this.elements.resultView = document.getElementById('result-view');
+                
+                this.elements.mainImage = document.getElementById('main-image');
+                this.elements.enhancedPromptText = document.getElementById('enhanced-prompt-text');
+                this.elements.copyBtn = document.getElementById('copy-btn');
+                this.elements.downloadBtn = document.getElementById('download-btn');
+
+                this.elements.gallerySection = document.getElementById('gallery-section');
+                this.elements.galleryContainer = document.getElementById('gallery-container');
+            },
+
+            setupEventListeners() {
+                this.elements.form.addEventListener('submit', this.handleGenerationRequest.bind(this));
+                this.elements.galleryContainer.addEventListener('click', this.handleGalleryClick.bind(this));
+                this.elements.copyBtn.addEventListener('click', this.handleCopyClick.bind(this));
+            },
+
+            async handleGenerationRequest(event) {
+                event.preventDefault();
+                if (this.state.isLoading) return;
+
+                const userPrompt = this.elements.promptInput.value.trim();
+                if (!userPrompt) {
+                    this.state.error = "Please enter a prompt to begin.";
+                    this.render();
+                    return;
+                }
+
+                this.state.isLoading = true;
+                this.state.error = null;
+                this.state.currentView = 'loading';
+                this.render();
+
+                try {
+                    this.state.loadingStep = 'prompt';
+                    this.render();
+                    const enhancedPrompt = await this.enhancePrompt(userPrompt);
+
+                    this.state.loadingStep = 'image';
+                    this.render();
+                    const imageUrl = await this.generateImage(enhancedPrompt);
+
+                    const newHistoryItem = { id: Date.now(), enhancedPrompt, imageUrl };
+                    this.state.history.unshift(newHistoryItem);
+                    if (this.state.history.length > 12) {
+                        this.state.history.pop();
+                    }
+                    this.saveHistory();
+                    
+                    this.updateResultView(newHistoryItem);
+                    this.state.currentView = 'result';
+
+                } catch (error) {
+                    this.state.error = error.message;
+                    console.error("Generation failed:", error);
+                } finally {
+                    this.state.isLoading = false;
+                    this.state.loadingStep = '';
+                    this.render();
+                }
+            },
+
+            async enhancePrompt(prompt) {
+                const metaPrompt = `You are a creative assistant. Your task is to take a user's image prompt and subtly and cleverly integrate the concept of 'a cute, blocky-headed black Labrador puppy' into it. The puppy should seem like a natural part of the scene. Do not just append the phrase. Rewrite the prompt to be more descriptive and evocative, including the puppy. Make the final prompt suitable for a high-quality text-to-image AI model. Respond with ONLY the rewritten prompt text. User's prompt: "${prompt}"`;
+                
+                const response = await fetch('/api/ai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ msgforai: metaPrompt, llmSettings: { model: "gemini-1.5-flash-latest" } })
+                });
+
+                if (!response.ok) throw new Error("Failed to connect to the prompt enhancement AI. Please check your connection and try again.");
+                const data = await response.json();
+                if (!data.success || !data.response) throw new Error(data.error || "The AI failed to enhance the prompt. It might be too busy.");
+                
+                return data.response.trim().replace(/^"|"$/g, '');
+            },
+
+            async generateImage(prompt) {
+                const response = await fetch('/api/generate-image-on-demand', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: prompt, aspectRatio: "1:1" })
+                });
+
+                if (!response.ok) throw new Error("Failed to connect to the image generation service. Please check your connection and try again.");
+                const data = await response.json();
+                if (!data.success || !data.imageUrl) throw new Error(data.error || "The AI failed to generate the image. Please try a different prompt.");
+
+                return data.imageUrl;
+            },
+            
+            updateResultView({ enhancedPrompt, imageUrl, id }) {
+                this.elements.mainImage.src = imageUrl;
+                this.elements.mainImage.alt = enhancedPrompt;
+                this.elements.mainImage.classList.remove('fade-in');
+                void this.elements.mainImage.offsetWidth;
+                this.elements.mainImage.classList.add('fade-in');
+                
+                this.elements.enhancedPromptText.textContent = enhancedPrompt;
+                this.elements.downloadBtn.href = imageUrl;
+                this.elements.downloadBtn.download = `pupppygen-${id || Date.now()}.png`;
+            },
+
+            handleCopyClick() {
+                const textToCopy = this.elements.enhancedPromptText.textContent;
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    const btn = this.elements.copyBtn;
+                    btn.querySelector('.bi-clipboard').classList.add('d-none');
+                    btn.querySelector('.copy-text-default').classList.add('d-none');
+                    btn.querySelector('.bi-clipboard-check-fill').classList.remove('d-none');
+                    btn.querySelector('.copy-text-copied').classList.remove('d-none');
+                    
+                    setTimeout(() => {
+                        btn.querySelector('.bi-clipboard').classList.remove('d-none');
+                        btn.querySelector('.copy-text-default').classList.remove('d-none');
+                        btn.querySelector('.bi-clipboard-check-fill').classList.add('d-none');
+                        btn.querySelector('.copy-text-copied').classList.add('d-none');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy text: ', err);
+                });
+            },
+
+            render() {
+                this.elements.generateBtn.disabled = this.state.isLoading;
+                this.elements.generateSpinner.classList.toggle('d-none', !this.state.isLoading);
+                this.elements.generateBtnText.classList.toggle('d-none', this.state.isLoading);
+
+                if (this.state.error) {
+                    this.elements.errorDisplay.textContent = this.state.error;
+                    this.elements.errorDisplay.classList.remove('d-none');
+                } else {
+                    this.elements.errorDisplay.classList.add('d-none');
+                }
+
+                this.elements.welcomeView.classList.toggle('d-none', this.state.currentView !== 'welcome');
+                this.elements.loadingView.classList.toggle('d-none', this.state.currentView !== 'loading');
+                this.elements.resultView.classList.toggle('d-none', this.state.currentView !== 'result');
+
+                if (this.state.currentView === 'loading') {
+                    this.elements.loadingText.textContent = this.state.loadingStep === 'prompt' ? 'Enhancing prompt...' : 'Generating image...';
+                }
+                
+                this.renderGallery();
+            },
+
+            renderGallery() {
+                this.elements.galleryContainer.innerHTML = '';
+                if (this.state.history.length > 0) {
+                    this.elements.gallerySection.classList.remove('d-none');
+                    this.state.history.forEach((item, index) => {
+                        const col = document.createElement('div');
+                        col.className = 'col';
+                        col.innerHTML = `<img src="${item.imageUrl}" alt="${item.enhancedPrompt}" class="gallery-img img-fluid rounded" data-index="${index}">`;
+                        this.elements.galleryContainer.appendChild(col);
+                    });
+                } else {
+                    this.elements.gallerySection.classList.add('d-none');
+                }
+            },
+
+            loadHistory() {
+                try {
+                    const storedHistory = localStorage.getItem('puppyGenHistory');
+                    if (storedHistory) {
+                        this.state.history = JSON.parse(storedHistory);
+                    }
+                } catch (e) {
+                    console.error("Could not load history from localStorage.", e);
+                    this.state.history = [];
+                }
+            },
+
+            saveHistory() {
+                try {
+                    localStorage.setItem('puppyGenHistory', JSON.stringify(this.state.history));
+                } catch (e) {
+                    console.error("Could not save history to localStorage.", e);
+                }
+            },
+            
+            handleGalleryClick(event) {
+                const target = event.target;
+                if (target.classList.contains('gallery-img')) {
+                    const index = parseInt(target.dataset.index, 10);
+                    if (!isNaN(index) && this.state.history[index]) {
+                        const item = this.state.history[index];
+                        this.state.currentView = 'result';
+                        this.state.error = null;
+                        this.updateResultView(item);
+                        this.render();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                }
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => PuppyGenApp.init());
+    </script>
+<!-- Injectable Console Log Copier Snippet --><div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab"><button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button></div><script>(function() { const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil'); if (utilContainer) { const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug; const logs = []; function formatLog(type, args) { const timestamp = new Date().toISOString(); const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' '); return `[${timestamp}] [${type.toUpperCase()}] ${message}`; } console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); }; console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); }; console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); }; console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); }; console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); }; window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; }; window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); }; const copyButton = utilContainer.querySelector('button'); if (copyButton) { copyButton.addEventListener('click', function(e) { e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; } const logText = logs.join('\n'); navigator.clipboard.writeText(logText).then(function() { const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745'; setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000); originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.'); }).catch(function(err) { originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message); alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.'); const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545'; setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000); }); }); } } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); } })();</script><!-- End of Injectable Snippet -->
+</body>
+</html>

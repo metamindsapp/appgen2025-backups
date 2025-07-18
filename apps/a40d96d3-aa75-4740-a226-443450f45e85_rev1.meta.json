@@ -1,0 +1,28 @@
+{
+  "projectId": "a40d96d3-aa75-4740-a226-443450f45e85",
+  "revisionString": "1",
+  "projectNameDisplay": "PuppyGen",
+  "projectType": "webapp",
+  "ownerPublicKey": "3VyXPH8FC2Bd1Cv8cWLto1AvvQMEZfzbphCEmo76H6Vr",
+  "userPromptForThisRevision": "ai image generator\r\nuser enters prompt\r\nwe make an ai call to fix the prompt so it cleverly includes a cute block lab puppy, \r\nwe use that new prompt to generate the image. ",
+  "basedOnRevisionString": null,
+  "savedAt": "2025-07-18T16:52:52.106Z",
+  "imageAssets": [
+    {
+      "placeholder_id": "/generated_images/imagen3_3VyXPH_a40d96_e93cd06b-729.png",
+      "url": "/generated_images/imagen3_3VyXPH_a40d96_e93cd06b-729.png",
+      "description": "A high-resolution, abstract, dark background image suitable for a web application. The style should be minimalist and tech-focused, with subtle, glowing blue and purple geometric patterns, like faint circuitry or a digital network. The overall mood is dark, clean, and modern, not busy or distracting. It should feel like a premium dark theme wallpaper.",
+      "purpose": "This will be the main background for the entire web application, sitting behind all UI elements with a semi-transparent overlay.",
+      "isNewlyGenerated": true
+    },
+    {
+      "placeholder_id": "/generated_images/imagen3_3VyXPH_a40d96_8a1a82fc-309.png",
+      "url": "/generated_images/imagen3_3VyXPH_a40d96_8a1a82fc-309.png",
+      "description": "A beautiful, cinematic, photorealistic image of a cute, blocky-headed black Labrador puppy sitting in a magical, glowing fantasy forest at night. The forest is filled with bioluminescent mushrooms and floating motes of light. The puppy looks curious and happy. The lighting is soft and magical, with deep blues and purples dominating the scene. This image should be very high quality and visually stunning.",
+      "purpose": "This image will be displayed as the initial example in the image result area when the user first loads the app, showcasing the app's capability.",
+      "isNewlyGenerated": true
+    }
+  ],
+  "isPublished": false,
+  "isShowcased": false
+}
