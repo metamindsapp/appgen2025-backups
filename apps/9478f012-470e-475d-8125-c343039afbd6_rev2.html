@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CatGen - Feline AI Art Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --bs-primary: #9F7AEA;
+            --bs-primary-rgb: 159, 122, 234;
+            --bs-primary-text-emphasis: #B197F7;
+            --bs-primary-bg-subtle: #2A203F;
+            --bs-primary-border-subtle: #684E9C;
+        }
+
+        body {
+            background-color: #1A202C;
+            background-image: url("/generated_images/imagen3_3VyXPH_9478f0_d40de6cf-514.png");
+            background-attachment: fixed;
+        }
+
+        .btn-primary {
+            --bs-btn-color: #fff;
+            --bs-btn-bg: var(--bs-primary);
+            --bs-btn-border-color: var(--bs-primary);
+            --bs-btn-hover-color: #fff;
+            --bs-btn-hover-bg: #8963e1;
+            --bs-btn-hover-border-color: #825be0;
+            --bs-btn-focus-shadow-rgb: var(--bs-primary-rgb);
+            --bs-btn-active-color: #fff;
+            --bs-btn-active-bg: #825be0;
+            --bs-btn-active-border-color: #7b54d8;
+            --bs-btn-disabled-color: #fff;
+            --bs-btn-disabled-bg: var(--bs-primary);
+            --bs-btn-disabled-border-color: var(--bs-primary);
+        }
+
+        .spinner-border {
+            color: var(--bs-primary);
+        }
+        
+        .navbar-brand .logo {
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .navbar-brand:hover .logo {
+            transform: rotate(15deg) scale(1.1);
+        }
+
+        #gallery-grid .gallery-item {
+            cursor: pointer;
+            overflow: hidden;
+            border-radius: var(--bs-border-radius);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        #gallery-grid .gallery-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(var(--bs-primary-rgb), 0.5);
+        }
+
+        #gallery-grid .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            aspect-ratio: 1 / 1;
+        }
+
+        .form-control-plaintext.enhanced-prompt {
+            white-space: normal;
+            word-wrap: break-word;
+        }
+        
+        #generated-image {
+            background-color: #2D3748;
+        }
+
+        #gallery-modal .modal-lg {
+            max-width: 900px;
+        }
+
+        #gallery-modal img {
+            max-height: 75vh;
+            object-fit: contain;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #output-card, #error-alert {
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .accordion-button:not(.collapsed) {
+            color: var(--bs-primary-text-emphasis);
+            background-color: var(--bs-primary-bg-subtle);
+        }
+
+        .accordion-button:focus {
+            box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+        }
+
+        #gallery-modal .modal-body dt {
+            color: var(--bs-secondary-color);
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body data-bs-theme="dark" class="d-flex flex-column min-vh-100">
+
+    <header>
+        <nav class="navbar bg-dark-subtle border-bottom border-body shadow-sm">
+            <div class="container-fluid">
+                <a class="navbar-brand d-flex align-items-center" href="#" onclick="event.preventDefault(); window.location.reload();">
+                    <img src="/generated_images/imagen3_3VyXPH_9478f0_c834d8e5-b75.png" alt="CatGen Logo" width="35" height="35" class="me-2 logo">
+                    <span class="fw-bold fs-4">CatGen</span>
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container my-4 flex-grow-1">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-xl-7">
+
+                <section id="input-section" class="mb-4">
+                    <div class="text-center p-4 rounded-3 bg-body-tertiary shadow-sm">
+                        <h1 class="display-6 fw-bold">Unleash Feline Creativity</h1>
+                        <p class="lead text-body-secondary mb-4">Describe any scene, and our AI will cleverly add a cat before generating your masterpiece.</p>
+                        <form id="prompt-form">
+                            <div class="mb-3">
+                                <textarea id="user-prompt" class="form-control form-control-lg" rows="3" placeholder="e.g., a serene zen garden in spring" required></textarea>
+                            </div>
+                            
+                            <div class="accordion mb-3" id="advancedControlsAccordion">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAdvanced" aria-expanded="false" aria-controls="collapseAdvanced">
+                                            <i class="bi bi-sliders me-2"></i> Advanced Feline Controls
+                                        </button>
+                                    </h2>
+                                    <div id="collapseAdvanced" class="accordion-collapse collapse" data-bs-parent="#advancedControlsAccordion">
+                                        <div class="accordion-body">
+                                            <div class="row g-3">
+                                                <div class="col-md-4">
+                                                    <label for="style-select" class="form-label small">Artistic Style</label>
+                                                    <select id="style-select" class="form-select"></select>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label for="breed-select" class="form-label small">Cat Breed</label>
+                                                    <select id="breed-select" class="form-select"></select>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label for="mood-select" class="form-label small">Cat Mood / Action</label>
+                                                    <select id="mood-select" class="form-select"></select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row g-2">
+                                <div class="col-md">
+                                    <div class="form-floating">
+                                        <select id="aspect-ratio-select" class="form-select">
+                                            <option value="1:1">Square (1:1)</option>
+                                            <option value="16:9" selected>Landscape (16:9)</option>
+                                            <option value="9:16">Portrait (9:16)</option>
+                                            <option value="4:3">Standard (4:3)</option>
+                                            <option value="3:4">Vertical (3:4)</option>
+                                        </select>
+                                        <label for="aspect-ratio-select">Aspect Ratio</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-auto d-grid">
+                                    <button id="surprise-btn" type="button" class="btn btn-outline-secondary"><i class="bi bi-shuffle"></i> Surprise Me!</button>
+                                </div>
+                                <div class="col-md d-grid">
+                                    <button id="generate-btn" type="submit" class="btn btn-primary btn-lg" disabled>
+                                        <span class="spinner-border spinner-border-sm me-2" role="status" style="display: none;"></span>
+                                        <span class="btn-text"><i class="bi bi-stars"></i> Generate!</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+
+                <section id="results-section" class="text-center" style="display: none;">
+                    <div id="loading-indicator" class="py-5">
+                        <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p id="loading-text" class="mt-3 fs-5 text-body-secondary" aria-live="polite"></p>
+                    </div>
+                    
+                    <div id="error-alert" class="alert alert-danger d-flex flex-column align-items-center" style="display: none;" aria-live="polite">
+                        <p class="mb-3 error-message text-center"></p>
+                        <button id="try-again-btn" class="btn btn-danger">Start Over</button>
+                    </div>
+                    
+                    <div id="output-card" class="card text-start shadow" style="display: none;">
+                        <img id="generated-image" src="" class="card-img-top" alt="AI Generated Image">
+                        <div class="card-body">
+                            <h5 class="card-title">Your Cat-tastic Creation!</h5>
+                            <div class="mb-3">
+                                <label class="form-label small text-body-secondary">Cat-Enhanced Prompt:</label>
+                                <div class="input-group">
+                                    <p id="enhanced-prompt-text" class="form-control-plaintext p-2 bg-body-tertiary rounded-start border border-end-0 mb-0 enhanced-prompt"></p>
+                                    <button id="copy-prompt-btn" class="btn btn-outline-secondary" type="button" data-bs-toggle="tooltip" data-bs-placement="top" title="Copy Prompt">
+                                        <i class="bi bi-clipboard"></i>
+                                    </button>
+                                </div>
+                            </div>
+                             <p class="small text-body-secondary mb-1">Your original prompt: "<em id="original-prompt-text"></em>"</p>
+                        </div>
+                        <div class="card-footer d-flex justify-content-between align-items-center bg-dark-subtle">
+                            <a id="download-btn" href="#" class="btn btn-success" download="catgen-creation.png"><i class="bi bi-download"></i> Download</a>
+                            <button id="reset-btn" class="btn btn-secondary"><i class="bi bi-arrow-repeat"></i> Create Another</button>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="gallery-section" class="mt-5">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2 class="mb-0">My Gallery</h2>
+                        <button id="clear-gallery-btn" class="btn btn-sm btn-outline-danger" style="display: none;"><i class="bi bi-trash"></i> Clear All</button>
+                    </div>
+                    <div id="gallery-grid" class="row g-3 row-cols-2 row-cols-sm-3 row-cols-md-4">
+                    </div>
+                    <p id="gallery-placeholder" class="text-center text-body-secondary py-5 bg-body-tertiary rounded-3">Your generated images will appear here.</p>
+                </section>
+            </div>
+        </div>
+    </main>
+    
+    <footer class="text-center text-body-secondary py-3 mt-4 border-top border-body">
+        <p class="mb-0">CatGen &copy; 2025 - Powered by AI</p>
+    </footer>
+
+    <div class="modal fade" id="gallery-modal" tabindex="-1" aria-labelledby="galleryModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="galleryModalLabel">Gallery Detail</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <img id="modal-image" src="" class="img-fluid rounded mb-4" alt="Full size generated image">
+            <div class="text-start">
+                <dl class="gy-2">
+                    <div class="row">
+                        <dt class="col-sm-4">Cat-Enhanced Prompt</dt>
+                        <dd class="col-sm-8" id="modal-enhanced-prompt"></dd>
+                    </div>
+                    <div class="row">
+                        <dt class="col-sm-4">Original Prompt</dt>
+                        <dd class="col-sm-8 fst-italic" id="modal-original-prompt"></dd>
+                    </div>
+                    <div id="modal-style-row" class="row">
+                        <dt class="col-sm-4">Artistic Style</dt>
+                        <dd class="col-sm-8" id="modal-style"></dd>
+                    </div>
+                    <div id="modal-breed-row" class="row">
+                        <dt class="col-sm-4">Cat Breed</dt>
+                        <dd class="col-sm-8" id="modal-breed"></dd>
+                    </div>
+                    <div id="modal-mood-row" class="row">
+                        <dt class="col-sm-4">Cat Mood</dt>
+                        <dd class="col-sm-8" id="modal-mood"></dd>
+                    </div>
+                </dl>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <a id="modal-download-btn" href="#" class="btn btn-success" download="catgen-creation.png"><i class="bi bi-download"></i> Download</a>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const App = {
+            state: {
+                isLoading: false,
+                gallery: [],
+            },
+            config: {
+                surprisePrompts: [
+                    "a majestic mountain range at dawn", "a bustling cyberpunk city street at night",
+                    "an enchanted forest filled with glowing mushrooms", "a lone astronaut looking at Earth from space",
+                    "a victorian-era detective's messy office", "a vibrant coral reef teeming with life",
+                    "a quiet, dusty library full of ancient books", "the deck of a pirate ship on a stormy sea",
+                    "a high-fantasy throne room made of crystal", "a cozy cabin in a snowy landscape"
+                ],
+                artStyles: ['Default', 'Photorealistic', 'Oil Painting', 'Watercolor', 'Anime', 'Pixel Art', 'Synthwave', 'Steampunk', 'Line Art'],
+                catBreeds: ['Any (Surprise Me)', 'Tabby', 'Siamese', 'Persian', 'Maine Coon', 'Sphynx', 'Bengal', 'Scottish Fold', 'Black Cat'],
+                catMoods: ['Default', 'Playful', 'Sleeping', 'Majestic', 'Mischievous', 'Curious', 'Hidden / Subtle', 'Giant / Kaiju']
+            },
+            elements: {},
+            
+            init() {
+                this.cacheElements();
+                this.populateSelectors();
+                this.bindEvents();
+                this.loadGallery();
+                this.copyTooltip = new bootstrap.Tooltip(this.elements.copyPromptBtn);
+                this.galleryModal = new bootstrap.Modal(this.elements.galleryModal);
+                this.advancedControlsCollapse = new bootstrap.Collapse(this.elements.advancedControls, { toggle: false });
+                this.setUIState('input');
+            },
+
+            cacheElements() {
+                this.elements.promptForm = document.getElementById('prompt-form');
+                this.elements.userPrompt = document.getElementById('user-prompt');
+                this.elements.aspectRatioSelect = document.getElementById('aspect-ratio-select');
+                this.elements.advancedControls = document.getElementById('collapseAdvanced');
+                this.elements.styleSelect = document.getElementById('style-select');
+                this.elements.breedSelect = document.getElementById('breed-select');
+                this.elements.moodSelect = document.getElementById('mood-select');
+                this.elements.generateBtn = document.getElementById('generate-btn');
+                this.elements.generateBtnSpinner = this.elements.generateBtn.querySelector('.spinner-border');
+                this.elements.generateBtnText = this.elements.generateBtn.querySelector('.btn-text');
+                this.elements.surpriseBtn = document.getElementById('surprise-btn');
+                this.elements.inputSection = document.getElementById('input-section');
+                this.elements.resultsSection = document.getElementById('results-section');
+                this.elements.loadingIndicator = document.getElementById('loading-indicator');
+                this.elements.loadingText = document.getElementById('loading-text');
+                this.elements.errorAlert = document.getElementById('error-alert');
+                this.elements.errorMessage = this.elements.errorAlert.querySelector('.error-message');
+                this.elements.tryAgainBtn = document.getElementById('try-again-btn');
+                this.elements.outputCard = document.getElementById('output-card');
+                this.elements.generatedImage = document.getElementById('generated-image');
+                this.elements.enhancedPromptText = document.getElementById('enhanced-prompt-text');
+                this.elements.originalPromptText = document.getElementById('original-prompt-text');
+                this.elements.copyPromptBtn = document.getElementById('copy-prompt-btn');
+                this.elements.downloadBtn = document.getElementById('download-btn');
+                this.elements.resetBtn = document.getElementById('reset-btn');
+                this.elements.gallerySection = document.getElementById('gallery-section');
+                this.elements.galleryGrid = document.getElementById('gallery-grid');
+                this.elements.galleryPlaceholder = document.getElementById('gallery-placeholder');
+                this.elements.clearGalleryBtn = document.getElementById('clear-gallery-btn');
+                this.elements.galleryModal = document.getElementById('gallery-modal');
+                this.elements.modalImage = document.getElementById('modal-image');
+                this.elements.modalEnhancedPrompt = document.getElementById('modal-enhanced-prompt');
+                this.elements.modalOriginalPrompt = document.getElementById('modal-original-prompt');
+                this.elements.modalStyle = document.getElementById('modal-style');
+                this.elements.modalBreed = document.getElementById('modal-breed');
+                this.elements.modalMood = document.getElementById('modal-mood');
+                this.elements.modalStyleRow = document.getElementById('modal-style-row');
+                this.elements.modalBreedRow = document.getElementById('modal-breed-row');
+                this.elements.modalMoodRow = document.getElementById('modal-mood-row');
+                this.elements.modalDownloadBtn = document.getElementById('modal-download-btn');
+            },
+            
+            populateSelectors() {
+                const createOptions = (selectElement, options) => {
+                    options.forEach(optionText => {
+                        const option = document.createElement('option');
+                        option.value = optionText;
+                        option.textContent = optionText;
+                        selectElement.appendChild(option);
+                    });
+                };
+                createOptions(this.elements.styleSelect, this.config.artStyles);
+                createOptions(this.elements.breedSelect, this.config.catBreeds);
+                createOptions(this.elements.moodSelect, this.config.catMoods);
+            },
+
+            bindEvents() {
+                this.elements.promptForm.addEventListener('submit', this.handleGenerate.bind(this));
+                this.elements.userPrompt.addEventListener('input', () => {
+                    if (!this.state.isLoading) {
+                        this.elements.generateBtn.disabled = this.elements.userPrompt.value.trim() === '';
+                    }
+                });
+                this.elements.surpriseBtn.addEventListener('click', this.handleSurpriseMe.bind(this));
+                this.elements.resetBtn.addEventListener('click', this.handleReset.bind(this));
+                this.elements.tryAgainBtn.addEventListener('click', this.handleReset.bind(this));
+                this.elements.copyPromptBtn.addEventListener('click', this.handleCopyPrompt.bind(this));
+                this.elements.clearGalleryBtn.addEventListener('click', this.handleClearGallery.bind(this));
+                this.elements.galleryGrid.addEventListener('click', this.handleGalleryClick.bind(this));
+            },
+
+            setUIState(view, message = '') {
+                this.elements.inputSection.style.display = 'none';
+                this.elements.resultsSection.style.display = 'none';
+                switch(view) {
+                    case 'loading':
+                        this.elements.resultsSection.style.display = 'block';
+                        this.elements.loadingIndicator.style.display = 'block';
+                        this.elements.outputCard.style.display = 'none';
+                        this.elements.errorAlert.style.display = 'none';
+                        this.elements.loadingText.textContent = message;
+                        break;
+                    case 'error':
+                        this.elements.resultsSection.style.display = 'block';
+                        this.elements.loadingIndicator.style.display = 'none';
+                        this.elements.outputCard.style.display = 'none';
+                        this.elements.errorAlert.style.display = 'flex';
+                        this.elements.errorMessage.textContent = message;
+                        break;
+                    case 'results':
+                        this.elements.resultsSection.style.display = 'block';
+                        this.elements.loadingIndicator.style.display = 'none';
+                        this.elements.outputCard.style.display = 'block';
+                        this.elements.errorAlert.style.display = 'none';
+                        break;
+                    case 'input':
+                    default:
+                        this.elements.inputSection.style.display = 'block';
+                        break;
+                }
+            },
+
+            setLoadingButtonState(isLoading) {
+                this.state.isLoading = isLoading;
+                this.elements.generateBtn.disabled = isLoading;
+                this.elements.surpriseBtn.disabled = isLoading;
+                this.elements.generateBtnSpinner.style.display = isLoading ? 'inline-block' : 'none';
+                this.elements.generateBtnText.style.display = isLoading ? 'none' : 'inline-block';
+                if (!isLoading) {
+                     this.elements.generateBtn.disabled = this.elements.userPrompt.value.trim() === '';
+                }
+            },
+
+            async handleGenerate(event) {
+                event.preventDefault();
+                if (this.state.isLoading) return;
+                const originalPrompt = this.elements.userPrompt.value.trim();
+                if (!originalPrompt) return;
+                const style = this.elements.styleSelect.value;
+                const breed = this.elements.breedSelect.value;
+                const mood = this.elements.moodSelect.value;
+                const advancedParams = { style, breed, mood };
+                this.setLoadingButtonState(true);
+                this.setUIState('loading', 'Step 1: Consulting the Feline Muse...');
+                try {
+                    const enhancedPrompt = await this.fetchEnhancedPrompt(originalPrompt, style, breed, mood);
+                    this.setUIState('loading', 'Step 2: Painting with Pixels...');
+                    const aspectRatio = this.elements.aspectRatioSelect.value;
+                    const imageUrl = await this.fetchGeneratedImage(enhancedPrompt, aspectRatio, style);
+                    this.displayResults(originalPrompt, enhancedPrompt, imageUrl, aspectRatio, advancedParams);
+                } catch (error) {
+                    console.error('Generation failed:', error);
+                    this.setUIState('error', error.message || 'An unknown error occurred. Please try again.');
+                    this.setLoadingButtonState(false);
+                }
+            },
+
+            async fetchEnhancedPrompt(prompt, style, breed, mood) {
+                let instruction = `You are a creative assistant named CatBot. Your task is to rewrite a user's image prompt to cleverly and naturally include a cat. The cat should be an integral, fun part of the scene, not just tacked on. Be creative: it could be a giant cat sleeping on a mountain, a cat-shaped constellation, a subtle pattern in the wallpaper, a mischievous cat photobombing, etc.`;
+                if (breed && breed !== 'Any (Surprise Me)') instruction += ` The user specifically requested a ${breed} cat, so make sure to incorporate that breed.`;
+                if (mood && mood !== 'Default') instruction += ` The cat's mood or action should be '${mood}'.`;
+                if (style && style !== 'Default') instruction += ` The final image should have an artistic style of '${style}'.`;
+                instruction += ` Do not mention that you are an AI. Output ONLY the rewritten prompt, without any conversational text, introductions, or quotation marks. The user's prompt is: "${prompt}"`;
+                const response = await fetch('/api/ai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ aiguide: instruction, msgforai: prompt, llmSettings: { temperature: 0.7, model: 'gemini-1.5-flash-latest' } })
+                });
+                if (!response.ok) throw new Error(`Network error while enhancing prompt (status: ${response.status}).`);
+                const data = await response.json();
+                if (!data.success) throw new Error(data.error || 'Failed to enhance prompt.');
+                const enhancedPrompt = data.response.trim().replace(/^"|"$/g, '');
+                if (!enhancedPrompt) throw new Error("The Feline Muse was speechless. Please try a different prompt.");
+                return enhancedPrompt;
+            },
+
+            async fetchGeneratedImage(prompt, aspectRatio, style) {
+                let finalImagePrompt = prompt;
+                if (style && style !== 'Default') {
+                    finalImagePrompt = `${prompt}, in the style of ${style}`;
+                }
+                const response = await fetch('/api/generate-image-on-demand', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: finalImagePrompt, aspectRatio })
+                });
+                if (!response.ok) throw new Error(`Network error while generating image (status: ${response.status}).`);
+                const data = await response.json();
+                if (!data.success) throw new Error(data.error || 'Failed to generate image.');
+                return data.imageUrl;
+            },
+
+            displayResults(original, enhanced, url, aspectRatio, params) {
+                const filename = this.slugify(enhanced) + '.png';
+                this.elements.generatedImage.src = url;
+                this.elements.generatedImage.alt = enhanced;
+                this.elements.originalPromptText.textContent = original;
+                this.elements.enhancedPromptText.textContent = enhanced;
+                this.elements.downloadBtn.href = url;
+                this.elements.downloadBtn.download = filename;
+                this.elements.generatedImage.onload = () => {
+                    this.setUIState('results');
+                    this.setLoadingButtonState(false);
+                    const galleryItem = { originalPrompt: original, enhancedPrompt: enhanced, imageUrl: url, aspectRatio: aspectRatio, ...params };
+                    this.addGalleryItem(galleryItem);
+                };
+                this.elements.generatedImage.onerror = () => {
+                    this.setUIState('error', 'Failed to load the generated image. It might have been blocked or removed.');
+                    this.setLoadingButtonState(false);
+                };
+            },
+
+            handleReset() {
+                this.setUIState('input');
+                this.setLoadingButtonState(false);
+                this.elements.userPrompt.value = '';
+                this.elements.generateBtn.disabled = true;
+                this.resetAdvancedControls();
+                this.advancedControlsCollapse.hide();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            },
+            
+            resetAdvancedControls() {
+                this.elements.styleSelect.value = this.config.artStyles[0];
+                this.elements.breedSelect.value = this.config.catBreeds[0];
+                this.elements.moodSelect.value = this.config.catMoods[0];
+            },
+
+            handleSurpriseMe() {
+                if(this.state.isLoading) return;
+                const randomIndex = Math.floor(Math.random() * this.config.surprisePrompts.length);
+                this.elements.userPrompt.value = this.config.surprisePrompts[randomIndex];
+                this.elements.generateBtn.disabled = false;
+                this.resetAdvancedControls();
+                this.elements.userPrompt.focus();
+            },
+
+            handleCopyPrompt() {
+                const textToCopy = this.elements.enhancedPromptText.textContent;
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    const originalTitle = this.elements.copyPromptBtn.getAttribute('data-bs-original-title');
+                    this.copyTooltip.setContent({ '.tooltip-inner': 'Copied!' });
+                    setTimeout(() => {
+                        this.copyTooltip.setContent({ '.tooltip-inner': originalTitle });
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy text: ', err);
+                });
+            },
+
+            loadGallery() {
+                try {
+                    const storedGalleryJSON = localStorage.getItem('catGenGallery');
+                    if (storedGalleryJSON) {
+                        const storedGallery = JSON.parse(storedGalleryJSON);
+                        this.state.gallery = storedGallery.map(item => ({
+                            style: 'Default',
+                            breed: 'Any (Surprise Me)',
+                            mood: 'Default',
+                            ...item
+                        }));
+                    }
+                } catch (e) {
+                    console.error("Could not load gallery from localStorage", e);
+                    this.state.gallery = [];
+                }
+                this.renderGallery();
+            },
+
+            saveGallery() {
+                try {
+                    localStorage.setItem('catGenGallery', JSON.stringify(this.state.gallery));
+                } catch (e) {
+                    console.error("Could not save gallery to localStorage", e);
+                }
+            },
+
+            renderGallery() {
+                this.elements.galleryGrid.innerHTML = '';
+                if (this.state.gallery.length === 0) {
+                    this.elements.galleryPlaceholder.style.display = 'block';
+                    this.elements.clearGalleryBtn.style.display = 'none';
+                } else {
+                    this.elements.galleryPlaceholder.style.display = 'none';
+                    this.elements.clearGalleryBtn.style.display = 'inline-block';
+                    const fragment = document.createDocumentFragment();
+                    this.state.gallery.forEach((item, index) => {
+                        const col = document.createElement('div');
+                        col.className = 'col';
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = 'gallery-item shadow-sm';
+                        itemDiv.dataset.index = index;
+                        const img = document.createElement('img');
+                        img.src = item.imageUrl;
+                        img.alt = item.enhancedPrompt;
+                        img.className = 'img-fluid rounded';
+                        img.loading = 'lazy';
+                        itemDiv.appendChild(img);
+                        col.appendChild(itemDiv);
+                        fragment.appendChild(col);
+                    });
+                    this.elements.galleryGrid.appendChild(fragment);
+                }
+            },
+
+            addGalleryItem(item) {
+                this.state.gallery.unshift(item);
+                if (this.state.gallery.length > 50) {
+                    this.state.gallery.pop();
+                }
+                this.saveGallery();
+                this.renderGallery();
+            },
+
+            handleClearGallery() {
+                if (confirm('Are you sure you want to clear your entire gallery? This cannot be undone.')) {
+                    this.state.gallery = [];
+                    this.saveGallery();
+                    this.renderGallery();
+                }
+            },
+
+            handleGalleryClick(event) {
+                const itemDiv = event.target.closest('.gallery-item');
+                if (itemDiv) {
+                    const index = itemDiv.dataset.index;
+                    const item = this.state.gallery[index];
+                    if (item) {
+                        const filename = this.slugify(item.enhancedPrompt) + '.png';
+                        this.elements.modalImage.src = item.imageUrl;
+                        this.elements.modalImage.alt = item.enhancedPrompt;
+                        this.elements.modalEnhancedPrompt.textContent = item.enhancedPrompt;
+                        this.elements.modalOriginalPrompt.textContent = item.originalPrompt;
+                        this.elements.modalDownloadBtn.href = item.imageUrl;
+                        this.elements.modalDownloadBtn.download = filename;
+
+                        this.elements.modalStyle.textContent = item.style;
+                        this.elements.modalBreed.textContent = item.breed;
+                        this.elements.modalMood.textContent = item.mood;
+                        
+                        this.elements.modalStyleRow.classList.toggle('d-none', !item.style || item.style === 'Default');
+                        this.elements.modalBreedRow.classList.toggle('d-none', !item.breed || item.breed === 'Any (Surprise Me)');
+                        this.elements.modalMoodRow.classList.toggle('d-none', !item.mood || item.mood === 'Default');
+
+                        this.galleryModal.show();
+                    }
+                }
+            },
+            
+            slugify(text) {
+                return text.toString().toLowerCase().trim()
+                    .replace(/\s+/g, '-')
+                    .replace(/[^\w\-]+/g, '')
+                    .replace(/\-\-+/g, '-')
+                    .substring(0, 50);
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => App.init());
+    </script>
+<!-- Injectable Console Log Copier Snippet --><div id="appgen2025ConsoleCopyUtil" style="position: fixed; top: 5px; right: 5px; z-index: 9999; padding: 5px; background-color: rgba(0,0,0,0.7); border-radius: 5px; cursor: default;" title="Copy Console Logs for this Tab"><button type="button" style="background: none; border: 1px solid #fff; color: #fff; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer;">Copy Logs</button></div><script>(function() { const utilContainer = document.getElementById('appgen2025ConsoleCopyUtil'); if (utilContainer) { const originalConsoleLog = console.log; const originalConsoleError = console.error; const originalConsoleWarn = console.warn; const originalConsoleInfo = console.info; const originalConsoleDebug = console.debug; const logs = []; function formatLog(type, args) { const timestamp = new Date().toISOString(); const message = Array.from(args).map(arg => { try { if (arg instanceof Error) return arg.stack || arg.toString(); if (typeof arg === 'object' && arg !== null) { const getCircularReplacer = () => { const seen = new WeakSet(); return (key, value) => { if (typeof value === "object" && value !== null) { if (seen.has(value)) { return "[Circular]"; } seen.add(value); } return value; }; }; return JSON.stringify(arg, getCircularReplacer(), 2); } return String(arg); } catch (e) { return '[Unserializable Object]'; } }).join(' '); return `[${timestamp}] [${type.toUpperCase()}] ${message}`; } console.log = function(...args) { const formatted = formatLog('log', args); logs.push(formatted); originalConsoleLog.apply(console, args); }; console.error = function(...args) { const formatted = formatLog('error', args); logs.push(formatted); originalConsoleError.apply(console, args); }; console.warn = function(...args) { const formatted = formatLog('warn', args); logs.push(formatted); originalConsoleWarn.apply(console, args); }; console.info = function(...args) { const formatted = formatLog('info', args); logs.push(formatted); originalConsoleInfo.apply(console, args); }; console.debug = function(...args) { const formatted = formatLog('debug', args); logs.push(formatted); originalConsoleDebug.apply(console, args); }; window.onerror = function(message, source, lineno, colno, error) { const errorObj = error || {}; const formatted = formatLog('uncaught_error', [message, `at ${source}:${lineno}:${colno}`, errorObj.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Uncaught Error:', message, 'at', source + ':' + lineno + ':' + colno, error); return false; }; window.onunhandledrejection = function(event) { const reason = event.reason || {}; const formatted = formatLog('unhandled_rejection', [reason.message || reason, reason.stack || '(no stack)']); logs.push(formatted); originalConsoleError.call(console, 'Unhandled Rejection:', event.reason); }; const copyButton = utilContainer.querySelector('button'); if (copyButton) { copyButton.addEventListener('click', function(e) { e.stopPropagation(); if (logs.length === 0) { alert('No console logs captured yet to copy.'); return; } const logText = logs.join('\n'); navigator.clipboard.writeText(logText).then(function() { const originalText = copyButton.textContent; copyButton.textContent = 'Copied!'; copyButton.style.background = '#28a745'; copyButton.style.borderColor = '#28a745'; setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 2000); originalConsoleInfo.call(console, 'AppGen2025 Util: Console logs copied to clipboard.'); }).catch(function(err) { originalConsoleError.call(console, 'AppGen2025 Util: Failed to copy console logs - ', err.name, err.message); alert('Failed to copy logs. See browser console for details. Logs may be too large or permissions denied.'); const originalText = copyButton.textContent; copyButton.textContent = 'Failed!'; copyButton.style.background = '#dc3545'; copyButton.style.borderColor = '#dc3545'; setTimeout(function() { copyButton.textContent = originalText; copyButton.style.background = 'none'; copyButton.style.borderColor = '#fff'; }, 3000); }); }); } } else { console.error('AppGen2025 Util: Container element "appgen2025ConsoleCopyUtil" not found.'); } })();</script><!-- End of Injectable Snippet -->
+</body>
+</html>
